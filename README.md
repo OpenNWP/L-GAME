@@ -32,6 +32,7 @@ Everything is easy and quick to install.
 ```
 git clone https://github.com/opennwp/rfpet.git
 ./setup_directories.sh
+./compile.sh
 ```
 
 ## Fundamental literature
