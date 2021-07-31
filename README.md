@@ -11,6 +11,8 @@ RFPET is a numerical weather prediction model. Properties:
 * radiation: coupled to RTE+RRTMGP
 * uses the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
 
+RFPET is meant to be applied at resolutions finer than 7 km.
+
 ## Fundamental literature
 
 * Thuburn, John. (2008). Numerical wave propagation on the hexagonal C-grid. Journal of Computational Physics. 227. 5836-5858. 10.1016/j.jcp.2008.02.010. 
