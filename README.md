@@ -1,6 +1,6 @@
 ## Regional Forecasting with Poisson brackets in Exner-Theta formulation.
 
-RFPET is a regional non-hydrostatic numerical weather prediction model. Properties:
+RFPET is a numerical weather prediction model. Properties:
 
 * regional
 * non-hydrostatic
