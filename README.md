@@ -4,8 +4,12 @@ RFPET is a regional non-hydrostatic numerical weather prediction model. Properti
 
 * regional
 * non-hydrostatic
-* quadrilateral mesh on a rotated latitude-longitude grid
+* Eulerian
+* quadrilateral mesh on a (rotated) latitude-longitude grid
 * using finite volume methods instead of grid point formulations
+* time stepping: two-time-level Runge-Kutta scheme, HEVI (horizontally explicit, vertically implicit)
+* radiation: coupled to RTE+RRTMGP
+* uses the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
 
 ## Fundamental literature
 
