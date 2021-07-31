@@ -17,6 +17,23 @@ RFPET is meant to be applied at resolutions finer than 7 km. Standard implementa
 * a 1 km version nested in ICON-EU
 * a 500 m version nested in ICON-D2
 
+## Installation
+
+### Dependencies
+
+Everything is easy and quick to install.
+
+* cmake: `sudo apt-get install cmake`
+* [atmostracers](https://github.com/OpenNWP/atmostracers)
+* clone the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp && cd rte-rrtmgp && git checkout rad_for_game && cd ..`
+
+### Installation
+
+```
+git clone https://github.com/opennwp/rfpet.git
+./setup_directories.sh
+```
+
 ## Fundamental literature
 
 * Thuburn, John. (2008). Numerical wave propagation on the hexagonal C-grid. Journal of Computational Physics. 227. 5836-5858. 10.1016/j.jcp.2008.02.010. 
@@ -24,10 +41,3 @@ RFPET is meant to be applied at resolutions finer than 7 km. Standard implementa
 * Thuburn, John et al. “Numerical representation of geostrophic modes on arbitrarily structured C-grids.” J. Comput. Phys. 228 (2009): 8321-8335.
 * Ringler, Todd & Thuburn, John & Klemp, J. & Skamarock, W.C.. (2010). A unified approach to energy conservation and potential vorticity dynamics on arbitrarily structured C-grids. J. Comput. Physics. 229. 3065-3090. 10.1016/j.jcp.2009.12.007.
 * Gassmann, A. (2013), A global hexagonal C‐grid non‐hydrostatic dynamical core (ICON‐IAP) designed for energetic consistency. Q.J.R. Meteorol. Soc., 139: 152-175. doi:10.1002/qj.1960
-
-## Installation
-
-```
-git clone https://github.com/opennwp/rfpet.git
-./setup_directories.sh
-```
