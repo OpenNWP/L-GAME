@@ -3,30 +3,23 @@
 
 ! This file is a collection of gradient operators.
 
-module gradient_operators
+module divergence_operators
 
-	subroutine grad_hor(scalar_field, result_field_x, result_field_y, grid)
+	subroutine divv_h(vector_field_x, vector_field_y, result_field, grid)
 
 		! This subroutine computes the gradient of a scalar field.
-		real(wp), intent(in)    :: scalar_field(:,:,:)      ! scalar field of which to calculate the gradient
-		real(wp), intent(inout) :: result_field_x(:,:,:)    ! x component of the resulting vector field
-		real(wp), intent(inout) :: result_field_y(:,:,:)    ! y component of the resulting vector field
+		real(wp), intent(in)    :: vector_field_x(:,:,:)    ! scalar field of which to calculate the gradient
+		real(wp), intent(inout) :: vector_field_y(:,:,:)    ! x component of the resulting vector field
+		real(wp), intent(inout) :: result_field  (:,:,:)    ! y component of the resulting vector field
 		real(wp), intent(in)    :: grid                     ! the grid properties
 
-		! calculating the x component of the gradient
-		do ji = 1,ncols-1
-			do jk = 1,nlins-1
-				result_field_x(ji,jk:) = (scalar_field(ji+1,jk,:) - scalar_field(ji,jk,:))/dx(ji,:)
-			enddo
-		enddo
-
-		! calculating the y component of the gradient
-		do ji = 1,ncols-1
-			do jk = 1,nlins-1
+		! performing the actual calculation
+		do ji = 1,ncols
+			do jk = 1,nlins
 				result_field_y(ji,jk:) = (scalar_field(ji,jk,:) - scalar_field(ji,jk+1,:))/dy(jk,:)
 			enddo
 		enddo
 
-	end subroutine grad
+	end subroutine divv_h
 
-end module gradient_operators
+end module divergence_operators

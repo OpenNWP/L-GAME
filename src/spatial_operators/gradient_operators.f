@@ -27,6 +27,6 @@ module gradient_operators
 			enddo
 		enddo
 
-	end subroutine grad
+	end subroutine grad_hor
 
 end module gradient_operators
