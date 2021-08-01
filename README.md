@@ -28,7 +28,7 @@ Everything is easy and quick to install.
 
 * cmake: `sudo apt-get install cmake`
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
-* clone the RTE+RRTMGP repository: `git clone https://github.com/earth-system-radiation/rte-rrtmgp`
+* clone the RTE+RRTMGP repository: `git clone https://github.com/earth-system-radiation/rte-rrtmgp` and replace all `!$omp` with `!!$omp` in the subdirectories `rte` as well as `rrtmgp`
 
 ### Installation
 
