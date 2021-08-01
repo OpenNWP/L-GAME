@@ -40,10 +40,10 @@ module grid_generator
 		lat_left_lower = -(nlins - 1)/2*dlat
 		lon_left_lower = -(ncols - 1)/2*dlon
 		do ji=1,nlins
-			do jk=1,ncols
-				grid%lat_scalar(ji,jk) = lat_left_lower + dlat*(ji - 1)
-				grid%lon_scalar(ji,jk) = lon_left_lower + dlon*(ji - 1)
-			enddo
+			grid%lat_scalar(ji) = lat_left_lower + dlat*(ji - 1)
+		enddo
+		do ji=1,ncols
+			grid%lon_scalar(ji) = lon_left_lower + dlon*(ji - 1)
 		enddo
 		
 		! setting the dy of the model grid

@@ -30,8 +30,8 @@ module definitions
 	
 	type t_grid
 	
-		real(wp), allocatable :: lat_scalar(:,:)
-		real(wp), allocatable :: lon_scalar(:,:)
+		real(wp), allocatable :: lat_scalar(:)
+		real(wp), allocatable :: lon_scalar(:)
 		real(wp), allocatable :: z_geo_scal(:,:,:)
 		real(wp), allocatable :: z_agl_scal(:,:,:)
 		real(wp), allocatable :: volume(:,:,:)
