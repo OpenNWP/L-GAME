@@ -5,8 +5,7 @@
 
 module divergence_operators
 
-	use io,             only: wp
-	use grid_generator, only: t_grid,t_vector_h
+	use definitions, only: wp,t_grid,t_vector_h
 	use run_nml,        only: nlins,ncols,nlev
 	
 	implicit none

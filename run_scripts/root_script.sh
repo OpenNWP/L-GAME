@@ -9,7 +9,7 @@ then
 mkdir $run_dir
 fi
 
-mv namelist_$run_id $run_dir
+mv namelist.nml $run_dir
 
 cd $run_dir
 

@@ -5,9 +5,8 @@
 
 module gradient_operators
 
-	use io,             only: wp
-	use grid_generator, only: t_vector_h, t_grid
-	use run_nml,        only: nlins,ncols,nlev
+	use definitions, only: t_vector_h,t_grid,wp
+	use run_nml,     only: nlins,ncols,nlev
 		
 	implicit none
 	

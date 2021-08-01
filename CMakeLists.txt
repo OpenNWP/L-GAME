@@ -14,7 +14,9 @@ enable_language(Fortran)
 set(RTERRTMGPDIR /home/max/code/rte-rrtmgp)
 add_executable(
 rfpet
+src/definitions/definitions.f90
 src/control.f90
+src/io/io.f90
 src/grid_generator/grid_generator.f90
 src/waves_coupler/waves_coupler.f90
 src/time_stepping/vertical_slice_solvers.f90
@@ -37,7 +39,6 @@ src/spatial_operators/divergences.f90
 src/soil_coupler/soil_coupler.f90
 src/radiation/rterrtmgp_coupler.f90
 src/ocean_coupler/ocean_coupler.f90
-src/io/io.f90
 namelists/bc_nml.f90
 namelists/diff_nml.f90
 namelists/hetero_nml.f90

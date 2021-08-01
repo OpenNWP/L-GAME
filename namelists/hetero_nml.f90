@@ -3,7 +3,7 @@
 
 module hetero_nml
 
-	use io, only: wp
+	use definitions, only: wp
 
 	implicit none
 	

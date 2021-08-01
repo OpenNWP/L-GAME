@@ -3,30 +3,20 @@
 
 module io
 
+	use definitions, only: t_state, wp
+
 	implicit none
 	
 	private
 	
-	public :: wp, read_init
-
-	! setting the floating point precision
-	! single precision
-	integer, parameter :: ps =  6
-	integer, parameter :: rs = 37
-	
-	! double precision
-	integer, parameter :: pd = 12
-	integer, parameter :: rd = 37
-	
-	integer, parameter :: sp = SELECTED_REAL_KIND(ps,rs) ! single precission
-	integer, parameter :: dp = SELECTED_REAL_KIND(pd,rd) ! double precission
-	
-	integer, parameter :: wp = dp                        ! working precission
+	public :: read_init
 	
 	contains
 	
-	subroutine read_init()
+	subroutine read_init(state)
 		! reads the initial state of the model calculation
+		
+		type(t_state), intent(inout) :: state
 		
 	end subroutine read_init
 	
@@ -40,5 +30,32 @@ module io
 		! sets the boundary conditions
 		
 	end subroutine bc
+	
+	subroutine oi()
+	
+		! optimum interpolation
+		
+	
+	end subroutine oi
+	
+	subroutine var_3d()
+		
+		! three-dimensional variational data assimilation
+	
+	end subroutine var_3d
+	
+	subroutine var_4d()
+	
+		! four-dimensional variational data assimilation
+	
+	end subroutine var_4d
 
 end module io
+
+
+
+
+
+
+
+

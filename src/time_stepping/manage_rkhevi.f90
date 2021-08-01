@@ -3,7 +3,7 @@
 
 module manage_rkhevi
 
-	use grid_generator, only: t_grid
+	use definitions, only: t_grid
 
 	implicit none
 
@@ -11,7 +11,7 @@ module manage_rkhevi
 	
 	subroutine rkhevi(grid)
 		
-		type(t_grid), intent(inout) :: grid
+		type(t_grid), intent(inout) :: grid ! the grid of the model
 		
 	end subroutine rkhevi
 
