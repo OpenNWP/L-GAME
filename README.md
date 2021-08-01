@@ -1,14 +1,14 @@
-## Regional Forecasting with Poisson brackets in Exner-Theta formulation.
+## Regional Forecasting with Poisson brackets in Exner-Theta formulation
 
-RFPET is a numerical weather prediction model. Properties:
+RFPET is a numerical weather prediction (NWP) model. Properties:
 
 * regional
 * non-hydrostatic
 * Eulerian
 * (rotated) latitude-longitude grid
 * C-grid
-* using finite volume methods instead of grid point formulations
-* time stepping: two-time-level Runge-Kutta scheme, HEVI (horizontally explicit, vertically implicit)
+* using a hybrid of finite volume and finite difference methods
+* time stepping: two-time-level Runge-Kutta scheme, modified into a HEVI (horizontally explicit, vertically implicit) and forward-backward scheme for stability, horizontal pressure gradient extrapolated and kept constant
 * radiation: coupled to RTE+RRTMGP
 * uses the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
 
