@@ -19,6 +19,8 @@ module gradient_operators
 		type(t_scalar), intent(in)      :: scalar_field(:,:,:) ! scalar field of which to calculate the gradient
 		type(t_vector_h), intent(inout) :: result_field        ! resulting vector field
 		type(t_grid),   intent(in)      :: grid                ! the grid properties
+		! local variables
+		integer                         :: ji,jk               ! loop variables
 
 		! calculating the x component of the gradient
 		do ji = 1,nlins
