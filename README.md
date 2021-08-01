@@ -6,6 +6,7 @@ RFPET is a numerical weather prediction model. Properties:
 * non-hydrostatic
 * Eulerian
 * quadrilateral mesh on a (rotated) latitude-longitude grid
+* C-grid
 * using finite volume methods instead of grid point formulations
 * time stepping: two-time-level Runge-Kutta scheme, HEVI (horizontally explicit, vertically implicit)
 * radiation: coupled to RTE+RRTMGP
