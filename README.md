@@ -11,11 +11,13 @@ RFPET is a numerical weather prediction model. Properties:
 * radiation: coupled to RTE+RRTMGP
 * uses the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
 
-RFPET is meant to be applied at resolutions finer than 7 km. Standard implementations include:
+RFPET is meant to be applied at resolutions finer than 7 km. Standard nesting options include:
 
-* a 6 km version nested in GFS
-* a 1 km version nested in ICON-EU
-* a 500 m version nested in ICON-D2
+* GFS
+* ICON-EU
+* ICON-D2
+
+Other nesting options are of course possible but require more work.
 
 ## Installation
 
