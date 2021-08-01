@@ -15,7 +15,7 @@ dtime=100
 dx=850
 nlins=101
 ncols=101
-nlevs=100
+nlevs=80
 run_span_hr=1
 /
 

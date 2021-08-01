@@ -29,7 +29,7 @@ module run_nml
 		
 		nlins       = 101
 		ncols       = 101
-		nlevs       = 101
+		nlevs       = 80
 		dy          = 800._wp
 		dx          = 850._wp
 		! this calculates the time step using the CFL criterion
