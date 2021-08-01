@@ -10,9 +10,9 @@ ncpus=1
 cat > namelist.nml << EOF
 
 &run
-dy=500
+dy=800
 dtime=100
-dx=550
+dx=850
 nlins=101
 ncols=101
 nlevs=100

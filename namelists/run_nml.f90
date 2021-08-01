@@ -30,8 +30,8 @@ module run_nml
 		nlins       = 101
 		ncols       = 101
 		nlevs       = 101
-		dy          = 500._wp
-		dx          = 550._wp
+		dy          = 800._wp
+		dx          = 850._wp
 		! this calculates the time step using the CFL criterion
 		dtime       = 0.5_wp*dy/350._wp
 		run_span_hr = 1
