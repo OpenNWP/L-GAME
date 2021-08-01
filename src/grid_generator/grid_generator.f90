@@ -27,7 +27,7 @@ module grid_generator
 	
 		real(wp),         allocatable :: z_geo_scal(:,:,:)
 		real(wp),         allocatable :: z_agl_scal(:,:,:)
-		real(wp),         allocatable :: volume
+		real(wp),         allocatable :: volume(:,:,:)
 		type(t_vector_h), allocatable :: area_h
 		real(wp),         allocatable :: dy(:)
 		real(wp),         allocatable :: dx(:,:)
@@ -50,8 +50,10 @@ module grid_generator
 	
 	contains
 	
-	subroutine grid_setup
+	subroutine grid_setup(grid)
 	
+		type(t_grid), intent(inout) :: grid
+		! local variables
 		real(wp) :: re ! Earth radius
 	
 	end subroutine grid_setup

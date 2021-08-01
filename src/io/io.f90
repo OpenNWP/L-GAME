@@ -7,7 +7,7 @@ module io
 	
 	private
 	
-	public :: wp
+	public :: wp, read_init
 
 	! setting the floating point precision
 	! single precision

@@ -75,7 +75,6 @@ SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS} -lgfortr
                                                 # insert output of 'nf-config --fflags --flibs' here
 SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -I/usr/include -L/usr/lib/x86_64-linux-gnu -lnetcdff -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -lnetcdf -lnetcdf -ldl -lm")
 target_link_libraries(rfpet m netcdf netcdff atmostracers)
-install(TARGETS rfpet DESTINATION rfpet)
 
 
 
