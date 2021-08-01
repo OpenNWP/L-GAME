@@ -32,6 +32,8 @@ program control
 	allocate(grid%z_agl_scal(nlins,ncols,nlevs))
 	allocate(grid%dy(nlins+1,ncols,nlevs))
 	allocate(grid%dx(nlins,ncols+1,nlevs))
+	allocate(grid%slope_x(nlins,ncols+1,nlevs))
+	allocate(grid%slope_y(nlins+1,ncols,nlevs))
 	! state at the old time step
 	allocate(state_old%rho(nlins,ncols,nlevs))
 	allocate(state_old%rhotheta(nlins,ncols,nlevs))
@@ -101,8 +103,14 @@ program control
 	
 	! deallocating the memory
 	write(*,*) "Deallocating memory ..."
+	deallocate(grid%lat_scalar)
+	deallocate(grid%lon_scalar)
 	deallocate(grid%z_geo_scal)
 	deallocate(grid%z_agl_scal)
+	deallocate(grid%dy)
+	deallocate(grid%dx)
+	deallocate(grid%slope_x)
+	deallocate(grid%slope_y)
 	! state at the old time step
 	deallocate(state_old%rho)
 	deallocate(state_old%rhotheta)

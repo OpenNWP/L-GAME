@@ -40,6 +40,8 @@ module definitions
 		real(wp), allocatable :: area_z(:,:,:)
 		real(wp), allocatable :: dy(:,:,:)
 		real(wp), allocatable :: dx(:,:,:)
+		real(wp), allocatable :: slope_x(:,:,:)
+		real(wp), allocatable :: slope_y(:,:,:)
 	
 	end type t_grid
 	

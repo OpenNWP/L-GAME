@@ -12,6 +12,8 @@ module gradient_operators
 	
 	private
 	
+	public :: grad_hor_cov
+	
 	contains
 	
 	subroutine grad_hor_cov(scalar_field, result_field_x, result_field_y, grid)

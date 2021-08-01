@@ -5,8 +5,9 @@
 
 module grid_generator
 
-	use definitions, only: wp,t_grid
-	use run_nml,     only: nlins,ncols,nlevs,dy,dx
+	use definitions,        only: wp,t_grid
+	use run_nml,            only: nlins,ncols,nlevs,dy,dx
+	use gradient_operators, only: grad_hor_cov
 
 	implicit none
 	
@@ -54,6 +55,9 @@ module grid_generator
 				enddo
 			enddo
 		enddo
+		
+		! calculating the coordinate slopes
+		call grad_hor_cov(grid%z_geo_scal, grid%slope_x, grid%slope_y, grid)
 	
 	end subroutine grid_setup
 	
