@@ -24,7 +24,7 @@ program control
 	call run_nml_setup
 	write(*,*) "... run namelist read."
 
-	! allocating the grid
+	! allocating memory
 	write(*,*) "Allocating memory ..."
 	allocate(grid%z_geo_scal(nlins,ncols,nlev))
 	allocate(grid%z_agl_scal(nlins,ncols,nlev))
@@ -89,13 +89,59 @@ program control
 	do while (t_0 < t_init + run_span + 300)
 		
 		! this is the RKHEVI routine performing the time stepping
-		call rkhevi(grid)
+		call rkhevi(state_old, state_new, state_tendency, grid)
 		
         t_0 = t_0 + dtime
 		time_step_counter = time_step_counter + 1
 		write(*,*) "Step ", time_step_counter, " completed."
 		
 	enddo
+	
+	! deallocating the memory
+	write(*,*) "Deallocating memory ..."
+	deallocate(grid%z_geo_scal)
+	deallocate(grid%z_agl_scal)
+	! state at the old time step
+	deallocate(state_old%rho)
+	deallocate(state_old%rhotheta)
+	deallocate(state_old%exner_bg)
+	deallocate(state_old%theta_bg)
+	deallocate(state_old%theta_pert)
+	deallocate(state_old%exner_pert)
+	deallocate(state_old%wind_h%x)
+	deallocate(state_old%wind_h%y)
+	deallocate(state_old%wind_v)
+	! state at the new time step
+	deallocate(state_new%rho)
+	deallocate(state_new%rhotheta)
+	deallocate(state_new%exner_bg)
+	deallocate(state_new%theta_bg)
+	deallocate(state_new%theta_pert)
+	deallocate(state_new%exner_pert)
+	deallocate(state_new%wind_h%x)
+	deallocate(state_new%wind_h%y)
+	deallocate(state_new%wind_v)
+	! state containing the tendency
+	deallocate(state_tendency%rho)
+	deallocate(state_tendency%rhotheta)
+	deallocate(state_tendency%exner_bg)
+	deallocate(state_tendency%theta_bg)
+	deallocate(state_tendency%theta_pert)
+	deallocate(state_tendency%exner_pert)
+	deallocate(state_tendency%wind_h%x)
+	deallocate(state_tendency%wind_h%y)
+	deallocate(state_tendency%wind_v)
+	! state to be written out
+	deallocate(state_write%rho)
+	deallocate(state_write%rhotheta)
+	deallocate(state_write%exner_bg)
+	deallocate(state_write%theta_bg)
+	deallocate(state_write%theta_pert)
+	deallocate(state_write%exner_pert)
+	deallocate(state_write%wind_h%x)
+	deallocate(state_write%wind_h%y)
+	deallocate(state_write%wind_v)
+	write(*,*) "... finished."
   
 end program control
 

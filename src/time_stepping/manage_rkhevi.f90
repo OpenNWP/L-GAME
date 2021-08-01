@@ -3,15 +3,18 @@
 
 module manage_rkhevi
 
-	use definitions, only: t_grid
+	use definitions, only: t_grid, t_state
 
 	implicit none
 
 	contains
 	
-	subroutine rkhevi(grid)
+	subroutine rkhevi(state_old, state_new, state_tendency, grid)
 		
-		type(t_grid), intent(inout) :: grid ! the grid of the model
+		type(t_state), intent(inout) :: state_old      ! the state at the old timestep
+		type(t_state), intent(inout) :: state_new      ! the state at the new timestep
+		type(t_state), intent(inout) :: state_tendency ! the state containing the tendency
+		type(t_grid), intent(inout)  :: grid            ! the grid of the model
 		
 	end subroutine rkhevi
 
