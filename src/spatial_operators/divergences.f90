@@ -27,7 +27,12 @@ module divergence_operators
 		! performing the actual calculation
 		do ji = 1,nlins
 			do jk = 1,ncols
-				result_field(ji,jk,:) = 0._wp
+				result_field(ji,jk,:) = (&
+				vector_field_x(ji,jk+1,:)  *grid%area_x(ji,jk+1,:) &
+				- vector_field_y(ji,jk+1,:)  *grid%area_y(ji,jk+1,:) &
+				- vector_field_x(ji,jk,:)  *grid%area_x(ji,jk,:) &
+				+ vector_field_y(ji+1,jk,:)*grid%area_y(ji+1,jk,:)) &
+				/grid%volume(ji,jk,:)
 			enddo
 		enddo
 
