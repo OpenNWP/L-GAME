@@ -14,7 +14,7 @@ dy=800 ! at sea level
 dx=850 ! at equator and sea level
 nlins=101
 ncols=101
-nlevs=80
+nlays=80
 run_span_hr=1
 /
 

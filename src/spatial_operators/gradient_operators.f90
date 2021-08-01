@@ -6,7 +6,7 @@
 module gradient_operators
 
 	use definitions, only: t_grid,wp
-	use run_nml,     only: nlins,ncols,nlevs
+	use run_nml,     only: nlins,ncols,nlays
 		
 	implicit none
 	

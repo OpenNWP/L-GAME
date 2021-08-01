@@ -6,7 +6,7 @@
 module divergence_operators
 
 	use definitions, only: wp,t_grid
-	use run_nml,     only: nlins,ncols,nlevs
+	use run_nml,     only: nlins,ncols,nlays
 	
 	implicit none
 	

@@ -34,6 +34,7 @@ module definitions
 		real(wp), allocatable :: lon_scalar(:)
 		real(wp), allocatable :: z_geo_scal(:,:,:)
 		real(wp), allocatable :: z_agl_scal(:,:,:)
+		real(wp), allocatable :: z_geo_w(:,:,:)
 		real(wp), allocatable :: volume(:,:,:)
 		real(wp), allocatable :: area_x(:,:,:)
 		real(wp), allocatable :: area_y(:,:,:)
