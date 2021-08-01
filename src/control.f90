@@ -26,6 +26,8 @@ program control
 
 	! allocating memory
 	write(*,*) "Allocating memory ..."
+	allocate(grid%lat_scalar(nlins,ncols))
+	allocate(grid%lon_scalar(nlins,ncols))
 	allocate(grid%z_geo_scal(nlins,ncols,nlevs))
 	allocate(grid%z_agl_scal(nlins,ncols,nlevs))
 	allocate(grid%dy(nlins+1,ncols,nlevs))
