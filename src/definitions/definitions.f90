@@ -4,7 +4,7 @@
 ! This file containss some definitions.
 
 module definitions
-
+	                          
 	implicit none
 	
 	private
@@ -25,39 +25,36 @@ module definitions
 	
 	integer, parameter :: wp = dp                        ! working precission
 	
-	public :: t_vector_h
 	public :: t_grid
 	public :: t_state
 	
-	type t_vector_h
-	
-		real(wp), allocatable :: x(:,:,:)
-		real(wp), allocatable :: y(:,:,:)
-	
-	end type t_vector_h
-	
 	type t_grid
 	
-		real(wp),         allocatable :: z_geo_scal(:,:,:)
-		real(wp),         allocatable :: z_agl_scal(:,:,:)
-		real(wp),         allocatable :: volume(:,:,:)
-		type(t_vector_h), allocatable :: area_h
-		real(wp),         allocatable :: dy(:)
-		real(wp),         allocatable :: dx(:,:)
+		real(wp), allocatable :: lat_scalar(:,:)
+		real(wp), allocatable :: lon_scalar(:,:)
+		real(wp), allocatable :: z_geo_scal(:,:,:)
+		real(wp), allocatable :: z_agl_scal(:,:,:)
+		real(wp), allocatable :: volume(:,:,:)
+		real(wp), allocatable :: area_x(:,:,:)
+		real(wp), allocatable :: area_y(:,:,:)
+		real(wp), allocatable :: area_z(:,:,:)
+		real(wp), allocatable :: dy(:,:,:)
+		real(wp), allocatable :: dx(:,:,:)
 	
 	end type t_grid
 	
 	type t_state
 	
 		! type containing the state variables
-		real(wp),         allocatable :: rho(:,:,:)
-		real(wp),         allocatable :: rhotheta(:,:,:)
-		real(wp),         allocatable :: exner_bg(:,:,:)
-		real(wp),         allocatable :: theta_bg(:,:,:)
-		real(wp),         allocatable :: theta_pert(:,:,:)
-		real(wp),         allocatable :: exner_pert(:,:,:)
-		type(t_vector_h), allocatable :: wind_h
-		real(wp),         allocatable :: wind_v(:,:,:)
+		real(wp), allocatable :: rho(:,:,:)
+		real(wp), allocatable :: rhotheta(:,:,:)
+		real(wp), allocatable :: exner_bg(:,:,:)
+		real(wp), allocatable :: theta_bg(:,:,:)
+		real(wp), allocatable :: theta_pert(:,:,:)
+		real(wp), allocatable :: exner_pert(:,:,:)
+		real(wp), allocatable :: wind_u(:,:,:)
+		real(wp), allocatable :: wind_v(:,:,:)
+		real(wp), allocatable :: wind_w(:,:,:)
 	
 	end type t_state
 	

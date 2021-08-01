@@ -9,6 +9,5 @@ cd build
 
 cmake -DCMAKE_INSTALL_PREFIX=../output ..
 make
-ctest
 
 cd ..

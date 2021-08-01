@@ -5,8 +5,8 @@
 
 module divergence_operators
 
-	use definitions, only: wp,t_grid,t_vector_h
-	use run_nml,        only: nlins,ncols,nlev
+	use definitions, only: wp,t_grid
+	use run_nml,     only: nlins,ncols,nlevs
 	
 	implicit none
 	
@@ -14,19 +14,20 @@ module divergence_operators
 	
 	contains
 
-	subroutine divv_h(vector_field, result_field, grid)
+	subroutine divv_h(vector_field_x, vector_field_y, result_field, grid)
 
 		! This subroutine computes the gradient of a scalar field.
-		type(t_vector_h), intent(in) :: vector_field        ! horizontal vector field of which to calculate the divergence
-		real(wp), intent(inout)      :: result_field(:,:,:) ! resulting scalar field
-		type(t_grid), intent(in)     :: grid                ! the grid properties
+		real(wp),     intent(in)    :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
+		real(wp),     intent(in)    :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
+		real(wp),     intent(inout) :: result_field(:,:,:)   ! resulting scalar field
+		type(t_grid), intent(in)    :: grid                  ! the grid properties
 		! local variables
-		integer                      :: ji,jk               ! loop variables
+		integer                     :: ji,jk                  ! loop variables
 
 		! performing the actual calculation
 		do ji = 1,nlins
 			do jk = 1,ncols
-				result_field(ji,jk,:) = (vector_field%x(ji,jk,:) - vector_field%x(ji,jk+1,:))/grid%dy(:)
+				result_field(ji,jk,:) = 0._wp
 			enddo
 		enddo
 

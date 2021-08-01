@@ -10,11 +10,13 @@ ncpus=1
 cat > namelist.nml << EOF
 
 &run
+dy=500
+dtime=100
+dx=550
+nlins=101
+ncols=101
+nlevs=100
 run_span_hr=1
-dtime=10
-nlins=10
-ncols=10
-nlev=10
 /
 
 EOF
