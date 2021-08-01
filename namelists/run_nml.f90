@@ -37,11 +37,11 @@ module run_nml
 		dy              = 800._wp
 		dx              = 850._wp
 		! this calculates the time step using the CFL criterion
-		dtime           = 0.5_wp*dy/350._wp
+		dtime           = 0.4_wp*dy/350._wp
 		run_span_hr     = 63
 		t_init          = 0._wp
 		run_id          = "ideal"
-		adv_sound_ratio = 5
+		adv_sound_ratio = 4
 		toa             = 40000._wp
 		sigma           = 1.3_wp
 		nlays_oro       = int(0.66*nlays)

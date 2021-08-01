@@ -11,6 +11,7 @@ program control
 	use grid_generator, only: grid_setup
 	use io,             only: read_init
 	use manage_rkhevi,  only: rkhevi
+	use linear_combine_two_states, only: lin_combination
 	
 	implicit none
 
@@ -42,8 +43,6 @@ program control
 	! state at the old time step
 	allocate(state_old%rho(nlins,ncols,nlays))
 	allocate(state_old%rhotheta(nlins,ncols,nlays))
-	allocate(state_old%exner_bg(nlins,ncols,nlays))
-	allocate(state_old%theta_bg(nlins,ncols,nlays))
 	allocate(state_old%theta_pert(nlins,ncols,nlays))
 	allocate(state_old%exner_pert(nlins,ncols,nlays))
 	allocate(state_old%wind_u(nlins,ncols+1,nlays))
@@ -52,8 +51,6 @@ program control
 	! state at the new time step
 	allocate(state_new%rho(nlins,ncols,nlays))
 	allocate(state_new%rhotheta(nlins,ncols,nlays))
-	allocate(state_new%exner_bg(nlins,ncols,nlays))
-	allocate(state_new%theta_bg(nlins,ncols,nlays))
 	allocate(state_new%theta_pert(nlins,ncols,nlays))
 	allocate(state_new%exner_pert(nlins,ncols,nlays))
 	allocate(state_new%wind_u(nlins,ncols+1,nlays))
@@ -62,8 +59,6 @@ program control
 	! state containing the tendency
 	allocate(state_tendency%rho(nlins,ncols,nlays))
 	allocate(state_tendency%rhotheta(nlins,ncols,nlays))
-	allocate(state_tendency%exner_bg(nlins,ncols,nlays))
-	allocate(state_tendency%theta_bg(nlins,ncols,nlays))
 	allocate(state_tendency%theta_pert(nlins,ncols,nlays))
 	allocate(state_tendency%exner_pert(nlins,ncols,nlays))
 	allocate(state_tendency%wind_u(nlins,ncols+1,nlays))
@@ -72,8 +67,6 @@ program control
 	! state to be written out
 	allocate(state_write%rho(nlins,ncols,nlays))
 	allocate(state_write%rhotheta(nlins,ncols,nlays))
-	allocate(state_write%exner_bg(nlins,ncols,nlays))
-	allocate(state_write%theta_bg(nlins,ncols,nlays))
 	allocate(state_write%theta_pert(nlins,ncols,nlays))
 	allocate(state_write%exner_pert(nlins,ncols,nlays))
 	allocate(state_write%wind_u(nlins,ncols+1,nlays))
@@ -86,6 +79,8 @@ program control
 	call grid_setup(grid)
 	write(*,*) "... grid set up."
 
+	call lin_combination(state_old, state_old, state_new, 1._wp, 0._wp)
+    
 	! reading the initial state
 	write(*,*) "Reading the initial state..."
 	call read_init(state_old)
@@ -97,8 +92,10 @@ program control
 	time_step_counter = 0
 	do while (t_0 < t_init + run_span + 300)
 		
+    	call lin_combination(state_new, state_new, state_old, 1._wp, 0._wp)
+    	
 		! this is the RKHEVI routine performing the time stepping
-		call rkhevi(state_old, state_new, state_tendency, grid)
+		call rkhevi(state_old, state_new, state_tendency, grid, time_step_counter)
 		
         t_0 = t_0 + dtime
 		time_step_counter = time_step_counter + 1
@@ -124,8 +121,6 @@ program control
 	! state at the old time step
 	deallocate(state_old%rho)
 	deallocate(state_old%rhotheta)
-	deallocate(state_old%exner_bg)
-	deallocate(state_old%theta_bg)
 	deallocate(state_old%theta_pert)
 	deallocate(state_old%exner_pert)
 	deallocate(state_old%wind_u)
@@ -134,8 +129,6 @@ program control
 	! state at the new time step
 	deallocate(state_new%rho)
 	deallocate(state_new%rhotheta)
-	deallocate(state_new%exner_bg)
-	deallocate(state_new%theta_bg)
 	deallocate(state_new%theta_pert)
 	deallocate(state_new%exner_pert)
 	deallocate(state_new%wind_u)
@@ -144,8 +137,6 @@ program control
 	! state containing the tendency
 	deallocate(state_tendency%rho)
 	deallocate(state_tendency%rhotheta)
-	deallocate(state_tendency%exner_bg)
-	deallocate(state_tendency%theta_bg)
 	deallocate(state_tendency%theta_pert)
 	deallocate(state_tendency%exner_pert)
 	deallocate(state_tendency%wind_u)
@@ -154,8 +145,6 @@ program control
 	! state to be written out
 	deallocate(state_write%rho)
 	deallocate(state_write%rhotheta)
-	deallocate(state_write%exner_bg)
-	deallocate(state_write%theta_bg)
 	deallocate(state_write%theta_pert)
 	deallocate(state_write%exner_pert)
 	deallocate(state_write%wind_u)

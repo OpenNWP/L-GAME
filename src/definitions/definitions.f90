@@ -27,6 +27,7 @@ module definitions
 	
 	public :: t_grid
 	public :: t_state
+	public :: t_bg
 	
 	type t_grid
 	
@@ -51,8 +52,6 @@ module definitions
 		! type containing the state variables
 		real(wp), allocatable :: rho(:,:,:)
 		real(wp), allocatable :: rhotheta(:,:,:)
-		real(wp), allocatable :: exner_bg(:,:,:)
-		real(wp), allocatable :: theta_bg(:,:,:)
 		real(wp), allocatable :: theta_pert(:,:,:)
 		real(wp), allocatable :: exner_pert(:,:,:)
 		real(wp), allocatable :: wind_u(:,:,:)
@@ -60,6 +59,15 @@ module definitions
 		real(wp), allocatable :: wind_w(:,:,:)
 	
 	end type t_state
+	
+		
+	type t_bg
+	
+		! background state
+		real(wp), allocatable :: exner_bg(:,:,:)
+		real(wp), allocatable :: theta_bg(:,:,:)
+	
+	end type t_bg
 	
 end module definitions
 
