@@ -10,7 +10,8 @@ RFPET is a numerical weather prediction (NWP) model. Properties:
 * using a hybrid of finite volume and finite difference methods
 * time stepping: two-time-level Runge-Kutta scheme, modified into a HEVI (horizontally explicit, vertically implicit) and forward-backward scheme for stability, horizontal pressure gradient extrapolated and kept constant
 * radiation: coupled to RTE+RRTMGP
-* uses the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
+* using the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
+* assigning individual mass densities to all tracers and calculating interactions using the atmostracers library
 
 RFPET is meant to be applied at resolutions finer than 7 km. The default configuration is a 800 m resolution implementation nested into ICON-D2. Other nesting options are of course possible but require more work.
 
@@ -18,7 +19,7 @@ RFPET is meant to be applied at resolutions finer than 7 km. The default configu
 
 ### Dependencies
 
-Everything is easy and quick to install.
+Everything is easy and quick to install. These instructions are for Ubuntu.
 
 * cmake: `sudo apt-get install cmake`
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
@@ -32,6 +33,15 @@ git clone https://github.com/opennwp/rfpet.git
 ./compile.sh
 ```
 
+### Execution
+
+```
+cd run_scripts
+./ideal.sh
+```
+
+Output will be placed in the directory `output`.
+
 ## Fundamental literature
 
 * Thuburn, John. (2008). Numerical wave propagation on the hexagonal C-grid. Journal of Computational Physics. 227. 5836-5858. 10.1016/j.jcp.2008.02.010. 
@@ -39,3 +49,9 @@ git clone https://github.com/opennwp/rfpet.git
 * Thuburn, John et al. “Numerical representation of geostrophic modes on arbitrarily structured C-grids.” J. Comput. Phys. 228 (2009): 8321-8335.
 * Ringler, Todd & Thuburn, John & Klemp, J. & Skamarock, W.C.. (2010). A unified approach to energy conservation and potential vorticity dynamics on arbitrarily structured C-grids. J. Comput. Physics. 229. 3065-3090. 10.1016/j.jcp.2009.12.007.
 * Gassmann, A. (2013), A global hexagonal C‐grid non‐hydrostatic dynamical core (ICON‐IAP) designed for energetic consistency. Q.J.R. Meteorol. Soc., 139: 152-175. doi:10.1002/qj.1960
+
+
+
+
+
+
