@@ -71,8 +71,8 @@ module grid_generator
 					sigma_z = z_rel**sigma
 					A = sigma_z*toa; ! the height without orography
 					! B corrects for orography
-					if (jl >= nlays - nlays_oro + 1) then
-						B = (jl - (nlays - nlays_oro + 1))/nlays_oro
+					if (jl >= nlays - nlays_oro + 1._wp) then
+						B = (jl - (nlays - nlays_oro + 1._wp))/nlays_oro
 					else
 						B = 0
 					endif
@@ -126,6 +126,25 @@ module grid_generator
 					else
 						grid%z_geo_w(ji,jk,jl) = 0.5_wp*(grid%z_geo_scal(ji,jk,jl-1) + grid%z_geo_scal(ji,jk,jl))
 					endif
+				enddo
+			enddo
+		enddo
+
+		! setting the horizontal areas at the higher points (above the surface)
+		do ji=1,nlins
+			do jk=1,ncols
+				do jl=1,nlays
+					grid%area_z(ji,jk,jl) = grid%area_z(ji,jk,nlays+1)*(grid%z_geo_w(ji,jk,jl)/grid%z_geo_w(ji,jk,nlays+1))**2
+				enddo
+			enddo
+		enddo
+
+		! setting the volume of the grid boxes
+		do ji=1,nlins
+			do jk=1,ncols
+				do jl=1,nlays
+					grid%volume(ji,jk,jl) = 1._wp/3._wp*(grid%z_geo_w(ji,jk,jl)**3 - grid%z_geo_w(ji,jk,jl+1)**3) &
+					/grid%z_geo_w(ji,jk,jl+1)**2*grid%area_z(ji,jk,jl+1)
 				enddo
 			enddo
 		enddo

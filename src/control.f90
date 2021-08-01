@@ -35,6 +35,10 @@ program control
 	allocate(grid%dx(nlins,ncols+1,nlays))
 	allocate(grid%slope_x(nlins,ncols+1,nlays))
 	allocate(grid%slope_y(nlins+1,ncols,nlays))
+	allocate(grid%volume(nlins,ncols,nlays))
+	allocate(grid%area_x(nlins,ncols+1,nlays))
+	allocate(grid%area_y(nlins+1,ncols,nlays))
+	allocate(grid%area_z(nlins,ncols,nlays+1))
 	! state at the old time step
 	allocate(state_old%rho(nlins,ncols,nlays))
 	allocate(state_old%rhotheta(nlins,ncols,nlays))
@@ -113,6 +117,10 @@ program control
 	deallocate(grid%dx)
 	deallocate(grid%slope_x)
 	deallocate(grid%slope_y)
+	deallocate(grid%volume)
+	deallocate(grid%area_x)
+	deallocate(grid%area_y)
+	deallocate(grid%area_z)
 	! state at the old time step
 	deallocate(state_old%rho)
 	deallocate(state_old%rhotheta)
