@@ -5,7 +5,8 @@
 
 module divergence_operators
 
-	use grid_generator, only: t_grid
+	use io, only: wp
+	use grid_generator, only: t_grid, t_vector_h
 	
 	implicit none
 	
@@ -16,15 +17,14 @@ module divergence_operators
 	subroutine divv_h(vector_field, result_field, grid)
 
 		! This subroutine computes the gradient of a scalar field.
-		real(wp), intent(in)     :: vector_field_x(:,:,:) ! scalar field of which to calculate the gradient
-		real(wp), intent(inout)  :: vector_field_y(:,:,:) ! x component of the resulting vector field
-		real(wp), intent(inout)  :: result_field  (:,:,:) ! y component of the resulting vector field
-		type(t_grid), intent(in) :: grid                  ! the grid properties
+		type(t_vector_h), intent(in) :: vector_field(:,:,:) ! scalar field of which to calculate the gradient
+		real(wp), intent(inout)      :: result_field  (:,:,:) ! y component of the resulting vector field
+		type(t_grid), intent(in)     :: grid                  ! the grid properties
 
 		! performing the actual calculation
 		do ji = 1,ncols
 			do jk = 1,nlins
-				result_field(ji,jk,:) = (scalar_field(ji,jk,:) - scalar_field(ji,jk+1,:))/dy(jk,:)
+				result_field(ji,jk,:) = (vector_field%x(ji,jk,:) - vector_field%x(ji,jk+1,:))/dy(jk,:)
 			enddo
 		enddo
 

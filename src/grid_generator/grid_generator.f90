@@ -11,17 +11,10 @@ module grid_generator
 	
 	private
 	
-	public :: t_scalar
-	public :: t_vector
+	public :: t_vector_h
 	public :: t_grid
 	public :: t_state
-	public :: diag
-	
-	type t_scalar
-		
-		real(wp), allocatable :: values(:,:,:)
-	
-	end type t_scalar
+	public :: t_diag
 	
 	type t_vector_h
 	
@@ -32,27 +25,27 @@ module grid_generator
 	
 	type t_grid
 	
-		t_scalar,   allocatable :: z_geo_scal
-		t_scalar,   allocatable :: z_agl_scal
-		t_scalar,   allocatable :: volume
-		t_vector_h, allocatable :: area_h
+		real(wp),         allocatable :: z_geo_scal(:,:,:)
+		real(wp),         allocatable :: z_agl_scal(:,:,:)
+		real(wp),         allocatable :: volume
+		type(t_vector_h), allocatable :: area_h
 	
 	end type t_grid
 	
 	type t_state
 	
 		! type containing the state variables
-		type(t_scalar),   allocatable: rho
-		type(t_scalar),   allocatable: rhotheta
-		type(t_scalar),   allocatable: exner
-		type(t_vector_h), allocatable: wind_h
-		type(t_vector_v), allocatable: wind_w
+		real(wp),         allocatable :: rho(:,:,:)
+		real(wp),         allocatable :: rhotheta(:,:,:)
+		real(wp),         allocatable :: exner(:,:,:)
+		type(t_vector_h), allocatable :: wind_h
+		real(wp),         allocatable :: wind_v(:,:,:)
 	
 	end type t_state
 	
 	type t_diag
 	
-		type(t_scalar),   allocatable: theta
+		real(wp), allocatable :: theta(:,:,:)
 	
 	end type t_diag
 	
