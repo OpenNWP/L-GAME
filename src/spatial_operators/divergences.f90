@@ -5,8 +5,9 @@
 
 module divergence_operators
 
-	use io, only: wp
-	use grid_generator, only: t_grid, t_vector_h
+	use io,             only: wp
+	use grid_generator, only: t_grid,t_vector_h
+	use run_nml,        only: nlins,ncols,nlev
 	
 	implicit none
 	
@@ -24,9 +25,9 @@ module divergence_operators
 		integer                      :: ji,jk               ! loop variables
 
 		! performing the actual calculation
-		do ji = 1,ncols
-			do jk = 1,nlins
-				result_field(ji,jk,:) = (vector_field%x(ji,jk,:) - vector_field%x(ji,jk+1,:))/dy(jk,:)
+		do ji = 1,nlins
+			do jk = 1,ncols
+				result_field(ji,jk,:) = (vector_field%x(ji,jk,:) - vector_field%x(ji,jk+1,:))/grid%dy(:)
 			enddo
 		enddo
 

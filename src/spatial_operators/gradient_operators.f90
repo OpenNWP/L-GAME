@@ -5,7 +5,9 @@
 
 module gradient_operators
 
-	use grid_generator, only: t_vector, t_grid
+	use io,             only: wp
+	use grid_generator, only: t_vector_h, t_grid
+	use run_nml,        only: nlins,ncols,nlev
 		
 	implicit none
 	
@@ -16,7 +18,7 @@ module gradient_operators
 	subroutine grad_hor(scalar_field, result_field, grid)
 
 		! This subroutine computes the gradient of a scalar field.
-		type(t_scalar), intent(in)      :: scalar_field(:,:,:) ! scalar field of which to calculate the gradient
+		real(wp), intent(in)            :: scalar_field(:,:,:) ! scalar field of which to calculate the gradient
 		type(t_vector_h), intent(inout) :: result_field        ! resulting vector field
 		type(t_grid),   intent(in)      :: grid                ! the grid properties
 		! local variables
@@ -25,14 +27,14 @@ module gradient_operators
 		! calculating the x component of the gradient
 		do ji = 1,nlins
 			do jk = 1,ncols-1
-				result_field%x(ji,jk+1,:) = (scalar_field(ji,jk+1,:) - scalar_field(ji,jk,:))/grid=>dx(ji,:)
+				result_field%x(ji,jk+1,:) = (scalar_field(ji,jk+1,:) - scalar_field(ji,jk,:))/grid%dx(ji,:)
 			enddo
 		enddo
 
 		! calculating the y component of the gradient
 		do ji = 1,nlins-1
 			do jk = 1,ncols
-				result_field%y(ji+1,jk:) = (scalar_field(ji,jk,:) - scalar_field(ji+1,jk,:))/grid=>dy(:)
+				result_field%y(ji+1,jk,:) = (scalar_field(ji,jk,:) - scalar_field(ji+1,jk,:))/grid%dy(:)
 			enddo
 		enddo
 

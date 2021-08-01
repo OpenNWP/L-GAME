@@ -14,7 +14,7 @@ module grid_generator
 	public :: t_vector_h
 	public :: t_grid
 	public :: t_state
-	public :: t_diag
+	public :: grid_setup
 	
 	type t_vector_h
 	
@@ -29,6 +29,8 @@ module grid_generator
 		real(wp),         allocatable :: z_agl_scal(:,:,:)
 		real(wp),         allocatable :: volume
 		type(t_vector_h), allocatable :: area_h
+		real(wp),         allocatable :: dy(:)
+		real(wp),         allocatable :: dx(:,:)
 	
 	end type t_grid
 	
@@ -37,17 +39,22 @@ module grid_generator
 		! type containing the state variables
 		real(wp),         allocatable :: rho(:,:,:)
 		real(wp),         allocatable :: rhotheta(:,:,:)
-		real(wp),         allocatable :: exner(:,:,:)
+		real(wp),         allocatable :: exner_bg(:,:,:)
+		real(wp),         allocatable :: theta_bg(:,:,:)
+		real(wp),         allocatable :: theta_pert(:,:,:)
+		real(wp),         allocatable :: exner_pert(:,:,:)
 		type(t_vector_h), allocatable :: wind_h
 		real(wp),         allocatable :: wind_v(:,:,:)
 	
 	end type t_state
 	
-	type t_diag
+	contains
 	
-		real(wp), allocatable :: theta(:,:,:)
+	subroutine grid_setup
 	
-	end type t_diag
+		real(wp) :: re ! Earth radius
+	
+	end subroutine grid_setup
 	
 end module grid_generator
 

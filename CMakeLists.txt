@@ -38,6 +38,13 @@ src/soil_coupler/soil_coupler.f90
 src/radiation/rterrtmgp_coupler.f90
 src/ocean_coupler/ocean_coupler.f90
 src/io/io.f90
+namelists/bc_nml.f90
+namelists/diff_nml.f90
+namelists/hetero_nml.f90
+namelists/init_nml.f90
+namelists/rad_nml.f90
+namelists/run_nml.f90
+namelists/surface_nml.f90
 ${RTERRTMGPDIR}/rrtmgp/mo_gas_optics.F90
 ${RTERRTMGPDIR}/rrtmgp/mo_gas_optics_rrtmgp.F90
 ${RTERRTMGPDIR}/rrtmgp/mo_rrtmgp_constants.F90
