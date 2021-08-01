@@ -17,8 +17,9 @@ module run_nml
 	integer  :: run_span_hr        ! run span in hours
 	real     :: t_init             ! epoch time stamp of the initialization
 	character(len = 100) :: run_id ! the ID of the run
+	integer  :: adv_sound_ratio    ! ratio of advective to sound time step
 	
-	namelist /run/run_id,nlins,ncols,nlevs,dy,dx,dtime,run_span_hr
+	namelist /run/run_id,nlins,ncols,nlevs,dy,dx,dtime,run_span_hr,adv_sound_ratio
 
 	contains
 
@@ -27,16 +28,17 @@ module run_nml
 		! local vaiables
 		integer :: fileunit
 		
-		nlins       = 101
-		ncols       = 101
-		nlevs       = 80
-		dy          = 800._wp
-		dx          = 850._wp
+		nlins           = 101
+		ncols           = 101
+		nlevs           = 80
+		dy              = 800._wp
+		dx              = 850._wp
 		! this calculates the time step using the CFL criterion
-		dtime       = 0.5_wp*dy/350._wp
-		run_span_hr = 1
-		t_init      = 0._wp
-		run_id      = "ideal"
+		dtime           = 0.5_wp*dy/350._wp
+		run_span_hr     = 63
+		t_init          = 0._wp
+		run_id          = "ideal"
+		adv_sound_ratio = 5
 		
         ! Open and read Namelist file.
         open(action="read", file="namelist.nml", newunit=fileunit)
