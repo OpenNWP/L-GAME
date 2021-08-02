@@ -122,7 +122,22 @@ module grid_generator
 				enddo
 			enddo
 		enddo
-
+		
+		! setting the vertical distances between the scalar data points
+		do ji=1,nlins
+			do jk=1,ncols
+				do jl=1,nlays+1
+					if (jl == 1) then
+						grid%dz(ji,jk,jl) = 2._wp*(toa - grid%z_geo_scal(ji,jk,jl))
+					elseif (jl == nlays+1) then
+						grid%dz(ji,jk,jl) = 2._wp*(grid%z_geo_scal(ji,jk,jl-1) - grid%z_geo_w(ji,jk,jl))
+					else
+						grid%dz(ji,jk,jl) = grid%z_geo_scal(ji,jk,jl-1) - grid%z_geo_scal(ji,jk,jl)
+					endif
+				enddo
+			enddo
+		enddo
+		
 		! setting the horizontal areas at the surface
 		do ji=1,nlins
 			do jk=1,ncols

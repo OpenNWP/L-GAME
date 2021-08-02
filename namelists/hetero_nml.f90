@@ -19,6 +19,20 @@ module hetero_nml
 			  integer(C_INT), value :: gas_number
 		end function specific_gas_constants_lookup
 	end interface
+	interface
+		real(C_DOUBLE) function spec_heat_capacities_v_gas_lookup(gas_number) bind(c, name = "spec_heat_capacities_v_gas_lookup")
+			  use, intrinsic::iso_c_binding
+			  implicit none
+			  integer(C_INT), value :: gas_number
+		end function spec_heat_capacities_v_gas_lookup
+	end interface
+	interface
+		real(C_DOUBLE) function spec_heat_capacities_p_gas_lookup(gas_number) bind(c, name = "spec_heat_capacities_p_gas_lookup")
+			  use, intrinsic::iso_c_binding
+			  implicit none
+			  integer(C_INT), value :: gas_number
+		end function spec_heat_capacities_p_gas_lookup
+	end interface
 
 	contains
 

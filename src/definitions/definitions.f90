@@ -29,6 +29,7 @@ module definitions
 	public :: t_state
 	public :: t_bg
 	public :: t_diag
+	public :: t_tend
 	
 	type t_grid
 	
@@ -56,6 +57,7 @@ module definitions
 		real(wp), allocatable :: rho(:,:,:)
 		real(wp), allocatable :: rhotheta(:,:,:)
 		real(wp), allocatable :: theta_pert(:,:,:)
+		real(wp), allocatable :: theta(:,:,:)
 		real(wp), allocatable :: exner_pert(:,:,:)
 		real(wp), allocatable :: wind_u(:,:,:)
 		real(wp), allocatable :: wind_v(:,:,:)
@@ -63,12 +65,23 @@ module definitions
 	
 	end type t_state
 	
+	type t_tend
+	
+		! type containing tendencies
+		real(wp), allocatable :: rho(:,:,:)
+		real(wp), allocatable :: rhotheta(:,:,:)
+		real(wp), allocatable :: wind_u(:,:,:)
+		real(wp), allocatable :: wind_v(:,:,:)
+		real(wp), allocatable :: wind_w(:,:,:)
+	
+	end type t_tend
+	
 		
 	type t_bg
 	
 		! background state
-		real(wp), allocatable :: exner_bg(:,:,:)
-		real(wp), allocatable :: theta_bg(:,:,:)
+		real(wp), allocatable :: theta(:,:,:)
+		real(wp), allocatable :: exner(:,:,:)
 	
 	end type t_bg
 	
@@ -76,6 +89,9 @@ module definitions
 	
 		! type containing diagnostic quantities
 		real(wp), allocatable :: e_kin(:,:,:)
+		real(wp), allocatable :: e_kin_grad_x(:,:,:)
+		real(wp), allocatable :: e_kin_grad_y(:,:,:)
+		real(wp), allocatable :: e_kin_grad_z(:,:,:)
 	
 	end type t_diag
 	

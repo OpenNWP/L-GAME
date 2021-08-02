@@ -10,11 +10,11 @@ ncpus=1
 cat > namelist.nml << EOF
 
 &run
-dy=800 ! at sea level
-dx=850 ! at equator and sea level
 nlins=101
 ncols=101
 nlays=80
+dy=800
+dx=850
 run_span_hr=1
 /
 

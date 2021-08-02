@@ -3,7 +3,6 @@
 
 module run_nml
 
-    use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 	use definitions, only: wp
 	
 	implicit none
@@ -25,7 +24,7 @@ module run_nml
 	real(wp) :: semiminor          ! Earth radius
 	real(wp) :: re                 ! Earth radius
 	
-	namelist /run/run_id,nlins,ncols,nlays,dy,dx,dtime,run_span_hr,adv_sound_ratio,toa,nlays_oro
+	namelist /run/run_id,nlins,ncols,nlays,dy,dx,run_span_hr,adv_sound_ratio,toa,nlays_oro
 
 	contains
 
@@ -39,8 +38,6 @@ module run_nml
 		nlays           = 80
 		dy              = 800._wp
 		dx              = 850._wp
-		! this calculates the time step using the CFL criterion
-		dtime           = 0.4_wp*dy/350._wp
 		run_span_hr     = 63
 		t_init          = 0._wp
 		run_id          = "ideal"
@@ -57,6 +54,9 @@ module run_nml
         read(nml=run, unit=fileunit)
         
         close(fileunit)
+        
+		! this calculates the time step using the CFL criterion
+		dtime           = 0.4_wp*dy/350._wp
         
         ! checking input data for correctness
         if (mod(nlins, 2) == 0) then
