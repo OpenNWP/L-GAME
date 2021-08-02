@@ -1,8 +1,6 @@
 ! This source file is part of the Regional Forecasting with Poisson-brackets in Exner-Theta formulation (RFPET), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/RFPET
 
-! This file is a collection of gradient operators.
-
 module divergence_operators
 
 	use definitions, only: wp,t_grid
