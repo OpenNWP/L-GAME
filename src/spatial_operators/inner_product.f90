@@ -34,6 +34,7 @@ module inner_product
 					grid%inner_product_weights(ji,jk,jl,4)*state%wind_v(ji  ,jk  ,jl  )**2 + &
 					grid%inner_product_weights(ji,jk,jl,5)*state%wind_w(ji  ,jk  ,jl  )**2 + &
 					grid%inner_product_weights(ji,jk,jl,6)*state%wind_w(ji  ,jk  ,jl+1)**2
+					diag%e_kin(ji,jk,jl) = 0.5_wp*diag%e_kin(ji,jk,jl)
 				enddo
 			enddo
 		enddo
