@@ -12,6 +12,10 @@ module manage_rkhevi
 	use explicit_vector_tendencies, only: vector_tendencies_expl
 
 	implicit none
+	
+	private
+	
+	public :: rkhevi
 
 	contains
 	
