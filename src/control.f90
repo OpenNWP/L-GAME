@@ -42,6 +42,7 @@ program control
 	allocate(grid%area_x(nlins,ncols+1,nlays))
 	allocate(grid%area_y(nlins+1,ncols,nlays))
 	allocate(grid%area_z(nlins,ncols,nlays+1))
+	allocate(grid%inner_product_weights(nlins,ncols,nlays,6))
 	! state at the old time step
 	allocate(state_old%rho(nlins,ncols,nlays))
 	allocate(state_old%rhotheta(nlins,ncols,nlays))
@@ -123,6 +124,7 @@ program control
 	deallocate(grid%area_x)
 	deallocate(grid%area_y)
 	deallocate(grid%area_z)
+	deallocate(grid%inner_product_weights)
 	! state at the old time step
 	deallocate(state_old%rho)
 	deallocate(state_old%rhotheta)
