@@ -28,6 +28,7 @@ module definitions
 	public :: t_grid
 	public :: t_state
 	public :: t_bg
+	public :: t_diag
 	
 	type t_grid
 	
@@ -68,6 +69,13 @@ module definitions
 		real(wp), allocatable :: theta_bg(:,:,:)
 	
 	end type t_bg
+	
+	type t_diag
+	
+		! type containing diagnostic quantities
+		real(wp), allocatable :: e_kin(:,:,:)
+	
+	end type t_diag
 	
 end module definitions
 

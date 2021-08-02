@@ -5,9 +5,9 @@ program control
 
 	! This controls the model run from the beginning to the end.
 
-	use run_nml,        only: run_nml_setup, run_span_hr, dtime, &
-	                          t_init, nlins, ncols, nlays
-	use definitions,    only: t_grid, t_state, wp
+	use run_nml,        only: run_nml_setup,run_span_hr,dtime, &
+	                          t_init,nlins,ncols,nlays
+	use definitions,    only: t_grid,t_state,wp,t_diag
 	use grid_generator, only: grid_setup
 	use io,             only: read_init
 	use manage_rkhevi,  only: rkhevi
@@ -19,6 +19,7 @@ program control
 	real(wp)      :: t_0, run_span
 	type(t_grid)  :: grid
 	type(t_state) :: state_old, state_new, state_tendency, state_write
+	type(t_diag)  :: diag
 
 	! reading in all namelists so that we know what we have to do
 	write(*,*) "Reading in run namelist ..."
@@ -72,6 +73,8 @@ program control
 	allocate(state_write%wind_u(nlins,ncols+1,nlays))
 	allocate(state_write%wind_v(nlins+1,ncols,nlays))
 	allocate(state_write%wind_w(nlins,ncols,nlays))
+	! state containing diagnostic quantities
+	allocate(diag%e_kin(nlins,ncols,nlays))
 	write(*,*) "... finished."
 
 	! firstly, the grid generator needs to be called to calculate the grid properties
@@ -95,7 +98,7 @@ program control
     	call lin_combination(state_new, state_new, state_old, 1._wp, 0._wp)
     	
 		! this is the RKHEVI routine performing the time stepping
-		call rkhevi(state_old, state_new, state_tendency, grid, time_step_counter)
+		call rkhevi(state_old,state_new,state_tendency,grid,diag,time_step_counter)
 		
         t_0 = t_0 + dtime
 		time_step_counter = time_step_counter + 1
@@ -150,6 +153,8 @@ program control
 	deallocate(state_write%wind_u)
 	deallocate(state_write%wind_v)
 	deallocate(state_write%wind_w)
+	! state containing diagnostic quantities
+	deallocate(diag%e_kin)
 	write(*,*) "... finished."
   
 end program control
