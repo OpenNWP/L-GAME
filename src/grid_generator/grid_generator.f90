@@ -6,7 +6,7 @@
 module grid_generator
 
 	use definitions,        only: wp,t_grid
-	use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma
+	use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re
 	use gradient_operators, only: grad_hor_cov
 
 	implicit none
@@ -21,9 +21,6 @@ module grid_generator
 	
 		type(t_grid), intent(inout) :: grid
 		! local variables
-		real(wp) :: semimajor      ! Earth radius
-		real(wp) :: semiminor      ! Earth radius
-		real(wp) :: re             ! Earth radius
 		real(wp) :: lat_left_lower ! latitude coordinate of lower left corner
 		real(wp) :: lon_left_lower ! longitude coordinate of lower left corner
 		real(wp) :: dlat           ! mesh size in y direction as angle
@@ -36,10 +33,6 @@ module grid_generator
 		real(wp) :: z_rel          ! variable for calculating the vertical grid
 		real(wp) :: z_vertical_vector_pre(nlays+1)
 		                           ! variable for calculating the vertical grid
-		
-		semiminor=6356752.314_wp
-		semimajor=6378137.0_wp
-		re = (semimajor*semimajor*semiminor)**(1._wp/3._wp)
 		
 		! setting the latitude and longitude coordinates of the scalar grid points
 		! setting the dy of the model grid
@@ -130,11 +123,20 @@ module grid_generator
 			enddo
 		enddo
 
+		! setting the horizontal areas at the surface
+		do ji=1,nlins
+			do jk=1,ncols
+				grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji))*(re + grid%z_geo_w(ji,jk,nlays+1))**2 &
+					/re**2
+			enddo
+		enddo
+
 		! setting the horizontal areas at the higher points (above the surface)
 		do ji=1,nlins
 			do jk=1,ncols
-				do jl=1,nlays
-					grid%area_z(ji,jk,jl) = grid%area_z(ji,jk,nlays+1)*(grid%z_geo_w(ji,jk,jl)/grid%z_geo_w(ji,jk,nlays+1))**2
+				do jl=1,nlays+1
+					grid%area_z(ji,jk,jl) = grid%area_z(ji,jk,nlays+1)*(re + grid%z_geo_w(ji,jk,jl))**2 &
+					/(re + grid%z_geo_w(ji,jk,nlays+1))**2
 				enddo
 			enddo
 		enddo
@@ -143,13 +145,32 @@ module grid_generator
 		do ji=1,nlins
 			do jk=1,ncols
 				do jl=1,nlays
-					grid%volume(ji,jk,jl) = 1._wp/3._wp*(grid%z_geo_w(ji,jk,jl)**3 - grid%z_geo_w(ji,jk,jl+1)**3) &
-					/grid%z_geo_w(ji,jk,jl+1)**2*grid%area_z(ji,jk,jl+1)
+					grid%volume(ji,jk,jl) = 1._wp/3._wp*((re + grid%z_geo_w(ji,jk,jl))**3 - (re + grid%z_geo_w(ji,jk,jl+1))**3) &
+					/(re + grid%z_geo_w(ji,jk,jl+1))**2*grid%area_z(ji,jk,jl+1)
 				enddo
 			enddo
 		enddo
 	
 	end subroutine grid_setup
+	
+	function patch_area(center_lat)
+	
+		! calculates the surface of a quadrilateral grid cell
+	
+		! latitude at the center of the patch
+		real(wp) :: center_lat
+		! output
+		real(wp) :: patch_area ! result
+		! local variables
+		real(wp) :: dy_as_angle ! mesh size in y-direction as angle
+		real(wp) :: dx_as_angle ! mesh size in x-direction as angle
+	
+		dy_as_angle = dy/re
+		dx_as_angle = dx/re
+	
+		patch_area = re**2*dx_as_angle*(sin(center_lat + 0.5_wp*dy_as_angle) - sin(center_lat - 0.5_wp*dy_as_angle))
+	
+	end function patch_area
 	
 end module grid_generator
 

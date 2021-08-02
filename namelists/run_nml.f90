@@ -21,6 +21,9 @@ module run_nml
 	real     :: t_init             ! epoch time stamp of the initialization
 	character(len = 100) :: run_id ! the ID of the run
 	integer  :: adv_sound_ratio    ! ratio of advective to sound time step
+	real(wp) :: semimajor          ! Earth radius
+	real(wp) :: semiminor          ! Earth radius
+	real(wp) :: re                 ! Earth radius
 	
 	namelist /run/run_id,nlins,ncols,nlays,dy,dx,dtime,run_span_hr,adv_sound_ratio,toa,nlays_oro
 
@@ -45,6 +48,9 @@ module run_nml
 		toa             = 40000._wp
 		sigma           = 1.3_wp
 		nlays_oro       = int(0.66*nlays)
+		semiminor       = 6356752.314_wp
+		semimajor       = 6378137.0_wp
+		re              = (semimajor*semimajor*semiminor)**(1._wp/3._wp)
 		
         ! Open and read Namelist file.
         open(action="read", file="namelist.nml", newunit=fileunit)
