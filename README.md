@@ -7,11 +7,11 @@ RFPET is a numerical weather prediction (NWP) model. Properties:
 * Eulerian
 * (rotated) latitude-longitude grid
 * C-grid
-* using a hybrid of finite volume and finite difference methods
+* uses a hybrid of finite volume and finite difference methods
 * time stepping: two-time-level Runge-Kutta scheme, modified into a HEVI (horizontally explicit, vertically implicit) and forward-backward scheme for stability, horizontal pressure gradient extrapolated and kept constant
 * radiation: coupled to [RTE+RRTMGP](https://github.com/earth-system-radiation/rte-rrtmgp)
-* using the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
-* assigning individual mass densities to all tracers and calculating interactions using the [atmostracers](https://github.com/OpenNWP/atmostracers) library
+* uses the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
+* assigns individual mass densities to all tracers and calculates interactions using the [atmostracers](https://github.com/OpenNWP/atmostracers) library
 
 RFPET is meant to be applied at resolutions finer than 7 km. The default configuration is a 800 m resolution implementation nested into ICON-D2. Other nesting options are of course possible but require more work.
 
