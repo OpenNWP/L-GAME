@@ -12,6 +12,7 @@ module manage_rkhevi
 	use explicit_vector_tendencies, only: vector_tendencies_expl
 	use thermodynamics,             only: spec_heat_cap_diagnostics_v, gas_constant_diagnostics
 	use scalar_tendencies_expl,     only: expl_scalar_tend
+	use vertical_slice_solvers,     only: three_band_solver_ver
 
 	implicit none
 	
@@ -68,6 +69,10 @@ module manage_rkhevi
 			! 2.) Explicit component of the generalized density equations.
 			! ------------------------------------------------------------
 			call expl_scalar_tend(grid,state_new,tend,diag,bg)
+			
+			! 3.) implicit dynamic vertical solver
+			! -------------------------------
+			call three_band_solver_ver(grid)
 	
 		enddo
 		
