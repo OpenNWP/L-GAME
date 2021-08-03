@@ -10,6 +10,7 @@ module linear_combine_two_states
 	private
 	
 	public :: lin_combination
+	public :: interpolation_t
 	
 	contains
 
@@ -34,5 +35,28 @@ module linear_combine_two_states
 		state_out%theta(:,:,:)      = bg%theta(:,:,:)                   + state_out%theta_pert(:,:,:)
 	
 	end subroutine lin_combination
+	
+	subroutine interpolation_t(state_0,state_1,state_out,time_old,time_new,time_write,bg)
+	
+		! this performs an interpolation in time
+	
+		type(t_state), intent(in)    :: state_0
+		type(t_state), intent(in)    :: state_1
+		type(t_state), intent(inout) :: state_out
+		real(wp),      intent(in)    :: time_old
+		real(wp),      intent(in)    :: time_new
+		real(wp),      intent(in)    :: time_write
+		type(t_bg),    intent(in)    :: bg
+		
+		call lin_combination(state_0,state_1,state_out,1._wp-(time_write-time_old)/(time_new-time_old), &
+		(time_write-time_old)/(time_new-time_old),bg)
+	
+	end subroutine interpolation_t
 
 end module linear_combine_two_states
+
+
+
+
+
+

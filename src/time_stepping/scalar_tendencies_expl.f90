@@ -5,7 +5,7 @@ module scalar_tendencies_expl
 
 	! This module manages the calculation of the explicit component of the scalar tendencies.
 
-	use definitions, 	      only: wp,t_grid,t_state,t_diag,t_tend
+	use definitions,          only: wp,t_grid,t_state,t_diag,t_tend
 	use multiplications,      only: scalar_times_vector_scalar_h
 	use divergence_operators, only: divv_h
 

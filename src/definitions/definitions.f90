@@ -95,6 +95,10 @@ module definitions
 		real(wp), allocatable :: scalar_placeholder(:,:,:)
 		real(wp), allocatable :: u_placeholder(:,:,:)
 		real(wp), allocatable :: v_placeholder(:,:,:)
+		real(wp), allocatable :: u_10(:,:)
+		real(wp), allocatable :: v_10(:,:)
+		real(wp), allocatable :: mslp(:,:)
+		real(wp), allocatable :: t_2(:,:)
 	
 	end type t_diag
 	

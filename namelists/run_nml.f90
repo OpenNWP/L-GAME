@@ -18,13 +18,15 @@ module run_nml
 	real(wp) :: sigma              ! vertical grid stretching parameter
 	integer  :: run_span_hr        ! run span in hours
 	real     :: t_init             ! epoch time stamp of the initialization
-	character(len = 100) :: run_id ! the ID of the run
 	integer  :: adv_sound_ratio    ! ratio of advective to sound time step
 	real(wp) :: semimajor          ! Earth radius
 	real(wp) :: semiminor          ! Earth radius
 	real(wp) :: re                 ! Earth radius
+	integer  :: dt_write_min       ! output interval in minutes
+	integer  :: dt_write           ! output interval in seconds
 	
-	namelist /run/run_id,nlins,ncols,nlays,dy,dx,run_span_hr,adv_sound_ratio,toa,nlays_oro
+	namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr, &
+	adv_sound_ratio,toa,nlays_oro,dt_write_min
 
 	contains
 
@@ -40,7 +42,6 @@ module run_nml
 		dx              = 850._wp
 		run_span_hr     = 63
 		t_init          = 0._wp
-		run_id          = "ideal"
 		adv_sound_ratio = 4
 		toa             = 40000._wp
 		sigma           = 1.3_wp
@@ -48,6 +49,7 @@ module run_nml
 		semiminor       = 6356752.314_wp
 		semimajor       = 6378137.0_wp
 		re              = (semimajor*semimajor*semiminor)**(1._wp/3._wp)
+		dt_write_min    = 1
 		
         ! Open and read Namelist file.
         open(action="read", file="namelist.nml", newunit=fileunit)
@@ -57,6 +59,7 @@ module run_nml
         
 		! this calculates the time step using the CFL criterion
 		dtime           = 0.4_wp*dy/350._wp
+		dt_write        = dt_write_min*3600._wp
         
         ! checking input data for correctness
         if (mod(nlins, 2) == 0) then

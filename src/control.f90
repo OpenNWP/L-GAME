@@ -5,18 +5,18 @@ program control
 
 	! This controls the model run from the beginning to the end.
 
-	use run_nml,        only: run_nml_setup,run_span_hr,dtime, &
-	                          t_init,nlins,ncols,nlays
-	use definitions,    only: t_grid,t_state,wp,t_diag,t_bg,t_tend
-	use grid_generator, only: grid_setup
-	use io,             only: read_init
-	use manage_rkhevi,  only: rkhevi
-	use linear_combine_two_states, only: lin_combination
+	use run_nml,                   only: run_nml_setup,run_span_hr,dtime, &
+	                                     t_init,nlins,ncols,nlays,dt_write
+	use definitions,               only: t_grid,t_state,wp,t_diag,t_bg,t_tend
+	use grid_generator,            only: grid_setup
+	use io,                        only: read_init,write_output
+	use manage_rkhevi,             only: rkhevi
+	use linear_combine_two_states, only: lin_combination,interpolation_t
 	
 	implicit none
 
 	integer       :: time_step_counter
-	real(wp)      :: t_0, run_span
+	real(wp)      :: t_0,run_span,t_write
 	type(t_grid)  :: grid
 	type(t_state) :: state_old, state_new, state_write
 	type(t_diag)  :: diag
@@ -89,6 +89,10 @@ program control
 	allocate(diag%scalar_placeholder(nlins,ncols,nlays))
 	allocate(diag%u_placeholder(nlins,ncols+1,nlays))
 	allocate(diag%v_placeholder(nlins+1,ncols,nlays))
+	allocate(diag%u_10(nlins,ncols))
+	allocate(diag%v_10(nlins,ncols))
+	allocate(diag%mslp(nlins,ncols))
+	allocate(diag%t_2(nlins,ncols))
 	write(*,*) "... finished."
 
 	! firstly, the grid generator needs to be called to calculate the grid properties
@@ -102,9 +106,12 @@ program control
 	write(*,*) "Reading the initial state..."
 	call read_init(state_old)
 	write(*,*) "... initial state read."
+	
+	call write_output(state_old,diag,0,grid,bg)
 
 	! the loop over the time steps
 	t_0 = t_init
+	t_write = t_0 + dt_write
 	run_span = 3600._wp*run_span_hr
 	time_step_counter = 0
 	do while (t_0 < t_init + run_span + 300)
@@ -113,6 +120,16 @@ program control
     	
 		! this is the RKHEVI routine performing the time stepping
 		call rkhevi(state_old,state_new,tend,bg,grid,diag,time_step_counter)
+		
+		! managing the calls to the output routine
+		if (t_0 + dtime >= t_write) then
+		
+            call interpolation_t(state_old,state_new,state_write,t_0,t_0+dtime,t_write,bg)
+			call write_output(state_write,diag,int((t_write-t_0)/60._wp),grid,bg)
+		
+			t_write = t_write + dt_write
+		
+		endif
 		
         t_0 = t_0 + dtime
 		time_step_counter = time_step_counter + 1
@@ -181,6 +198,10 @@ program control
 	deallocate(diag%scalar_placeholder)
 	deallocate(diag%u_placeholder)
 	deallocate(diag%v_placeholder)
+	deallocate(diag%u_10)
+	deallocate(diag%v_10)
+	deallocate(diag%mslp)
+	deallocate(diag%t_2)
 	write(*,*) "... finished."
   
 end program control
