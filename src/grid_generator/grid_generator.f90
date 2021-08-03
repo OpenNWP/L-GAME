@@ -33,6 +33,8 @@ module grid_generator
 		real(wp) :: z_rel          ! variable for calculating the vertical grid
 		real(wp) :: z_vertical_vector_pre(nlays+1)
 		                           ! variable for calculating the vertical grid
+		real(wp) :: lower_z,upper_z,lower_length
+		                           ! variables needed for area calculations
 		
 		! setting the latitude and longitude coordinates of the scalar grid points
 		! setting the dy of the model grid
@@ -155,6 +157,48 @@ module grid_generator
 				enddo
 			enddo
 		enddo
+		
+		! setting the vertical areas in x-direction
+		do ji=1,nlins
+			do jk=1,ncols+1
+				do jl=1,nlays
+					if (jk==1) then
+						lower_z = grid%z_geo_w(ji,1,jl+1)
+						upper_z = grid%z_geo_w(ji,1,jl)
+					elseif (jk==ncols+1) then
+						lower_z = grid%z_geo_w(ji,ncols+1,jl+1)
+						upper_z = grid%z_geo_w(ji,ncols+1,jl)
+					else
+						lower_z = 0.5_wp*(grid%z_geo_w(ji,jk-1,jl+1) + grid%z_geo_w(ji,jk,jl+1))
+						upper_z = 0.5_wp*(grid%z_geo_w(ji,jk-1,jl) + grid%z_geo_w(ji,jk,jl))
+					endif
+					lower_length = dy*(re+lower_z)/re
+					grid%area_x(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
+				enddo
+			enddo
+		enddo
+		
+		! setting the vertical areas in y-direction
+		do ji=1,nlins+1
+			do jk=1,ncols
+				do jl=1,nlays
+					if (ji==1) then
+						lower_z = grid%z_geo_w(1,jk,jl+1)
+						upper_z = grid%z_geo_w(1,jk,jl)
+						lower_length = dx*cos(grid%lat_scalar(1)-dlat)*(re+lower_z)/re
+					elseif (ji==nlins+1) then
+						lower_z = grid%z_geo_w(nlins,jk,jl+1)
+						upper_z = grid%z_geo_w(nlins,jk,jl)
+						lower_length = dx*cos(grid%lat_scalar(nlins)+dlat)*(re+lower_z)/re
+					else
+						lower_z = 0.5_wp*(grid%z_geo_w(ji-1,jk,jl+1) + grid%z_geo_w(ji,jk,jl+1))
+						upper_z = 0.5_wp*(grid%z_geo_w(ji-1,jk,jl) + grid%z_geo_w(ji,jk,jl))
+						lower_length = dx*cos(0.5_wp*(grid%lat_scalar(jk-1)+grid%lat_scalar(jk)))*(re+lower_z)/re
+					endif
+					grid%area_x(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
+				enddo
+			enddo
+		enddo
 
 		! setting the volume of the grid boxes
 		do ji=1,nlins
@@ -186,10 +230,11 @@ module grid_generator
 	
 		! calculates the surface of a quadrilateral grid cell
 	
+		! input
 		! latitude at the center of the patch
 		real(wp) :: center_lat
 		! output
-		real(wp) :: patch_area ! result
+		real(wp) :: patch_area  ! the result
 		! local variables
 		real(wp) :: dy_as_angle ! mesh size in y-direction as angle
 		real(wp) :: dx_as_angle ! mesh size in x-direction as angle
@@ -200,6 +245,21 @@ module grid_generator
 		patch_area = re**2*dx_as_angle*(sin(center_lat + 0.5_wp*dy_as_angle) - sin(center_lat - 0.5_wp*dy_as_angle))
 	
 	end function patch_area
+	
+	function vertical_face_area(lower_z,upper_z,lower_length)
+	
+		! calculates the surface of a vertical face
+		! input
+		real(wp) :: lower_z            ! geometric height of the lower boundary of the face
+		real(wp) :: upper_z            ! geometric height of the upper boundary of the face
+		real(wp) :: lower_length       ! length of the lower boundary of the face
+		! output
+		real(wp) :: vertical_face_area ! the result
+		
+		vertical_face_area = 0.5_wp*lower_length*(re + upper_z + re + lower_z) &
+		/(re + lower_z)*(upper_z - lower_z)
+	
+	end function vertical_face_area
 	
 end module grid_generator
 
