@@ -92,6 +92,9 @@ module definitions
 		real(wp), allocatable :: e_kin_grad_x(:,:,:)
 		real(wp), allocatable :: e_kin_grad_y(:,:,:)
 		real(wp), allocatable :: e_kin_grad_z(:,:,:)
+		real(wp), allocatable :: scalar_placeholder(:,:,:)
+		real(wp), allocatable :: u_placeholder(:,:,:)
+		real(wp), allocatable :: v_placeholder(:,:,:)
 	
 	end type t_diag
 	

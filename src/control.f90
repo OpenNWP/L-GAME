@@ -86,6 +86,9 @@ program control
 	allocate(diag%e_kin_grad_x(nlins,ncols+1,nlays))
 	allocate(diag%e_kin_grad_y(nlins+1,ncols,nlays))
 	allocate(diag%e_kin_grad_z(nlins,ncols,nlays+1))
+	allocate(diag%scalar_placeholder(nlins,ncols,nlays))
+	allocate(diag%u_placeholder(nlins,ncols+1,nlays))
+	allocate(diag%v_placeholder(nlins+1,ncols,nlays))
 	write(*,*) "... finished."
 
 	! firstly, the grid generator needs to be called to calculate the grid properties
@@ -175,6 +178,9 @@ program control
 	deallocate(diag%e_kin_grad_x)
 	deallocate(diag%e_kin_grad_y)
 	deallocate(diag%e_kin_grad_z)
+	deallocate(diag%scalar_placeholder)
+	deallocate(diag%u_placeholder)
+	deallocate(diag%v_placeholder)
 	write(*,*) "... finished."
   
 end program control

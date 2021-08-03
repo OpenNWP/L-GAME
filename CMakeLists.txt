@@ -35,7 +35,7 @@ src/spatial_operators/averaging.f90
 src/spatial_operators/vorticities.f90
 src/spatial_operators/momentum_diff_diss.f90
 src/spatial_operators/inner_product.f90
-src/spatial_operators/divergences.f90
+src/spatial_operators/divergence_operators.f90
 src/soil_coupler/soil_coupler.f90
 src/radiation/rterrtmgp_coupler.f90
 src/ocean_coupler/ocean_coupler.f90

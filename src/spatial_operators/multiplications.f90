@@ -12,6 +12,7 @@ module multiplications
 	
 	private
 	
+	public :: scalar_times_vector_scalar_h
 	public :: scalar_times_vector
 	
 	contains

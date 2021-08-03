@@ -11,6 +11,7 @@ module manage_rkhevi
 	use pressure_gradient,          only: manage_pressure_gradient
 	use explicit_vector_tendencies, only: vector_tendencies_expl
 	use thermodynamics,             only: spec_heat_cap_diagnostics_v, gas_constant_diagnostics
+	use scalar_tendencies_expl,     only: expl_scalar_tend
 
 	implicit none
 	
@@ -64,6 +65,10 @@ module manage_rkhevi
 			state_new%wind_v(:,:,:) = state_old%wind_v(:,:,:) + delta_t_step*tend%wind_v(:,:,:)
 			! Horizontal velocity can be considered to be updated from now on.
 
+			! 2.) Explicit component of the generalized density equations.
+			! ------------------------------------------------------------
+			call expl_scalar_tend(grid,state_new,tend,diag)
+	
 		enddo
 		
 		! in this case, a large time step has been taken, which we modify into a small step here    

@@ -4,7 +4,7 @@
 module divergence_operators
 
 	use definitions, only: wp,t_grid
-	use run_nml,     only: nlins,ncols,nlays
+	use run_nml,     only: nlins,ncols,nlays,nlays_oro
 	use averaging,   only: vertical_contravariant_corr
 	
 	implicit none
@@ -43,13 +43,14 @@ module divergence_operators
 					vector_field_y(ji  ,jk  ,jl)*grid%area_y(ji  ,jk  ,jl)
 					
 					! the vertical component
-			        if (jl == 1) then
+					comp_v = 0._wp
+			        if (jl == nlays - nlays_oro - 1) then
 						contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
 						comp_v = contra_lower*grid%area_z(ji,jk,jl+1)
-					elseif (jl == nlays+1) then
+					elseif (jl == nlays) then
 						contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl  , grid)
 						comp_v = contra_upper*grid%area_z(ji,jk,jl  )
-					else
+					elseif (jl > nlays - nlays_oro - 1) then
 						contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl  ,grid)
 						contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
 						comp_v &
