@@ -3,10 +3,12 @@
 
 module explicit_vector_tendencies
 
+	! this module manages the calculation of the explicit part of the wind tendencies
+
 	use definitions,        only: t_grid,t_state,t_diag,t_tend
 	use inner_product,      only: kinetic_energy
 	use gradient_operators, only: grad
-	use run_nml,            only: nlays,ncols,nlays
+	use run_nml,            only: nlins,ncols,nlays
 
 	implicit none
 	
@@ -34,9 +36,9 @@ module explicit_vector_tendencies
 			call grad(diag%e_kin,diag%e_kin_grad_x,diag%e_kin_grad_y,diag%e_kin_grad_z,grid)
 		endif
 		
-		tend%wind_u(:,:,:) = -diag%e_kin_grad_x(:,:,:)
-		tend%wind_v(:,:,:) = -diag%e_kin_grad_y(:,:,:)
-		tend%wind_w(:,:,:) = -diag%e_kin_grad_z(:,:,:)
+		tend%wind_u(2:nlins+1,:,:)    = -diag%e_kin_grad_x(:,:,:)
+		tend%wind_v(:,2:ncols+1,:)    = -diag%e_kin_grad_y(:,:,:)
+		tend%wind_w(2:nlins+1,2:ncols+1,:) = -diag%e_kin_grad_z(:,:,:)
 	
 	end subroutine vector_tendencies_expl
 
