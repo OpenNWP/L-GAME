@@ -36,9 +36,9 @@ module explicit_vector_tendencies
 			call grad(diag%e_kin,diag%e_kin_grad_x,diag%e_kin_grad_y,diag%e_kin_grad_z,grid)
 		endif
 		
-		tend%wind_u(2:nlins+1,:,:)    = -diag%e_kin_grad_x(:,:,:)
-		tend%wind_v(:,2:ncols+1,:)    = -diag%e_kin_grad_y(:,:,:)
-		tend%wind_w(2:nlins+1,2:ncols+1,:) = -diag%e_kin_grad_z(:,:,:)
+		tend%wind_u(:,:,:)    = -diag%e_kin_grad_x(:,:,:)
+		tend%wind_v(:,:,:)    = -diag%e_kin_grad_y(:,:,:)
+		tend%wind_w(:,:,:)    = -diag%e_kin_grad_z(:,:,:)
 	
 	end subroutine vector_tendencies_expl
 

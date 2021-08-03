@@ -40,26 +40,26 @@ module grid_generator
 		! setting the dy of the model grid
 		dlat = dy/re
 		dlon = dx/re
-		lat_left_lower = -(nlins - 1)/2*dlat
-		lon_left_lower = -(ncols - 1)/2*dlon
-		do ji=1,nlins
+		lat_left_lower = -(nlins+2-1)/2*dlat
+		lon_left_lower = -(ncols+2-1)/2*dlon
+		do ji=1,nlins+2
 			grid%lat_scalar(ji) = lat_left_lower + dlat*(ji - 1)
 		enddo
-		do ji=1,ncols
+		do ji=1,ncols+2
 			grid%lon_scalar(ji) = lon_left_lower + dlon*(ji - 1)
 		enddo
 		
 		! setting up the orography of the grid
-		do ji=1,nlins
-			do jk=1,ncols
+		do ji=1,nlins+2
+			do jk=1,ncols+2
 				grid%z_geo_w(ji,jk,nlays+1) = 0._wp
 			enddo
 		enddo
 	
 		! calculating the vertical positions of the scalar points
 		! the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
-		do ji=1,nlins
-			do jk=1,ncols
+		do ji=1,nlins+2
+			do jk=1,ncols+2
 				! filling up z_vertical_vector_pre
 				do jl=1,nlays+1
 					z_rel = 1 - jl/nlays; ! z/toa
@@ -91,18 +91,18 @@ module grid_generator
 			enddo
 		enddo
 		
-		! setting the dy of the inner model grid
-		do ji=1,nlins-1
-			do jk=1,ncols
+		! setting dy
+		do ji=1,nlins+1
+			do jk=1,ncols+2
 				do jl=1,nlays
-					grid%dy(ji+1,jk,jl) = dy*(re + 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji+1,jk,jl)))/re
+					grid%dy(ji,jk,jl) = dy*(re + 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji+1,jk,jl)))/re
 				enddo
 			enddo
 		enddo
 		
-		! setting the dx of the inner model grid
-		do ji=1,nlins
-			do jk=1,ncols-1
+		! setting dx
+		do ji=1,nlins+2
+			do jk=1,ncols+1
 				do jl=1,nlays
 					grid%dx(ji,jk,jl) = dx*(re + 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji,jk+1,jl)))/re
 				enddo
@@ -126,8 +126,8 @@ module grid_generator
 		enddo
 		
 		! setting the vertical distances between the scalar data points
-		do ji=1,nlins
-			do jk=1,ncols
+		do ji=1,nlins+2
+			do jk=1,ncols+2
 				do jl=1,nlays+1
 					if (jl == 1) then
 						grid%dz(ji,jk,jl) = 2._wp*(toa - grid%z_geo_scal(ji,jk,jl))
@@ -143,7 +143,7 @@ module grid_generator
 		! setting the horizontal areas at the surface
 		do ji=1,nlins
 			do jk=1,ncols
-				grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji))*(re + grid%z_geo_w(ji,jk,nlays+1))**2 &
+				grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji+1))*(re + grid%z_geo_w(ji+1,jk+1,nlays+1))**2 &
 					/re**2
 			enddo
 		enddo
@@ -152,8 +152,8 @@ module grid_generator
 		do ji=1,nlins
 			do jk=1,ncols
 				do jl=1,nlays+1
-					grid%area_z(ji,jk,jl) = grid%area_z(ji,jk,nlays+1)*(re + grid%z_geo_w(ji,jk,jl))**2 &
-					/(re + grid%z_geo_w(ji,jk,nlays+1))**2
+					grid%area_z(ji,jk,jl) = grid%area_z(ji,jk,nlays+1)*(re + grid%z_geo_w(ji+1,jk+1,jl))**2 &
+					/(re + grid%z_geo_w(ji+1,jk+1,nlays+1))**2
 				enddo
 			enddo
 		enddo
@@ -204,8 +204,8 @@ module grid_generator
 		do ji=1,nlins
 			do jk=1,ncols
 				do jl=1,nlays
-					grid%volume(ji,jk,jl) = 1._wp/3._wp*((re + grid%z_geo_w(ji,jk,jl))**3 - (re + grid%z_geo_w(ji,jk,jl+1))**3) &
-					/(re + grid%z_geo_w(ji,jk,jl+1))**2*grid%area_z(ji,jk,jl+1)
+					grid%volume(ji,jk,jl) = 1._wp/3._wp*((re + grid%z_geo_w(ji+1,jk+1,jl))**3 - (re + grid%z_geo_w(ji+1,jk+1,jl+1))**3) &
+					/(re + grid%z_geo_w(ji+1,jk+1,jl+1))**2*grid%area_z(ji+1,jk+1,jl+1)
 				enddo
 			enddo
 		enddo
@@ -214,10 +214,10 @@ module grid_generator
 		do ji=1,nlins
 			do jk=1,ncols
 				do jl=1,nlays
-					grid%inner_product_weights(ji,jk,jl,1) = grid%area_x(ji  ,jk+1,jl  )*grid%dx(ji  ,jk+1,jl  )/(2._wp*grid%volume(ji,jk,jl))
-					grid%inner_product_weights(ji,jk,jl,2) = grid%area_y(ji+1,jk  ,jl  )*grid%dy(ji+1,jk  ,jl  )/(2._wp*grid%volume(ji,jk,jl))
-					grid%inner_product_weights(ji,jk,jl,3) = grid%area_x(ji  ,jk  ,jl  )*grid%dx(ji  ,jk  ,jl  )/(2._wp*grid%volume(ji,jk,jl))
-					grid%inner_product_weights(ji,jk,jl,4) = grid%area_y(ji  ,jk  ,jl  )*grid%dy(ji  ,jk  ,jl  )/(2._wp*grid%volume(ji,jk,jl))
+					grid%inner_product_weights(ji,jk,jl,1) = grid%area_x(ji  ,jk+1,jl  )*grid%dx(ji+1,jk+1,jl  )/(2._wp*grid%volume(ji,jk,jl))
+					grid%inner_product_weights(ji,jk,jl,2) = grid%area_y(ji+1,jk  ,jl  )*grid%dy(ji+1,jk+1,jl  )/(2._wp*grid%volume(ji,jk,jl))
+					grid%inner_product_weights(ji,jk,jl,3) = grid%area_x(ji  ,jk  ,jl  )*grid%dx(ji+1,jk  ,jl  )/(2._wp*grid%volume(ji,jk,jl))
+					grid%inner_product_weights(ji,jk,jl,4) = grid%area_y(ji  ,jk  ,jl  )*grid%dy(ji  ,jk+1,jl  )/(2._wp*grid%volume(ji,jk,jl))
 					grid%inner_product_weights(ji,jk,jl,5) = grid%area_z(ji  ,jk  ,jl  )*grid%dz(ji  ,jk  ,jl  )/(2._wp*grid%volume(ji,jk,jl))
 					grid%inner_product_weights(ji,jk,jl,6) = grid%area_z(ji  ,jk  ,jl+1)*grid%dz(ji  ,jk  ,jl+1)/(2._wp*grid%volume(ji,jk,jl))
 				enddo

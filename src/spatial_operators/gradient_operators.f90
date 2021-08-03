@@ -31,15 +31,15 @@ module gradient_operators
 
 		! calculating the x component of the gradient
 		do ji=1,nlins
-			do jk=2,ncols
-				result_field_x(ji,jk,:) = (scalar_field(ji,jk,:) - scalar_field(ji,jk-1,:))/grid%dx(ji,jk,:)
+			do jk=1,ncols-1
+				result_field_x(ji,jk,:) = (scalar_field(ji,jk+1,:) - scalar_field(ji,jk,:))/grid%dx(ji+1,jk+1,:)
 			enddo
 		enddo
 
 		! calculating the y component of the gradient
-		do ji=2,nlins
+		do ji=1,nlins-1
 			do jk=1,ncols
-				result_field_y(ji,jk,:) = (scalar_field(ji,jk,:) - scalar_field(ji-1,jk,:))/grid%dy(ji,jk,:)
+				result_field_y(ji,jk,:) = (scalar_field(ji+1,jk,:) - scalar_field(ji,jk,:))/grid%dy(ji+1,jk+1,:)
 			enddo
 		enddo
 
@@ -56,18 +56,20 @@ module gradient_operators
 
 		! calculating the vertical gradient in the inner levels
 		do jl=2,nlays
-			result_field(:,:,jl) = (scalar_field(:,:,jl-1) - scalar_field(:,:,jl))/grid%dz(:,:,jl)
+			result_field(:,:,jl) = (scalar_field(:,:,jl-1) - scalar_field(:,:,jl))/grid%dz(2:nlins-1,2:ncols-1,jl)
 		enddo
 
 		! linear extrapolation to the TOA
 		result_field(:,:,1) = result_field(:,:,2) + &
-		(result_field(:,:,2) - result_field(:,:,3))/(grid%z_geo_w(:,:,2) - grid%z_geo_w(:,:,3)) &
-		*(toa - grid%z_geo_w(:,:,2))
+		(result_field(:,:,2) - result_field(:,:,3)) &
+		/(grid%z_geo_w(2:nlins-1,2:ncols-1,2) - grid%z_geo_w(2:nlins-1,2:ncols-1,3)) &
+		*(toa - grid%z_geo_w(2:nlins-1,2:ncols-1,2))
 		
 		! linear extrapolation to the surface
 		result_field(:,:,nlays+1) = result_field(:,:,nlays) + &
-		(result_field(:,:,nlays-1) - result_field(:,:,nlays))/(grid%z_geo_w(:,:,nlays-1) - grid%z_geo_w(:,:,nlays)) &
-		*(grid%z_geo_w(:,:,nlays+1) - grid%z_geo_w(:,:,nlays))
+		(result_field(:,:,nlays-1) - result_field(:,:,nlays)) &
+		/(grid%z_geo_w(2:nlins-1,2:ncols-1,nlays-1) - grid%z_geo_w(2:nlins-1,2:ncols-1,nlays)) &
+		*(grid%z_geo_w(2:nlins-1,2:ncols-1,nlays+1) - grid%z_geo_w(2:nlins-1,2:ncols-1,nlays))
 
 	end subroutine grad_vert_cov
 	
