@@ -3,26 +3,97 @@
 
 module io
 
+	! This module handles everything dealing with IO.
+
 	use definitions,    only: t_state,wp,t_diag,t_grid,t_bg
 	use netcdf
-	use run_nml,        only: nlins,ncols,nlays
-	use thermodynamics, only: gas_constant_diagnostics
+	use run_nml,        only: nlins,ncols,nlays,scenario,p0
+	use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics
 
 	implicit none
 	
 	private
 	
-	public :: read_init
+	public :: ideal
+	public :: restart
+	public :: var_3d
+	public :: var_4d
 	public :: write_output
 	
 	contains
 	
-	subroutine read_init(state)
-		! reads the initial state of the model calculation
+	subroutine ideal(state,bg)
+	
+		! sets the initial state of the model calculation i terms if analytic functions
 		
-		type(t_state), intent(inout) :: state
+		type(t_state), intent(inout) :: state ! state to write the initial state to
+		type(t_bg),    intent(in)    :: bg    ! background state
 		
-	end subroutine read_init
+		! local variables
+		real(wp)                     :: temp(nlins,ncols,nlays) ! temperature
+			
+		select case (trim(scenario))
+		
+			case("standard")
+			
+			! This test case is the standard atmosphere.
+			
+			state%wind_u(:,:,:) = 0._wp
+			state%wind_v(:,:,:) = 0._wp
+		
+		endselect
+		
+		call unessential_init(state,temp,bg)
+		
+	end subroutine ideal
+	
+	subroutine restart(state,bg)
+	
+		! reads the initial state of the model calculation from a netcdf file
+		
+		type(t_state), intent(inout) :: state ! state to write the initial state to
+		type(t_bg),    intent(in)    :: bg    ! background state
+		
+		! local variables
+		real(wp)                     :: temp(nlins,ncols,nlays) ! temperature
+		
+		call unessential_init(state,temp,bg)
+		
+	end subroutine restart
+	
+	subroutine var_3d(state,bg)
+	
+		! three-dimensional variational data assimilation
+		
+		type(t_state), intent(inout) :: state ! state to write the initial state to
+		type(t_bg),    intent(in)    :: bg    ! background state
+		
+		! local variables
+		real(wp)                     :: temp(nlins,ncols,nlays) ! temperature
+		
+		call unessential_init(state,temp,bg)
+	
+	end subroutine var_3d
+	
+	subroutine var_4d(state,bg)
+	
+		! four-dimensional variational data assimilation
+		
+		type(t_state), intent(inout) :: state ! state to write the initial state to
+		type(t_bg),    intent(in)    :: bg    ! background state
+		
+		! local variables
+		real(wp)                     :: temp(nlins,ncols,nlays) ! temperature
+		
+		call unessential_init(state,temp,bg)
+	
+	end subroutine var_4d
+	
+	subroutine bc()
+	
+		! sets the boundary conditions
+		
+	end subroutine bc
 	
 	subroutine write_output(state,diag,time_since_init_min,grid,bg)
 		! reads out the state of the model atmosphere
@@ -81,7 +152,8 @@ module io
 	
 		! 3D temperature
 		call check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder))
-		diag%scalar_placeholder(:,:,:) =  state%theta(:,:,:)*(bg%exner(:,:,:) + state%exner_pert(:,:,:))
+		diag%scalar_placeholder(:,:,:) =  (bg%theta(:,:,:) + state%theta_pert(:,:,:)) &
+		*(bg%exner(:,:,:) + state%exner_pert(:,:,:))
 		
 		! writing the data to the output file
 		! 3D pressure
@@ -112,29 +184,26 @@ module io
 		
 	end subroutine write_output
 	
-	subroutine bc()
-		! sets the boundary conditions
+	subroutine unessential_init(state,temp,bg)
+	
+		! setting the unessential quantities of an initial state
 		
-	end subroutine bc
-	
-	subroutine oi()
-	
-		! optimum interpolation
+		type(t_state), intent(inout) :: state       ! state to work with
+		real(wp),      intent(in)    :: temp(:,:,:) ! temperature
+		type(t_bg),    intent(in)    :: bg          ! background state
 		
-	
-	end subroutine oi
-	
-	subroutine var_3d()
+		! potential temoerature density
+		state%rhotheta(:,:,:) = p0/gas_constant_diagnostics(1)*(bg%exner(:,:,:) + state%exner_pert(:,:,:)) &
+		**(spec_heat_cap_diagnostics_v(1)/gas_constant_diagnostics(1))
+		! potential temperature
+		state%theta_pert(:,:,:) = temp(:,:,:)/(bg%exner(:,:,:) + state%exner_pert(:,:,:)) - bg%theta(:,:,:)
+		! density
+		state%rho(:,:,:)      = state%rhotheta(:,:,:)/(bg%theta(:,:,:) + state%theta_pert(:,:,:))
 		
-		! three-dimensional variational data assimilation
-	
-	end subroutine var_3d
-	
-	subroutine var_4d()
-	
-		! four-dimensional variational data assimilation
-	
-	end subroutine var_4d
+		! vertical wind velocity
+		state%wind_w(:,:,:) = 0._wp
+		
+	end subroutine unessential_init
 	
 	subroutine check(i_status)
 		integer, intent(in) :: i_status

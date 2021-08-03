@@ -6,10 +6,11 @@ program control
 	! This controls the model run from the beginning to the end.
 
 	use run_nml,                   only: run_nml_setup,run_span_hr,dtime, &
-	                                     t_init,nlins,ncols,nlays,dt_write
+	                                     t_init,nlins,ncols,nlays,dt_write, &
+	                                     lrestart,lideal,l3dvar,l4dvar
 	use definitions,               only: t_grid,t_state,wp,t_diag,t_bg,t_tend
 	use grid_generator,            only: grid_setup
-	use io,                        only: read_init,write_output
+	use io,                        only: restart,ideal,var_3d,var_4d,write_output
 	use manage_rkhevi,             only: rkhevi
 	use linear_combine_two_states, only: lin_combination,interpolation_t
 	
@@ -49,20 +50,18 @@ program control
 	allocate(state_old%rho(nlins,ncols,nlays))
 	allocate(state_old%rhotheta(nlins,ncols,nlays))
 	allocate(state_old%theta_pert(nlins,ncols,nlays))
-	allocate(state_old%theta(nlins,ncols,nlays))
 	allocate(state_old%exner_pert(nlins,ncols,nlays))
 	allocate(state_old%wind_u(nlins,ncols+1,nlays))
 	allocate(state_old%wind_v(nlins+1,ncols,nlays))
-	allocate(state_old%wind_w(nlins,ncols,nlays))
+	allocate(state_old%wind_w(nlins,ncols,nlays+1))
 	! state at the new time step
 	allocate(state_new%rho(nlins,ncols,nlays))
 	allocate(state_new%rhotheta(nlins,ncols,nlays))
 	allocate(state_new%theta_pert(nlins,ncols,nlays))
-	allocate(state_new%theta(nlins,ncols,nlays))
 	allocate(state_new%exner_pert(nlins,ncols,nlays))
 	allocate(state_new%wind_u(nlins,ncols+1,nlays))
 	allocate(state_new%wind_v(nlins+1,ncols,nlays))
-	allocate(state_new%wind_w(nlins,ncols,nlays))
+	allocate(state_new%wind_w(nlins,ncols,nlays+1))
 	! state containing the tendency
 	allocate(tend%rho(nlins,ncols,nlays))
 	allocate(tend%rhotheta(nlins,ncols,nlays))
@@ -73,11 +72,10 @@ program control
 	allocate(state_write%rho(nlins,ncols,nlays))
 	allocate(state_write%rhotheta(nlins,ncols,nlays))
 	allocate(state_write%theta_pert(nlins,ncols,nlays))
-	allocate(state_write%theta(nlins,ncols,nlays))
 	allocate(state_write%exner_pert(nlins,ncols,nlays))
 	allocate(state_write%wind_u(nlins,ncols+1,nlays))
 	allocate(state_write%wind_v(nlins+1,ncols,nlays))
-	allocate(state_write%wind_w(nlins,ncols,nlays))
+	allocate(state_write%wind_w(nlins,ncols,nlays+1))
 	! background state
 	allocate(bg%theta(nlins,ncols,nlays))
 	allocate(bg%exner(nlins,ncols,nlays))
@@ -102,10 +100,18 @@ program control
 
 	call lin_combination(state_old,state_old,state_new,1._wp,0._wp,bg)
     
-	! reading the initial state
-	write(*,*) "Reading the initial state..."
-	call read_init(state_old)
-	write(*,*) "... initial state read."
+	! setting the initial state
+	write(*,*) "Setting the initial state..."
+	if (lrestart) then
+		call restart(state_old,bg)
+	elseif (lideal) then
+		call ideal(state_old,bg)
+	elseif (l3dvar) then
+		call var_3d(state_old,bg)
+	elseif (l4dvar) then
+		call var_4d(state_old,bg)
+	endif
+	write(*,*) "... initial state set."
 	
 	call write_output(state_old,diag,0,grid,bg)
 
@@ -158,7 +164,6 @@ program control
 	deallocate(state_old%rho)
 	deallocate(state_old%rhotheta)
 	deallocate(state_old%theta_pert)
-	deallocate(state_old%theta)
 	deallocate(state_old%exner_pert)
 	deallocate(state_old%wind_u)
 	deallocate(state_old%wind_v)
@@ -167,7 +172,6 @@ program control
 	deallocate(state_new%rho)
 	deallocate(state_new%rhotheta)
 	deallocate(state_new%theta_pert)
-	deallocate(state_new%theta)
 	deallocate(state_new%exner_pert)
 	deallocate(state_new%wind_u)
 	deallocate(state_new%wind_v)
@@ -182,7 +186,6 @@ program control
 	deallocate(state_write%rho)
 	deallocate(state_write%rhotheta)
 	deallocate(state_write%theta_pert)
-	deallocate(state_write%theta)
 	deallocate(state_write%exner_pert)
 	deallocate(state_write%wind_u)
 	deallocate(state_write%wind_v)

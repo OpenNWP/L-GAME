@@ -67,7 +67,7 @@ module manage_rkhevi
 
 			! 2.) Explicit component of the generalized density equations.
 			! ------------------------------------------------------------
-			call expl_scalar_tend(grid,state_new,tend,diag)
+			call expl_scalar_tend(grid,state_new,tend,diag,bg)
 	
 		enddo
 		

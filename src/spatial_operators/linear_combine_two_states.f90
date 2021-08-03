@@ -32,7 +32,6 @@ module linear_combine_two_states
 		state_out%wind_u(:,:,:)     = coeff_0*state_0%wind_u(:,:,:)     + coeff_1*state_1%wind_u(:,:,:)
 		state_out%wind_v(:,:,:)     = coeff_0*state_0%wind_v(:,:,:)     + coeff_1*state_1%wind_v(:,:,:)
 		state_out%wind_w(:,:,:)     = coeff_0*state_0%wind_w(:,:,:)     + coeff_1*state_1%wind_w(:,:,:)
-		state_out%theta(:,:,:)      = bg%theta(:,:,:)                   + state_out%theta_pert(:,:,:)
 	
 	end subroutine lin_combination
 	

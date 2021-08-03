@@ -57,7 +57,6 @@ module definitions
 		real(wp), allocatable :: rho(:,:,:)
 		real(wp), allocatable :: rhotheta(:,:,:)
 		real(wp), allocatable :: theta_pert(:,:,:)
-		real(wp), allocatable :: theta(:,:,:)
 		real(wp), allocatable :: exner_pert(:,:,:)
 		real(wp), allocatable :: wind_u(:,:,:)
 		real(wp), allocatable :: wind_v(:,:,:)

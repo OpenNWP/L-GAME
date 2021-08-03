@@ -7,26 +7,32 @@ module run_nml
 	
 	implicit none
 
-	integer  :: nlins              ! number of lines
-	integer  :: ncols              ! number of columns
-	integer  :: nlays              ! number of levels
-	integer  :: nlays_oro          ! number of levels following the orography
-	real(wp) :: dy                 ! mesh size in y direction at sea level
-	real(wp) :: dx                 ! mesh size in x direction at sea level at the equator
-	real(wp) :: dtime              ! time step
-	real(wp) :: toa                ! top of atmosphere
-	real(wp) :: sigma              ! vertical grid stretching parameter
-	integer  :: run_span_hr        ! run span in hours
-	real     :: t_init             ! epoch time stamp of the initialization
-	integer  :: adv_sound_ratio    ! ratio of advective to sound time step
-	real(wp) :: semimajor          ! Earth radius
-	real(wp) :: semiminor          ! Earth radius
-	real(wp) :: re                 ! Earth radius
-	integer  :: dt_write_min       ! output interval in minutes
-	integer  :: dt_write           ! output interval in seconds
+	integer           :: nlins              ! number of lines
+	integer           :: ncols              ! number of columns
+	integer		      :: nlays              ! number of levels
+	integer           :: nlays_oro          ! number of levels following the orography
+	real(wp)          :: dy                 ! mesh size in y direction at sea level
+	real(wp)          :: dx                 ! mesh size in x direction at sea level at the equator
+	real(wp)          :: dtime              ! time step
+	real(wp)          :: toa                ! top of atmosphere
+	real(wp)          :: sigma              ! vertical grid stretching parameter
+	integer           :: run_span_hr        ! run span in hours
+	real              :: t_init             ! epoch time stamp of the initialization
+	integer           :: adv_sound_ratio    ! ratio of advective to sound time step
+	real(wp)          :: semimajor          ! large halfaxis of the Earth
+	real(wp)          :: semiminor          ! small halfaxis of the Earth
+	real(wp)          :: re                 ! Earth radius
+	integer           :: dt_write_min       ! output interval in minutes
+	real(wp)          :: dt_write           ! output interval in seconds
+	logical           :: lrestart           ! switch for restart runs
+	logical           :: lideal             ! switch for analytic test cases
+	logical           :: l3dvar             ! switch for 3d-Var
+	logical           :: l4dvar             ! switch for 4d-Var
+	character(len=64) :: scenario           ! scenario for ideal runs
+	real(wp)          :: p0                 ! reference pressure
 	
 	namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr, &
-	adv_sound_ratio,toa,nlays_oro,dt_write_min
+	adv_sound_ratio,toa,dt_write_min,scenario
 
 	contains
 
@@ -45,11 +51,16 @@ module run_nml
 		adv_sound_ratio = 4
 		toa             = 40000._wp
 		sigma           = 1.3_wp
-		nlays_oro       = int(0.66*nlays)
 		semiminor       = 6356752.314_wp
 		semimajor       = 6378137.0_wp
 		re              = (semimajor*semimajor*semiminor)**(1._wp/3._wp)
-		dt_write_min    = 1
+		dt_write_min    = 60
+		lrestart        = .false.
+		lideal          = .true.
+		l3dvar          = .false.
+		l4dvar          = .false.
+		scenario        = "standard"
+		p0              = 100000._wp
 		
         ! Open and read Namelist file.
         open(action="read", file="namelist.nml", newunit=fileunit)
@@ -59,7 +70,10 @@ module run_nml
         
 		! this calculates the time step using the CFL criterion
 		dtime           = 0.4_wp*dy/350._wp
-		dt_write        = dt_write_min*3600._wp
+		! calculating the output timestep in seconds
+		dt_write        = 60._wp*dt_write_min
+		! number of layers following orography
+		nlays_oro       = int(0.66*nlays)
         
         ! checking input data for correctness
         if (mod(nlins, 2) == 0) then

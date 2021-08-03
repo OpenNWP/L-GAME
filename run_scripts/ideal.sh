@@ -12,10 +12,11 @@ cat > namelist.nml << EOF
 &run
 nlins=101
 ncols=101
-nlays=80
+nlays=50
 dy=800
 dx=850
 run_span_hr=1
+scenario="standard"
 /
 
 EOF
