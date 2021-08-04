@@ -51,6 +51,9 @@ program control
 	allocate(grid%area_dual_z(nlins+1,ncols+1,nlays))
 	allocate(grid%z_geo_area_dual_z(nlins+1,ncols+1,nlays))
 	allocate(grid%inner_product_weights(nlins,ncols,nlays,6))
+	allocate(grid%fvec_x(nlins+1,ncols))
+	allocate(grid%fvec_y(nlins,ncols+1))
+	allocate(grid%fvec_z(nlins+1,ncols+1))
 	! state at the old time step
 	allocate(state_old%rho(nlins+2,ncols+2,nlays))
 	allocate(state_old%rhotheta(nlins+2,ncols+2,nlays))
@@ -179,6 +182,9 @@ program control
 	deallocate(grid%area_dual_z)
 	deallocate(grid%z_geo_area_dual_z)
 	deallocate(grid%inner_product_weights)
+	deallocate(grid%fvec_x)
+	deallocate(grid%fvec_y)
+	deallocate(grid%fvec_z)
 	! state at the old time step
 	deallocate(state_old%rho)
 	deallocate(state_old%rhotheta)

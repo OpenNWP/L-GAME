@@ -52,6 +52,9 @@ module definitions
 		real(wp), allocatable :: area_dual_y(:,:,:)
 		real(wp), allocatable :: area_dual_z(:,:,:)
 		real(wp), allocatable :: z_geo_area_dual_z(:,:,:)
+		real(wp), allocatable :: fvec_x(:,:)                    ! x-component of Coriolis vector
+		real(wp), allocatable :: fvec_y(:,:)                    ! y-component of Coriolis vector
+		real(wp), allocatable :: fvec_z(:,:)                    ! z-component of Coriolis vector
 	
 	end type t_grid
 	

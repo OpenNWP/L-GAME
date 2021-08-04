@@ -30,6 +30,7 @@ module run_nml
 	logical           :: l4dvar             ! switch for 4d-Var
 	character(len=64) :: scenario           ! scenario for ideal runs
 	real(wp)          :: p0                 ! reference pressure
+	real(wp)          :: omega              ! angular frequency of Earth rotation
 	
 	namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr, &
 	adv_sound_ratio,toa,dt_write_min,scenario
@@ -61,6 +62,7 @@ module run_nml
 		l4dvar          = .false.
 		scenario        = "standard"
 		p0              = 100000._wp
+		omega           = 7.292115e-5
 		
         ! Open and read Namelist file.
         open(action="read", file="namelist.nml", newunit=fileunit)

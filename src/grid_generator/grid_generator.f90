@@ -6,7 +6,7 @@
 module grid_generator
 
 	use definitions,        only: wp,t_grid
-	use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re
+	use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re,omega
 	use gradient_operators, only: grad_hor_cov_extended
 
 	implicit none
@@ -47,6 +47,24 @@ module grid_generator
 		enddo
 		do ji=1,ncols+2
 			grid%lon_scalar(ji) = lon_left_lower + dlon*(ji - 1)
+		enddo
+		
+		! setting the Coriolis vector at the grid points
+		
+		do ji=1,nlins+1
+			do jk=1,ncols
+				grid%fvec_x(ji,jk) = 0._wp
+			enddo
+		enddo
+		do ji=1,nlins
+			do jk=1,ncols+1
+				grid%fvec_y(ji,jk) = omega
+			enddo
+		enddo
+		do ji=1,nlins+1
+			do jk=1,ncols+1
+				grid%fvec_z(ji,jk) = omega
+			enddo
 		enddo
 		
 		! setting up the orography of the grid

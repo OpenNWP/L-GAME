@@ -143,9 +143,21 @@ module vorticities
 		type(t_diag),  intent(inout) :: diag     ! diagnostic quantities
 		type(t_grid),  intent(in)    :: grid     ! model grid
 	
+		! local variables
+		integer                      :: jl       ! loop index
+	
 		! calculating the relative vorticity
 		call rel_vort(state,diag,grid)
 		! adding the Coriolis vector to the relative vorticity to obtain the absolute vorticity
+		do jl=1,nlays+1
+			diag%zeta_x(:,:,jl) = diag%zeta_x(:,:,jl) + grid%fvec_x(:,:)
+		enddo
+		do jl=1,nlays+1
+			diag%zeta_y(:,:,jl) = diag%zeta_y(:,:,jl) + grid%fvec_y(:,:)
+		enddo
+		do jl=1,nlays
+			diag%zeta_z(:,:,jl) = diag%zeta_z(:,:,jl) + grid%fvec_z(:,:)
+		enddo
 		
 		! dividing by the averaged density to obtain the "potential vorticity"
 		
