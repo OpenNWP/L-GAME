@@ -59,20 +59,6 @@ module multiplications
 		do jl=2,nlays
 			result_vector_z(:,:,jl) = 0.5_wp*(scalar_field(:,:,jl-1) + scalar_field(:,:,jl))*in_vector_z(:,:,jl)
 		enddo
-		
-		! linear extrapolation to the TOA
-		result_vector_z(:,:,1) = (scalar_field(:,:,1) +    &
-		(scalar_field(:,:,2) - scalar_field(:,:,3))        &
-		/(grid%z_geo_scal(:,:,2) - grid%z_geo_scal(:,:,3)) &
-		*(grid%z_geo_w(:,:,1) - grid%z_geo_scal(:,:,1)))   &
-		*in_vector_z(:,:,1)
-		
-		! linear extrapolation to the surface
-		result_vector_z(:,:,nlays+1) = (scalar_field(:,:,nlays) +    &
-		(scalar_field(:,:,nlays-1) - scalar_field(:,:,nlays))        &
-		/(grid%z_geo_scal(:,:,nlays-1) - grid%z_geo_scal(:,:,nlays)) &
-		*(grid%z_geo_w(:,:,nlays+1) - grid%z_geo_scal(:,:,nlays)))   &
-		*in_vector_z(:,:,nlays+1)
 	
 	end subroutine scalar_times_vector_scalar_v
 	

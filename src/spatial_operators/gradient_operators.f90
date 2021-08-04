@@ -59,18 +59,6 @@ module gradient_operators
 			result_field(:,:,jl) = (scalar_field(:,:,jl-1) - scalar_field(:,:,jl))/grid%dz(2:nlins+1,2:ncols+1,jl)
 		enddo
 
-		! linear extrapolation to the TOA
-		result_field(:,:,1) = result_field(:,:,2) + &
-		(result_field(:,:,2) - result_field(:,:,3)) &
-		/(grid%z_geo_w(2:nlins+1,2:ncols+1,2) - grid%z_geo_w(2:nlins+1,2:ncols+1,3)) &
-		*(toa - grid%z_geo_w(2:nlins+1,2:ncols+1,2))
-		
-		! linear extrapolation to the surface
-		result_field(:,:,nlays+1) = result_field(:,:,nlays) + &
-		(result_field(:,:,nlays-1) - result_field(:,:,nlays)) &
-		/(grid%z_geo_w(2:nlins+1,2:ncols+1,nlays-1) - grid%z_geo_w(2:nlins+1,2:ncols+1,nlays)) &
-		*(grid%z_geo_w(2:nlins+1,2:ncols+1,nlays+1) - grid%z_geo_w(2:nlins+1,2:ncols+1,nlays))
-
 	end subroutine grad_vert_cov
 	
 	subroutine grad_cov(scalar_field,result_field_x,result_field_y,result_field_z,grid)
