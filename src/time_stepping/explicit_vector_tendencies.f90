@@ -43,9 +43,10 @@ module explicit_vector_tendencies
 			call grad(diag%e_kin,diag%e_kin_grad_x,diag%e_kin_grad_y,diag%e_kin_grad_z,grid)
 		endif
 		
-		tend%wind_u(:,:,:) = -diag%e_kin_grad_x(:,:,:) + diag%pot_vort_tend_x(:,:,:)
-		tend%wind_v(:,:,:) = -diag%e_kin_grad_y(:,:,:) + diag%pot_vort_tend_y(:,:,:)
-		tend%wind_w(:,:,:) = -diag%e_kin_grad_z(:,:,:) + diag%pot_vort_tend_z(:,:,:)
+		! adding up the explicit wind tendencies
+		tend%wind_u(:,:,:) = -diag%e_kin_grad_x(:,:,:) + diag%pot_vort_tend_x(:,:,:) + diag%mom_diff_tend_x(:,:,:)
+		tend%wind_v(:,:,:) = -diag%e_kin_grad_y(:,:,:) + diag%pot_vort_tend_y(:,:,:) + diag%mom_diff_tend_y(:,:,:)
+		tend%wind_w(:,:,:) = -diag%e_kin_grad_z(:,:,:) + diag%pot_vort_tend_z(:,:,:) + diag%mom_diff_tend_z(:,:,:)
 	
 	end subroutine vector_tendencies_expl
 
