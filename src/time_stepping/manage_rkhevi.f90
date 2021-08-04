@@ -7,7 +7,7 @@ module manage_rkhevi
 
 	use definitions,                only: t_grid,t_state,t_diag,t_bg,wp,t_tend
 	use linear_combine_two_states,  only: lin_combination
-	use run_nml,                    only: adv_sound_ratio,dtime
+	use run_nml,                    only: adv_sound_ratio,dtime,nlins,ncols
 	use pressure_gradient,          only: manage_pressure_gradient
 	use explicit_vector_tendencies, only: vector_tendencies_expl
 	use thermodynamics,             only: spec_heat_cap_diagnostics_v, gas_constant_diagnostics
@@ -62,8 +62,8 @@ module manage_rkhevi
 			! Only the horizontal momentum is a forward tendency.
 			call vector_tendencies_expl(state_new,tend,diag,grid,slow_update_bool,rk_step,total_step_counter)
 	    	! time stepping for the horizontal momentum can be directly executed
-			state_new%wind_u(:,:,:) = state_old%wind_u(:,:,:) + delta_t_step*tend%wind_u(:,:,:)
-			state_new%wind_v(:,:,:) = state_old%wind_v(:,:,:) + delta_t_step*tend%wind_v(:,:,:)
+			state_new%wind_u(2:ncols+1,2:nlins  ,:) = state_old%wind_u(2:ncols+1,2:nlins  ,:) + delta_t_step*tend%wind_u(:,:,:)
+			state_new%wind_v(2:ncols  ,2:nlins+1,:) = state_old%wind_v(2:ncols  ,2:nlins+1,:) + delta_t_step*tend%wind_v(:,:,:)
 			! Horizontal velocity can be considered to be updated from now on.
 
 			! 2.) Explicit component of the generalized density equations.

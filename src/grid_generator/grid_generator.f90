@@ -162,16 +162,8 @@ module grid_generator
 		do ji=1,nlins
 			do jk=1,ncols+1
 				do jl=1,nlays
-					if (jk==1) then
-						lower_z = grid%z_geo_w(ji,1,jl+1)
-						upper_z = grid%z_geo_w(ji,1,jl)
-					elseif (jk==ncols+1) then
-						lower_z = grid%z_geo_w(ji,ncols+1,jl+1)
-						upper_z = grid%z_geo_w(ji,ncols+1,jl)
-					else
-						lower_z = 0.5_wp*(grid%z_geo_w(ji,jk-1,jl+1) + grid%z_geo_w(ji,jk,jl+1))
-						upper_z = 0.5_wp*(grid%z_geo_w(ji,jk-1,jl) + grid%z_geo_w(ji,jk,jl))
-					endif
+					lower_z = 0.5_wp*(grid%z_geo_w(ji+1,jk,jl+1) + grid%z_geo_w(ji+1,jk+1,jl+1))
+					upper_z = 0.5_wp*(grid%z_geo_w(ji+1,jk,jl  ) + grid%z_geo_w(ji+1,jk+1,jl  ))
 					lower_length = dy*(re+lower_z)/re
 					grid%area_x(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
 				enddo
@@ -182,20 +174,10 @@ module grid_generator
 		do ji=1,nlins+1
 			do jk=1,ncols
 				do jl=1,nlays
-					if (ji==1) then
-						lower_z = grid%z_geo_w(1,jk,jl+1)
-						upper_z = grid%z_geo_w(1,jk,jl)
-						lower_length = dx*cos(grid%lat_scalar(1)-dlat)*(re+lower_z)/re
-					elseif (ji==nlins+1) then
-						lower_z = grid%z_geo_w(nlins,jk,jl+1)
-						upper_z = grid%z_geo_w(nlins,jk,jl)
-						lower_length = dx*cos(grid%lat_scalar(nlins)+dlat)*(re+lower_z)/re
-					else
-						lower_z = 0.5_wp*(grid%z_geo_w(ji-1,jk,jl+1) + grid%z_geo_w(ji,jk,jl+1))
-						upper_z = 0.5_wp*(grid%z_geo_w(ji-1,jk,jl) + grid%z_geo_w(ji,jk,jl))
-						lower_length = dx*cos(0.5_wp*(grid%lat_scalar(jk-1)+grid%lat_scalar(jk)))*(re+lower_z)/re
-					endif
-					grid%area_x(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
+					lower_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl+1) + grid%z_geo_w(ji+1,jk+1,jl+1))
+					upper_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl  ) + grid%z_geo_w(ji+1,jk+1,jl  ))
+					lower_length = dx*cos(0.5_wp*(grid%lat_scalar(jk)+grid%lat_scalar(jk+1)))*(re+lower_z)/re
+					grid%area_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
 				enddo
 			enddo
 		enddo
@@ -205,7 +187,7 @@ module grid_generator
 			do jk=1,ncols
 				do jl=1,nlays
 					grid%volume(ji,jk,jl) = 1._wp/3._wp*((re + grid%z_geo_w(ji+1,jk+1,jl))**3 - (re + grid%z_geo_w(ji+1,jk+1,jl+1))**3) &
-					/(re + grid%z_geo_w(ji+1,jk+1,jl+1))**2*grid%area_z(ji+1,jk+1,jl+1)
+					/(re + grid%z_geo_w(ji+1,jk+1,jl+1))**2*grid%area_z(ji,jk,jl+1)
 				enddo
 			enddo
 		enddo
@@ -218,8 +200,8 @@ module grid_generator
 					grid%inner_product_weights(ji,jk,jl,2) = grid%area_y(ji+1,jk  ,jl  )*grid%dy(ji+1,jk+1,jl  )/(2._wp*grid%volume(ji,jk,jl))
 					grid%inner_product_weights(ji,jk,jl,3) = grid%area_x(ji  ,jk  ,jl  )*grid%dx(ji+1,jk  ,jl  )/(2._wp*grid%volume(ji,jk,jl))
 					grid%inner_product_weights(ji,jk,jl,4) = grid%area_y(ji  ,jk  ,jl  )*grid%dy(ji  ,jk+1,jl  )/(2._wp*grid%volume(ji,jk,jl))
-					grid%inner_product_weights(ji,jk,jl,5) = grid%area_z(ji  ,jk  ,jl  )*grid%dz(ji  ,jk  ,jl  )/(2._wp*grid%volume(ji,jk,jl))
-					grid%inner_product_weights(ji,jk,jl,6) = grid%area_z(ji  ,jk  ,jl+1)*grid%dz(ji  ,jk  ,jl+1)/(2._wp*grid%volume(ji,jk,jl))
+					grid%inner_product_weights(ji,jk,jl,5) = grid%area_z(ji  ,jk  ,jl  )*grid%dz(ji+1,jk+1,jl  )/(2._wp*grid%volume(ji,jk,jl))
+					grid%inner_product_weights(ji,jk,jl,6) = grid%area_z(ji  ,jk  ,jl+1)*grid%dz(ji+1,jk+1,jl+1)/(2._wp*grid%volume(ji,jk,jl))
 				enddo
 			enddo
 		enddo

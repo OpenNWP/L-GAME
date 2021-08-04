@@ -77,7 +77,7 @@ module averaging
 		do ji=1,nlins
 			do jk=1,ncols-1
 				do jl=1,nlays
-					result_field_x(ji+1,jk+1,jl) = result_field_x(ji+1,jk+1,jl) - &
+					result_field_x(ji,jk,jl) = result_field_x(ji,jk,jl) - &
 					grid%slope_x(ji+1,jk+1,jl)*remap_ver2hor_x(result_field_z,grid,ji,jk,jl)
 				enddo
 			enddo
@@ -87,8 +87,8 @@ module averaging
 		do ji=1,nlins-1
 			do jk=1,ncols
 				do jl=1,nlays
-					result_field_y(ji+1,jk+1,jl) = result_field_y(ji+1,jk+1,jl) - &
-					grid%slope_y(ji,jk,jl)*remap_ver2hor_y(result_field_z,grid,ji,jk,jl)
+					result_field_y(ji,jk,jl) = result_field_y(ji,jk,jl) - &
+					grid%slope_y(ji+1,jk+1,jl)*remap_ver2hor_y(result_field_z,grid,ji,jk,jl)
 				enddo
 			enddo
 		enddo
@@ -106,12 +106,12 @@ module averaging
 	
 		real(wp)                    :: remap_ver2hor_x       ! the result
 		
-	    remap_ver2hor_x = grid%inner_product_weights(ji,jk-1,jl,5)*vertical_cov(ji+1,jk  ,jl)
-	    remap_ver2hor_x = grid%inner_product_weights(ji,jk  ,jl,5)*vertical_cov(ji+1,jk+1,jl)
+	    remap_ver2hor_x = grid%inner_product_weights(ji,jk  ,jl,5)*vertical_cov(ji,jk  ,jl)
+	    remap_ver2hor_x = grid%inner_product_weights(ji,jk+1,jl,5)*vertical_cov(ji,jk+1,jl)
 		! layer below
 		if (jl < nlays) then
-			remap_ver2hor_x = grid%inner_product_weights(ji,jk-1,jl,6)*vertical_cov(ji+1,jk  ,jl+1)
-			remap_ver2hor_x = grid%inner_product_weights(ji,jk  ,jl,6)*vertical_cov(ji+1,jk+1,jl+1)
+			remap_ver2hor_x = grid%inner_product_weights(ji,jk  ,jl,6)*vertical_cov(ji,jk  ,jl+1)
+			remap_ver2hor_x = grid%inner_product_weights(ji,jk+1,jl,6)*vertical_cov(ji,jk+1,jl+1)
 		endif
 		! horizontal average
     	remap_ver2hor_x = 0.5_wp*remap_ver2hor_x
@@ -129,12 +129,12 @@ module averaging
 	
 		real(wp)                    :: remap_ver2hor_y       ! the result
 		
-	    remap_ver2hor_y = grid%inner_product_weights(ji-1,jk,jl,5)*vertical_cov(ji  ,jk+1,jl)
-	    remap_ver2hor_y = grid%inner_product_weights(ji  ,jk,jl,5)*vertical_cov(ji+1,jk+1,jl)
+	    remap_ver2hor_y = grid%inner_product_weights(ji  ,jk,jl,5)*vertical_cov(ji  ,jk,jl)
+	    remap_ver2hor_y = grid%inner_product_weights(ji+1,jk,jl,5)*vertical_cov(ji+1,jk,jl)
 		! layer below
 		if (jl < nlays) then
-			remap_ver2hor_y = grid%inner_product_weights(ji-1,jk,jl,6)*vertical_cov(ji  ,jk+1,jl+1)
-			remap_ver2hor_y = grid%inner_product_weights(ji  ,jk,jl,6)*vertical_cov(ji+1,jk+1,jl+1)
+			remap_ver2hor_y = grid%inner_product_weights(ji  ,jk,jl,6)*vertical_cov(ji  ,jk,jl+1)
+			remap_ver2hor_y = grid%inner_product_weights(ji+1,jk,jl,6)*vertical_cov(ji+1,jk,jl+1)
 		endif
 		! horizontal average
     	remap_ver2hor_y = 0.5_wp*remap_ver2hor_y

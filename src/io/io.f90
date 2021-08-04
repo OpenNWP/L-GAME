@@ -30,7 +30,7 @@ module io
 		type(t_bg),    intent(in)    :: bg    ! background state
 		
 		! local variables
-		real(wp)                     :: temp(nlins,ncols,nlays) ! temperature
+		real(wp)                     :: temp(nlins+2,ncols+2,nlays) ! temperature
 			
 		select case (trim(scenario))
 		
@@ -55,7 +55,7 @@ module io
 		type(t_bg),    intent(in)    :: bg    ! background state
 		
 		! local variables
-		real(wp)                     :: temp(nlins,ncols,nlays) ! temperature
+		real(wp)                     :: temp(nlins+2,ncols+2,nlays) ! temperature
 		
 		call unessential_init(state,temp,bg)
 		
@@ -69,7 +69,7 @@ module io
 		type(t_bg),    intent(in)    :: bg    ! background state
 		
 		! local variables
-		real(wp)                     :: temp(nlins,ncols,nlays) ! temperature
+		real(wp)                     :: temp(nlins+2,ncols+2,nlays) ! temperature
 		
 		call unessential_init(state,temp,bg)
 	
@@ -83,7 +83,7 @@ module io
 		type(t_bg),    intent(in)    :: bg    ! background state
 		
 		! local variables
-		real(wp)                     :: temp(nlins,ncols,nlays) ! temperature
+		real(wp)                     :: temp(nlins+2,ncols+2,nlays) ! temperature
 		
 		call unessential_init(state,temp,bg)
 	
@@ -128,7 +128,7 @@ module io
 		! defining the dimensions
 		call check(nf90_def_dim(ncid,"x",ncols,x_dimid))
 		call check(nf90_def_dim(ncid,"y",nlins,y_dimid))
-		call check(nf90_def_dim(ncid,"z",nlays,z_dimid))
+		call check(nf90_def_dim(ncid,"z",nlays,  z_dimid))
 
 		! setting the dimension ID arrays
 		! 2D
@@ -151,33 +151,38 @@ module io
 		call check(nf90_enddef(ncid))
 	
 		! 3D temperature
-		call check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder))
-		diag%scalar_placeholder(:,:,:) =  (bg%theta(:,:,:) + state%theta_pert(:,:,:)) &
-		*(bg%exner(:,:,:) + state%exner_pert(:,:,:))
+		call check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
+		diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) =  (bg%theta(2:nlins+1,2:ncols+1,:) &
+		+ state%theta_pert(2:nlins+1,2:ncols+1,:)) &
+		*(bg%exner(2:nlins+1,2:ncols+1,:) + state%exner_pert(2:nlins+1,2:ncols+1,:))
 		
 		! writing the data to the output file
 		! 3D pressure
-		call check(nf90_put_var(ncid,varid_p,diag%scalar_placeholder))
-		diag%scalar_placeholder(:,:,:) = state%rho(:,:,:)*gas_constant_diagnostics(1)*diag%scalar_placeholder(:,:,:)
+		call check(nf90_put_var(ncid,varid_p,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
+		diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) = state%rho(2:nlins+1,2:ncols+1,:) &
+		*gas_constant_diagnostics(1)*diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
 		
 		! 3D u wind
 		do jk=1,ncols
-			diag%scalar_placeholder(:,jk,:) = 0.5_wp*(state%wind_u(:,jk,:)+state%wind_u(:,jk+1,:))
+			diag%scalar_placeholder(2:nlins+1,jk+1,:) = 0.5_wp*(state%wind_u(2:nlins+1,jk,:)+state%wind_u(2:nlins+1,jk+1,:))
 		enddo
-		call check(nf90_put_var(ncid,varid_u,diag%scalar_placeholder))
+		call check(nf90_put_var(ncid,varid_u,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
 		
 		! 3D v wind
 		do ji=1,nlins
-			diag%scalar_placeholder(ji,:,:) = 0.5_wp*(state%wind_u(ji,:,:)+state%wind_u(ji+1,:,:))
+			diag%scalar_placeholder(ji+1,2:ncols+1,:) = 0.5_wp*(state%wind_v(ji,2:ncols+1,:)+state%wind_v(ji+1,2:ncols+1,:))
 		enddo
-		call check(nf90_put_var(ncid,varid_v,diag%scalar_placeholder))
+		call check(nf90_put_var(ncid,varid_v,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
 		
 		! 3D w wind
-		call check(nf90_put_var(ncid,varid_w,diag%scalar_placeholder))
 		do jl=1,nlays
-			upper_weight(:,:) = (grid%z_geo_scal(:,:,jl) - grid%z_geo_w(:,:,jl+1))-(grid%z_geo_w(:,:,jl) - grid%z_geo_w(:,:,jl+1))
-			diag%scalar_placeholder(:,:,jl) = upper_weight*state%wind_w(:,:,jl)+(1-upper_weight)*state%wind_w(:,:,jl+1)
+			upper_weight(:,:) = (grid%z_geo_scal(2:nlins+1,2:ncols+1,jl) -&
+			grid%z_geo_w(2:nlins+1,2:ncols+1,jl+1))-(grid%z_geo_w(2:nlins+1,2:ncols+1,jl)  &
+			- grid%z_geo_w(2:nlins+1,2:ncols+1,jl+1))
+			diag%scalar_placeholder(2:nlins+1,2:ncols+1,jl) = &
+			upper_weight*state%wind_w(2:nlins+1,2:ncols+1,jl)+(1-upper_weight)*state%wind_w(2:nlins+1,2:ncols+1,jl+1)
 		enddo
+		call check(nf90_put_var(ncid,varid_w,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
   
 		! closing the netcdf file
 		call check(nf90_close(ncid))

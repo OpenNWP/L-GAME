@@ -8,6 +8,7 @@ module scalar_tendencies_expl
 	use definitions,          only: wp,t_grid,t_state,t_diag,t_tend,t_bg
 	use multiplications,      only: scalar_times_vector_scalar_h
 	use divergence_operators, only: divv_h
+	use run_nml,              only: nlins,ncols
 
 	implicit none
 	
@@ -29,9 +30,9 @@ module scalar_tendencies_expl
 		! calculating the mass density flux
 		call scalar_times_vector_scalar_h(state%rho,state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
 		! calculating the divergence of the mass density flux
-		call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+		call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
 		
-		tend%rho(:,:,:) = diag%scalar_placeholder(:,:,:)
+		tend%rho(:,:,:) = diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
 		
 		! explicit potential temperature density integration
 		! calculating the potential temperature density flux
@@ -39,9 +40,9 @@ module scalar_tendencies_expl
 		call scalar_times_vector_scalar_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder, &
 		diag%u_placeholder,diag%v_placeholder)
 		! calculating the divergence of the potential temperature density flux
-		call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+		call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
 		
-		tend%rhotheta(:,:,:) = diag%scalar_placeholder(:,:,:)
+		tend%rhotheta(:,:,:) = diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
 	
 	end subroutine
 

@@ -34,12 +34,12 @@ module multiplications
 		result_vector_x(:,:,:) = 0._wp
 		result_vector_y(:,:,:) = 0._wp
 		
-		do jk=2,ncols
-			result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk-1,:) + scalar_field(:,jk,:))*in_vector_x(:,jk,:)
+		do jk=1,ncols+1
+			result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk,:) + scalar_field(:,jk,:))*in_vector_x(:,jk,:)
 		enddo
 		
-		do ji=2,nlins
-			result_vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji-1,:,:) + scalar_field(ji,:,:))*in_vector_y(ji,:,:)
+		do ji=1,nlins+1
+			result_vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji,:,:) + scalar_field(ji+1,:,:))*in_vector_y(ji,:,:)
 		enddo
 	
 	end subroutine scalar_times_vector_scalar_h
