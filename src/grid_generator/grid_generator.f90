@@ -181,6 +181,61 @@ module grid_generator
 				enddo
 			enddo
 		enddo
+		
+		! setting the horizontal dual areas
+		do ji=1,nlins+1
+			do jk=1,ncols+1
+				do jl=1,nlays
+					grid%area_dual_z(ji,jk,jl) = patch_area(0.5_wp*(grid%lat_scalar(ji) + grid%lat_scalar(ji+1))) &
+					*(re + 0.25_wp*(grid%z_geo_scal(ji,jk,jl)+grid%z_geo_scal(ji+1,jk,jl) &
+					+grid%z_geo_scal(ji+1,jk+1,jl)+grid%z_geo_scal(ji,jk+1,jl)))**2/re**2
+				enddo
+			enddo
+		enddo
+		
+		! setting the vertical dual areas in x-direction
+		do ji=1,nlins+1
+			do jk=1,ncols
+				do jl=1,nlays+1
+					if (jl==nlays+1) then
+						lower_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl) + grid%z_geo_w(ji+1,jk+1,jl))
+						lower_length = grid%dy(ji,jk+1,jl-1)*(re + lower_z)/ &
+						(re + 0.5_wp*(grid%z_geo_scal(ji,jk+1,jl-1) + grid%z_geo_scal(ji+1,jk+1,jl-1)))
+					else
+						lower_z = 0.5_wp*(grid%z_geo_scal(ji,jk+1,jl) + grid%z_geo_scal(ji+1,jk+1,jl))
+						lower_length = grid%dy(ji,jk+1,jl)
+					endif
+					if (jl==1) then
+						upper_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl) + grid%z_geo_w(ji+1,jk+1,jl))
+					else
+						upper_z = 0.5_wp*(grid%z_geo_scal(ji,jk+1,jl-1) + grid%z_geo_scal(ji+1,jk+1,jl-1))
+					endif
+					grid%area_dual_x(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
+				enddo
+			enddo
+		enddo
+		
+		! setting the vertical dual areas in y-direction
+		do ji=1,nlins
+			do jk=1,ncols+1
+				do jl=1,nlays+1
+					if (jl==nlays+1) then
+						lower_z = 0.5_wp*(grid%z_geo_w(ji+1,jk,jl) + grid%z_geo_w(ji+1,jk+1,jl))
+						lower_length = grid%dx(ji+1,jk,jl-1)*(re + lower_z)/ &
+						(re + 0.5_wp*(grid%z_geo_scal(ji+1,jk,jl-1) + grid%z_geo_scal(ji+1,jk+1,jl-1)))
+					else
+						lower_z = 0.5_wp*(grid%z_geo_scal(ji+1,jk,jl) + grid%z_geo_scal(ji+1,jk+1,jl))
+						lower_length = grid%dx(ji+1,jk,jl)
+					endif
+					if (jl==1) then
+						upper_z = 0.5_wp*(grid%z_geo_w(ji+1,jk,jl) + grid%z_geo_w(ji+1,jk+1,jl))
+					else
+						upper_z = 0.5_wp*(grid%z_geo_scal(ji+1,jk,jl-1) + grid%z_geo_scal(ji+1,jk+1,jl-1))
+					endif
+					grid%area_dual_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
+				enddo
+			enddo
+		enddo
 
 		! setting the volume of the grid boxes
 		do ji=1,nlins

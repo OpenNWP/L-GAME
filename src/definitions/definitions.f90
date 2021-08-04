@@ -47,6 +47,9 @@ module definitions
 		real(wp), allocatable :: slope_x(:,:,:)
 		real(wp), allocatable :: slope_y(:,:,:)
 		real(wp), allocatable :: inner_product_weights(:,:,:,:)
+		real(wp), allocatable :: area_dual_x(:,:,:)
+		real(wp), allocatable :: area_dual_y(:,:,:)
+		real(wp), allocatable :: area_dual_z(:,:,:)
 	
 	end type t_grid
 	
