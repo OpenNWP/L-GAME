@@ -7,7 +7,7 @@ module grid_generator
 
 	use definitions,        only: wp,t_grid
 	use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re
-	use gradient_operators, only: grad_hor_cov
+	use gradient_operators, only: grad_hor_cov_extended
 
 	implicit none
 	
@@ -91,26 +91,28 @@ module grid_generator
 			enddo
 		enddo
 		
-		! setting dy
-		do ji=1,nlins+1
-			do jk=1,ncols+2
-				do jl=1,nlays
-					grid%dy(ji,jk,jl) = dy*(re + 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji+1,jk,jl)))/re
-				enddo
-			enddo
-		enddo
-		
 		! setting dx
 		do ji=1,nlins+2
 			do jk=1,ncols+1
 				do jl=1,nlays
-					grid%dx(ji,jk,jl) = dx*(re + 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji,jk+1,jl)))/re
+					grid%z_geo_u(ji,jk,jl) = 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji,jk+1,jl))
+					grid%dx(ji,jk,jl) = dx*(re + grid%z_geo_u(ji,jk,jl))/re
+				enddo
+			enddo
+		enddo
+		
+		! setting dy
+		do ji=1,nlins+1
+			do jk=1,ncols+2
+				do jl=1,nlays
+					grid%z_geo_v(ji,jk,jl) = 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji+1,jk,jl))
+					grid%dy(ji,jk,jl) = dy*(re + grid%z_geo_v(ji,jk,jl))/re
 				enddo
 			enddo
 		enddo
 		
 		! calculating the coordinate slopes
-		call grad_hor_cov(grid%z_geo_scal, grid%slope_x, grid%slope_y, grid)
+		call grad_hor_cov_extended(grid%z_geo_scal, grid%slope_x, grid%slope_y, grid)
 		
 		! setting the z coordinates of the vertical vector points
 		do ji=1,nlins
@@ -186,9 +188,10 @@ module grid_generator
 		do ji=1,nlins+1
 			do jk=1,ncols+1
 				do jl=1,nlays
+					grid%z_geo_area_dual_z(ji,jk,jl) = 0.25_wp*(grid%z_geo_scal(ji,jk,jl)+grid%z_geo_scal(ji+1,jk,jl) &
+					+grid%z_geo_scal(ji+1,jk+1,jl)+grid%z_geo_scal(ji,jk+1,jl))
 					grid%area_dual_z(ji,jk,jl) = patch_area(0.5_wp*(grid%lat_scalar(ji) + grid%lat_scalar(ji+1))) &
-					*(re + 0.25_wp*(grid%z_geo_scal(ji,jk,jl)+grid%z_geo_scal(ji+1,jk,jl) &
-					+grid%z_geo_scal(ji+1,jk+1,jl)+grid%z_geo_scal(ji,jk+1,jl)))**2/re**2
+					*(re + grid%z_geo_area_dual_z(ji,jk,jl))**2/re**2
 				enddo
 			enddo
 		enddo

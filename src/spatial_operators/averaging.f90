@@ -14,6 +14,8 @@ module averaging
 	
 	public :: vertical_contravariant_corr
 	public :: hor_cov_to_con
+	public :: horizontal_covariant_x
+	public :: horizontal_covariant_y
 	
 	contains
 	
@@ -140,6 +142,50 @@ module averaging
     	remap_ver2hor_y = 0.5_wp*remap_ver2hor_y
 	
 	end function remap_ver2hor_y
+	
+	function horizontal_covariant_x(hor_comp_x,vert_comp,grid,ji,jk,jl)
+	
+		! This function calculates the horizontal covariant component of a vector field in x-direction.
+	
+		real(wp),     intent(in) :: hor_comp_x(:,:,:) ! horizontal component in x-direction of vector field to work with
+		real(wp),     intent(in) :: vert_comp(:,:,:)  ! vertical component of vector field to work with
+		type(t_grid), intent(in) :: grid              ! model grid
+		integer,      intent(in) :: ji,jk,jl         ! positional indices
+		
+		! output
+		real(wp)                 :: horizontal_covariant_x
+		
+		horizontal_covariant_x = hor_comp_x(ji,jk,jl)
+		if (jl > nlays - nlays_oro) then
+			horizontal_covariant_x = horizontal_covariant_x + &
+			! more self-consistency is not required, more accuracy would be an option however
+			grid%slope_x(ji,jk,jl)*0.25_wp*(vert_comp(ji,jk,jl)+vert_comp(ji,jk+1,jl)+ &
+			vert_comp(ji,jk,jl+1)+vert_comp(ji,jk+1,jl+1))
+		endif
+		
+	end function horizontal_covariant_x
+	
+	function horizontal_covariant_y(hor_comp_y,vert_comp,grid,ji,jk,jl)
+	
+		! This function calculates the horizontal covariant component of a vector field in y-direction.
+	
+		real(wp),     intent(in) :: hor_comp_y(:,:,:) ! horizontal component in x-direction of vector field to work with
+		real(wp),     intent(in) :: vert_comp(:,:,:)  ! vertical component of vector field to work with
+		type(t_grid), intent(in) :: grid              ! model grid
+		integer,      intent(in) :: ji,jk,jl         ! positional indices
+		
+		! output
+		real(wp)                 :: horizontal_covariant_y
+	
+		horizontal_covariant_y = hor_comp_y(ji,jk,jl)
+		if (jl > nlays - nlays_oro) then
+			horizontal_covariant_y = horizontal_covariant_y + &
+			! more self-consistency is not required, more accuracy would be an option however
+			grid%slope_y(ji,jk,jl)*0.25_wp*(vert_comp(ji,jk,jl)+vert_comp(ji+1,jk,jl)+ &
+			vert_comp(ji,jk,jl+1)+vert_comp(ji+1,jk,jl+1))
+		endif
+	
+	end function horizontal_covariant_y
 
 end module averaging
 
