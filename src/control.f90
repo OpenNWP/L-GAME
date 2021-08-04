@@ -105,9 +105,9 @@ program control
 	allocate(diag%v_10(nlins,ncols))
 	allocate(diag%mslp(nlins,ncols))
 	allocate(diag%t_2(nlins,ncols))
-	allocate(diag%zeta_x(nlins+1,ncols,nlays+1))
-	allocate(diag%zeta_y(nlins,ncols+1,nlays+1))
-	allocate(diag%zeta_z(nlins+1,ncols+1,nlays))
+	allocate(diag%z_eta_x(nlins+1,ncols,nlays+1))
+	allocate(diag%z_eta_y(nlins,ncols+1,nlays+1))
+	allocate(diag%z_eta_z(nlins+1,ncols+1,nlays))
 	write(*,*) "... finished."
 
 	! firstly, the grid generator needs to be called to calculate the grid properties
@@ -236,9 +236,9 @@ program control
 	deallocate(diag%v_10)
 	deallocate(diag%mslp)
 	deallocate(diag%t_2)
-	deallocate(diag%zeta_x)
-	deallocate(diag%zeta_y)
-	deallocate(diag%zeta_z)
+	deallocate(diag%z_eta_x)
+	deallocate(diag%z_eta_y)
+	deallocate(diag%z_eta_z)
 	write(*,*) "... finished."
   
 end program control

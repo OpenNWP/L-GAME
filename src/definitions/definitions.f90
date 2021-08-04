@@ -111,9 +111,9 @@ module definitions
 		real(wp), allocatable :: v_10(:,:)                 ! 10 m wind in y direction
 		real(wp), allocatable :: mslp(:,:)                 ! mean sea level pressure
 		real(wp), allocatable :: t_2(:,:)                  ! 2 m temperature
-		real(wp), allocatable :: zeta_x(:,:,:)             ! relative vorticity in x-direction
-		real(wp), allocatable :: zeta_y(:,:,:)             ! relative vorticity in y-direction
-		real(wp), allocatable :: zeta_z(:,:,:)             ! relative vorticity in z-direction
+		real(wp), allocatable :: z_eta_x(:,:,:)             ! relative vorticity in x-direction
+		real(wp), allocatable :: z_eta_y(:,:,:)             ! relative vorticity in y-direction
+		real(wp), allocatable :: z_eta_z(:,:,:)             ! relative vorticity in z-direction
 	
 	end type t_diag
 	
