@@ -6,7 +6,7 @@ module scalar_tendencies_expl
 	! This module manages the calculation of the explicit component of the scalar tendencies.
 
 	use definitions,          only: wp,t_grid,t_state,t_diag,t_tend,t_bg
-	use multiplications,      only: scalar_times_vector_scalar_h
+	use multiplications,      only: scalar_times_vector_h
 	use divergence_operators, only: divv_h
 	use run_nml,              only: nlins,ncols
 
@@ -28,7 +28,7 @@ module scalar_tendencies_expl
 	
 		! explicit mass density integration
 		! calculating the mass density flux
-		call scalar_times_vector_scalar_h(state%rho,state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
+		call scalar_times_vector_h(state%rho,state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
 		! calculating the divergence of the mass density flux
 		call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
 		
@@ -37,7 +37,7 @@ module scalar_tendencies_expl
 		! explicit potential temperature density integration
 		! calculating the potential temperature density flux
 		diag%scalar_placeholder(:,:,:) = bg%theta(:,:,:) + state%theta_pert(:,:,:)
-		call scalar_times_vector_scalar_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder, &
+		call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder, &
 		diag%u_placeholder,diag%v_placeholder)
 		! calculating the divergence of the potential temperature density flux
 		call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)

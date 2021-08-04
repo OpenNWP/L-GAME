@@ -86,6 +86,9 @@ program control
 	allocate(diag%e_kin_grad_x(nlins,ncols-1,nlays))
 	allocate(diag%e_kin_grad_y(nlins-1,ncols,nlays))
 	allocate(diag%e_kin_grad_z(nlins,ncols,nlays+1))
+	allocate(diag%pot_vort_tend_x(nlins,ncols-1,nlays))
+	allocate(diag%pot_vort_tend_y(nlins-1,ncols,nlays))
+	allocate(diag%pot_vort_tend_z(nlins,ncols,nlays+1))
 	allocate(diag%scalar_placeholder(nlins+2,ncols+2,nlays))
 	allocate(diag%u_placeholder(nlins+2,ncols+1,nlays))
 	allocate(diag%v_placeholder(nlins+1,ncols+2,nlays))
@@ -93,6 +96,9 @@ program control
 	allocate(diag%v_10(nlins,ncols))
 	allocate(diag%mslp(nlins,ncols))
 	allocate(diag%t_2(nlins,ncols))
+	allocate(diag%zeta_x(nlins+1,ncols,nlays+1))
+	allocate(diag%zeta_y(nlins,ncols+1,nlays+1))
+	allocate(diag%zeta_z(nlins+1,ncols+1,nlays))
 	write(*,*) "... finished."
 
 	! firstly, the grid generator needs to be called to calculate the grid properties
@@ -202,6 +208,9 @@ program control
 	deallocate(diag%e_kin_grad_x)
 	deallocate(diag%e_kin_grad_y)
 	deallocate(diag%e_kin_grad_z)
+	deallocate(diag%pot_vort_tend_x)
+	deallocate(diag%pot_vort_tend_y)
+	deallocate(diag%pot_vort_tend_z)
 	deallocate(diag%scalar_placeholder)
 	deallocate(diag%u_placeholder)
 	deallocate(diag%v_placeholder)
@@ -209,6 +218,9 @@ program control
 	deallocate(diag%v_10)
 	deallocate(diag%mslp)
 	deallocate(diag%t_2)
+	deallocate(diag%zeta_x)
+	deallocate(diag%zeta_y)
+	deallocate(diag%zeta_z)
 	write(*,*) "... finished."
   
 end program control

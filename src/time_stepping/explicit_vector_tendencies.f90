@@ -9,6 +9,8 @@ module explicit_vector_tendencies
 	use inner_product,      only: kinetic_energy
 	use gradient_operators, only: grad
 	use run_nml,            only: nlins,ncols,nlays
+	use vorticities,        only: calc_pot_vort
+	use multiplications,    only: scalar_times_vector_h
 
 	implicit none
 	
@@ -30,15 +32,20 @@ module explicit_vector_tendencies
 		
 		! momentum advection
 		if ((slow_update_bool .and. rk_step == 2) .or. total_step_counter == 0) then
+			! calculating the mass flux density
+			call scalar_times_vector_h(state%rho,state%wind_u,state%wind_v, &
+			diag%u_placeholder,diag%v_placeholder)
+			! calculating the potential vorticity
+			call calc_pot_vort(state,diag,grid)
 			! Kinetic energy is prepared for the gradient term of the Lamb transformation.
 			call kinetic_energy(state,diag,grid)
 			! taking the gradient of the kinetic energy
 			call grad(diag%e_kin,diag%e_kin_grad_x,diag%e_kin_grad_y,diag%e_kin_grad_z,grid)
 		endif
 		
-		tend%wind_u(:,:,:)    = -diag%e_kin_grad_x(:,:,:)
-		tend%wind_v(:,:,:)    = -diag%e_kin_grad_y(:,:,:)
-		tend%wind_w(:,:,:)    = -diag%e_kin_grad_z(:,:,:)
+		tend%wind_u(:,:,:) = -diag%e_kin_grad_x(:,:,:) + diag%pot_vort_tend_x(:,:,:)
+		tend%wind_v(:,:,:) = -diag%e_kin_grad_y(:,:,:) + diag%pot_vort_tend_y(:,:,:)
+		tend%wind_w(:,:,:) = -diag%e_kin_grad_z(:,:,:) + diag%pot_vort_tend_z(:,:,:)
 	
 	end subroutine vector_tendencies_expl
 

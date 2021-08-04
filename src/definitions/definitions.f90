@@ -10,7 +10,12 @@ module definitions
 	private
 	
 	public :: wp
-
+	public :: t_grid
+	public :: t_state
+	public :: t_bg
+	public :: t_diag
+	public :: t_tend
+	
 	! setting the floating point precision
 	! single precision
 	integer, parameter :: ps =  6
@@ -24,12 +29,6 @@ module definitions
 	integer, parameter :: dp = SELECTED_REAL_KIND(pd,rd) ! double precission
 	
 	integer, parameter :: wp = dp                        ! working precission
-	
-	public :: t_grid
-	public :: t_state
-	public :: t_bg
-	public :: t_diag
-	public :: t_tend
 	
 	type t_grid
 	
@@ -81,25 +80,31 @@ module definitions
 	type t_bg
 	
 		! background state
-		real(wp), allocatable :: theta(:,:,:)
-		real(wp), allocatable :: exner(:,:,:)
+		real(wp), allocatable :: theta(:,:,:)              ! potential temperature
+		real(wp), allocatable :: exner(:,:,:)              ! Exner pressure
 	
 	end type t_bg
 	
 	type t_diag
 	
 		! type containing diagnostic quantities
-		real(wp), allocatable :: e_kin(:,:,:)
-		real(wp), allocatable :: e_kin_grad_x(:,:,:)
-		real(wp), allocatable :: e_kin_grad_y(:,:,:)
-		real(wp), allocatable :: e_kin_grad_z(:,:,:)
-		real(wp), allocatable :: scalar_placeholder(:,:,:)
-		real(wp), allocatable :: u_placeholder(:,:,:)
-		real(wp), allocatable :: v_placeholder(:,:,:)
-		real(wp), allocatable :: u_10(:,:)
-		real(wp), allocatable :: v_10(:,:)
-		real(wp), allocatable :: mslp(:,:)
-		real(wp), allocatable :: t_2(:,:)
+		real(wp), allocatable :: e_kin(:,:,:)              ! specific kinetic energy
+		real(wp), allocatable :: e_kin_grad_x(:,:,:)       ! x-gradient of specific kinetic energy
+		real(wp), allocatable :: e_kin_grad_y(:,:,:)       ! y-gradient of specific kinetic energy
+		real(wp), allocatable :: e_kin_grad_z(:,:,:)       ! z-gradient of specific kinetic energy
+		real(wp), allocatable :: pot_vort_tend_x(:,:,:)    ! tendency due to the vorticity flux term in x-direction
+		real(wp), allocatable :: pot_vort_tend_y(:,:,:)    ! tendency due to the vorticity flux term in y-direction
+		real(wp), allocatable :: pot_vort_tend_z(:,:,:)    ! tendency due to the vorticity flux term in z-direction
+		real(wp), allocatable :: scalar_placeholder(:,:,:) ! placeholder for scalar fields
+		real(wp), allocatable :: u_placeholder(:,:,:)      ! placeholder for vector fields in x-direction
+		real(wp), allocatable :: v_placeholder(:,:,:)      ! placeholder for vector fields in y-direction
+		real(wp), allocatable :: u_10(:,:)                 ! 10 m wind in x direction
+		real(wp), allocatable :: v_10(:,:)                 ! 10 m wind in y direction
+		real(wp), allocatable :: mslp(:,:)                 ! mean sea level pressure
+		real(wp), allocatable :: t_2(:,:)                  ! 2 m temperature
+		real(wp), allocatable :: zeta_x(:,:,:)             ! relative vorticity in x-direction
+		real(wp), allocatable :: zeta_y(:,:,:)             ! relative vorticity in y-direction
+		real(wp), allocatable :: zeta_z(:,:,:)             ! relative vorticity in z-direction
 	
 	end type t_diag
 	
