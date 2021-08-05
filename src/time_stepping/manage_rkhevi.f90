@@ -56,8 +56,8 @@ module manage_rkhevi
 			! 1.) Explicit component of the momentum equation.
 			! ------------------------------------------------
 			! Update of the pressure gradient.
-			if (rk_step == 0) then
-				call manage_pressure_gradient()
+			if (rk_step == 1) then
+				call manage_pressure_gradient(state_new,diag,bg,grid,total_step_counter==1)
 			endif
 			! Only the horizontal momentum is a forward tendency.
 			call vector_tendencies_expl(state_new,tend,diag,grid,slow_update_bool,rk_step,total_step_counter)
