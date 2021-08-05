@@ -7,7 +7,7 @@ module io
 
 	use definitions,    only: t_state,wp,t_diag,t_grid,t_bg
 	use netcdf
-	use run_nml,        only: nlins,ncols,nlays,scenario,p0
+	use run_nml,        only: nlins,ncols,nlays,scenario,p_0
 	use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics
 
 	implicit none
@@ -198,7 +198,7 @@ module io
 		type(t_bg),    intent(in)    :: bg          ! background state
 		
 		! potential temoerature density
-		state%rhotheta(:,:,:) = p0/gas_constant_diagnostics(1)*(bg%exner(:,:,:) + state%exner_pert(:,:,:)) &
+		state%rhotheta(:,:,:) = p_0/gas_constant_diagnostics(1)*(bg%exner(:,:,:) + state%exner_pert(:,:,:)) &
 		**(spec_heat_cap_diagnostics_v(1)/gas_constant_diagnostics(1))
 		! potential temperature
 		state%theta_pert(:,:,:) = temp(:,:,:)/(bg%exner(:,:,:) + state%exner_pert(:,:,:)) - bg%theta(:,:,:)

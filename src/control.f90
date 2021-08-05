@@ -9,7 +9,7 @@ program control
 	                                     t_init,nlins,ncols,nlays,dt_write, &
 	                                     lrestart,lideal,l3dvar,l4dvar
 	use definitions,               only: t_grid,t_state,wp,t_diag,t_bg,t_tend
-	use grid_generator,            only: grid_setup
+	use grid_generator,            only: grid_setup,bg_setup
 	use io,                        only: restart,ideal,var_3d,var_4d,write_output
 	use manage_rkhevi,             only: rkhevi
 	use linear_combine_two_states, only: lin_combination,interpolation_t
@@ -115,7 +115,11 @@ program control
 	call grid_setup(grid)
 	write(*,*) "... grid set up."
 
+	! copying the old state to the new state
 	call lin_combination(state_old,state_old,state_new,1._wp,0._wp,bg)
+	
+	! setting up the background state
+	call bg_setup(grid,bg)
     
 	! setting the initial state
 	write(*,*) "Setting the initial state..."

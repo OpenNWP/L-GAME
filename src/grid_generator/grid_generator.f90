@@ -5,21 +5,24 @@
 
 module grid_generator
 
-	use definitions,        only: wp,t_grid
-	use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re,omega
+	use definitions,        only: wp,t_grid,t_bg
+	use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re,omega,p_0,gravity, &
+	                              lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard
 	use gradient_operators, only: grad_hor_cov_extended
+	use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_p
 
 	implicit none
 	
 	private
 	
 	public :: grid_setup
+	public :: bg_setup
 	
 	contains
 	
 	subroutine grid_setup(grid)
 	
-		type(t_grid), intent(inout) :: grid
+		type(t_grid), intent(inout) :: grid ! the model grid
 		! local variables
 		real(wp) :: lat_left_lower ! latitude coordinate of lower left corner
 		real(wp) :: lon_left_lower ! longitude coordinate of lower left corner
@@ -280,9 +283,49 @@ module grid_generator
 					grid%inner_product_weights(ji,jk,jl,6) = grid%area_z(ji  ,jk  ,jl+1)*grid%dz(ji+1,jk+1,jl+1)/(2._wp*grid%volume(ji,jk,jl))
 				enddo
 			enddo
-		enddo
+		enddo		
 	
 	end subroutine grid_setup
+	
+	subroutine bg_setup(grid,bg)
+	
+		! This subroutine sets up the background state.
+		type(t_grid), intent(in)    :: grid     ! the model grid
+		type(t_bg),   intent(inout) :: bg       ! the background state
+		
+		! local variables
+		integer                     :: ji,jk,jl ! index variables
+		real(wp)                    :: temperature, pressure
+		                                        ! temperature and pressure at the respective grid point
+		real(wp)                    :: b,c      ! abbreviations needed for the hydrostatic initialization routine
+		
+		! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
+		do ji=1,nlins
+			do jk=1,ncols	
+				! integrating from bottom to top
+				do jl=nlays,1,-1
+					temperature = bg_temp(grid%z_geo_scal(ji,jk,jl))
+					! lowest layer
+					if (jl == nlays) then
+						pressure    = bg_pres(grid%z_geo_scal(ji,jk,jl))
+						bg%theta(ji,jk,jl) = temperature*(pressure/p_0)**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1))
+						bg%exner(ji,jk,jl) = temperature/bg%theta(ji,jk,jl)
+					! other layers
+					else
+						! solving a quadratic equation for the Exner pressure
+						b = -0.5_wp*bg%exner(ji,jk,jl+1)/bg_temp(grid%z_geo_scal(ji,jk,jl+1)) &
+						*(temperature - bg_temp(grid%z_geo_scal(ji,jk,jl+1)) + 2.0_wp/ &
+						spec_heat_cap_diagnostics_p(1)*(geopot(grid%z_geo_scal(ji,jk,jl)) - geopot(grid%z_geo_scal(ji,jk,jl+1))))
+						c = bg%exner(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_geo_scal(ji,jk,jl+1))
+						bg%exner(ji,jk,jl) = b+sqrt(b**2+c)
+						bg%theta(ji,jk,jl) = temperature/bg%exner(ji,jk,jl)
+					endif
+				enddo
+			enddo
+		enddo
+		
+	
+	end subroutine bg_setup
 	
 	function patch_area(center_lat)
 	
@@ -318,6 +361,60 @@ module grid_generator
 		/(re + lower_z)*(upper_z - lower_z)
 	
 	end function vertical_face_area
+	
+	function bg_temp(z_height)
+	
+		! This function returns the temperature of the background state.
+		
+		real(wp), intent(in) :: z_height
+		! output
+		real(wp)             :: bg_temp
+
+		! troposphere
+		if (z_height < tropo_height) then	
+			bg_temp = surface_temp - lapse_rate*z_height
+		! constant temperature layer
+		elseif (z_height < inv_height) then
+			bg_temp = surface_temp - lapse_rate*tropo_height
+		! inversion
+		else
+			bg_temp = surface_temp - lapse_rate*tropo_height + t_grad_inv*(z_height - inv_height)
+		endif
+	
+	end function bg_temp
+
+	function bg_pres(z_height)
+	
+		! This function returns the pressure of the background state (only used in the lowest layer during the initialization).
+		
+		real(wp), intent(in) :: z_height
+		! output
+		real(wp)             :: bg_pres
+
+		if (z_height < inv_height) then	
+			bg_pres = p_0_standard*(1 - lapse_rate*z_height/surface_temp)**(gravity/(gas_constant_diagnostics(1)*lapse_rate));
+		elseif (z_height < tropo_height) then
+            bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(gas_constant_diagnostics(1)*lapse_rate)) &
+            *exp(-gravity*(z_height - tropo_height)/(gas_constant_diagnostics(1)*(surface_temp - lapse_rate*tropo_height)));
+        else
+        	write(*,*) "Argument of bg_pres is above the inversion height. This is unrealistic in the lowest layer."
+        	write(*,*) "Aborting."
+        	call exit(1)
+		endif
+	
+	end function bg_pres
+	
+	function geopot(z_height)
+	
+		! This function returns the geopotential as a function of the geometrical height.
+	
+		real(wp), intent(in) :: z_height
+		! output
+		real(wp)             :: geopot
+		
+		geopot = -gravity*re**2/(re+z_height)+gravity*re
+	
+	end function geopot
 	
 end module grid_generator
 

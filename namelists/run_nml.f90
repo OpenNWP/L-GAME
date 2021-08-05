@@ -29,8 +29,15 @@ module run_nml
 	logical           :: l3dvar             ! switch for 3d-Var
 	logical           :: l4dvar             ! switch for 4d-Var
 	character(len=64) :: scenario           ! scenario for ideal runs
-	real(wp)          :: p0                 ! reference pressure
+	real(wp)          :: p_0                ! reference pressure
 	real(wp)          :: omega              ! angular frequency of Earth rotation
+	real(wp)          :: lapse_rate         ! lapse_rate within the troposphere
+	real(wp)          :: surface_temp       ! the temperature at the surface
+	real(wp)          :: tropo_height       ! the tropopause height
+	real(wp)          :: inv_height         ! height where the temperature inversion begins
+	real(wp)          :: t_grad_inv         ! temperature gradient above the inversion
+	real(wp)          :: p_0_standard       ! reference pressure of the standard atmosphere
+	real(wp)          :: gravity            ! average surface gravity value
 	
 	namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr, &
 	adv_sound_ratio,toa,dt_write_min,scenario
@@ -61,8 +68,15 @@ module run_nml
 		l3dvar          = .false.
 		l4dvar          = .false.
 		scenario        = "standard"
-		p0              = 100000._wp
+		p_0              = 100000._wp
 		omega           = 7.292115e-5
+		lapse_rate      = 0.0065_wp
+		surface_temp    = 288.15_wp
+		tropo_height    = 12000._wp
+		inv_height      = 20000._wp
+		t_grad_inv      = 0.001_wp
+		p_0_standard    = 101325._wp
+		gravity         = 9.80616_wp
 		
         ! Open and read Namelist file.
         open(action="read", file="namelist.nml", newunit=fileunit)
