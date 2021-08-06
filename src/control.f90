@@ -133,13 +133,13 @@ program control
 	! setting the initial state
 	write(*,*) "Setting the initial state..."
 	if (lrestart) then
-		call restart(state_old,bg)
+		call restart(state_old,diag,bg,grid)
 	elseif (lideal) then
-		call ideal(state_old,bg)
+		call ideal(state_old,diag,bg,grid)
 	elseif (l3dvar) then
-		call var_3d(state_old,bg)
+		call var_3d(state_old,diag,bg,grid)
 	elseif (l4dvar) then
-		call var_4d(state_old,bg)
+		call var_4d(state_old,diag,bg,grid)
 	endif
 	write(*,*) "... initial state set."
 	

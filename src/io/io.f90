@@ -9,6 +9,7 @@ module io
 	use netcdf
 	use run_nml,        only: nlins,ncols,nlays,scenario,p_0
 	use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics
+	use grid_generator, only: bg_temp,bg_pres
 
 	implicit none
 	
@@ -22,15 +23,18 @@ module io
 	
 	contains
 	
-	subroutine ideal(state,bg)
+	subroutine ideal(state,diag,bg,grid)
 	
 		! sets the initial state of the model calculation i terms if analytic functions
 		
 		type(t_state), intent(inout) :: state ! state to write the initial state to
+		type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
 		type(t_bg),    intent(in)    :: bg    ! background state
+		type(t_grid),  intent(in)    :: grid  ! model grid
 		
 		! local variables
-		real(wp)                     :: temp(nlins+2,ncols+2,nlays) ! temperature
+		integer                      :: ji,jk,jl                           ! loop indices
+		real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
 			
 		select case (trim(scenario))
 		
@@ -40,52 +44,58 @@ module io
 			
 			state%wind_u(:,:,:) = 0._wp
 			state%wind_v(:,:,:) = 0._wp
+			
+			do ji=1,nlins+2
+				do jk=1,ncols+2
+					do jl=1,nlays
+						diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_geo_scal(ji,jk,jl))
+					enddo
+					pres_lowest_layer(ji,jk) = bg_pres(grid%z_geo_scal(ji,jk,nlays))
+				enddo
+			enddo
 		
 		endselect
 		
-		call unessential_init(state,temp,bg)
+		call unessential_init(state,diag,bg,grid)
 		
 	end subroutine ideal
 	
-	subroutine restart(state,bg)
+	subroutine restart(state,diag,bg,grid)
 	
 		! reads the initial state of the model calculation from a netcdf file
 		
 		type(t_state), intent(inout) :: state ! state to write the initial state to
+		type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
 		type(t_bg),    intent(in)    :: bg    ! background state
+		type(t_grid),  intent(in)    :: grid  ! model grid
 		
-		! local variables
-		real(wp)                     :: temp(nlins+2,ncols+2,nlays) ! temperature
-		
-		call unessential_init(state,temp,bg)
+		call unessential_init(state,diag,bg,grid)
 		
 	end subroutine restart
 	
-	subroutine var_3d(state,bg)
+	subroutine var_3d(state,diag,bg,grid)
 	
 		! three-dimensional variational data assimilation
 		
 		type(t_state), intent(inout) :: state ! state to write the initial state to
+		type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
 		type(t_bg),    intent(in)    :: bg    ! background state
+		type(t_grid),  intent(in)    :: grid  ! model grid
 		
-		! local variables
-		real(wp)                     :: temp(nlins+2,ncols+2,nlays) ! temperature
-		
-		call unessential_init(state,temp,bg)
+		call unessential_init(state,diag,bg,grid)
 	
 	end subroutine var_3d
 	
-	subroutine var_4d(state,bg)
+	subroutine var_4d(state,diag,bg,grid)
 	
 		! four-dimensional variational data assimilation
 		
 		type(t_state), intent(inout) :: state ! state to write the initial state to
+		type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
 		type(t_bg),    intent(in)    :: bg    ! background state
+		type(t_grid),  intent(in)    :: grid  ! model grid
 		
-		! local variables
-		real(wp)                     :: temp(nlins+2,ncols+2,nlays) ! temperature
-		
-		call unessential_init(state,temp,bg)
+		call unessential_init(state,diag,bg,grid)
 	
 	end subroutine var_4d
 	
@@ -189,19 +199,24 @@ module io
 		
 	end subroutine write_output
 	
-	subroutine unessential_init(state,temp,bg)
+	subroutine unessential_init(state,diag,bg,grid)
 	
 		! setting the unessential quantities of an initial state
 		
-		type(t_state), intent(inout) :: state       ! state to work with
-		real(wp),      intent(in)    :: temp(:,:,:) ! temperature
-		type(t_bg),    intent(in)    :: bg          ! background state
+		type(t_state), intent(inout) :: state ! state to work with
+		type(t_diag),  intent(in)    :: diag  ! diagnostic quantities
+		type(t_bg),    intent(in)    :: bg    ! background state
+		type(t_grid),  intent(in)    :: grid  ! model grid
+		
+		! substracting the background state
+		state%theta_pert(:,:,:) = state%theta_pert(:,:,:) - bg%theta(:,:,:)
+		state%exner_pert(:,:,:) = state%exner_pert(:,:,:) - bg%exner(:,:,:)
 		
 		! potential temoerature density
 		state%rhotheta(:,:,:) = p_0/gas_constant_diagnostics(1)*(bg%exner(:,:,:) + state%exner_pert(:,:,:)) &
 		**(spec_heat_cap_diagnostics_v(1)/gas_constant_diagnostics(1))
 		! potential temperature
-		state%theta_pert(:,:,:) = temp(:,:,:)/(bg%exner(:,:,:) + state%exner_pert(:,:,:)) - bg%theta(:,:,:)
+		state%theta_pert(:,:,:) = diag%scalar_placeholder(:,:,:)/(bg%exner(:,:,:) + state%exner_pert(:,:,:)) - bg%theta(:,:,:)
 		! density
 		state%rho(:,:,:)      = state%rhotheta(:,:,:)/(bg%theta(:,:,:) + state%theta_pert(:,:,:))
 		

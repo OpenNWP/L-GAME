@@ -17,6 +17,8 @@ module grid_generator
 	
 	public :: grid_setup
 	public :: bg_setup
+	public :: bg_temp
+	public :: bg_pres
 	
 	contains
 	
@@ -300,8 +302,8 @@ module grid_generator
 		real(wp)                    :: b,c      ! abbreviations needed for the hydrostatic initialization routine
 		
 		! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
-		do ji=1,nlins
-			do jk=1,ncols	
+		do ji=1,nlins+2
+			do jk=1,ncols+2	
 				! integrating from bottom to top
 				do jl=nlays,1,-1
 					temperature = bg_temp(grid%z_geo_scal(ji,jk,jl))
