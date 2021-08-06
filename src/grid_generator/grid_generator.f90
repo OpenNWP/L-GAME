@@ -19,6 +19,7 @@ module grid_generator
 	public :: bg_setup
 	public :: bg_temp
 	public :: bg_pres
+	public :: geopot
 	
 	contains
 	
@@ -325,7 +326,6 @@ module grid_generator
 				enddo
 			enddo
 		enddo
-		
 	
 	end subroutine bg_setup
 	

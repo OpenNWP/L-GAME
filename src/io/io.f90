@@ -8,8 +8,8 @@ module io
 	use definitions,    only: t_state,wp,t_diag,t_grid,t_bg
 	use netcdf
 	use run_nml,        only: nlins,ncols,nlays,scenario,p_0
-	use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics
-	use grid_generator, only: bg_temp,bg_pres
+	use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics,spec_heat_cap_diagnostics_p
+	use grid_generator, only: bg_temp,bg_pres,geopot
 
 	implicit none
 	
@@ -56,7 +56,7 @@ module io
 		
 		endselect
 		
-		call unessential_init(state,diag,bg,grid)
+		call unessential_init(state,diag,bg,grid,pres_lowest_layer)
 		
 	end subroutine ideal
 	
@@ -69,7 +69,10 @@ module io
 		type(t_bg),    intent(in)    :: bg    ! background state
 		type(t_grid),  intent(in)    :: grid  ! model grid
 		
-		call unessential_init(state,diag,bg,grid)
+		! local variables
+		real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
+		
+		call unessential_init(state,diag,bg,grid,pres_lowest_layer)
 		
 	end subroutine restart
 	
@@ -82,7 +85,10 @@ module io
 		type(t_bg),    intent(in)    :: bg    ! background state
 		type(t_grid),  intent(in)    :: grid  ! model grid
 		
-		call unessential_init(state,diag,bg,grid)
+		! local variables
+		real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
+		
+		call unessential_init(state,diag,bg,grid,pres_lowest_layer)
 	
 	end subroutine var_3d
 	
@@ -95,7 +101,10 @@ module io
 		type(t_bg),    intent(in)    :: bg    ! background state
 		type(t_grid),  intent(in)    :: grid  ! model grid
 		
-		call unessential_init(state,diag,bg,grid)
+		! local variables
+		real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
+		
+		call unessential_init(state,diag,bg,grid,pres_lowest_layer)
 	
 	end subroutine var_4d
 	
@@ -199,14 +208,46 @@ module io
 		
 	end subroutine write_output
 	
-	subroutine unessential_init(state,diag,bg,grid)
+	subroutine unessential_init(state,diag,bg,grid,pres_lowest_layer)
 	
 		! setting the unessential quantities of an initial state
 		
-		type(t_state), intent(inout) :: state ! state to work with
-		type(t_diag),  intent(in)    :: diag  ! diagnostic quantities
-		type(t_bg),    intent(in)    :: bg    ! background state
-		type(t_grid),  intent(in)    :: grid  ! model grid
+		type(t_state), intent(inout) :: state                  ! state to work with
+		type(t_diag),  intent(in)    :: diag                   ! diagnostic quantities
+		type(t_bg),    intent(in)    :: bg                     ! background state
+		type(t_grid),  intent(in)    :: grid                   ! model grid
+		real(wp),      intent(in)    :: pres_lowest_layer(:,:) ! pressure in the lowest layer
+		
+		! local variables
+		integer                      :: ji,jk,jl          ! loop indices
+		real(wp)                     :: b,c               ! abbreviations needed for the hydrostatic initialization routine
+		real(wp)                     :: temperature       ! single temperature value
+		real(wp)                     :: pressure          ! single pressure value
+		
+		! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
+		do ji=1,nlins+2
+			do jk=1,ncols+2	
+				! integrating from bottom to top
+				do jl=nlays,1,-1
+					temperature = diag%scalar_placeholder(ji,jk,jl)
+					! lowest layer
+					if (jl == nlays) then
+						pressure    = pres_lowest_layer(ji,jk)
+						state%theta_pert(ji,jk,jl) = temperature*(pressure/p_0)**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1))
+						state%exner_pert(ji,jk,jl) = temperature/state%theta_pert(ji,jk,jl)
+					! other layers
+					else
+						! solving a quadratic equation for the Exner pressure
+						b = -0.5_wp*state%exner_pert(ji,jk,jl+1)/bg_temp(grid%z_geo_scal(ji,jk,jl+1)) &
+						*(temperature - bg_temp(grid%z_geo_scal(ji,jk,jl+1)) + 2.0_wp/ &
+						spec_heat_cap_diagnostics_p(1)*(geopot(grid%z_geo_scal(ji,jk,jl)) - geopot(grid%z_geo_scal(ji,jk,jl+1))))
+						c = state%exner_pert(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_geo_scal(ji,jk,jl+1))
+						state%exner_pert(ji,jk,jl) = b+sqrt(b**2+c)
+						state%theta_pert(ji,jk,jl) = temperature/state%exner_pert(ji,jk,jl)
+					endif
+				enddo
+			enddo
+		enddo
 		
 		! substracting the background state
 		state%theta_pert(:,:,:) = state%theta_pert(:,:,:) - bg%theta(:,:,:)
