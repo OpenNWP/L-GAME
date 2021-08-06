@@ -13,6 +13,7 @@ module explicit_vector_tendencies
 	use multiplications,    only: scalar_times_vector_h
 	use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_v, &
 	                              spec_heat_cap_diagnostics_p
+	use vorticity_flux,     only: calc_vorticity_flux_term
 
 	implicit none
 	
@@ -46,6 +47,9 @@ module explicit_vector_tendencies
 			diag%u_placeholder,diag%v_placeholder)
 			! calculating the potential vorticity
 			call calc_pot_vort(state,diag,grid)
+			! calculating the potential voritcity flux term
+			call calc_vorticity_flux_term(diag,grid)
+			
 			! Kinetic energy is prepared for the gradient term of the Lamb transformation.
 			call kinetic_energy(state,diag,grid)
 			! taking the gradient of the kinetic energy
