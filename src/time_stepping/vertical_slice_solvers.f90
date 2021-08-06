@@ -30,12 +30,21 @@ module vertical_slice_solvers
 		real(wp)                 :: e_vector(nlays-2) ! needed for the vertical solver
 		real(wp)                 :: r_vector(nlays-1) ! needed for the vertical solver
 		real(wp)                 :: solution(nlays-1) ! covariant mass flux density at the interfaces (solution)
-		integer                  :: ji,jk             ! loop variables
+		integer                  :: ji,jk,jl          ! loop variables
 
 		do ji=1,nlins
 			do jk=1,ncols
 			
+				! filling up the coefficient vectors
+				do jl=1,nlays-1
+					d_vector(jl) = 0._wp
+					r_vector(jl) = 0._wp
+				enddo
 				
+				do jl=1,nlays-2
+					c_vector(jl) = 0._wp
+					e_vector(jl) = 0._wp
+				enddo
 		
 				call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution,nlays-1)
 				
