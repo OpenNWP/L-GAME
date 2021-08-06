@@ -21,19 +21,26 @@ module vertical_slice_solvers
 		type(t_grid), intent(in) :: grid  ! model grid
 
 		! local variables
-		integer                  :: ji,jk ! loop variables
+		real(wp)                 :: c_vector(nlays-2) ! needed for the vertical solver
+		real(wp)                 :: d_vector(nlays-1) ! needed for the vertical solver
+		real(wp)                 :: e_vector(nlays-2) ! needed for the vertical solver
+		real(wp)                 :: r_vector(nlays-1) ! needed for the vertical solver
+		real(wp)                 :: solution(nlays-1) ! covariant mass flux density at the interfaces (solution)
+		integer                  :: ji,jk             ! loop variables
 
 		do ji=1,nlins
 			do jk=1,ncols
-		
+			
 				
+		
+				call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution,nlays-1)
 				
 			enddo
 		enddo
 
 	end subroutine three_band_solver_ver
 	
-	subroutine thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector)
+	subroutine thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,solution_length)
 
 		! This subroutine solves a system of linear equations with a three-band matrix.
 		
@@ -41,12 +48,13 @@ module vertical_slice_solvers
 		real(wp), intent(in)    :: d_vector(:)
 		real(wp), intent(in)    :: e_vector(:)
 		real(wp), intent(in)    :: r_vector(:)
-		real(wp), intent(inout) :: solution_vector(:)
+		real(wp), intent(inout) :: solution_vector(:) ! vector containing the solution
+		integer,  intent(in)    :: solution_length    ! length of the solution vector
 		
 		! local variables
-		real(wp) :: e_prime_vector(nlays-1) ! help vector for solving the matrix equation
-		real(wp) :: r_prime_vector(nlays)   ! help vector for solving the matrix equation
-		integer  :: jl                      ! loop index
+		real(wp) :: e_prime_vector(solution_length-1) ! help vector for solving the matrix equation
+		real(wp) :: r_prime_vector(solution_length)   ! help vector for solving the matrix equation
+		integer  :: jl                                ! loop index
 		
 		! downward sweep (matrix)
 		if (d_vector(1) /= 0._wp) then
@@ -54,7 +62,7 @@ module vertical_slice_solvers
 		else
 			e_prime_vector(1) = 0._wp
 		endif
-		do jl=2,nlays-1
+		do jl=2,solution_length-1
 			if (d_vector(jl) - e_prime_vector(jl-1)*c_vector(jl-1) /= 0) then
 				e_prime_vector(jl) = e_vector(jl)/(d_vector(jl) - e_prime_vector(jl-1)*c_vector(jl-1))
 			else
@@ -67,7 +75,7 @@ module vertical_slice_solvers
 		else
 			r_prime_vector(1) = 0._wp
 		endif
-		do jl=2,nlays
+		do jl=2,solution_length
 			if (d_vector(jl) - e_prime_vector(jl-1)*c_vector(jl-1) /= 0) then
 				r_prime_vector(jl) = (r_vector(jl) - r_prime_vector(jl-1)*c_vector(jl-1))/(d_vector(jl) - e_prime_vector(jl-1)*c_vector(jl-1))
 			else
@@ -76,8 +84,8 @@ module vertical_slice_solvers
 		enddo
 		
 		! upward sweep (final solution)
-		solution_vector(nlays) = r_prime_vector(nlays)
-		do jl=nlays-1,1,-1
+		solution_vector(solution_length) = r_prime_vector(solution_length)
+		do jl=solution_length-1,1,-1
 			solution_vector(jl) = r_prime_vector(jl) - e_prime_vector(jl)*solution_vector(jl+1)
 		enddo
 	
