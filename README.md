@@ -27,9 +27,15 @@ Everything is easy and quick to install. These instructions are for Ubuntu.
 
 ### Installation
 
+
 ```
 git clone https://github.com/opennwp/rfpet.git
 ./setup_directories.sh
+```
+
+Modify the file CMakeLists.txt (read the comments). If you want to use radiation, modify rrtmgp_coefficients_file_sw and rrtmgp_coefficients_file_lw in the file src/radiation/rterrtmgp_coupler.f90.
+
+```
 ./compile.sh
 ```
 
