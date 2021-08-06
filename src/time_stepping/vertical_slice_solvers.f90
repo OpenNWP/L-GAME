@@ -5,8 +5,9 @@ module vertical_slice_solvers
 
 	! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
-	use run_nml,     only: nlins,ncols,wp,nlays
-	use definitions, only: t_grid
+	use run_nml,        only: nlins,ncols,wp,nlays
+	use definitions,    only: t_grid,t_state,t_bg
+	use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics
 
 	implicit none
 	
@@ -16,9 +17,12 @@ module vertical_slice_solvers
 	
 	contains
 	
-	subroutine three_band_solver_ver(grid)
+	subroutine three_band_solver_ver(state_old,state_new,bg,grid)
 
-		type(t_grid), intent(in) :: grid  ! model grid
+		type(t_state), intent(in)    :: state_old ! state at the old timestep
+		type(t_state), intent(inout) :: state_new ! state at the new timestep
+		type(t_bg),    intent(in)    :: bg        ! background fields
+		type(t_grid),  intent(in)    :: grid      ! model grid
 
 		! local variables
 		real(wp)                 :: c_vector(nlays-2) ! needed for the vertical solver
@@ -37,6 +41,10 @@ module vertical_slice_solvers
 				
 			enddo
 		enddo
+		
+		! self-consistent rhotheta-evolution
+		state_new%rhotheta(:,:,:) = state_old%rhotheta(:,:,:)*(1 + spec_heat_cap_diagnostics_v(1)/gas_constant_diagnostics(1)* &
+		((bg%exner(:,:,:) + state_new%exner_pert(:,:,:))/(bg%exner(:,:,:) + state_old%exner_pert(:,:,:)) - 1))
 
 	end subroutine three_band_solver_ver
 	

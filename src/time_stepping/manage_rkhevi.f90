@@ -72,7 +72,7 @@ module manage_rkhevi
 			
 			! 3.) implicit dynamic vertical solver
 			! -------------------------------
-			call three_band_solver_ver(grid)
+			call three_band_solver_ver(state_old,state_new,bg,grid)
 	
 		enddo
 		
