@@ -118,6 +118,7 @@ module definitions
 		real(wp), allocatable :: scalar_placeholder(:,:,:) ! placeholder for scalar fields
 		real(wp), allocatable :: u_placeholder(:,:,:)      ! placeholder for vector fields in x-direction
 		real(wp), allocatable :: v_placeholder(:,:,:)      ! placeholder for vector fields in y-direction
+		real(wp), allocatable :: w_placeholder(:,:,:)      ! placeholder for vector fields in z-direction
 		real(wp), allocatable :: u_10(:,:)                 ! 10 m wind in x direction
 		real(wp), allocatable :: v_10(:,:)                 ! 10 m wind in y direction
 		real(wp), allocatable :: mslp(:,:)                 ! mean sea level pressure

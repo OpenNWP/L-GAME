@@ -59,6 +59,30 @@ module vorticity_flux
 		enddo
 		
 		! horizontal velocity tendency due to horizontal vorticity and vertical wind
+		! u
+		do ji=1,nlins
+			do jk=1,ncols-1
+				do jl=1,nlays
+					diag%pot_vort_tend_x(ji,jk,jl) = diag%pot_vort_tend_x(ji,jk,jl) &
+					- 0.5_wp*grid%inner_product_weights(ji,jk  ,jl,5)*diag%w_placeholder(ji,jk  ,jl  )*diag%z_eta_y(ji,jk+1,jl  ) &
+					- 0.5_wp*grid%inner_product_weights(ji,jk  ,jl,6)*diag%w_placeholder(ji,jk  ,jl+1)*diag%z_eta_y(ji,jk+1,jl+1) &
+					- 0.5_wp*grid%inner_product_weights(ji,jk+1,jl,5)*diag%w_placeholder(ji,jk+1,jl  )*diag%z_eta_y(ji,jk+1,jl  ) &
+					- 0.5_wp*grid%inner_product_weights(ji,jk+1,jl,6)*diag%w_placeholder(ji,jk+1,jl+1)*diag%z_eta_y(ji,jk+1,jl+1)
+				enddo
+			enddo
+		enddo
+		! v
+		do ji=1,nlins-1
+			do jk=1,ncols
+				do jl=1,nlays
+					diag%pot_vort_tend_y(ji,jk,jl) = diag%pot_vort_tend_y(ji,jk,jl) &
+					+ 0.5_wp*grid%inner_product_weights(ji  ,jk,jl,5)*diag%w_placeholder(ji  ,jk,jl  )*diag%z_eta_x(ji+1,jk,jl  ) &
+					+ 0.5_wp*grid%inner_product_weights(ji  ,jk,jl,6)*diag%w_placeholder(ji  ,jk,jl+1)*diag%z_eta_x(ji+1,jk,jl+1) &
+					+ 0.5_wp*grid%inner_product_weights(ji+1,jk,jl,5)*diag%w_placeholder(ji+1,jk,jl  )*diag%z_eta_x(ji+1,jk,jl  ) &
+					+ 0.5_wp*grid%inner_product_weights(ji+1,jk,jl,6)*diag%w_placeholder(ji+1,jk,jl+1)*diag%z_eta_x(ji+1,jk,jl+1)
+				enddo
+			enddo
+		enddo
 		
 		! vertical velocity tendency due to horizontal vorticity and horizontal wind
 		do ji = 1,nlins

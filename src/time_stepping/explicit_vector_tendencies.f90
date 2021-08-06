@@ -10,7 +10,7 @@ module explicit_vector_tendencies
 	use gradient_operators, only: grad
 	use run_nml,            only: nlins,ncols,nlays
 	use vorticities,        only: calc_pot_vort
-	use multiplications,    only: scalar_times_vector_h
+	use multiplications,    only: scalar_times_vector
 	use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_v, &
 	                              spec_heat_cap_diagnostics_p
 	use vorticity_flux,     only: calc_vorticity_flux_term
@@ -43,8 +43,8 @@ module explicit_vector_tendencies
 		! momentum advection
 		if ((slow_update_bool .and. rk_step == 2) .or. total_step_counter == 0) then
 			! calculating the mass flux density
-			call scalar_times_vector_h(state%rho,state%wind_u,state%wind_v, &
-			diag%u_placeholder,diag%v_placeholder)
+			call scalar_times_vector(state%rho,state%wind_u,state%wind_v,state%wind_w, &
+			diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
 			! calculating the potential vorticity
 			call calc_pot_vort(state,diag,grid)
 			! calculating the potential voritcity flux term
