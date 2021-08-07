@@ -38,6 +38,7 @@ module run_nml
 	real(wp)          :: t_grad_inv         ! temperature gradient above the inversion
 	real(wp)          :: p_0_standard       ! reference pressure of the standard atmosphere
 	real(wp)          :: gravity            ! average surface gravity value
+	logical           :: llinear            ! switch to turn momentum advection on or off
 	
 	namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr, &
 	adv_sound_ratio,toa,dt_write_min,scenario
@@ -77,6 +78,7 @@ module run_nml
 		t_grad_inv      = 0.001_wp
 		p_0_standard    = 101325._wp
 		gravity         = 9.80616_wp
+		llinear         = .false.
 		
         ! Open and read Namelist file.
         open(action="read", file="namelist.nml", newunit=fileunit)

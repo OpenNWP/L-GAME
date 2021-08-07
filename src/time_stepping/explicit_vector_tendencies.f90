@@ -8,7 +8,7 @@ module explicit_vector_tendencies
 	use definitions,        only: t_grid,t_state,t_diag,t_tend,wp
 	use inner_product,      only: kinetic_energy
 	use gradient_operators, only: grad
-	use run_nml,            only: nlins,ncols,nlays
+	use run_nml,            only: nlins,ncols,nlays,llinear
 	use vorticities,        only: calc_pot_vort
 	use multiplications,    only: scalar_times_vector
 	use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_v, &
@@ -41,7 +41,7 @@ module explicit_vector_tendencies
 		new_hor_pgrad_sound_weight = 1._wp - old_hor_pgrad_sound_weight
 		
 		! momentum advection
-		if ((slow_update_bool .and. rk_step == 2) .or. total_step_counter == 0) then
+		if (((slow_update_bool .and. rk_step == 2) .or. total_step_counter == 0) .and. .not. llinear) then
 			! calculating the mass flux density
 			call scalar_times_vector(state%rho,state%wind_u,state%wind_v,state%wind_w, &
 			diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
