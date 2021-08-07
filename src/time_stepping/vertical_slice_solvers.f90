@@ -111,9 +111,6 @@ module vertical_slice_solvers
 			enddo
 		enddo
 		
-		! self-consistent rhotheta-evolution
-		state_new%rhotheta(:,:,:) = state_old%rhotheta(:,:,:)*(1 + spec_heat_cap_diagnostics_v(1)/gas_constant_diagnostics(1)* &
-		((bg%exner(:,:,:) + state_new%exner_pert(:,:,:))/(bg%exner(:,:,:) + state_old%exner_pert(:,:,:)) - 1))
 		! potential temperature perturbation at the new time step
 		state_new%theta_pert(:,:,:) = state_new%rhotheta(:,:,:)/state_new%rho(:,:,:) - bg%theta(:,:,:)
 
