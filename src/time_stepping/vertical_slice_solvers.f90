@@ -5,8 +5,8 @@ module vertical_slice_solvers
 
 	! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
-	use run_nml,        only: nlins,ncols,wp,nlays
-	use definitions,    only: t_grid,t_state,t_bg
+	use run_nml,        only: nlins,ncols,wp,nlays,dtime
+	use definitions,    only: t_grid,t_state,t_bg,t_tend
 	use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics
 
 	implicit none
@@ -17,23 +17,38 @@ module vertical_slice_solvers
 	
 	contains
 	
-	subroutine three_band_solver_ver(state_old,state_new,bg,grid)
+	subroutine three_band_solver_ver(state_old,state_new,tend,bg,grid)
 
 		type(t_state), intent(in)    :: state_old ! state at the old timestep
 		type(t_state), intent(inout) :: state_new ! state at the new timestep
+		type(t_tend),  intent(in)    :: tend      ! explicit tendencies
 		type(t_bg),    intent(in)    :: bg        ! background fields
 		type(t_grid),  intent(in)    :: grid      ! model grid
 
 		! local variables
-		real(wp)                 :: c_vector(nlays-2) ! needed for the vertical solver
-		real(wp)                 :: d_vector(nlays-1) ! needed for the vertical solver
-		real(wp)                 :: e_vector(nlays-2) ! needed for the vertical solver
-		real(wp)                 :: r_vector(nlays-1) ! needed for the vertical solver
-		real(wp)                 :: solution(nlays-1) ! covariant mass flux density at the interfaces (solution)
-		integer                  :: ji,jk,jl          ! loop variables
+		real(wp)                 :: c_vector(nlays-2)      ! needed for the vertical solver
+		real(wp)                 :: d_vector(nlays-1)      ! needed for the vertical solver
+		real(wp)                 :: e_vector(nlays-2)      ! needed for the vertical solver
+		real(wp)                 :: r_vector(nlays-1)      ! needed for the vertical solver
+		real(wp)                 :: solution(nlays-1)      ! covariant mass flux density at the interfaces (solution)
+		real(wp)                 :: rho_expl(nlays)        ! explicit mass density
+		real(wp)                 :: rho_int_old(nlays-1)   ! explicit mass density
+		integer                  :: ji,jk,jl               ! loop variables
+		real(wp)                 :: rho_int_new            ! new density interface value
 
 		do ji=1,nlins
 			do jk=1,ncols
+			
+				! explicit quantities
+				do jl=1,nlays
+					! explicit density
+					rho_expl(jl) = state_new%rho(ji+1,jk+1,jl) + dtime*tend%rho(ji,jk,jl)
+				enddo
+				
+				! interface values
+				do jl=1,nlays-1
+					rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl)+state_old%rho(ji+1,jk+1,jl+1))
+				enddo
 			
 				! filling up the coefficient vectors
 				do jl=1,nlays-1
@@ -48,12 +63,30 @@ module vertical_slice_solvers
 		
 				call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution,nlays-1)
 				
+				! results
+				! density
+				do jl=2,nlays-1
+					state_new%rho(ji+1,jk+1,jl) = rho_expl(jl) + dtime*(-solution(jl-1)+solution(jl))
+				enddo
+				! uppermost layer
+				state_new%rho(ji+1,jk+1,1    ) = rho_expl(1    ) + dtime*solution(1      )
+				! lowest layer
+				state_new%rho(ji+1,jk+1,nlays) = rho_expl(nlays) - dtime*solution(nlays-1)
+				! vertical velocity
+				do jl=2,nlays
+					rho_int_new = 0.5_wp*(state_new%rho(ji+1,jk+1,jl-1)+state_new%rho(ji+1,jk+1,jl))
+					state_new%wind_w(ji+1,jk+1,jl)  = (2._wp*solution(jl-1)/grid%area_z(ji,jk,jl) &
+					- rho_int_new*state_old%wind_w(ji+1,jk+1,jl))/rho_int_old(jl-1)
+				enddo
+				
 			enddo
 		enddo
 		
 		! self-consistent rhotheta-evolution
 		state_new%rhotheta(:,:,:) = state_old%rhotheta(:,:,:)*(1 + spec_heat_cap_diagnostics_v(1)/gas_constant_diagnostics(1)* &
 		((bg%exner(:,:,:) + state_new%exner_pert(:,:,:))/(bg%exner(:,:,:) + state_old%exner_pert(:,:,:)) - 1))
+		! potential temperature perturbation at the new time step
+		state_new%theta_pert(:,:,:) = state_new%rhotheta(:,:,:)/state_new%rho(:,:,:) - bg%theta(:,:,:)
 
 	end subroutine three_band_solver_ver
 	
