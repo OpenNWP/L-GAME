@@ -2,7 +2,6 @@
 
 RFPET is a numerical weather prediction (NWP) model. It is the application of the theory behind [GAME](https://github.com/opennwp/game) to a regional quadrilateral grid. Properties:
 
-* regional
 * non-hydrostatic
 * Eulerian
 * (rotated) latitude-longitude grid
