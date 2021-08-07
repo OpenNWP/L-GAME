@@ -170,7 +170,7 @@ module grid_generator
 		! setting the horizontal areas at the surface
 		do ji=1,nlins
 			do jk=1,ncols
-				grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji+1),dx,dy)*(re + grid%z_geo_w(ji+1,jk+1,nlays+1))**2 &
+				grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji+1),dlon,dlat)*(re + grid%z_geo_w(ji+1,jk+1,nlays+1))**2 &
 					/re**2
 			enddo
 		enddo
@@ -215,7 +215,7 @@ module grid_generator
 				do jl=1,nlays
 					grid%z_geo_area_dual_z(ji,jk,jl) = 0.25_wp*(grid%z_geo_scal(ji,jk,jl)+grid%z_geo_scal(ji+1,jk,jl) &
 					+grid%z_geo_scal(ji+1,jk+1,jl)+grid%z_geo_scal(ji,jk+1,jl))
-					grid%area_dual_z(ji,jk,jl) = patch_area(0.5_wp*(grid%lat_scalar(ji) + grid%lat_scalar(ji+1)),dx,dy) &
+					grid%area_dual_z(ji,jk,jl) = patch_area(0.5_wp*(grid%lat_scalar(ji) + grid%lat_scalar(ji+1)),dlon,dlat) &
 					*(re + grid%z_geo_area_dual_z(ji,jk,jl))**2/re**2
 				enddo
 			enddo
@@ -293,11 +293,11 @@ module grid_generator
 		! u
 		do ji=1,nlins
 			do jk=1,ncols-1
-				base_area = patch_area(grid%lat_scalar(ji+1),dx,dy)
+				base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
 				grid%trsk_weights_u(ji,jk,1) = 0.5_wp - 0._wp/base_area
 				grid%trsk_weights_u(ji,jk,2) = 0.5_wp - 0._wp/base_area
 				grid%trsk_weights_u(ji,jk,3) = 0.5_wp - 0._wp/base_area
-				base_area = patch_area(grid%lat_scalar(ji+1),dx,dy)
+				base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
 				grid%trsk_weights_u(ji,jk,4) = 0.5_wp - 0._wp/base_area
 				grid%trsk_weights_u(ji,jk,5) = 0.5_wp - 0._wp/base_area
 				grid%trsk_weights_u(ji,jk,6) = 0.5_wp - 0._wp/base_area
@@ -306,10 +306,10 @@ module grid_generator
 		! v
 		do ji=1,nlins-1
 			do jk=1,ncols
-				base_area = patch_area(grid%lat_scalar(ji+1),dx,dy)
+				base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
 				grid%trsk_weights_v(ji,jk,1) = 0.5_wp - 0._wp/base_area
 				grid%trsk_weights_v(ji,jk,2) = -grid%trsk_weights_v(ji,jk,1)
-				base_area = patch_area(grid%lat_scalar(ji+2),dx,dy)
+				base_area = patch_area(grid%lat_scalar(ji+2),dlon,dlat)
 				grid%trsk_weights_v(ji,jk,3) = 0.5_wp - 0._wp/base_area
 				grid%trsk_weights_v(ji,jk,4) = -grid%trsk_weights_v(ji,jk,3)
 			enddo
@@ -356,22 +356,16 @@ module grid_generator
 	
 	end subroutine bg_setup
 	
-	function patch_area(center_lat,dx_local,dy_local)
+	function patch_area(center_lat,dx_as_angle,dy_as_angle)
 	
-		! calculates the surface of a quadrilateral grid cell
+		! calculates the area of a quadrilateral grid cell
 	
 		! input
-		real(wp) :: center_lat ! latitude at the center of the patch
-		real(wp) :: dx_local   ! delta x in m
-		real(wp) :: dy_local   ! delta y in m
+		real(wp) :: center_lat  ! latitude at the center of the patch
+		real(wp) :: dx_as_angle ! delta x as angle
+		real(wp) :: dy_as_angle ! delta y as angle
 		! output
 		real(wp) :: patch_area  ! the result
-		! local variables
-		real(wp) :: dy_as_angle ! mesh size in y-direction as angle
-		real(wp) :: dx_as_angle ! mesh size in x-direction as angle
-	
-		dx_as_angle = dx_local/re
-		dy_as_angle = dy_local/re
 	
 		patch_area = re**2*dx_as_angle*(sin(center_lat + 0.5_wp*dy_as_angle) - sin(center_lat - 0.5_wp*dy_as_angle))
 	
