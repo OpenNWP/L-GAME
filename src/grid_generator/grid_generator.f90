@@ -31,7 +31,7 @@ module grid_generator
 		real(wp) :: lon_left_lower ! longitude coordinate of lower left corner
 		real(wp) :: dlat           ! mesh size in y direction as angle
 		real(wp) :: dlon           ! mesh size in x direction as angle
-		integer  :: ji, jk, jl     ! loop indices
+		integer  :: ji,jk,jl       ! loop indices
 		real(wp) :: max_oro        ! variable for orography check
 		real(wp) :: A              ! variable for calculating the vertical grid
 		real(wp) :: B              ! variable for calculating the vertical grid
@@ -294,10 +294,13 @@ module grid_generator
 		do ji=1,nlins
 			do jk=1,ncols-1
 				base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
-				grid%trsk_weights_u(ji,jk,1) = 0.5_wp - 0._wp/base_area
-				grid%trsk_weights_u(ji,jk,2) = 0.5_wp - 0._wp/base_area
-				grid%trsk_weights_u(ji,jk,3) = 0.5_wp - 0._wp/base_area
-				base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
+				grid%trsk_weights_u(ji,jk,1) = (0.5_wp - patch_area(grid%lat_scalar(ji+1)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area) &
+				*dx*cos(0.5_wp*(grid%lat_scalar(ji+1)+grid%lat_scalar(ji+2)))/(dx*cos(grid%lat_scalar(ji+1)))
+				grid%trsk_weights_u(ji,jk,2) = -(0.5_wp - patch_area(grid%lat_scalar(ji+1)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area) &
+				*dy/(dx*cos(grid%lat_scalar(ji+1)))
+				grid%trsk_weights_u(ji,jk,3) = -(0.5_wp - (patch_area(grid%lat_scalar(ji+1)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
+				+patch_area(grid%lat_scalar(ji+1)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat))/base_area) &
+				*dx*cos(0.5_wp*(grid%lat_scalar(ji  )+grid%lat_scalar(ji+1)))/(dx*cos(grid%lat_scalar(ji+1)))
 				grid%trsk_weights_u(ji,jk,4) = grid%trsk_weights_u(ji,jk,3)
 				grid%trsk_weights_u(ji,jk,5) = -grid%trsk_weights_u(ji,jk,2)
 				grid%trsk_weights_u(ji,jk,6) = grid%trsk_weights_u(ji,jk,1)
