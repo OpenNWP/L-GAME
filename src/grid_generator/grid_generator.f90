@@ -307,10 +307,10 @@ module grid_generator
 		do ji=1,nlins-1
 			do jk=1,ncols
 				base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
-				grid%trsk_weights_v(ji,jk,1) = 0.5_wp - 0._wp/base_area
+				grid%trsk_weights_v(ji,jk,1) = 0.5_wp - patch_area(grid%lat_scalar(ji+1)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area
 				grid%trsk_weights_v(ji,jk,2) = -grid%trsk_weights_v(ji,jk,1)
 				base_area = patch_area(grid%lat_scalar(ji+2),dlon,dlat)
-				grid%trsk_weights_v(ji,jk,3) = 0.5_wp - 0._wp/base_area
+				grid%trsk_weights_v(ji,jk,3) = -(0.5_wp - patch_area(grid%lat_scalar(ji+2)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
 				grid%trsk_weights_v(ji,jk,4) = -grid%trsk_weights_v(ji,jk,3)
 			enddo
 		enddo
