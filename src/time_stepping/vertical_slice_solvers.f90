@@ -60,13 +60,13 @@ module vertical_slice_solvers
 					rho_expl(jl) = state_new%rho(ji+1,jk+1,jl) + dtime*tend%rho(ji,jk,jl)
 					! explicit potential temperature density
 					rhotheta_expl(jl) = state_new%rhotheta(ji+1,jk+1,jl) + dtime*tend%rhotheta(ji,jk,jl)
-					! old time step partial derivatives of rhoxtheta and Pi
+					! old time step partial derivatives of rho*theta and Pi
 					alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2
 					beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)
 					gamma_old(jl) = gas_constant_diagnostics(1)/(spec_heat_cap_diagnostics_v(1)*state_old%rho(ji+1,jk+1,jl)) &
 					*(gas_constant_diagnostics(1)*state_old%rhotheta(ji+1,jk+1,jl)/p_0) &
 					**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_v(1))
-					! new time step partial derivatives of rhoxtheta and Pi
+					! new time step partial derivatives of rho*theta and Pi
 					alpha_new(jl) = -state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl)**2
 					beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl)
 					gamma_new(jl) = gas_constant_diagnostics(1)/(spec_heat_cap_diagnostics_v(1)*state_new%rho(ji+1,jk+1,jl)) &
