@@ -5,7 +5,7 @@ module vertical_slice_solvers
 
 	! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
-	use run_nml,        only: nlins,ncols,wp,nlays,dtime
+	use run_nml,        only: nlins,ncols,wp,nlays,dtime,p_0
 	use definitions,    only: t_grid,t_state,t_bg,t_tend
 	use thermodynamics, only: spec_heat_cap_diagnostics_v,spec_heat_cap_diagnostics_p,gas_constant_diagnostics
 
@@ -56,10 +56,22 @@ module vertical_slice_solvers
 				do jl=1,nlays
 					! explicit density
 					rho_expl(jl) = state_new%rho(ji+1,jk+1,jl) + dtime*tend%rho(ji,jk,jl)
-					! interpolation of partial derivatives
-					alpha (jl) = (1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl)
-					beta  (jl) = (1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl)
-					gammaa(jl) = (1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl)
+					! old time step partial derivatives of rhoxtheta and Pi
+					alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2
+					beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)
+					gamma_old(jl) = gas_constant_diagnostics(1)/(spec_heat_cap_diagnostics_v(1)*state_old%rho(ji+1,jk+1,jl)) &
+					*(gas_constant_diagnostics(1)*state_old%rhotheta(ji+1,jk+1,jl)/p_0) &
+					**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_v(1))
+					! new time step partial derivatives of rhoxtheta and Pi
+					alpha_new(jl) = -state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl)**2
+					beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl)
+					gamma_new(jl) = gas_constant_diagnostics(1)/(spec_heat_cap_diagnostics_v(1)*state_new%rho(ji+1,jk+1,jl)) &
+					*(gas_constant_diagnostics(1)*state_new%rhotheta(ji+1,jk+1,jl)/p_0) &
+					**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_v(1))
+					! interpolation of partial derivatives of rhoxtheta and Pi
+					alpha (jl) = ((1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
+					beta  (jl) = ((1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
+					gammaa(jl) = ((1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
 				enddo
 				
 				! interface values

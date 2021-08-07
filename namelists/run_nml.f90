@@ -69,7 +69,7 @@ module run_nml
 		l3dvar          = .false.
 		l4dvar          = .false.
 		scenario        = "standard"
-		p_0              = 100000._wp
+		p_0             = 100000._wp
 		omega           = 7.292115e-5
 		lapse_rate      = 0.0065_wp
 		surface_temp    = 288.15_wp
