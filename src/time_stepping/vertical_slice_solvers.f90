@@ -116,6 +116,11 @@ module vertical_slice_solvers
 					state_new%wind_w(ji+1,jk+1,jl)  = (2._wp*solution(jl-1)/grid%area_z(ji,jk,jl) &
 					- rho_int_new*state_old%wind_w(ji+1,jk+1,jl))/rho_int_old(jl-1)
 				enddo
+				! Exner pressure
+				do jl=1,nlays
+					state_new%exner_pert(ji+1,jk+1,jl) = state_old%exner_pert(ji+1,jk+1,jl) + &
+					gammaa(jl)*(state_new%rhotheta(ji+1,jk+1,jl)-state_old%rhotheta(ji+1,jk+1,jl))
+				enddo
 				
 			enddo
 		enddo
