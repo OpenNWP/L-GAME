@@ -26,25 +26,27 @@ module vertical_slice_solvers
 		type(t_grid),  intent(in)    :: grid      ! model grid
 
 		! local variables
-		real(wp)                 :: c_vector(nlays-2)      ! needed for the vertical solver
-		real(wp)                 :: d_vector(nlays-1)      ! needed for the vertical solver
-		real(wp)                 :: e_vector(nlays-2)      ! needed for the vertical solver
-		real(wp)                 :: r_vector(nlays-1)      ! needed for the vertical solver
-		real(wp)                 :: solution(nlays-1)      ! covariant mass flux density at the interfaces (solution)
-		real(wp)                 :: rho_expl(nlays)        ! explicit mass density
-		real(wp)                 :: rho_int_old(nlays-1)   ! explicit mass density
-		integer                  :: ji,jk,jl               ! loop variables
-		real(wp)                 :: rho_int_new            ! new density interface value
-		real(wp)                 :: alpha_old(nlays)       ! alpha at the old time step
-		real(wp)                 :: beta_old(nlays)        ! beta at the old time step
-		real(wp)                 :: gamma_old(nlays)       ! gamma at the old time step
-		real(wp)                 :: alpha_new(nlays)       ! alpha at the new time step
-		real(wp)                 :: beta_new(nlays)        ! beta at the new time step
-		real(wp)                 :: gamma_new(nlays)       ! gamma at the new time step
-		real(wp)                 :: alpha(nlays)           ! alpha
-		real(wp)                 :: beta(nlays)            ! beta
-		real(wp)                 :: gammaa(nlays)          ! gamma
-		real(wp)                 :: impl_weight            ! implicit weight
+		real(wp)                 :: c_vector(nlays-2)       ! needed for the vertical solver
+		real(wp)                 :: d_vector(nlays-1)       ! needed for the vertical solver
+		real(wp)                 :: e_vector(nlays-2)       ! needed for the vertical solver
+		real(wp)                 :: r_vector(nlays-1)       ! needed for the vertical solver
+		real(wp)                 :: solution(nlays-1)       ! covariant mass flux density at the interfaces (solution)
+		real(wp)                 :: rho_expl(nlays)         ! explicit mass density
+		real(wp)                 :: rhotheta_expl(nlays)    ! explicit potential temperature density
+		real(wp)                 :: rho_int_old(nlays-1)    ! old interface mass density
+		real(wp)                 :: theta_int_expl(nlays-1) ! explicit potential temperature interface values
+		integer                  :: ji,jk,jl                ! loop variables
+		real(wp)                 :: rho_int_new             ! new density interface value
+		real(wp)                 :: alpha_old(nlays)        ! alpha at the old time step
+		real(wp)                 :: beta_old(nlays)         ! beta at the old time step
+		real(wp)                 :: gamma_old(nlays)        ! gamma at the old time step
+		real(wp)                 :: alpha_new(nlays)        ! alpha at the new time step
+		real(wp)                 :: beta_new(nlays)         ! beta at the new time step
+		real(wp)                 :: gamma_new(nlays)        ! gamma at the new time step
+		real(wp)                 :: alpha(nlays)            ! alpha
+		real(wp)                 :: beta(nlays)             ! beta
+		real(wp)                 :: gammaa(nlays)           ! gamma
+		real(wp)                 :: impl_weight             ! implicit weight
 
 		! setting the implicit weight
 		impl_weight = spec_heat_cap_diagnostics_v(1)/spec_heat_cap_diagnostics_p(1)
@@ -56,6 +58,8 @@ module vertical_slice_solvers
 				do jl=1,nlays
 					! explicit density
 					rho_expl(jl) = state_new%rho(ji+1,jk+1,jl) + dtime*tend%rho(ji,jk,jl)
+					! explicit potential temperature density
+					rhotheta_expl(jl) = state_new%rhotheta(ji+1,jk+1,jl) + dtime*tend%rhotheta(ji,jk,jl)
 					! old time step partial derivatives of rhoxtheta and Pi
 					alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2
 					beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)
@@ -77,6 +81,7 @@ module vertical_slice_solvers
 				! interface values
 				do jl=1,nlays-1
 					rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl)+state_old%rho(ji+1,jk+1,jl+1))
+					theta_int_expl(jl) = 0.5_wp*(rhotheta_expl(jl)/rho_expl(jl)+rhotheta_expl(jl+1)/rho_expl(jl+1))
 				enddo
 			
 				! filling up the coefficient vectors
@@ -93,14 +98,18 @@ module vertical_slice_solvers
 				call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution,nlays-1)
 				
 				! results
-				! density
+				! density, potential temperature density
 				do jl=2,nlays-1
 					state_new%rho(ji+1,jk+1,jl) = rho_expl(jl) + dtime*(-solution(jl-1)+solution(jl))
+					state_new%rhotheta(ji+1,jk+1,jl) = rho_theta_expl(jl) + &
+					dtime*(-theta_int_expl(jl-1)*solution(jl-1)+theta_int_expl(jl)*solution(jl))
 				enddo
 				! uppermost layer
-				state_new%rho(ji+1,jk+1,1    ) = rho_expl(1    ) + dtime*solution(1      )
+				state_new%rho(ji+1,jk+1,1) = rho_expl(1) + dtime*solution(1)
+				state_new%rhotheta(ji+1,jk+1,1) = rho_theta_expl(1) + dtime*theta_int_expl(1)*solution(1)
 				! lowest layer
 				state_new%rho(ji+1,jk+1,nlays) = rho_expl(nlays) - dtime*solution(nlays-1)
+				state_new%rhotheta(ji+1,jk+1,nlays) = rho_theta_expl(nlays) - dtime*theta_int_expl(nlays-1)*solution(nlays-1)
 				! vertical velocity
 				do jl=2,nlays
 					rho_int_new = 0.5_wp*(state_new%rho(ji+1,jk+1,jl-1)+state_new%rho(ji+1,jk+1,jl))
