@@ -7,7 +7,7 @@ module vertical_slice_solvers
 
 	use run_nml,        only: nlins,ncols,wp,nlays,dtime
 	use definitions,    only: t_grid,t_state,t_bg,t_tend
-	use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics
+	use thermodynamics, only: spec_heat_cap_diagnostics_v,spec_heat_cap_diagnostics_p,gas_constant_diagnostics
 
 	implicit none
 	
@@ -35,6 +35,19 @@ module vertical_slice_solvers
 		real(wp)                 :: rho_int_old(nlays-1)   ! explicit mass density
 		integer                  :: ji,jk,jl               ! loop variables
 		real(wp)                 :: rho_int_new            ! new density interface value
+		real(wp)                 :: alpha_old(nlays)       ! alpha at the old time step
+		real(wp)                 :: beta_old(nlays)        ! beta at the old time step
+		real(wp)                 :: gamma_old(nlays)       ! gamma at the old time step
+		real(wp)                 :: alpha_new(nlays)       ! alpha at the new time step
+		real(wp)                 :: beta_new(nlays)        ! beta at the new time step
+		real(wp)                 :: gamma_new(nlays)       ! gamma at the new time step
+		real(wp)                 :: alpha(nlays)           ! alpha
+		real(wp)                 :: beta(nlays)            ! beta
+		real(wp)                 :: gammaa(nlays)          ! gamma
+		real(wp)                 :: impl_weight            ! implicit weight
+
+		! setting the implicit weight
+		impl_weight = spec_heat_cap_diagnostics_v(1)/spec_heat_cap_diagnostics_p(1)
 
 		do ji=1,nlins
 			do jk=1,ncols
@@ -43,6 +56,10 @@ module vertical_slice_solvers
 				do jl=1,nlays
 					! explicit density
 					rho_expl(jl) = state_new%rho(ji+1,jk+1,jl) + dtime*tend%rho(ji,jk,jl)
+					! interpolation of partial derivatives
+					alpha (jl) = (1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl)
+					beta  (jl) = (1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl)
+					gammaa(jl) = (1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl)
 				enddo
 				
 				! interface values
