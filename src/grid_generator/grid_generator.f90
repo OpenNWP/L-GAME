@@ -298,9 +298,9 @@ module grid_generator
 				grid%trsk_weights_u(ji,jk,2) = 0.5_wp - 0._wp/base_area
 				grid%trsk_weights_u(ji,jk,3) = 0.5_wp - 0._wp/base_area
 				base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
-				grid%trsk_weights_u(ji,jk,4) = 0.5_wp - 0._wp/base_area
-				grid%trsk_weights_u(ji,jk,5) = 0.5_wp - 0._wp/base_area
-				grid%trsk_weights_u(ji,jk,6) = 0.5_wp - 0._wp/base_area
+				grid%trsk_weights_u(ji,jk,4) = grid%trsk_weights_u(ji,jk,3)
+				grid%trsk_weights_u(ji,jk,5) = -grid%trsk_weights_u(ji,jk,2)
+				grid%trsk_weights_u(ji,jk,6) = grid%trsk_weights_u(ji,jk,1)
 			enddo
 		enddo
 		! v
