@@ -33,7 +33,10 @@ module vertical_slice_solvers
 		real(wp)                 :: solution(nlays-1)       ! covariant mass flux density at the interfaces (solution)
 		real(wp)                 :: rho_expl(nlays)         ! explicit mass density
 		real(wp)                 :: rhotheta_expl(nlays)    ! explicit potential temperature density
+		real(wp)                 :: theta_pert_expl(nlays)  ! explicit potential temperature perturbation
+		real(wp)                 :: exner_pert_expl(nlays)  ! explicit Exner pressure perturbation
 		real(wp)                 :: rho_int_old(nlays-1)    ! old interface mass density
+		real(wp)                 :: rho_int_expl(nlays-1)   ! explicit interface mass density
 		real(wp)                 :: theta_int_expl(nlays-1) ! explicit potential temperature interface values
 		integer                  :: ji,jk,jl                ! loop variables
 		real(wp)                 :: rho_int_new             ! new density interface value
@@ -74,18 +77,30 @@ module vertical_slice_solvers
 					alpha (jl) = ((1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
 					beta  (jl) = ((1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
 					gammaa(jl) = (1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl)
+					! explicit potential temperature perturbation
+					theta_pert_expl(jl) = state_old%theta_pert(ji+1,jk+1,jl) + dtime*tend%rhotheta(ji,jk,jl)
+					! explicit Exner pressure perturbation
+					exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + gammaa(jl)*dtime*tend%rhotheta(ji,jk,jl)
 				enddo
 				
 				! interface values
 				do jl=1,nlays-1
 					rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl)+state_old%rho(ji+1,jk+1,jl+1))
 					theta_int_expl(jl) = 0.5_wp*(rhotheta_expl(jl)/rho_expl(jl)+rhotheta_expl(jl+1)/rho_expl(jl+1))
+					rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
 				enddo
 			
 				! filling up the coefficient vectors
 				do jl=1,nlays-1
 					d_vector(jl) = 0._wp
-					r_vector(jl) = 0._wp
+					! right hand side
+					r_vector(jl) = -(state_old%wind_w(ji+1,jk+1,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
+					(grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1)) &
+					/(impl_weight*dtime**2*spec_heat_cap_diagnostics_p(1)) &
+					+ theta_int_expl(jl)*(exner_pert_expl(jl)+exner_pert_expl(jl+1))/dtime &
+					+ 0.5_wp/dtime*(exner_pert_expl(jl)+exner_pert_expl(jl+1))*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1)) &
+					- (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*spec_heat_cap_diagnostics_p(1)) &
+					*state_old%wind_w(ji+1,jk+1,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
 				enddo
 				
 				do jl=1,nlays-2
