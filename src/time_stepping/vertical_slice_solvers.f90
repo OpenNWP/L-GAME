@@ -36,6 +36,7 @@ module vertical_slice_solvers
 		real(wp)                 :: rho_expl(nlays)         ! explicit mass density
 		real(wp)                 :: rhotheta_expl(nlays)    ! explicit potential temperature density
 		real(wp)                 :: exner_pert_expl(nlays)  ! explicit Exner pressure perturbation
+		real(wp)                 :: theta_pert_expl(nlays)  ! explicit potential temperature perturbation
 		real(wp)                 :: rho_int_old(nlays-1)    ! old interface mass density
 		real(wp)                 :: rho_int_expl(nlays-1)   ! explicit interface mass density
 		real(wp)                 :: theta_int_expl(nlays-1) ! explicit potential temperature interface values
@@ -99,7 +100,10 @@ module vertical_slice_solvers
 						gammaa(jl) = ((1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
 					endif
 					! explicit Exner pressure perturbation
-					exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + gammaa(jl)*dtime*tend%rhotheta(ji,jk,jl)
+					exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + grid%volume(ji,jk,jl)*gammaa(jl)*dtime*tend%rhotheta(ji,jk,jl)
+					! explicit potential temperature perturbation
+					theta_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl) &
+					+ beta(jl)*tend%rhotheta(ji,jk,jl))
 				enddo
 				
 				! interface values
@@ -131,8 +135,8 @@ module vertical_slice_solvers
 					r_vector(jl) = -(state_old%wind_w(ji+1,jk+1,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
 					(grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1)) &
 					/(impl_weight*dtime**2*c_p) &
-					+ theta_int_expl(jl)*(exner_pert_expl(jl)+exner_pert_expl(jl+1))/dtime &
-					+ 0.5_wp/dtime*(exner_pert_expl(jl)+exner_pert_expl(jl+1))*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1)) &
+					+ theta_int_expl(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
+					+ 0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1)) &
 					- (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p) &
 					*state_old%wind_w(ji+1,jk+1,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
 				enddo
