@@ -14,6 +14,8 @@ module explicit_vector_tendencies
 	use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_v, &
 	                              spec_heat_cap_diagnostics_p
 	use vorticity_flux,     only: calc_vorticity_flux_term
+	use diff_nml,           only: lmom_diff_h
+	use momentum_diff_diss, only: mom_diff_h
 
 	implicit none
 	
@@ -54,6 +56,14 @@ module explicit_vector_tendencies
 			call kinetic_energy(state,diag,grid)
 			! taking the gradient of the kinetic energy
 			call grad(diag%e_kin,diag%e_kin_grad_x,diag%e_kin_grad_y,diag%e_kin_grad_z,grid)
+		endif
+		
+		! momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
+    	if (rk_step == 1 .and. slow_update_bool) then
+			! horizontal momentum diffusion
+			if (lmom_diff_h) then
+				call mom_diff_h(state,diag,grid)
+			endif
 		endif
 		
 		! adding up the explicit wind tendencies
