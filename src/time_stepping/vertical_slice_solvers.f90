@@ -5,9 +5,10 @@ module vertical_slice_solvers
 
 	! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
-	use run_nml,        only: nlins,ncols,wp,nlays,dtime,p_0
+	use run_nml,        only: nlins,ncols,wp,nlays,dtime,p_0,toa
 	use definitions,    only: t_grid,t_state,t_bg,t_tend
 	use thermodynamics, only: spec_heat_cap_diagnostics_v,spec_heat_cap_diagnostics_p,gas_constant_diagnostics
+	use diff_nml,       only: lklemp,klemp_damp_max,klemp_begin_rel
 
 	implicit none
 	
@@ -54,10 +55,14 @@ module vertical_slice_solvers
 		real(wp)                 :: c_v                     ! specific heat capacity at constant volume
 		real(wp)                 :: c_p                     ! specific heat capacity at constant pressure
 		real(wp)                 :: r_d                     ! individual gas constant of dry air
+		real(wp)                 :: damping_start_height    ! lower boundary height of the Klemp layer
+		real(wp)                 :: damping_coeff           ! damping coefficient of the Klemp layer
+		real(wp)                 :: z_above_damping         ! height above the lower boundary of the damping height
 
 		c_v = spec_heat_cap_diagnostics_v(1)
 		c_p = spec_heat_cap_diagnostics_p(1)
 		r_d = gas_constant_diagnostics(1)
+		damping_start_height = klemp_begin_rel*toa
 
 		! setting the implicit weight
 		impl_weight = c_v/c_p
@@ -109,6 +114,14 @@ module vertical_slice_solvers
 					- (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
 					*(2._wp/grid%area_z(ji,jk,jl+1)-dtime*state_old%wind_w(ji+1,jk+1,jl+1)*0.5_wp &
 					*(1._wp/grid%volume(ji,jk,jl)+1._wp/grid%volume(ji,jk,jl)))
+					! Klemp swamp layer
+					z_above_damping = grid%z_geo_w(ji+1,jk+1,jl+1)-damping_start_height
+					if (z_above_damping < 0._wp .or. .not. lklemp) then
+						damping_coeff = 0._wp
+					else
+						damping_coeff = klemp_damp_max*sin(0.5_wp*4*atan(1.d0)*z_above_damping/(toa-damping_start_height))**2
+					endif
+					d_vector(jl) = (1._wp + damping_coeff*dtime)*d_vector(jl)
 					! right hand side
 					r_vector(jl) = -(state_old%wind_w(ji+1,jk+1,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
 					(grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1)) &

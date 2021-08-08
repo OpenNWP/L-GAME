@@ -8,6 +8,7 @@ program control
 	use run_nml,                   only: run_nml_setup,run_span_hr,dtime, &
 	                                     t_init,nlins,ncols,nlays,dt_write, &
 	                                     lrestart,lideal,l3dvar,l4dvar
+	use diff_nml,                  only: diff_nml_setup
 	use definitions,               only: t_grid,t_state,wp,t_diag,t_bg,t_tend
 	use grid_generator,            only: grid_setup,bg_setup
 	use io,                        only: restart,ideal,var_3d,var_4d,write_output
@@ -28,6 +29,9 @@ program control
 	write(*,*) "Reading in run namelist ..."
 	call run_nml_setup
 	write(*,*) "... run namelist read."
+	write(*,*) "Reading in diff namelist ..."
+	call diff_nml_setup
+	write(*,*) "... diff namelist read."
 
 	! allocating memory
 	write(*,*) "Allocating memory ..."

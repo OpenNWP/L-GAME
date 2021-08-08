@@ -19,6 +19,10 @@ run_span_hr=1
 scenario="standard"
 /
 
+&diff
+lklemp=.false.
+/
+
 EOF
 
 # That's it, here we go.

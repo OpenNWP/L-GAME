@@ -47,7 +47,7 @@ module run_nml
 
 	subroutine run_nml_setup
 	
-		! local vaiables
+		! local variables
 		integer :: fileunit
 		
 		nlins           = 101
