@@ -18,13 +18,14 @@ module vertical_slice_solvers
 	
 	contains
 	
-	subroutine three_band_solver_ver(state_old,state_new,tend,bg,grid)
+	subroutine three_band_solver_ver(state_old,state_new,tend,bg,grid,rk_step)
 
 		type(t_state), intent(in)    :: state_old ! state at the old timestep
 		type(t_state), intent(inout) :: state_new ! state at the new timestep
 		type(t_tend),  intent(in)    :: tend      ! explicit tendencies
 		type(t_bg),    intent(in)    :: bg        ! background fields
 		type(t_grid),  intent(in)    :: grid      ! model grid
+		integer,       intent(in)    :: rk_step   ! Runge Kutta substep
 
 		! local variables
 		real(wp)                 :: c_vector(nlays-2)       ! needed for the vertical solver
@@ -75,20 +76,28 @@ module vertical_slice_solvers
 					rho_expl(jl) = state_old%rho(ji+1,jk+1,jl) + dtime*tend%rho(ji,jk,jl)
 					! explicit potential temperature density
 					rhotheta_expl(jl) = state_old%rhotheta(ji+1,jk+1,jl) + dtime*tend%rhotheta(ji,jk,jl)
-					! old time step partial derivatives of rho*theta and Pi
-					alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2
-					beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)
-					gamma_old(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
-					(bg%exner(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))
-					! new time step partial derivatives of rho*theta and Pi
-					alpha_new(jl) = -state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl)**2
-					beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl)
-					gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
-					*(bg%exner(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
-					! interpolation of partial derivatives of rho times theta and Pi
-					alpha (jl) = ((1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
-					beta  (jl) = ((1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
-					gammaa(jl) = (1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl)
+					if (rk_Step == 1) then
+						! old time step partial derivatives of rho*theta and Pi
+						alpha(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2/grid%volume(ji,jk,jl)
+						beta(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)/grid%volume(ji,jk,jl)
+						gammaa(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
+						(bg%exner(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))
+					else
+						! old time step partial derivatives of rho*theta and Pi
+						alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2
+						beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)
+						gamma_old(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
+						(bg%exner(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))
+						! new time step partial derivatives of rho*theta and Pi
+						alpha_new(jl) = -state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl)**2
+						beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl)
+						gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
+						*(bg%exner(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
+						! interpolation of partial derivatives of rho times theta and Pi
+						alpha (jl) = ((1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
+						beta  (jl) = ((1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
+						gammaa(jl) = (1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl)
+					endif
 					! explicit Exner pressure perturbation
 					exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + gammaa(jl)*dtime*tend%rhotheta(ji,jk,jl)
 				enddo
