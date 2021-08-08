@@ -21,6 +21,8 @@ scenario="standard"
 
 &diff
 lklemp=.false.
+lmom_diff_h=.false.
+lmom_diff_v=.false.
 /
 
 EOF

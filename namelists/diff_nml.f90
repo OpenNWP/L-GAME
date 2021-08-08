@@ -10,8 +10,10 @@ module diff_nml
 	logical  :: lklemp           ! turns the Klemp damping layer on or off
 	real(wp) :: klemp_damp_max   ! the maximum Klemp damping coefficient
 	real(wp) :: klemp_begin_rel  ! lower boundary of the Klemp damping layer in relation to TOA
+	logical  :: lmom_diff_h      ! switch for horizontal momentum diffusion
+	logical  :: lmom_diff_v      ! switch for vertical momentum diffusion
 	
-	namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel
+	namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v
 	
 	contains
 	
@@ -23,6 +25,8 @@ module diff_nml
 		lklemp          = .true.
 		klemp_damp_max  = 0.25_wp
 		klemp_begin_rel = 0.53_wp
+		lmom_diff_h     = .true.
+		lmom_diff_v     = .true.
 	
         ! Open and read Namelist file.
         open(action="read", file="namelist.nml", newunit=fileunit)
