@@ -114,7 +114,7 @@ module vertical_slice_solvers
 				! filling up the coefficient vectors
 				do jl=1,nlays-1
 					! main diagonal
-					d_vector(jl) = -theta_int_new(jl)*(gammaa(jl)*theta_int_new(jl) + gammaa(jl+1)*theta_int_new(jl)) &
+					d_vector(jl) = -theta_int_new(jl)*(gammaa(jl)*theta_int_new(jl)+gammaa(jl+1)*theta_int_new(jl)) &
 					+ 0.5_wp*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1))*(alpha(jl)-alpha(jl+1)+theta_int_new(jl)*(beta(jl)-beta(jl+1))) &
 					- (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
 					*(2._wp/grid%area_z(ji,jk,jl+1)-dtime*state_old%wind_w(ji+1,jk+1,jl+1)*0.5_wp &
@@ -139,12 +139,13 @@ module vertical_slice_solvers
 				
 				do jl=1,nlays-2
 					! lower diagonal
-					c_vector(jl) = (theta_int_new(jl+1)*gammaa(jl+1) + 0.5_wp*(bg%exner(ji+1,jk+1,jl+1)-bg%exner(ji+1,jk+1,jl+2))) &
+					c_vector(jl) = theta_int_new(jl+1)*gammaa(jl+1)*theta_int_new(jl) &
+					+ 0.5_wp*(bg%exner(ji+1,jk+1,jl+1)-bg%exner(ji+1,jk+1,jl+2)) &
 					*(alpha(jl+1)+beta(jl+1)*theta_int_new(jl)) &
 					- (grid%z_geo_scal(ji+1,jk+1,jl+1)-grid%z_geo_scal(ji+1,jk+1,jl+2))/(impl_weight*dtime*c_p)*0.5_wp &
 					*state_old%wind_w(ji+1,jk+1,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))
 					! upper diagonal
-					e_vector(jl) = (theta_int_new(jl)*gammaa(jl+1) - 0.5_wp*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1))) &
+					e_vector(jl) = theta_int_new(jl)*gammaa(jl+1)*theta_int_new(jl+1) - 0.5_wp*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1)) &
 					*(alpha(jl+1)+beta(jl+1)*theta_int_new(jl+1)) &
 					+ (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
 					*state_old%wind_w(ji+1,jk+1,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
