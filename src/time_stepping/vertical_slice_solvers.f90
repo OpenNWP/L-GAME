@@ -38,6 +38,7 @@ module vertical_slice_solvers
 		real(wp)                 :: rho_int_old(nlays-1)    ! old interface mass density
 		real(wp)                 :: rho_int_expl(nlays-1)   ! explicit interface mass density
 		real(wp)                 :: theta_int_expl(nlays-1) ! explicit potential temperature interface values
+		real(wp)                 :: theta_int_new(nlays-1)  ! preliminary new potential temperature interface values
 		integer                  :: ji,jk,jl                ! loop variables
 		real(wp)                 :: rho_int_new             ! new density interface value
 		real(wp)                 :: alpha_old(nlays)        ! alpha at the old time step
@@ -95,11 +96,19 @@ module vertical_slice_solvers
 					rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl)+state_old%rho(ji+1,jk+1,jl+1))
 					theta_int_expl(jl) = 0.5_wp*(rhotheta_expl(jl)/rho_expl(jl)+rhotheta_expl(jl+1)/rho_expl(jl+1))
 					rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
+					theta_int_new(jl) = 0.5_wp*(state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl) &
+					+state_old%rhotheta(ji+1,jk+1,jl+1)/state_old%rho(ji+1,jk+1,jl+1))
 				enddo
 			
 				! filling up the coefficient vectors
 				do jl=1,nlays-1
-					d_vector(jl) = 0._wp
+					! main diagonal
+					d_vector(jl) = -theta_int_new(jl)*(gammaa(jl)*(alpha(jl)+beta(jl)*theta_int_new(jl)) &
+					+ gammaa(jl+1)*(alpha(jl+1)+beta(jl+1)*theta_int_new(jl))) &
+					+ 0.5_wp*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1))*(alpha(jl)-alpha(jl+1)+theta_int_new(jl)*(beta(jl)-beta(jl+1))) &
+					- (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
+					*(2._wp/grid%area_z(ji,jk,jl+1)-dtime*state_old%wind_w(ji+1,jk+1,jl+1)*0.5_wp &
+					*(1._wp/grid%volume(ji,jk,jl)+1._wp/grid%volume(ji,jk,jl)))
 					! right hand side
 					r_vector(jl) = -(state_old%wind_w(ji+1,jk+1,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
 					(grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1)) &
