@@ -50,9 +50,16 @@ module vertical_slice_solvers
 		real(wp)                 :: beta(nlays)             ! beta
 		real(wp)                 :: gammaa(nlays)           ! gamma
 		real(wp)                 :: impl_weight             ! implicit weight
+		real(wp)                 :: c_v                     ! specific heat capacity at constant volume
+		real(wp)                 :: c_p                     ! specific heat capacity at constant pressure
+		real(wp)                 :: r_d                     ! individual gas constant of dry air
+
+		c_v = spec_heat_cap_diagnostics_v(1)
+		c_p = spec_heat_cap_diagnostics_p(1)
+		r_d = gas_constant_diagnostics(1)
 
 		! setting the implicit weight
-		impl_weight = spec_heat_cap_diagnostics_v(1)/spec_heat_cap_diagnostics_p(1)
+		impl_weight = c_v/c_p
 
 		do ji=1,nlins
 			do jk=1,ncols
@@ -66,12 +73,12 @@ module vertical_slice_solvers
 					! old time step partial derivatives of rho*theta and Pi
 					alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2
 					beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)
-					gamma_old(jl) = gas_constant_diagnostics(1)/(spec_heat_cap_diagnostics_v(1)*state_old%rhotheta(ji+1,jk+1,jl))* &
+					gamma_old(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
 					(bg%exner(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))
 					! new time step partial derivatives of rho*theta and Pi
 					alpha_new(jl) = -state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl)**2
 					beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl)
-					gamma_new(jl) = gas_constant_diagnostics(1)/(spec_heat_cap_diagnostics_v(1)*state_new%rhotheta(ji+1,jk+1,jl)) &
+					gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
 					*(bg%exner(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
 					! interpolation of partial derivatives of rhoxtheta and Pi
 					alpha (jl) = ((1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
@@ -96,10 +103,10 @@ module vertical_slice_solvers
 					! right hand side
 					r_vector(jl) = -(state_old%wind_w(ji+1,jk+1,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
 					(grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1)) &
-					/(impl_weight*dtime**2*spec_heat_cap_diagnostics_p(1)) &
+					/(impl_weight*dtime**2*c_p) &
 					+ theta_int_expl(jl)*(exner_pert_expl(jl)+exner_pert_expl(jl+1))/dtime &
 					+ 0.5_wp/dtime*(exner_pert_expl(jl)+exner_pert_expl(jl+1))*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1)) &
-					- (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*spec_heat_cap_diagnostics_p(1)) &
+					- (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p) &
 					*state_old%wind_w(ji+1,jk+1,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
 				enddo
 				
