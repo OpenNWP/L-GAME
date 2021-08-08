@@ -34,7 +34,6 @@ module vertical_slice_solvers
 		real(wp)                 :: solution(nlays-1)       ! covariant mass flux density at the interfaces (solution)
 		real(wp)                 :: rho_expl(nlays)         ! explicit mass density
 		real(wp)                 :: rhotheta_expl(nlays)    ! explicit potential temperature density
-		real(wp)                 :: theta_pert_expl(nlays)  ! explicit potential temperature perturbation
 		real(wp)                 :: exner_pert_expl(nlays)  ! explicit Exner pressure perturbation
 		real(wp)                 :: rho_int_old(nlays-1)    ! old interface mass density
 		real(wp)                 :: rho_int_expl(nlays-1)   ! explicit interface mass density
@@ -86,12 +85,10 @@ module vertical_slice_solvers
 					beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl)
 					gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
 					*(bg%exner(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
-					! interpolation of partial derivatives of rhoxtheta and Pi
+					! interpolation of partial derivatives of rho times theta and Pi
 					alpha (jl) = ((1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
 					beta  (jl) = ((1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
 					gammaa(jl) = (1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl)
-					! explicit potential temperature perturbation
-					theta_pert_expl(jl) = state_old%theta_pert(ji+1,jk+1,jl) + dtime*tend%rhotheta(ji,jk,jl)
 					! explicit Exner pressure perturbation
 					exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + gammaa(jl)*dtime*tend%rhotheta(ji,jk,jl)
 				enddo
