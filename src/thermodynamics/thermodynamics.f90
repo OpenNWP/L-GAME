@@ -26,7 +26,7 @@ module thermodynamics
     ! specific heat capacity at constant volume
     real(wp) :: spec_heat_cap_diagnostics_v
     
-    spec_heat_cap_diagnostics_v = spec_heat_capacities_p_gas_lookup(1)
+    spec_heat_cap_diagnostics_v = spec_heat_capacities_v_gas_lookup(1)
     
   end function spec_heat_cap_diagnostics_v
 
