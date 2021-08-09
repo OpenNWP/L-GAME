@@ -28,7 +28,7 @@ Everything is easy and quick to install. These instructions are for Ubuntu.
 
 
 ```
-git clone https://github.com/opennwp/rfpet.git
+git clone https://github.com/OpenNWP/RFPET.git
 ./setup_directories.sh
 ```
 
