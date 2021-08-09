@@ -20,6 +20,11 @@ cd - > /dev/null
 exit 1
 fi
 
+if [ -f rfpet ]
+then
+rm rfpet
+fi
+
 cp ../../build/rfpet .
 
 mpirun -np $ncpus ./rfpet

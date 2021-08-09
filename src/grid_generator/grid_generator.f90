@@ -87,7 +87,7 @@ module grid_generator
       do jk=1,ncols+2
         ! filling up z_vertical_vector_pre
         do jl=1,nlays+1
-          z_rel = 1 - jl/nlays; ! z/toa
+          z_rel = 1._wp - (jl - 1._wp)/(nlays+1) ! z/toa
           sigma_z = z_rel**sigma
           A = sigma_z*toa; ! the height without orography
           ! B corrects for orography
@@ -111,7 +111,7 @@ module grid_generator
         
         ! placing the scalar points in the middle between the preliminary values of the adjacent levels
         do jl=1,nlays
-          grid%z_geo_scal(ji,jk,jl) = 0.5_wp*(z_vertical_vector_pre(jl) + z_vertical_vector_pre(jl + 1));
+          grid%z_geo_scal(ji,jk,jl) = 0.5_wp*(z_vertical_vector_pre(jl) + z_vertical_vector_pre(jl + 1))
         enddo
       enddo
     enddo
@@ -140,8 +140,8 @@ module grid_generator
     call grad_hor_cov_extended(grid%z_geo_scal, grid%slope_x, grid%slope_y, grid)
     
     ! setting the z coordinates of the vertical vector points
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,nlins+2
+      do jk=1,ncols+2
         do jl=1,nlays
           if (jl == 1) then
             grid%z_geo_w(ji,jk,jl) = toa
@@ -421,12 +421,12 @@ module grid_generator
     if (z_height < inv_height) then  
       bg_pres = p_0_standard*(1 - lapse_rate*z_height/surface_temp)**(gravity/(gas_constant_diagnostics(1)*lapse_rate));
     elseif (z_height < tropo_height) then
-            bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(gas_constant_diagnostics(1)*lapse_rate)) &
-            *exp(-gravity*(z_height - tropo_height)/(gas_constant_diagnostics(1)*(surface_temp - lapse_rate*tropo_height)));
-        else
-          write(*,*) "Argument of bg_pres is above the inversion height. This is unrealistic in the lowest layer."
-          write(*,*) "Aborting."
-          call exit(1)
+      bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(gas_constant_diagnostics(1)*lapse_rate)) &
+      *exp(-gravity*(z_height - tropo_height)/(gas_constant_diagnostics(1)*(surface_temp - lapse_rate*tropo_height)));
+    else
+      write(*,*) "Argument of bg_pres is above the inversion height. This is unrealistic in the lowest layer."
+      write(*,*) "Aborting."
+      call exit(1)
     endif
   
   end function bg_pres

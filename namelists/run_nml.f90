@@ -9,7 +9,7 @@ module run_nml
 
   integer           :: nlins              ! number of lines
   integer           :: ncols              ! number of columns
-  integer          :: nlays              ! number of levels
+  integer           :: nlays              ! number of levels
   integer           :: nlays_oro          ! number of levels following the orography
   real(wp)          :: dy                 ! mesh size in y direction at sea level
   real(wp)          :: dx                 ! mesh size in x direction at sea level at the equator
