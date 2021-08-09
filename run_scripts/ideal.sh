@@ -3,7 +3,7 @@
 # This source file is part of the Regional Forecasting with Poisson-brackets in Exner-Theta formulation (RFPET), which is released under the MIT license.
 # Github repository: https://github.com/OpenNWP/RFPET
 
-rfpet_home_dir=~/code/rfpet
+rfpet_home_dir=~/code/RFPET
 run_id=ideal
 ncpus=1
 
