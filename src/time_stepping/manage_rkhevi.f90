@@ -82,6 +82,7 @@ module manage_rkhevi
             call lin_combination(state_old,state_new,state_new,1._wp-dtime/delta_t_step,dtime/delta_t_step,bg)
         endif
         
+        ! calling the boundary conditions subroutine
         call bc()
         
     end subroutine rkhevi
