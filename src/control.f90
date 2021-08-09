@@ -131,12 +131,9 @@ program control
   call grid_setup(grid)
   write(*,*) "... grid set up."
 
-  ! copying the old state to the new state
-  call lin_combination(state_old,state_old,state_new,1._wp,0._wp,bg)
-  
   ! setting up the background state
   call bg_setup(grid,bg)
-    
+  
   ! setting the initial state
   write(*,*) "Setting the initial state..."
   if (lrestart) then
@@ -150,7 +147,11 @@ program control
   endif
   write(*,*) "... initial state set."
   
+  ! writing out the initial state
   call write_output(state_old,diag,0,grid,bg)
+  
+  ! copying the old state to the new state
+  call lin_combination(state_old,state_old,state_new,1._wp,0._wp,bg)
 
   ! the loop over the time steps
   t_0 = t_init

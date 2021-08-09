@@ -66,6 +66,7 @@ module explicit_vector_tendencies
       endif
     endif
     
+    
     ! adding up the explicit wind tendencies
     ! x-direction
     tend%wind_u(:,:,:) = diag%p_grad_acc_l_u(:,:,:) + diag%p_grad_acc_nl_u(:,:,:) &

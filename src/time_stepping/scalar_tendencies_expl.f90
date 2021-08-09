@@ -31,7 +31,6 @@ module scalar_tendencies_expl
     call scalar_times_vector_h(state%rho,state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
     ! calculating the divergence of the mass density flux
     call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
-    
     tend%rho(:,:,:) = diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
     
     ! explicit potential temperature density integration

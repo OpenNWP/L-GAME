@@ -41,7 +41,7 @@ module run_nml
   logical           :: llinear            ! switch to turn momentum advection on or off
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr, &
-  adv_sound_ratio,toa,dt_write_min,scenario
+  adv_sound_ratio,toa,dt_write_min,scenario,llinear
 
   contains
 
