@@ -57,6 +57,9 @@ module definitions
     real(wp), allocatable :: fvec_z(:,:)                    ! z-component of Coriolis vector
     real(wp), allocatable :: trsk_weights_u(:,:,:)
     real(wp), allocatable :: trsk_weights_v(:,:,:)
+    real(wp), allocatable :: exner_bg_grad_u(:,:,:)
+    real(wp), allocatable :: exner_bg_grad_v(:,:,:)
+    real(wp), allocatable :: exner_bg_grad_w(:,:,:)
   
   end type t_grid
   

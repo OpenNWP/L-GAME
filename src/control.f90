@@ -64,6 +64,9 @@ program control
   allocate(grid%fvec_z(nlins+1,ncols+1))
   allocate(grid%trsk_weights_u(nlins,ncols-1,6))
   allocate(grid%trsk_weights_v(nlins-1,ncols,4))
+  allocate(grid%exner_bg_grad_u(nlins,ncols-1,nlays))
+  allocate(grid%exner_bg_grad_v(nlins-1,ncols,nlays))
+  allocate(grid%exner_bg_grad_w(nlins,ncols,nlays+1))
   ! state at the old time step
   allocate(state_old%rho(nlins+2,ncols+2,nlays))
   allocate(state_old%rhotheta(nlins+2,ncols+2,nlays))

@@ -81,8 +81,8 @@ module explicit_vector_tendencies
     ! momentum diffusion
     + diag%mom_diff_tend_y(:,:,:)
     ! z-direction
-    tend%wind_w(:,:,:) = gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1)*diag%p_grad_acc_l_w(:,:,:) + &
-    gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1)*diag%p_grad_acc_nl_w(:,:,:) &
+    tend%wind_w(:,:,:) = gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1)*(diag%p_grad_acc_nl_w(:,:,:) + &
+    diag%p_grad_acc_l_w(:,:,:)) &
     ! momentum advection
     - diag%e_kin_grad_z(:,:,:) + diag%pot_vort_tend_z(:,:,:) &
     ! momentum diffusion

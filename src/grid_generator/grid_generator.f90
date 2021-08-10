@@ -8,7 +8,7 @@ module grid_generator
   use definitions,        only: wp,t_grid,t_bg
   use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re,omega,p_0,gravity, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard
-  use gradient_operators, only: grad_hor_cov_extended
+  use gradient_operators, only: grad_hor_cov_extended,grad
   use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_p
 
   implicit none
@@ -323,7 +323,7 @@ module grid_generator
   subroutine bg_setup(grid,bg)
   
     ! This subroutine sets up the background state.
-    type(t_grid), intent(in)    :: grid     ! the model grid
+    type(t_grid), intent(inout) :: grid     ! the model grid
     type(t_bg),   intent(inout) :: bg       ! the background state
     
     ! local variables
@@ -356,6 +356,9 @@ module grid_generator
         enddo
       enddo
     enddo
+    
+    ! calculating the gradient of the background Exner pressure (only needs to be done once)
+    call grad(bg%exner(2:nlins+1,2:ncols+1,:),grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
   
   end subroutine bg_setup
   
