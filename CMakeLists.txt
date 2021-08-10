@@ -17,6 +17,7 @@ rfpet
 src/definitions/definitions.f90
 src/control.f90
 src/io/io.f90
+src/bc/bc.f90
 src/grid_generator/grid_generator.f90
 src/waves_coupler/waves_coupler.f90
 src/time_stepping/vertical_slice_solvers.f90

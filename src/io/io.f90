@@ -20,7 +20,6 @@ module io
   public :: var_3d
   public :: var_4d
   public :: write_output
-  public :: bc
   
   contains
   
@@ -108,12 +107,6 @@ module io
     call unessential_init(state,diag,bg,grid,pres_lowest_layer)
   
   end subroutine var_4d
-  
-  subroutine bc()
-  
-    ! sets the boundary conditions
-    
-  end subroutine bc
   
   subroutine write_output(state,diag,time_since_init_min,grid,bg)
     ! reads out the state of the model atmosphere
