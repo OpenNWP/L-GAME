@@ -1,7 +1,7 @@
 ! This source file is part of the Regional Forecasting with Poisson-brackets in Exner-Theta formulation (RFPET), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/RFPET
 
-module bc
+module boundaries
 
   ! This module handles everything dealing with boundary conditions.
 
@@ -9,17 +9,17 @@ module bc
   
   private
   
-  public :: boundaries
+  public :: bc
   
   contains
   
-  subroutine boundaries()
+  subroutine bc()
   
     ! sets the boundary conditions
     
-  end subroutine boundaries
+  end subroutine bc
 
-end module bc
+end module boundaries
 
 
 

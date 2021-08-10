@@ -13,7 +13,7 @@ module manage_rkhevi
     use thermodynamics,             only: spec_heat_cap_diagnostics_v, gas_constant_diagnostics
     use scalar_tendencies_expl,     only: expl_scalar_tend
     use vertical_slice_solvers,     only: three_band_solver_ver
-    use bc,                         only: boundaries
+    use boundaries,                 only: bc
 
     implicit none
     
@@ -83,7 +83,7 @@ module manage_rkhevi
         endif
         
         ! calling the boundary conditions subroutine
-        call boundaries()
+        call bc()
         
     end subroutine rkhevi
 
