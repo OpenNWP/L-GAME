@@ -6,8 +6,9 @@ program control
   ! This controls the model run from the beginning to the end.
 
   use run_nml,                   only: run_nml_setup,run_span_hr,dtime, &
-                                       t_init,nlins,ncols,nlays,dt_write, &
-                                       lrestart,lideal,l3dvar,l4dvar
+                                       t_init,nlins,ncols,nlays,lrestart, &
+                                       lideal,l3dvar,l4dvar
+  use io_nml,                    only: io_nml_setup,dt_write
   use diff_nml,                  only: diff_nml_setup
   use definitions,               only: t_grid,t_state,wp,t_diag,t_bg,t_tend
   use grid_generator,            only: grid_setup,bg_setup
@@ -32,7 +33,10 @@ program control
   write(*,*) "Reading in diff namelist ..."
   call diff_nml_setup
   write(*,*) "... diff namelist read."
-
+  write(*,*) "Reading in I/O namelist ..."
+  call io_nml_setup
+  write(*,*) "... I/O namelist read."
+  
   ! allocating memory
   write(*,*) "Allocating memory ..."
   allocate(grid%lat_scalar(nlins+2))

@@ -46,6 +46,7 @@ namelists/hetero_nml.f90
 namelists/init_nml.f90
 namelists/rad_nml.f90
 namelists/run_nml.f90
+namelists/io_nml.f90
 namelists/surface_nml.f90
 ${RTERRTMGPDIR}/rrtmgp/mo_gas_optics.F90
 ${RTERRTMGPDIR}/rrtmgp/mo_gas_optics_rrtmgp.F90

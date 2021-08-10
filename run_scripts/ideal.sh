@@ -25,6 +25,10 @@ lmom_diff_h=.false.
 lmom_diff_v=.false.
 /
 
+&io
+dt_write_min=60
+/
+
 EOF
 
 # That's it, here we go.

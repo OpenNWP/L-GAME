@@ -22,8 +22,6 @@ module run_nml
   real(wp)          :: semimajor          ! large halfaxis of the Earth
   real(wp)          :: semiminor          ! small halfaxis of the Earth
   real(wp)          :: re                 ! Earth radius
-  integer           :: dt_write_min       ! output interval in minutes
-  real(wp)          :: dt_write           ! output interval in seconds
   logical           :: lrestart           ! switch for restart runs
   logical           :: lideal             ! switch for analytic test cases
   logical           :: l3dvar             ! switch for 3d-Var
@@ -41,7 +39,7 @@ module run_nml
   logical           :: llinear            ! switch to turn momentum advection on or off
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr, &
-  adv_sound_ratio,toa,dt_write_min,scenario,llinear
+  adv_sound_ratio,toa,scenario,llinear
 
   contains
 
@@ -63,7 +61,6 @@ module run_nml
     semiminor       = 6356752.314_wp
     semimajor       = 6378137.0_wp
     re              = (semimajor*semimajor*semiminor)**(1._wp/3._wp)
-    dt_write_min    = 60
     lrestart        = .false.
     lideal          = .true.
     l3dvar          = .false.
@@ -80,32 +77,30 @@ module run_nml
     gravity         = 9.80616_wp
     llinear         = .false.
     
-        ! Open and read Namelist file.
-        open(action="read", file="namelist.nml", newunit=fileunit)
-        read(nml=run, unit=fileunit)
+    ! Open and read Namelist file.
+    open(action="read", file="namelist.nml", newunit=fileunit)
+    read(nml=run, unit=fileunit)
         
-        close(fileunit)
-        
+    close(fileunit)
+    
     ! this calculates the time step using the CFL criterion
     dtime           = 0.4_wp*dy/350._wp
-    ! calculating the output timestep in seconds
-    dt_write        = 60._wp*dt_write_min
     ! number of layers following orography
     nlays_oro       = int(0.66*nlays)
         
-        ! checking input data for correctness
-        if (mod(nlins, 2) == 0) then
-          write(*,*) "Error: nlins must be odd. Aborting."
-          call exit(1)
-        endif
-        if (mod(ncols, 2) == 0) then
-          write(*,*) "Error: ncols must be odd. Aborting."
-          call exit(1)
-        endif
-        if (toa <= 0) then
-          write(*,*) "Error: TOA must be positive."
-          call exit(1)
-        endif
+    ! checking input data for correctness
+    if (mod(nlins, 2) == 0) then
+      write(*,*) "Error: nlins must be odd. Aborting."
+      call exit(1)
+    endif
+    if (mod(ncols, 2) == 0) then
+      write(*,*) "Error: ncols must be odd. Aborting."
+      call exit(1)
+    endif
+    if (toa <= 0) then
+      write(*,*) "Error: TOA must be positive."
+      call exit(1)
+    endif
     
     write(*,*) "Time step: ", dtime, " s."
     
