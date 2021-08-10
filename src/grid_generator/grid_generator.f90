@@ -334,7 +334,7 @@ module grid_generator
     
     ! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
     do ji=1,nlins+2
-      do jk=1,ncols+2  
+      do jk=1,ncols+2
         ! integrating from bottom to top
         do jl=nlays,1,-1
           temperature = bg_temp(grid%z_geo_scal(ji,jk,jl))
