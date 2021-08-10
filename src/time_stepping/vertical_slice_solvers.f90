@@ -78,7 +78,7 @@ module vertical_slice_solvers
           ! explicit potential temperature density
           rhotheta_expl(jl) = state_old%rhotheta(ji+1,jk+1,jl) + dtime*tend%rhotheta(ji,jk,jl)
           if (rk_Step == 1) then
-            ! old time step partial derivatives of rho*theta and Pi
+            ! old time step partial derivatives of rho*theta and Pi (divided by the volume)
             alpha(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2/grid%volume(ji,jk,jl)
             beta(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)/grid%volume(ji,jk,jl)
             gammaa(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
@@ -99,18 +99,18 @@ module vertical_slice_solvers
             beta  (jl) = ((1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
             gammaa(jl) = ((1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
           endif
-          ! explicit Exner pressure perturbation
-          exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + grid%volume(ji,jk,jl)*gammaa(jl)*dtime*tend%rhotheta(ji,jk,jl)
           ! explicit potential temperature perturbation
           theta_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl) &
           + beta(jl)*tend%rhotheta(ji,jk,jl))
+          ! explicit Exner pressure perturbation
+          exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + grid%volume(ji,jk,jl)*gammaa(jl)*dtime*tend%rhotheta(ji,jk,jl)
         enddo
         
         ! interface values
         do jl=1,nlays-1
           rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl)+state_old%rho(ji+1,jk+1,jl+1))
-          theta_int_expl(jl) = 0.5_wp*(rhotheta_expl(jl)/rho_expl(jl)+rhotheta_expl(jl+1)/rho_expl(jl+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
+          theta_int_expl(jl) = 0.5_wp*(rhotheta_expl(jl)/rho_expl(jl)+rhotheta_expl(jl+1)/rho_expl(jl+1))
           theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl) &
           + state_new%rhotheta(ji+1,jk+1,jl+1)/state_new%rho(ji+1,jk+1,jl+1))
         enddo
