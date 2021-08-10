@@ -110,7 +110,7 @@ module vertical_slice_solvers
         do jl=1,nlays-1
           rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl)+state_old%rho(ji+1,jk+1,jl+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
-          theta_int_expl(jl) = 0.5_wp*(rhotheta_expl(jl)/rho_expl(jl)+rhotheta_expl(jl+1)/rho_expl(jl+1))
+          theta_int_expl(jl) = 0.5_wp*(bg%exner(ji+1,jk+1,jl)+theta_pert_expl(jl)+bg%exner(ji+1,jk+1,jl+1)+theta_pert_expl(jl+1))
           theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl) &
           + state_new%rhotheta(ji+1,jk+1,jl+1)/state_new%rho(ji+1,jk+1,jl+1))
         enddo
