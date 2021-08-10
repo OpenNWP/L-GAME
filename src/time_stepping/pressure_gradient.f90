@@ -7,7 +7,7 @@ module pressure_gradient
 
   use gradient_operators, only: grad
   use run_nml,            only: nlins,ncols
-  use definitions,        only: t_state,t_diag,t_grid,t_bg
+  use definitions,        only: t_state,t_diag,t_grid
   use multiplications,    only: scalar_times_vector_for_gradient
 
   implicit none
@@ -18,11 +18,10 @@ module pressure_gradient
   
   contains
 
-  subroutine manage_pressure_gradient(state,diag,bg,grid,first)
+  subroutine manage_pressure_gradient(state,diag,grid,first)
   
     type(t_state), intent(in)    :: state ! state to work with
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_bg),    intent(in)    :: bg    ! the background state
     type(t_grid),  intent(in)    :: grid  ! model grid
     logical,       intent(in)    :: first ! true for the first model step
   
@@ -37,7 +36,7 @@ module pressure_gradient
     ! calculating the gradient of the perturbed Exner pressure
     call grad(state%exner_pert(2:nlins+1,2:ncols+1,:),diag%p_grad_acc_nl_u,diag%p_grad_acc_nl_v,diag%p_grad_acc_nl_w,grid)
     ! calculating the full potential temperature
-    diag%scalar_placeholder(:,:,:) = bg%theta(:,:,:) + state%theta_pert(:,:,:)
+    diag%scalar_placeholder(:,:,:) = grid%theta_bg(:,:,:) + state%theta_pert(:,:,:)
     ! multiplying the perturbed Exner pressure gradient by the full potential temperature
     call scalar_times_vector_for_gradient(diag%scalar_placeholder,diag%p_grad_acc_nl_u,diag%p_grad_acc_nl_v, &
     diag%p_grad_acc_nl_w,diag%p_grad_acc_nl_u,diag%p_grad_acc_nl_v,diag%p_grad_acc_nl_w,grid)

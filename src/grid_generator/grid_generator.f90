@@ -5,7 +5,7 @@
 
 module grid_generator
 
-  use definitions,        only: wp,t_grid,t_bg
+  use definitions,        only: wp,t_grid
   use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re,omega,p_0,gravity, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard
   use gradient_operators, only: grad_hor_cov_extended,grad
@@ -320,11 +320,10 @@ module grid_generator
   
   end subroutine grid_setup
   
-  subroutine bg_setup(grid,bg)
+  subroutine bg_setup(grid)
   
     ! This subroutine sets up the background state.
     type(t_grid), intent(inout) :: grid     ! the model grid
-    type(t_bg),   intent(inout) :: bg       ! the background state
     
     ! local variables
     integer                     :: ji,jk,jl ! index variables
@@ -341,24 +340,24 @@ module grid_generator
           ! lowest layer
           if (jl == nlays) then
             pressure    = bg_pres(grid%z_geo_scal(ji,jk,jl))
-            bg%theta(ji,jk,jl) = temperature*(pressure/p_0)**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1))
-            bg%exner(ji,jk,jl) = temperature/bg%theta(ji,jk,jl)
+            grid%theta_bg(ji,jk,jl) = temperature*(pressure/p_0)**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1))
+            grid%exner_bg(ji,jk,jl) = temperature/grid%theta_bg(ji,jk,jl)
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
-            b = -0.5_wp*bg%exner(ji,jk,jl+1)/bg_temp(grid%z_geo_scal(ji,jk,jl+1)) &
+            b = -0.5_wp*grid%exner_bg(ji,jk,jl+1)/bg_temp(grid%z_geo_scal(ji,jk,jl+1)) &
             *(temperature - bg_temp(grid%z_geo_scal(ji,jk,jl+1)) + 2.0_wp/ &
             spec_heat_cap_diagnostics_p(1)*(geopot(grid%z_geo_scal(ji,jk,jl)) - geopot(grid%z_geo_scal(ji,jk,jl+1))))
-            c = bg%exner(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_geo_scal(ji,jk,jl+1))
-            bg%exner(ji,jk,jl) = b+sqrt(b**2+c)
-            bg%theta(ji,jk,jl) = temperature/bg%exner(ji,jk,jl)
+            c = grid%exner_bg(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_geo_scal(ji,jk,jl+1))
+            grid%exner_bg(ji,jk,jl) = b+sqrt(b**2+c)
+            grid%theta_bg(ji,jk,jl) = temperature/grid%exner_bg(ji,jk,jl)
           endif
         enddo
       enddo
     enddo
     
     ! calculating the gradient of the background Exner pressure (only needs to be done once)
-    call grad(bg%exner(2:nlins+1,2:ncols+1,:),grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
+    call grad(grid%exner_bg(2:nlins+1,2:ncols+1,:),grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
   
   end subroutine bg_setup
   

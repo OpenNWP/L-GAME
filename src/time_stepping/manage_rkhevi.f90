@@ -5,7 +5,7 @@ module manage_rkhevi
 
     ! In this file, the RKHEVI time stepping is managed.
 
-    use definitions,                only: t_grid,t_state,t_diag,t_bg,wp,t_tend
+    use definitions,                only: t_grid,t_state,t_diag,wp,t_tend
     use linear_combine_two_states,  only: lin_combination
     use run_nml,                    only: adv_sound_ratio,dtime,nlins,ncols
     use pressure_gradient,          only: manage_pressure_gradient
@@ -23,12 +23,11 @@ module manage_rkhevi
 
     contains
     
-    subroutine rkhevi(state_old,state_new,tend,bg,grid,diag,total_step_counter)
+    subroutine rkhevi(state_old,state_new,tend,grid,diag,total_step_counter)
         
         type(t_state),  intent(inout) :: state_old          ! the state at the old timestep
         type(t_state),  intent(inout) :: state_new          ! the state at the new timestep
         type(t_tend),   intent(inout) :: tend               ! the tendency
-        type(t_bg),     intent(in)    :: bg                 ! background state
         type(t_grid),   intent(in)    :: grid               ! the grid of the model
         type(t_diag),   intent(inout) :: diag               ! diagnostic quantities
         integer,        intent(in)    :: total_step_counter ! time step counter
@@ -58,7 +57,7 @@ module manage_rkhevi
             ! ------------------------------------------------
             ! Update of the pressure gradient.
             if (rk_step == 1) then
-                call manage_pressure_gradient(state_new,diag,bg,grid,total_step_counter==1)
+                call manage_pressure_gradient(state_new,diag,grid,total_step_counter==1)
             endif
             ! Only the horizontal momentum is a forward tendency.
             call vector_tendencies_expl(state_new,tend,diag,grid,slow_update_bool,rk_step,total_step_counter)
@@ -69,17 +68,17 @@ module manage_rkhevi
 
             ! 2.) Explicit component of the generalized density equations.
             ! ------------------------------------------------------------
-            call expl_scalar_tend(grid,state_new,tend,diag,bg)
+            call expl_scalar_tend(grid,state_new,tend,diag)
             
             ! 3.) implicit dynamic vertical solver
             ! -------------------------------
-            call three_band_solver_ver(state_old,state_new,tend,bg,grid,rk_step)
+            call three_band_solver_ver(state_old,state_new,tend,grid,rk_step)
     
         enddo
         
         ! in this case, a large time step has been taken, which we modify into a small step here    
         if (slow_update_bool .and. adv_sound_ratio > 1) then
-            call lin_combination(state_old,state_new,state_new,1._wp-dtime/delta_t_step,dtime/delta_t_step,bg)
+            call lin_combination(state_old,state_new,state_new,1._wp-dtime/delta_t_step,dtime/delta_t_step)
         endif
         
         ! calling the boundary conditions subroutine

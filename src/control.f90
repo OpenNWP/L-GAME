@@ -10,7 +10,7 @@ program control
                                        lideal,l3dvar,l4dvar
   use io_nml,                    only: io_nml_setup,dt_write
   use diff_nml,                  only: diff_nml_setup
-  use definitions,               only: t_grid,t_state,wp,t_diag,t_bg,t_tend
+  use definitions,               only: t_grid,t_state,wp,t_diag,t_tend
   use grid_generator,            only: grid_setup,bg_setup
   use io,                        only: restart,ideal,var_3d,var_4d,write_output
   use manage_rkhevi,             only: rkhevi
@@ -23,7 +23,6 @@ program control
   type(t_grid)  :: grid
   type(t_state) :: state_old, state_new, state_write
   type(t_diag)  :: diag
-  type(t_bg)    :: bg
   type(t_tend)  :: tend
 
   ! reading in all namelists so that we know what we have to do
@@ -64,6 +63,8 @@ program control
   allocate(grid%fvec_z(nlins+1,ncols+1))
   allocate(grid%trsk_weights_u(nlins,ncols-1,6))
   allocate(grid%trsk_weights_v(nlins-1,ncols,4))
+  allocate(grid%theta_bg(nlins+2,ncols+2,nlays))
+  allocate(grid%exner_bg(nlins+2,ncols+2,nlays))
   allocate(grid%exner_bg_grad_u(nlins,ncols-1,nlays))
   allocate(grid%exner_bg_grad_v(nlins-1,ncols,nlays))
   allocate(grid%exner_bg_grad_w(nlins,ncols,nlays+1))
@@ -97,9 +98,6 @@ program control
   allocate(state_write%wind_u(nlins+2,ncols+1,nlays))
   allocate(state_write%wind_v(nlins+1,ncols+2,nlays))
   allocate(state_write%wind_w(nlins+2,ncols+2,nlays+1))
-  ! background state
-  allocate(bg%theta(nlins+2,ncols+2,nlays))
-  allocate(bg%exner(nlins+2,ncols+2,nlays))
   ! state containing diagnostic quantities
   allocate(diag%e_kin(nlins,ncols,nlays))
   allocate(diag%e_kin_grad_x(nlins,ncols-1,nlays))
@@ -139,26 +137,26 @@ program control
   write(*,*) "... grid set up."
 
   ! setting up the background state
-  call bg_setup(grid,bg)
+  call bg_setup(grid)
   
   ! setting the initial state
   write(*,*) "Setting the initial state..."
   if (lrestart) then
-    call restart(state_old,diag,bg,grid)
+    call restart(state_old,diag,grid)
   elseif (lideal) then
-    call ideal(state_old,diag,bg,grid)
+    call ideal(state_old,diag,grid)
   elseif (l3dvar) then
-    call var_3d(state_old,diag,bg,grid)
+    call var_3d(state_old,diag,grid)
   elseif (l4dvar) then
-    call var_4d(state_old,diag,bg,grid)
+    call var_4d(state_old,diag,grid)
   endif
   write(*,*) "... initial state set."
   
   ! writing out the initial state
-  call write_output(state_old,diag,0,grid,bg)
+  call write_output(state_old,diag,0,grid)
   
   ! copying the old state to the new state
-  call lin_combination(state_old,state_old,state_new,1._wp,0._wp,bg)
+  call lin_combination(state_old,state_old,state_new,1._wp,0._wp)
 
   ! the loop over the time steps
   t_0 = t_init
@@ -167,16 +165,16 @@ program control
   time_step_counter = 0
   do while (t_0 < t_init + run_span + 300)
     
-      call lin_combination(state_new,state_new,state_old,1._wp,0._wp,bg)
+      call lin_combination(state_new,state_new,state_old,1._wp,0._wp)
       
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,bg,grid,diag,time_step_counter)
+    call rkhevi(state_old,state_new,tend,grid,diag,time_step_counter)
     
     ! managing the calls to the output routine
     if (t_0 + dtime >= t_write) then
     
-            call interpolation_t(state_old,state_new,state_write,t_0,t_0+dtime,t_write,bg)
-      call write_output(state_write,diag,int((t_write-t_0)/60._wp),grid,bg)
+            call interpolation_t(state_old,state_new,state_write,t_0,t_0+dtime,t_write)
+      call write_output(state_write,diag,int((t_write-t_0)/60._wp),grid)
     
       t_write = t_write + dt_write
     
@@ -215,6 +213,11 @@ program control
   deallocate(grid%fvec_z)
   deallocate(grid%trsk_weights_u)
   deallocate(grid%trsk_weights_v)
+  deallocate(grid%theta_bg)
+  deallocate(grid%exner_bg)
+  deallocate(grid%exner_bg_grad_u)
+  deallocate(grid%exner_bg_grad_v)
+  deallocate(grid%exner_bg_grad_w)
   ! state at the old time step
   deallocate(state_old%rho)
   deallocate(state_old%rhotheta)
@@ -245,9 +248,6 @@ program control
   deallocate(state_write%wind_u)
   deallocate(state_write%wind_v)
   deallocate(state_write%wind_w)
-  ! background state
-  deallocate(bg%theta)
-  deallocate(bg%exner)
   ! state containing diagnostic quantities
   deallocate(diag%e_kin)
   deallocate(diag%p_grad_acc_l_u)

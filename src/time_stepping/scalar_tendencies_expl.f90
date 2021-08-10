@@ -5,7 +5,7 @@ module scalar_tendencies_expl
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
-  use definitions,          only: wp,t_grid,t_state,t_diag,t_tend,t_bg
+  use definitions,          only: wp,t_grid,t_state,t_diag,t_tend
   use multiplications,      only: scalar_times_vector_h
   use divergence_operators, only: divv_h
   use run_nml,              only: nlins,ncols
@@ -18,13 +18,12 @@ module scalar_tendencies_expl
   
   contains
   
-  subroutine expl_scalar_tend(grid,state,tend,diag,bg)
+  subroutine expl_scalar_tend(grid,state,tend,diag)
   
     type(t_grid),  intent(in)    :: grid  ! model grid
     type(t_state), intent(in)    :: state ! state with which to calculate the divergence
     type(t_tend),  intent(inout) :: tend  ! state which will contain the tendencies
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_bg),    intent(in)    :: bg    ! background state
   
     ! explicit mass density integration
     ! calculating the mass density flux
@@ -35,7 +34,7 @@ module scalar_tendencies_expl
     
     ! explicit potential temperature density integration
     ! calculating the potential temperature density flux
-    diag%scalar_placeholder(:,:,:) = bg%theta(:,:,:) + state%theta_pert(:,:,:)
+    diag%scalar_placeholder(:,:,:) = grid%theta_bg(:,:,:) + state%theta_pert(:,:,:)
     call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder, &
     diag%u_placeholder,diag%v_placeholder)
     ! calculating the divergence of the potential temperature density flux

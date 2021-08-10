@@ -12,7 +12,6 @@ module definitions
   public :: wp
   public :: t_grid
   public :: t_state
-  public :: t_bg
   public :: t_diag
   public :: t_tend
   
@@ -60,6 +59,8 @@ module definitions
     real(wp), allocatable :: exner_bg_grad_u(:,:,:)
     real(wp), allocatable :: exner_bg_grad_v(:,:,:)
     real(wp), allocatable :: exner_bg_grad_w(:,:,:)
+    real(wp), allocatable :: theta_bg(:,:,:)                ! background potential temperature
+    real(wp), allocatable :: exner_bg(:,:,:)                ! background Exner pressure
   
   end type t_grid
   
@@ -86,15 +87,6 @@ module definitions
     real(wp), allocatable :: wind_w(:,:,:)
   
   end type t_tend
-  
-    
-  type t_bg
-  
-    ! background state
-    real(wp), allocatable :: theta(:,:,:)              ! potential temperature
-    real(wp), allocatable :: exner(:,:,:)              ! Exner pressure
-  
-  end type t_bg
   
   type t_diag
   

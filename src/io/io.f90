@@ -5,7 +5,7 @@ module io
 
   ! This module handles everything dealing with IO.
 
-  use definitions,    only: t_state,wp,t_diag,t_grid,t_bg
+  use definitions,    only: t_state,wp,t_diag,t_grid
   use netcdf
   use run_nml,        only: nlins,ncols,nlays,scenario,p_0
   use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics,spec_heat_cap_diagnostics_p
@@ -23,13 +23,12 @@ module io
   
   contains
   
-  subroutine ideal(state,diag,bg,grid)
+  subroutine ideal(state,diag,grid)
   
     ! sets the initial state of the model calculation i terms if analytic functions
     
     type(t_state), intent(inout) :: state ! state to write the initial state to
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_bg),    intent(in)    :: bg    ! background state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
@@ -56,59 +55,56 @@ module io
     
     endselect
     
-    call unessential_init(state,diag,bg,grid,pres_lowest_layer)
+    call unessential_init(state,diag,grid,pres_lowest_layer)
     
   end subroutine ideal
   
-  subroutine restart(state,diag,bg,grid)
+  subroutine restart(state,diag,grid)
   
     ! reads the initial state of the model calculation from a netcdf file
     
     type(t_state), intent(inout) :: state ! state to write the initial state to
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_bg),    intent(in)    :: bg    ! background state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
     real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
     
-    call unessential_init(state,diag,bg,grid,pres_lowest_layer)
+    call unessential_init(state,diag,grid,pres_lowest_layer)
     
   end subroutine restart
   
-  subroutine var_3d(state,diag,bg,grid)
+  subroutine var_3d(state,diag,grid)
   
     ! three-dimensional variational data assimilation
     
     type(t_state), intent(inout) :: state ! state to write the initial state to
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_bg),    intent(in)    :: bg    ! background state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
     real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
     
-    call unessential_init(state,diag,bg,grid,pres_lowest_layer)
+    call unessential_init(state,diag,grid,pres_lowest_layer)
   
   end subroutine var_3d
   
-  subroutine var_4d(state,diag,bg,grid)
+  subroutine var_4d(state,diag,grid)
   
     ! four-dimensional variational data assimilation
     
     type(t_state), intent(inout) :: state ! state to write the initial state to
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_bg),    intent(in)    :: bg    ! background state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
     real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
     
-    call unessential_init(state,diag,bg,grid,pres_lowest_layer)
+    call unessential_init(state,diag,grid,pres_lowest_layer)
   
   end subroutine var_4d
   
-  subroutine write_output(state,diag,time_since_init_min,grid,bg)
+  subroutine write_output(state,diag,time_since_init_min,grid)
     ! reads out the state of the model atmosphere
     ! at a single timestep to a netcdf file
     
@@ -116,7 +112,6 @@ module io
     type(t_diag),  intent(inout) :: diag                ! diagnostic quantities
     integer,       intent(in)    :: time_since_init_min ! time in minutes since init
     type(t_grid),  intent(in)    :: grid                ! model grid
-    type(t_bg),    intent(in)    :: bg                  ! background state
     
     ! local variables
     integer                   :: ncid                      ! ID of the netcdf file
@@ -130,9 +125,9 @@ module io
     integer                   :: varid_u                   ! variable ID of the 3D u wind field
     integer                   :: varid_v                   ! variable ID of the 3D v wind field
     integer                   :: varid_w                   ! variable ID of the 3D w wind field
-      character(len=32)         :: filename                  ! output filename
-      integer                   :: ji,jk,jl                  ! line indices
-      real(wp)                  :: upper_weight(nlins,ncols) ! interpolation weights
+    character(len=32)         :: filename                  ! output filename
+    integer                   :: ji,jk,jl                  ! line indices
+    real(wp)                  :: upper_weight(nlins,ncols) ! interpolation weights
     
     ! creating the netcdf file
     write(filename,"(I10,A3)") time_since_init_min,".nc"
@@ -165,9 +160,9 @@ module io
   
     ! 3D temperature
     call check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
-    diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) =  (bg%theta(2:nlins+1,2:ncols+1,:) &
+    diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) =  (grid%theta_bg(2:nlins+1,2:ncols+1,:) &
     + state%theta_pert(2:nlins+1,2:ncols+1,:)) &
-    *(bg%exner(2:nlins+1,2:ncols+1,:) + state%exner_pert(2:nlins+1,2:ncols+1,:))
+    *(grid%exner_bg(2:nlins+1,2:ncols+1,:) + state%exner_pert(2:nlins+1,2:ncols+1,:))
     
     ! writing the data to the output file
     ! 3D pressure
@@ -202,13 +197,12 @@ module io
     
   end subroutine write_output
   
-  subroutine unessential_init(state,diag,bg,grid,pres_lowest_layer)
+  subroutine unessential_init(state,diag,grid,pres_lowest_layer)
   
     ! setting the unessential quantities of an initial state
     
     type(t_state), intent(inout) :: state                  ! state to work with
     type(t_diag),  intent(in)    :: diag                   ! diagnostic quantities
-    type(t_bg),    intent(in)    :: bg                     ! background state
     type(t_grid),  intent(in)    :: grid                   ! model grid
     real(wp),      intent(in)    :: pres_lowest_layer(:,:) ! pressure in the lowest layer
     
@@ -244,16 +238,16 @@ module io
     enddo
     
     ! substracting the background state
-    state%theta_pert(:,:,:) = state%theta_pert(:,:,:) - bg%theta(:,:,:)
-    state%exner_pert(:,:,:) = state%exner_pert(:,:,:) - bg%exner(:,:,:)
+    state%theta_pert(:,:,:) = state%theta_pert(:,:,:) - grid%theta_bg(:,:,:)
+    state%exner_pert(:,:,:) = state%exner_pert(:,:,:) - grid%exner_bg(:,:,:)
     
     ! potential temoerature density
-    state%rhotheta(:,:,:) = p_0/gas_constant_diagnostics(1)*(bg%exner(:,:,:) + state%exner_pert(:,:,:)) &
+    state%rhotheta(:,:,:) = p_0/gas_constant_diagnostics(1)*(grid%exner_bg(:,:,:) + state%exner_pert(:,:,:)) &
     **(spec_heat_cap_diagnostics_v(1)/gas_constant_diagnostics(1))
     ! potential temperature
-    state%theta_pert(:,:,:) = diag%scalar_placeholder(:,:,:)/(bg%exner(:,:,:) + state%exner_pert(:,:,:)) - bg%theta(:,:,:)
+    state%theta_pert(:,:,:) = diag%scalar_placeholder(:,:,:)/(grid%exner_bg(:,:,:) + state%exner_pert(:,:,:)) - grid%theta_bg(:,:,:)
     ! density
-    state%rho(:,:,:)      = state%rhotheta(:,:,:)/(bg%theta(:,:,:) + state%theta_pert(:,:,:))
+    state%rho(:,:,:)      = state%rhotheta(:,:,:)/(grid%theta_bg(:,:,:) + state%theta_pert(:,:,:))
     
     ! vertical wind velocity
     state%wind_w(:,:,:) = 0._wp

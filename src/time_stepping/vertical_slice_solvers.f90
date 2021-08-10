@@ -6,7 +6,7 @@ module vertical_slice_solvers
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
   use run_nml,        only: nlins,ncols,wp,nlays,dtime,p_0,toa
-  use definitions,    only: t_grid,t_state,t_bg,t_tend
+  use definitions,    only: t_grid,t_state,t_tend
   use thermodynamics, only: spec_heat_cap_diagnostics_v,spec_heat_cap_diagnostics_p,gas_constant_diagnostics
   use diff_nml,       only: lklemp,klemp_damp_max,klemp_begin_rel
 
@@ -18,12 +18,11 @@ module vertical_slice_solvers
   
   contains
   
-  subroutine three_band_solver_ver(state_old,state_new,tend,bg,grid,rk_step)
+  subroutine three_band_solver_ver(state_old,state_new,tend,grid,rk_step)
 
     type(t_state), intent(in)    :: state_old ! state at the old timestep
     type(t_state), intent(inout) :: state_new ! state at the new timestep
     type(t_tend),  intent(in)    :: tend      ! explicit tendencies
-    type(t_bg),    intent(in)    :: bg        ! background fields
     type(t_grid),  intent(in)    :: grid      ! model grid
     integer,       intent(in)    :: rk_step   ! Runge Kutta substep
 
@@ -82,18 +81,18 @@ module vertical_slice_solvers
             alpha(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2/grid%volume(ji,jk,jl)
             beta(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)/grid%volume(ji,jk,jl)
             gammaa(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
-            (bg%exner(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))/grid%volume(ji,jk,jl)
+            (grid%exner_bg(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))/grid%volume(ji,jk,jl)
           else
             ! old time step partial derivatives of rho*theta and Pi
             alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2
             beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)
             gamma_old(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
-            (bg%exner(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))
+            (grid%exner_bg(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))
             ! new time step partial derivatives of rho*theta and Pi
             alpha_new(jl) = -state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl)**2
             beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl)
             gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
-            *(bg%exner(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
+            *(grid%exner_bg(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
             ! interpolation of partial derivatives of rho times theta and Pi
             alpha (jl) = ((1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
             beta  (jl) = ((1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
@@ -110,7 +109,8 @@ module vertical_slice_solvers
         do jl=1,nlays-1
           rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl)+state_old%rho(ji+1,jk+1,jl+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
-          theta_int_expl(jl) = 0.5_wp*(bg%exner(ji+1,jk+1,jl)+theta_pert_expl(jl)+bg%exner(ji+1,jk+1,jl+1)+theta_pert_expl(jl+1))
+          theta_int_expl(jl) = 0.5_wp*(grid%exner_bg(ji+1,jk+1,jl)+theta_pert_expl(jl) &
+          +grid%exner_bg(ji+1,jk+1,jl+1)+theta_pert_expl(jl+1))
           theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl) &
           + state_new%rhotheta(ji+1,jk+1,jl+1)/state_new%rho(ji+1,jk+1,jl+1))
         enddo
@@ -119,7 +119,7 @@ module vertical_slice_solvers
         do jl=1,nlays-1
           ! main diagonal
           d_vector(jl) = -theta_int_new(jl)**2*(gammaa(jl)+gammaa(jl+1)) &
-          + 0.5_wp*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1)) &
+          + 0.5_wp*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
           *(alpha(jl)-alpha(jl+1)+theta_int_new(jl)*(beta(jl+1)-beta(jl))) &
           - (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
           *(2._wp/grid%area_z(ji,jk,jl+1)-dtime*state_old%wind_w(ji+1,jk+1,jl+1)*0.5_wp &
@@ -137,7 +137,7 @@ module vertical_slice_solvers
           (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1)) &
           /(impl_weight*dtime**2*c_p) &
           + theta_int_expl(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
-          + 0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1)) &
+          + 0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
           - (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p) &
           *state_old%wind_w(ji+1,jk+1,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
         enddo
@@ -145,13 +145,13 @@ module vertical_slice_solvers
         do jl=1,nlays-2
           ! lower diagonal
           c_vector(jl) = theta_int_new(jl+1)*gammaa(jl+1)*theta_int_new(jl) &
-          + 0.5_wp*(bg%exner(ji+1,jk+1,jl+1)-bg%exner(ji+1,jk+1,jl+2)) &
+          + 0.5_wp*(grid%exner_bg(ji+1,jk+1,jl+1)-grid%exner_bg(ji+1,jk+1,jl+2)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl)) &
           - (grid%z_geo_scal(ji+1,jk+1,jl+1)-grid%z_geo_scal(ji+1,jk+1,jl+2))/(impl_weight*dtime*c_p)*0.5_wp &
           *state_old%wind_w(ji+1,jk+1,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))
           ! upper diagonal
           e_vector(jl) = theta_int_new(jl)*gammaa(jl+1)*theta_int_new(jl+1) &
-          - 0.5_wp*(bg%exner(ji+1,jk+1,jl)-bg%exner(ji+1,jk+1,jl+1)) &
+          - 0.5_wp*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl+1)) &
           + (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
           *state_old%wind_w(ji+1,jk+1,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
@@ -188,7 +188,7 @@ module vertical_slice_solvers
     enddo
     
     ! potential temperature perturbation at the new time step
-    state_new%theta_pert(:,:,:) = state_new%rhotheta(:,:,:)/state_new%rho(:,:,:) - bg%theta(:,:,:)
+    state_new%theta_pert(:,:,:) = state_new%rhotheta(:,:,:)/state_new%rho(:,:,:) - grid%theta_bg(:,:,:)
 
   end subroutine three_band_solver_ver
   
