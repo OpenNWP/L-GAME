@@ -69,20 +69,30 @@ module explicit_vector_tendencies
     
     ! adding up the explicit wind tendencies
     ! x-direction
-    tend%wind_u(:,:,:) = diag%p_grad_acc_l_u(:,:,:) + diag%p_grad_acc_nl_u(:,:,:) &
+    tend%wind_u(:,:,:) = &
+    ! old time step pressure gradient component
+    old_hor_pgrad_sound_weight*diag%p_grad_acc_old_u(:,:,:) &
+    ! new time step pressure gradient component
+    + new_hor_pgrad_sound_weight*(diag%p_grad_acc_nl_u(:,:,:) + diag%p_grad_acc_l_u(:,:,:)) &
     ! momentum advection
     - diag%e_kin_grad_x(:,:,:) + diag%pot_vort_tend_x(:,:,:) & 
     ! momentum diffusion
     + diag%mom_diff_tend_x(:,:,:)
     ! y-direction
-    tend%wind_v(:,:,:) = diag%p_grad_acc_l_v(:,:,:) + diag%p_grad_acc_nl_v(:,:,:) &
+    tend%wind_v(:,:,:) = &
+    ! old time step pressure gradient component
+    old_hor_pgrad_sound_weight*diag%p_grad_acc_old_v(:,:,:) &
+    ! new time step pressure gradient component
+    + new_hor_pgrad_sound_weight*(diag%p_grad_acc_nl_v(:,:,:) + diag%p_grad_acc_l_v(:,:,:)) &
     ! momentum advection
     - diag%e_kin_grad_y(:,:,:) + diag%pot_vort_tend_y(:,:,:) &
     ! momentum diffusion
     + diag%mom_diff_tend_y(:,:,:)
     ! z-direction
-    tend%wind_w(:,:,:) = gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1)*(diag%p_grad_acc_nl_w(:,:,:) + &
-    diag%p_grad_acc_l_w(:,:,:)) &
+    tend%wind_w(:,:,:) = &
+    ! old time step component of the pressure gradient acceleration
+    gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1) &
+    *(diag%p_grad_acc_nl_w(:,:,:) + diag%p_grad_acc_l_w(:,:,:)) &
     ! momentum advection
     - diag%e_kin_grad_z(:,:,:) + diag%pot_vort_tend_z(:,:,:) &
     ! momentum diffusion

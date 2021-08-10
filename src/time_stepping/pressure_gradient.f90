@@ -28,19 +28,19 @@ module pressure_gradient
   
     ! saving the old pressure gradient acceleration before it is overwritten with the new one
     if (.not. first) then
-      diag%p_grad_acc_old_u(:,:,:) = diag%p_grad_acc_l_u(:,:,:) + diag%p_grad_acc_nl_u(:,:,:)
-      diag%p_grad_acc_old_v(:,:,:) = diag%p_grad_acc_l_v(:,:,:) + diag%p_grad_acc_nl_v(:,:,:)
-      diag%p_grad_acc_old_w(:,:,:) = diag%p_grad_acc_l_w(:,:,:) + diag%p_grad_acc_nl_w(:,:,:)
+      diag%p_grad_acc_old_u(:,:,:) = diag%p_grad_acc_nl_u(:,:,:) + diag%p_grad_acc_l_u(:,:,:)
+      diag%p_grad_acc_old_v(:,:,:) = diag%p_grad_acc_nl_v(:,:,:) + diag%p_grad_acc_l_v(:,:,:)
+      diag%p_grad_acc_old_w(:,:,:) = diag%p_grad_acc_nl_w(:,:,:) + diag%p_grad_acc_l_w(:,:,:)
     endif
     
     ! the nonlinear pressure gradient term
     ! calculating the gradient of the perturbed Exner pressure
-    call grad(state%exner_pert(2:nlins+1,2:ncols+1,:),diag%p_grad_acc_l_u,diag%p_grad_acc_l_v,diag%p_grad_acc_l_w,grid)
+    call grad(state%exner_pert(2:nlins+1,2:ncols+1,:),diag%p_grad_acc_nl_u,diag%p_grad_acc_nl_v,diag%p_grad_acc_nl_w,grid)
     ! calculating the full potential temperature
     diag%scalar_placeholder(:,:,:) = bg%theta(:,:,:) + state%theta_pert(:,:,:)
     ! multiplying the perturbed Exner pressure gradient by the full potential temperature
-    call scalar_times_vector_for_gradient(diag%scalar_placeholder,diag%p_grad_acc_l_u,diag%p_grad_acc_l_v, &
-    diag%p_grad_acc_nl_w,diag%p_grad_acc_nl_u,diag%p_grad_acc_l_v,diag%p_grad_acc_nl_w,grid)
+    call scalar_times_vector_for_gradient(diag%scalar_placeholder,diag%p_grad_acc_nl_u,diag%p_grad_acc_nl_v, &
+    diag%p_grad_acc_nl_w,diag%p_grad_acc_nl_u,diag%p_grad_acc_nl_v,diag%p_grad_acc_nl_w,grid)
     
     ! the linear pressure gradient term
     ! multiplying the background Exner pressure gradient by the perturbed potential temperature
@@ -49,9 +49,9 @@ module pressure_gradient
     
     ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
     if (first) then
-      diag%p_grad_acc_old_u(:,:,:) = diag%p_grad_acc_l_u(:,:,:) + diag%p_grad_acc_nl_u(:,:,:)
-      diag%p_grad_acc_old_v(:,:,:) = diag%p_grad_acc_l_v(:,:,:) + diag%p_grad_acc_nl_v(:,:,:)
-      diag%p_grad_acc_old_w(:,:,:) = diag%p_grad_acc_l_w(:,:,:) + diag%p_grad_acc_nl_w(:,:,:)
+      diag%p_grad_acc_old_u(:,:,:) = diag%p_grad_acc_nl_u(:,:,:) + diag%p_grad_acc_l_u(:,:,:)
+      diag%p_grad_acc_old_v(:,:,:) = diag%p_grad_acc_nl_v(:,:,:) + diag%p_grad_acc_l_v(:,:,:)
+      diag%p_grad_acc_old_w(:,:,:) = diag%p_grad_acc_nl_w(:,:,:) + diag%p_grad_acc_l_w(:,:,:)
     endif
   
   end subroutine manage_pressure_gradient
