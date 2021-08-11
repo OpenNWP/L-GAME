@@ -78,7 +78,7 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -O1 -Wall")
 SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS} -lgfortran -O1 -Wall -Wno-c-binding-type -Wno-unused-dummy-argument")
                                                 # insert output of 'nf-config --fflags --flibs' here
 SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -I/usr/include -L/usr/lib/x86_64-linux-gnu -lnetcdff -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -lnetcdf -lnetcdf -ldl -lm")
-target_link_libraries(rfpet m netcdf netcdff atmostracers)
+target_link_libraries(rfpet m netcdf netcdff atmostracers geos95)
 
 
 

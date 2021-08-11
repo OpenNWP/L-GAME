@@ -7,7 +7,8 @@ module grid_generator
 
   use definitions,        only: wp,t_grid
   use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re,omega,p_0,gravity, &
-                                lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard
+                                lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard, &
+                                scenario
   use gradient_operators, only: grad_hor_cov_extended,grad
   use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_p
 
@@ -21,27 +22,42 @@ module grid_generator
   public :: bg_pres
   public :: geopot
   
+  interface
+    real(C_DOUBLE) function calculate_distance_h(latitude_a,longitude_a,latitude_b,longitude_b,radius) &
+    bind(c, name = "calculate_distance_h")
+        use, intrinsic::iso_c_binding
+        implicit none
+        real(C_DOUBLE), value :: latitude_a
+        real(C_DOUBLE), value :: longitude_a
+        real(C_DOUBLE), value :: latitude_b
+        real(C_DOUBLE), value :: longitude_b
+        real(C_DOUBLE), value :: radius
+    end function calculate_distance_h
+  end interface
+  
   contains
   
   subroutine grid_setup(grid)
   
     type(t_grid), intent(inout) :: grid ! the model grid
     ! local variables
-    real(wp) :: lat_left_lower ! latitude coordinate of lower left corner
-    real(wp) :: lon_left_lower ! longitude coordinate of lower left corner
-    real(wp) :: dlat           ! mesh size in y direction as angle
-    real(wp) :: dlon           ! mesh size in x direction as angle
-    integer  :: ji,jk,jl       ! loop indices
-    real(wp) :: max_oro        ! variable for orography check
-    real(wp) :: A              ! variable for calculating the vertical grid
-    real(wp) :: B              ! variable for calculating the vertical grid
-    real(wp) :: sigma_z        ! variable for calculating the vertical grid
-    real(wp) :: z_rel          ! variable for calculating the vertical grid
+    real(wp) :: lat_left_lower  ! latitude coordinate of lower left corner
+    real(wp) :: lon_left_lower  ! longitude coordinate of lower left corner
+    real(wp) :: dlat            ! mesh size in y direction as angle
+    real(wp) :: dlon            ! mesh size in x direction as angle
+    integer  :: ji,jk,jl        ! loop indices
+    real(wp) :: max_oro         ! variable for orography check
+    real(wp) :: A               ! variable for calculating the vertical grid
+    real(wp) :: B               ! variable for calculating the vertical grid
+    real(wp) :: sigma_z         ! variable for calculating the vertical grid
+    real(wp) :: z_rel           ! variable for calculating the vertical grid
     real(wp) :: z_vertical_vector_pre(nlays+1)
-                               ! variable for calculating the vertical grid
+                                ! variable for calculating the vertical grid
+    real(wp) :: base_area       ! variable for calculating the vertical grid
     real(wp) :: lower_z,upper_z,lower_length
-                               ! variables needed for area calculations
-    real(wp) :: base_area      ! help variable for calculating the TRSK weights
+                                ! variables needed for area calculations
+    real(wp) :: height_mountain ! height of Gaussian mountain (needed for test case)
+    real(wp) :: sigma_mountain  ! standard deviation of Gaussian mountain (needed for test case)
     
     ! setting the latitude and longitude coordinates of the scalar grid points
     ! setting the dy of the model grid
@@ -75,11 +91,26 @@ module grid_generator
     enddo
     
     ! setting up the orography of the grid
-    do ji=1,nlins+2
-      do jk=1,ncols+2
-        grid%z_geo_w(ji,jk,nlays+1) = 0._wp
-      enddo
-    enddo
+    select case (trim(scenario))
+    
+      case("standard")
+        do ji=1,nlins+2
+          do jk=1,ncols+2
+            grid%z_geo_w(ji,jk,nlays+1) = 0._wp
+          enddo
+        enddo
+
+      case("resting_mountain")
+        height_mountain = 8848._wp ! Mount Everest
+        sigma_mountain = 3000._wp
+        do ji=1,nlins+2
+          do jk=1,ncols+2
+            grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk), &
+            0._wp,0._wp,re)**2/(2._wp*sigma_mountain**2))
+          enddo
+        enddo
+    
+    endselect
   
     ! calculating the vertical positions of the scalar points
     ! the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1

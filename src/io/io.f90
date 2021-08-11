@@ -39,19 +39,35 @@ module io
     
       case("standard")
       
-      ! This test case is the standard atmosphere.
+        ! This test case is the standard atmosphere.
       
-      state%wind_u(:,:,:) = 0._wp
-      state%wind_v(:,:,:) = 0._wp
-      
-      do ji=1,nlins+2
-        do jk=1,ncols+2
-          do jl=1,nlays
-            diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_geo_scal(ji,jk,jl))
+        state%wind_u(:,:,:) = 0._wp
+        state%wind_v(:,:,:) = 0._wp
+       
+        do ji=1,nlins+2
+          do jk=1,ncols+2
+            do jl=1,nlays
+              diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_geo_scal(ji,jk,jl))
+            enddo
+            pres_lowest_layer(ji,jk) = bg_pres(grid%z_geo_scal(ji,jk,nlays))
           enddo
-          pres_lowest_layer(ji,jk) = bg_pres(grid%z_geo_scal(ji,jk,nlays))
         enddo
-      enddo
+
+      case("resting_mountain")
+      
+        ! This test case is the standard atmosphere with a Gaussian mountain.
+      
+        state%wind_u(:,:,:) = 0._wp
+        state%wind_v(:,:,:) = 0._wp
+       
+        do ji=1,nlins+2
+          do jk=1,ncols+2
+            do jl=1,nlays
+              diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_geo_scal(ji,jk,jl))
+            enddo
+            pres_lowest_layer(ji,jk) = bg_pres(grid%z_geo_scal(ji,jk,nlays))
+          enddo
+        enddo
     
     endselect
     
