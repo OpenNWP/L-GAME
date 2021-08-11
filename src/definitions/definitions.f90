@@ -91,33 +91,33 @@ module definitions
   type t_diag
   
     ! type containing diagnostic quantities
-    real(wp), allocatable :: e_kin(:,:,:)              ! specific kinetic energy
-    real(wp), allocatable :: p_grad_acc_l_u(:,:,:)     ! x-component of linear pressure gradient acceleration
-    real(wp), allocatable :: p_grad_acc_l_v(:,:,:)     ! y-component of linear pressure gradient acceleration
-    real(wp), allocatable :: p_grad_acc_l_w(:,:,:)     ! z-component of linear pressure gradient accelerationpgrad_acc_old
-    real(wp), allocatable :: p_grad_acc_nl_u(:,:,:)    ! x-component of nonlinear pressure gradient acceleration
-    real(wp), allocatable :: p_grad_acc_nl_v(:,:,:)    ! y-component of nonlinear pressure gradient acceleration
-    real(wp), allocatable :: p_grad_acc_nl_w(:,:,:)    ! z-component of nonlinear pressure gradient acceleration
-    real(wp), allocatable :: p_grad_acc_old_u(:,:,:)   ! x-component of pressure gradient at old time step
-    real(wp), allocatable :: p_grad_acc_old_v(:,:,:)   ! y-component of pressure gradient at old time step
-    real(wp), allocatable :: p_grad_acc_old_w(:,:,:)   ! z-component of pressure gradient at old time step
-    real(wp), allocatable :: e_kin_grad_x(:,:,:)       ! x-gradient of specific kinetic energy
-    real(wp), allocatable :: e_kin_grad_y(:,:,:)       ! y-gradient of specific kinetic energy
-    real(wp), allocatable :: e_kin_grad_z(:,:,:)       ! z-gradient of specific kinetic energy
-    real(wp), allocatable :: pot_vort_tend_x(:,:,:)    ! tendency due to the vorticity flux term in x-direction
-    real(wp), allocatable :: pot_vort_tend_y(:,:,:)    ! tendency due to the vorticity flux term in y-direction
-    real(wp), allocatable :: pot_vort_tend_z(:,:,:)    ! tendency due to the vorticity flux term in z-direction
-    real(wp), allocatable :: mom_diff_tend_x(:,:,:)    ! tendency due to momentum diffusion in x-direction
-    real(wp), allocatable :: mom_diff_tend_y(:,:,:)    ! tendency due to momentum diffusion in y-direction
-    real(wp), allocatable :: mom_diff_tend_z(:,:,:)    ! tendency due to momentum diffusion in z-direction
-    real(wp), allocatable :: scalar_placeholder(:,:,:) ! placeholder for scalar fields
-    real(wp), allocatable :: u_placeholder(:,:,:)      ! placeholder for vector fields in x-direction
-    real(wp), allocatable :: v_placeholder(:,:,:)      ! placeholder for vector fields in y-direction
-    real(wp), allocatable :: w_placeholder(:,:,:)      ! placeholder for vector fields in z-direction
-    real(wp), allocatable :: u_10(:,:)                 ! 10 m wind in x direction
-    real(wp), allocatable :: v_10(:,:)                 ! 10 m wind in y direction
-    real(wp), allocatable :: mslp(:,:)                 ! mean sea level pressure
-    real(wp), allocatable :: t_2(:,:)                  ! 2 m temperature
+    real(wp), allocatable :: e_kin(:,:,:)               ! specific kinetic energy
+    real(wp), allocatable :: p_grad_acc_neg_l_u(:,:,:)  ! x-component of linear pressure gradient acceleration
+    real(wp), allocatable :: p_grad_acc_neg_l_v(:,:,:)  ! y-component of linear pressure gradient acceleration
+    real(wp), allocatable :: p_grad_acc_neg_l_w(:,:,:)  ! z-component of linear pressure gradient accelerationpgrad_acc_old
+    real(wp), allocatable :: p_grad_acc_neg_nl_u(:,:,:) ! x-component of nonlinear pressure gradient acceleration
+    real(wp), allocatable :: p_grad_acc_neg_nl_v(:,:,:) ! y-component of nonlinear pressure gradient acceleration
+    real(wp), allocatable :: p_grad_acc_neg_nl_w(:,:,:) ! z-component of nonlinear pressure gradient acceleration
+    real(wp), allocatable :: p_grad_acc_old_u(:,:,:)    ! x-component of pressure gradient at old time step
+    real(wp), allocatable :: p_grad_acc_old_v(:,:,:)    ! y-component of pressure gradient at old time step
+    real(wp), allocatable :: p_grad_acc_old_w(:,:,:)    ! z-component of pressure gradient at old time step
+    real(wp), allocatable :: e_kin_grad_x(:,:,:)        ! x-gradient of specific kinetic energy
+    real(wp), allocatable :: e_kin_grad_y(:,:,:)        ! y-gradient of specific kinetic energy
+    real(wp), allocatable :: e_kin_grad_z(:,:,:)        ! z-gradient of specific kinetic energy
+    real(wp), allocatable :: pot_vort_tend_x(:,:,:)     ! tendency due to the vorticity flux term in x-direction
+    real(wp), allocatable :: pot_vort_tend_y(:,:,:)     ! tendency due to the vorticity flux term in y-direction
+    real(wp), allocatable :: pot_vort_tend_z(:,:,:)     ! tendency due to the vorticity flux term in z-direction
+    real(wp), allocatable :: mom_diff_tend_x(:,:,:)     ! tendency due to momentum diffusion in x-direction
+    real(wp), allocatable :: mom_diff_tend_y(:,:,:)     ! tendency due to momentum diffusion in y-direction
+    real(wp), allocatable :: mom_diff_tend_z(:,:,:)     ! tendency due to momentum diffusion in z-direction
+    real(wp), allocatable :: scalar_placeholder(:,:,:)  ! placeholder for scalar fields
+    real(wp), allocatable :: u_placeholder(:,:,:)       ! placeholder for vector fields in x-direction
+    real(wp), allocatable :: v_placeholder(:,:,:)       ! placeholder for vector fields in y-direction
+    real(wp), allocatable :: w_placeholder(:,:,:)       ! placeholder for vector fields in z-direction
+    real(wp), allocatable :: u_10(:,:)                  ! 10 m wind in x direction
+    real(wp), allocatable :: v_10(:,:)                  ! 10 m wind in y direction
+    real(wp), allocatable :: mslp(:,:)                  ! mean sea level pressure
+    real(wp), allocatable :: t_2(:,:)                   ! 2 m temperature
     real(wp), allocatable :: z_eta_x(:,:,:)             ! relative vorticity in x-direction
     real(wp), allocatable :: z_eta_y(:,:,:)             ! relative vorticity in y-direction
     real(wp), allocatable :: z_eta_z(:,:,:)             ! relative vorticity in z-direction
