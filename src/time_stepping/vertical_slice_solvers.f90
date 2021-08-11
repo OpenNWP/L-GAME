@@ -180,8 +180,8 @@ module vertical_slice_solvers
         enddo
         ! Exner pressure
         do jl=1,nlays
-          state_new%exner_pert(ji+1,jk+1,jl) = state_old%exner_pert(ji+1,jk+1,jl) &
-          + grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji+1,jk+1,jl)-state_old%rhotheta(ji+1,jk+1,jl))
+          state_new%exner_pert(ji+1,jk+1,jl) = exner_pert_expl(jl) &
+          + grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji+1,jk+1,jl)-rhotheta_expl(jl))
         enddo
         
       enddo
