@@ -99,7 +99,7 @@ module vertical_slice_solvers
             gammaa(jl) = ((1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
           endif
           ! explicit potential temperature perturbation
-          theta_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl) &
+          theta_pert_expl(jl) = state_old%theta_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl) &
           + beta(jl)*tend%rhotheta(ji,jk,jl))
           ! explicit Exner pressure perturbation
           exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*gammaa(jl)*tend%rhotheta(ji,jk,jl)
@@ -109,8 +109,8 @@ module vertical_slice_solvers
         do jl=1,nlays-1
           rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl)+state_old%rho(ji+1,jk+1,jl+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
-          theta_int_expl(jl) = 0.5_wp*(grid%exner_bg(ji+1,jk+1,jl)+theta_pert_expl(jl) &
-          +grid%exner_bg(ji+1,jk+1,jl+1)+theta_pert_expl(jl+1))
+          theta_int_expl(jl) = 0.5_wp*(grid%theta_bg(ji+1,jk+1,jl)+theta_pert_expl(jl) &
+          +grid%theta_bg(ji+1,jk+1,jl+1)+theta_pert_expl(jl+1))
           theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl) &
           + state_new%rhotheta(ji+1,jk+1,jl+1)/state_new%rho(ji+1,jk+1,jl+1))
         enddo
