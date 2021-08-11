@@ -19,9 +19,9 @@ module thermodynamics
   
   contains
 
-  function spec_heat_cap_diagnostics_v(j_constituents)
+  function spec_heat_cap_diagnostics_v(j_constituent)
     
-    integer, intent(in) :: j_constituents
+    integer, intent(in) :: j_constituent
     
     ! specific heat capacity at constant volume
     real(wp) :: spec_heat_cap_diagnostics_v
@@ -30,9 +30,9 @@ module thermodynamics
     
   end function spec_heat_cap_diagnostics_v
 
-  function spec_heat_cap_diagnostics_p(j_constituents)
+  function spec_heat_cap_diagnostics_p(j_constituent)
     
-    integer, intent(in) :: j_constituents
+    integer, intent(in) :: j_constituent
     
     ! specific heat capacity at constant pressure
     real(wp) :: spec_heat_cap_diagnostics_p
@@ -41,9 +41,9 @@ module thermodynamics
     
   end function spec_heat_cap_diagnostics_p
   
-  function gas_constant_diagnostics(j_constituents)
+  function gas_constant_diagnostics(j_constituent)
     
-    integer, intent(in) :: j_constituents
+    integer, intent(in) :: j_constituent
     
     ! specific heat capacity at constant pressure
     real(wp) :: gas_constant_diagnostics
