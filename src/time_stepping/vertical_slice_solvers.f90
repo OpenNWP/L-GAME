@@ -102,7 +102,7 @@ module vertical_slice_solvers
           theta_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl) &
           + beta(jl)*tend%rhotheta(ji,jk,jl))
           ! explicit Exner pressure perturbation
-          exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + grid%volume(ji,jk,jl)*gammaa(jl)*dtime*tend%rhotheta(ji,jk,jl)
+          exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*gammaa(jl)*tend%rhotheta(ji,jk,jl)
         enddo
         
         ! interface values
