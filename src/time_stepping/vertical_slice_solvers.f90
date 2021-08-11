@@ -163,8 +163,8 @@ module vertical_slice_solvers
         ! density, potential temperature density
         do jl=2,nlays-1
           state_new%rho(ji+1,jk+1,jl) = rho_expl(jl) + dtime*(-solution(jl-1)+solution(jl))
-          state_new%rhotheta(ji+1,jk+1,jl) = rhotheta_expl(jl) + &
-          dtime*(-theta_int_new(jl-1)*solution(jl-1)+theta_int_new(jl)*solution(jl))
+          state_new%rhotheta(ji+1,jk+1,jl) = rhotheta_expl(jl) &
+          + dtime*(-theta_int_new(jl-1)*solution(jl-1)+theta_int_new(jl)*solution(jl))
         enddo
         ! uppermost layer
         state_new%rho(ji+1,jk+1,1) = rho_expl(1) + dtime*solution(1)
