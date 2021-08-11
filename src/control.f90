@@ -155,8 +155,8 @@ program control
   ! writing out the initial state
   call write_output(state_old,diag,0,grid)
   
-  ! copying the old state to the new state
-  call lin_combination(state_old,state_old,state_new,1._wp,0._wp)
+  ! copying the new state to the old state
+  state_old = state_new
 
   ! the loop over the time steps
   t_0 = t_init
@@ -173,7 +173,7 @@ program control
     ! managing the calls to the output routine
     if (t_0 + dtime >= t_write) then
     
-            call interpolation_t(state_old,state_new,state_write,t_0,t_0+dtime,t_write)
+      call interpolation_t(state_old,state_new,state_write,t_0,t_0+dtime,t_write)
       call write_output(state_write,diag,int((t_write-t_0)/60._wp),grid)
     
       t_write = t_write + dt_write
