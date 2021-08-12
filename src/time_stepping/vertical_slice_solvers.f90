@@ -76,23 +76,23 @@ module vertical_slice_solvers
           ! explicit potential temperature density
           rhotheta_expl(jl) = state_old%rhotheta(ji+1,jk+1,jl) + dtime*tend%rhotheta(ji,jk,jl)
           if (rk_Step == 1) then
-            ! old time step partial derivatives of rho*theta and Pi (divided by the volume)
+            ! old time step partial derivatives of theta and Pi (divided by the volume)
             alpha(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2/grid%volume(ji,jk,jl)
             beta(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)/grid%volume(ji,jk,jl)
             gammaa(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
             (grid%exner_bg(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))/grid%volume(ji,jk,jl)
           else
-            ! old time step partial derivatives of rho*theta and Pi
+            ! old time step partial derivatives of theta and Pi
             alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2
             beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)
             gamma_old(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
             (grid%exner_bg(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))
-            ! new time step partial derivatives of rho*theta and Pi
+            ! new time step partial derivatives of theta and Pi
             alpha_new(jl) = -state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl)**2
             beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl)
             gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
             *(grid%exner_bg(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
-            ! interpolation of partial derivatives of rho times theta and Pi
+            ! interpolation of partial derivatives of theta and Pi
             alpha (jl) = ((1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
             beta  (jl) = ((1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
             gammaa(jl) = ((1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
