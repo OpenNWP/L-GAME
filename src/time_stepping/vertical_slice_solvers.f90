@@ -38,7 +38,6 @@ module vertical_slice_solvers
     real(wp)                 :: theta_pert_expl(nlays)  ! explicit potential temperature perturbation
     real(wp)                 :: rho_int_old(nlays-1)    ! old interface mass density
     real(wp)                 :: rho_int_expl(nlays-1)   ! explicit interface mass density
-    real(wp)                 :: theta_int_expl(nlays-1) ! explicit potential temperature interface values
     real(wp)                 :: theta_int_new(nlays-1)  ! preliminary new potential temperature interface values
     integer                  :: ji,jk,jl                ! loop variables
     real(wp)                 :: rho_int_new             ! new density interface value
@@ -109,8 +108,6 @@ module vertical_slice_solvers
         do jl=1,nlays-1
           rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl)+state_old%rho(ji+1,jk+1,jl+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
-          theta_int_expl(jl) = 0.5_wp*(grid%theta_bg(ji+1,jk+1,jl)+theta_pert_expl(jl) &
-          +grid%theta_bg(ji+1,jk+1,jl+1)+theta_pert_expl(jl+1))
           theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl) &
           + state_new%rhotheta(ji+1,jk+1,jl+1)/state_new%rho(ji+1,jk+1,jl+1))
         enddo
@@ -136,7 +133,7 @@ module vertical_slice_solvers
           r_vector(jl) = -(state_old%wind_w(ji+1,jk+1,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
           (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1)) &
           /(impl_weight*dtime**2*c_p) &
-          + theta_int_expl(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
+          + theta_int_new(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
           + 0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
           - (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p) &
           *state_old%wind_w(ji+1,jk+1,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
