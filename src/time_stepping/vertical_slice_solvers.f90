@@ -119,8 +119,8 @@ module vertical_slice_solvers
           + 0.5_wp*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
           *(alpha(jl+1)-alpha(jl)+theta_int_new(jl)*(beta(jl+1)-beta(jl))) &
           - (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
-          *(2._wp/grid%area_z(ji,jk,jl+1)-dtime*state_old%wind_w(ji+1,jk+1,jl+1)*0.5_wp &
-          *(1._wp/grid%volume(ji,jk,jl)+1._wp/grid%volume(ji,jk,jl+1)))
+          *(2._wp/grid%area_z(ji,jk,jl+1)+dtime*state_old%wind_w(ji+1,jk+1,jl+1)*0.5_wp &
+          *(-1._wp/grid%volume(ji,jk,jl)+1._wp/grid%volume(ji,jk,jl+1)))
           ! Klemp swamp layer
           z_above_damping = grid%z_geo_w(ji+1,jk+1,jl+1)-damping_start_height
           if (z_above_damping < 0._wp .or. .not. lklemp) then
