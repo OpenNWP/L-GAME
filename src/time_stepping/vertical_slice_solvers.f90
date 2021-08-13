@@ -121,14 +121,6 @@ module vertical_slice_solvers
           - (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
           *(2._wp/grid%area_z(ji,jk,jl+1)+dtime*state_old%wind_w(ji+1,jk+1,jl+1)*0.5_wp &
           *(-1._wp/grid%volume(ji,jk,jl)+1._wp/grid%volume(ji,jk,jl+1)))
-          ! Klemp swamp layer
-          z_above_damping = grid%z_geo_w(ji+1,jk+1,jl+1)-damping_start_height
-          if (z_above_damping < 0._wp .or. .not. lklemp) then
-            damping_coeff = 0._wp
-          else
-            damping_coeff = klemp_damp_max*sin(0.5_wp*4*atan(1.d0)*z_above_damping/(toa-damping_start_height))**2
-          endif
-          d_vector(jl) = (1._wp + damping_coeff*dtime)*d_vector(jl)
           ! right hand side
           r_vector(jl) = -(state_old%wind_w(ji+1,jk+1,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
           (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1)) &
@@ -155,6 +147,17 @@ module vertical_slice_solvers
         enddo
     
         call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution,nlays-1)
+       
+        ! Klemp swamp layer
+        do jl=1,nlays-1
+          z_above_damping = grid%z_geo_w(ji+1,jk+1,jl+1)-damping_start_height
+          if (z_above_damping < 0._wp .or. .not. lklemp) then
+            damping_coeff = 0._wp
+          else
+            damping_coeff = klemp_damp_max*sin(0.5_wp*4*atan(1.d0)*z_above_damping/(toa-damping_start_height))**2
+          endif
+          solution(jl) = solution(jl)/(1._wp + damping_coeff*dtime)
+        enddo
         
         ! results
         ! density, potential temperature density
