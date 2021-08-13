@@ -57,14 +57,16 @@ module vertical_slice_solvers
     real(wp)                 :: damping_start_height    ! lower boundary height of the Klemp layer
     real(wp)                 :: damping_coeff           ! damping coefficient of the Klemp layer
     real(wp)                 :: z_above_damping         ! height above the lower boundary of the damping height
+    real(wp)                 :: partial_impl_weight     ! partial derivatives new time step weight
 
     c_v = spec_heat_cap_diagnostics_v(1)
     c_p = spec_heat_cap_diagnostics_p(1)
     r_d = gas_constant_diagnostics(1)
     damping_start_height = klemp_begin_rel*toa
 
-    ! setting the implicit weight
+    ! setting the implicit weights
     impl_weight = c_v/c_p
+    partial_impl_weight = 0._wp
 
     do ji=1,nlins
       do jk=1,ncols
@@ -93,9 +95,9 @@ module vertical_slice_solvers
             gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
             *(grid%exner_bg(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
             ! interpolation of partial derivatives of theta and Pi
-            alpha (jl) = ((1._wp - impl_weight)*alpha_old(jl) + impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
-            beta  (jl) = ((1._wp - impl_weight)*beta_old (jl) + impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
-            gammaa(jl) = ((1._wp - impl_weight)*gamma_old(jl) + impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
+            alpha (jl) = ((1._wp - partial_impl_weight)*alpha_old(jl) + partial_impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
+            beta  (jl) = ((1._wp - partial_impl_weight)*beta_old (jl) + partial_impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
+            gammaa(jl) = ((1._wp - partial_impl_weight)*gamma_old(jl) + partial_impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
           endif
           ! explicit potential temperature perturbation
           theta_pert_expl(jl) = state_old%theta_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl) &
@@ -180,8 +182,8 @@ module vertical_slice_solvers
         enddo
         ! Exner pressure
         do jl=1,nlays
-          state_new%exner_pert(ji+1,jk+1,jl) = exner_pert_expl(jl) &
-          + grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji+1,jk+1,jl)-rhotheta_expl(jl))
+          state_new%exner_pert(ji+1,jk+1,jl) = state_old%exner_pert(ji+1,jk+1,jl) &
+          + grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji+1,jk+1,jl)-state_old%rhotheta(ji+1,jk+1,jl))
         enddo
         
       enddo
