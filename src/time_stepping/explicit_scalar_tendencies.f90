@@ -1,7 +1,7 @@
 ! This source file is part of the Regional Forecasting with Poisson-brackets in Exner-Theta formulation (RFPET), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/RFPET
 
-module scalar_tendencies_expl
+module explicit_scalar_tendencies
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
@@ -44,4 +44,4 @@ module scalar_tendencies_expl
   
   end subroutine
 
-end module scalar_tendencies_expl
+end module explicit_scalar_tendencies

@@ -22,7 +22,7 @@ src/grid_generator/grid_generator.f90
 src/waves_coupler/waves_coupler.f90
 src/time_stepping/vertical_slice_solvers.f90
 src/time_stepping/explicit_vector_tendencies.f90
-src/time_stepping/scalar_tendencies_expl.f90
+src/time_stepping/explicit_scalar_tendencies.f90
 src/time_stepping/manage_rkhevi.f90
 src/time_stepping/pressure_gradient.f90
 src/thermodynamics/thermodynamics.f90
