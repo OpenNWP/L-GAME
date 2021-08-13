@@ -38,6 +38,7 @@ module explicit_vector_tendencies
     ! local variables
     real(wp)                     :: old_hor_pgrad_sound_weight ! old time step pressure gradient weight
     real(wp)                     :: new_hor_pgrad_sound_weight ! new time step pressure gradient weight
+    real(wp)                     :: old_weight, new_weight     ! Runge-Kutta weights
     
     old_hor_pgrad_sound_weight = 0.5_wp - spec_heat_cap_diagnostics_v(1)/spec_heat_cap_diagnostics_p(1)
     new_hor_pgrad_sound_weight = 1._wp - old_hor_pgrad_sound_weight
@@ -66,10 +67,16 @@ module explicit_vector_tendencies
       endif
     endif
     
+    new_weight = 1._wp
+    if (rk_step == 2) then
+        new_weight = 0.5_wp
+    endif
+    old_weight = 1._wp - new_weight
     
     ! adding up the explicit wind tendencies
     ! x-direction
-    tend%wind_u = &
+    tend%wind_u = old_weight*tend%wind_u &
+    + new_weight*( &
     ! old time step pressure gradient component
     old_hor_pgrad_sound_weight*diag%p_grad_acc_old_u &
     ! new time step pressure gradient component
@@ -77,9 +84,10 @@ module explicit_vector_tendencies
     ! momentum advection
     - diag%e_kin_grad_x + diag%pot_vort_tend_x & 
     ! momentum diffusion
-    + diag%mom_diff_tend_x
+    + diag%mom_diff_tend_x)
     ! y-direction
-    tend%wind_v = &
+    tend%wind_v = old_weight*tend%wind_v &
+    + new_weight*( &
     ! old time step pressure gradient component
     old_hor_pgrad_sound_weight*diag%p_grad_acc_old_v &
     ! new time step pressure gradient component
@@ -87,16 +95,17 @@ module explicit_vector_tendencies
     ! momentum advection
     - diag%e_kin_grad_y + diag%pot_vort_tend_y &
     ! momentum diffusion
-    + diag%mom_diff_tend_y
+    + diag%mom_diff_tend_y)
     ! z-direction
-    tend%wind_w = &
+    tend%wind_w = old_weight*tend%wind_w &
+    + new_weight*( &
     ! old time step component of the pressure gradient acceleration
     -gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1) &
     *(diag%p_grad_acc_neg_nl_w + diag%p_grad_acc_neg_l_w) &
     ! momentum advection
     - diag%e_kin_grad_z + diag%pot_vort_tend_z &
     ! momentum diffusion
-    + diag%mom_diff_tend_z
+    + diag%mom_diff_tend_z)
   
   end subroutine vector_tendencies_expl
 
