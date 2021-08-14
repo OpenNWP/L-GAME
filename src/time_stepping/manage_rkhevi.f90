@@ -25,12 +25,12 @@ module manage_rkhevi
   
   subroutine rkhevi(state_old,state_new,tend,grid,diag,total_step_counter)
     
-    type(t_state),  intent(inout) :: state_old    ! the state at the old timestep
-    type(t_state),  intent(inout) :: state_new    ! the state at the new timestep
-    type(t_tend),   intent(inout) :: tend         ! the tendency
-    type(t_grid),   intent(in)  :: grid           ! the grid of the model
-    type(t_diag),   intent(inout) :: diag         ! diagnostic quantities
-    integer,    intent(in)  :: total_step_counter ! time step counter
+    type(t_state),  intent(inout) :: state_old          ! the state at the old timestep
+    type(t_state),  intent(inout) :: state_new          ! the state at the new timestep
+    type(t_tend),   intent(inout) :: tend               ! the tendency
+    type(t_grid),   intent(in)    :: grid               ! the grid of the model
+    type(t_diag),   intent(inout) :: diag               ! diagnostic quantities
+    integer,        intent(in)    :: total_step_counter ! time step counter
     
     ! local variables
     integer  :: rk_step          ! index of the Runge-Kutta step
