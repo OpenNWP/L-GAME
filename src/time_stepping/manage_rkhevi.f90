@@ -12,7 +12,7 @@ module manage_rkhevi
     use explicit_vector_tendencies, only: vector_tendencies_expl
     use thermodynamics,             only: spec_heat_cap_diagnostics_v, gas_constant_diagnostics
     use explicit_scalar_tendencies, only: expl_scalar_tend
-    use vertical_slice_solvers,     only: three_band_solver_ver
+    use column_solvers,             only: three_band_solver_ver
     use boundaries,                 only: bc
 
     implicit none

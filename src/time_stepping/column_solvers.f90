@@ -1,7 +1,7 @@
 ! This source file is part of the Regional Forecasting with Poisson-brackets in Exner-Theta formulation (RFPET), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/RFPET
 
-module vertical_slice_solvers
+module column_solvers
 
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
@@ -246,7 +246,7 @@ module vertical_slice_solvers
   
   end subroutine thomas_algorithm
 
-end module vertical_slice_solvers
+end module column_solvers
 
 
 
