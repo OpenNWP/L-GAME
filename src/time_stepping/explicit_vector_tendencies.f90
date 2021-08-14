@@ -36,12 +36,12 @@ module explicit_vector_tendencies
     integer,       intent(in)    :: total_step_counter ! time step counter of the model integration
     
     ! local variables
-    real(wp)                     :: old_hor_pgrad_sound_weight ! old time step pressure gradient weight
-    real(wp)                     :: new_hor_pgrad_sound_weight ! new time step pressure gradient weight
+    real(wp)                     :: old_hor_pgrad_weight ! old time step pressure gradient weight
+    real(wp)                     :: new_hor_pgrad_weight ! new time step pressure gradient weight
     real(wp)                     :: old_weight, new_weight     ! Runge-Kutta weights
     
-    new_hor_pgrad_sound_weight = 1.25_wp
-    old_hor_pgrad_sound_weight = 1._wp - new_hor_pgrad_sound_weight
+    new_hor_pgrad_weight = 1.25_wp
+    old_hor_pgrad_weight = 1._wp - new_hor_pgrad_weight
      
     ! momentum advection
     if (((slow_update_bool .and. rk_step == 2) .or. total_step_counter == 0) .and. .not. llinear) then
@@ -60,7 +60,7 @@ module explicit_vector_tendencies
     endif
     
     ! momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
-      if (rk_step == 1 .and. slow_update_bool) then
+    if (rk_step == 1 .and. slow_update_bool) then
       ! horizontal momentum diffusion
       if (lmom_diff_h) then
         call mom_diff_h(state,diag,grid)
@@ -78,9 +78,9 @@ module explicit_vector_tendencies
     tend%wind_u = old_weight*tend%wind_u &
     + new_weight*( &
     ! old time step pressure gradient component
-    old_hor_pgrad_sound_weight*diag%p_grad_acc_old_u &
+    old_hor_pgrad_weight*diag%p_grad_acc_old_u &
     ! new time step pressure gradient component
-    - new_hor_pgrad_sound_weight*(diag%p_grad_acc_neg_nl_u + diag%p_grad_acc_neg_l_u) &
+    - new_hor_pgrad_weight*(diag%p_grad_acc_neg_nl_u + diag%p_grad_acc_neg_l_u) &
     ! momentum advection
     - diag%e_kin_grad_x + diag%pot_vort_tend_x & 
     ! momentum diffusion
@@ -89,9 +89,9 @@ module explicit_vector_tendencies
     tend%wind_v = old_weight*tend%wind_v &
     + new_weight*( &
     ! old time step pressure gradient component
-    old_hor_pgrad_sound_weight*diag%p_grad_acc_old_v &
+    old_hor_pgrad_weight*diag%p_grad_acc_old_v &
     ! new time step pressure gradient component
-    - new_hor_pgrad_sound_weight*(diag%p_grad_acc_neg_nl_v + diag%p_grad_acc_neg_l_v) &
+    - new_hor_pgrad_weight*(diag%p_grad_acc_neg_nl_v + diag%p_grad_acc_neg_l_v) &
     ! momentum advection
     - diag%e_kin_grad_y + diag%pot_vort_tend_y &
     ! momentum diffusion
