@@ -371,8 +371,8 @@ module grid_generator
           ! lowest layer
           if (jl == nlays) then
             pressure    = bg_pres(grid%z_geo_scal(ji,jk,jl))
-            grid%theta_bg(ji,jk,jl) = temperature*(pressure/p_0)**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1))
-            grid%exner_bg(ji,jk,jl) = temperature/grid%theta_bg(ji,jk,jl)
+            grid%exner_bg(ji,jk,jl) = (pressure/p_0)**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1))
+            grid%theta_bg(ji,jk,jl) = temperature/grid%exner_bg(ji,jk,jl)
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure

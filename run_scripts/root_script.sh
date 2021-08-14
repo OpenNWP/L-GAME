@@ -3,11 +3,8 @@
 # the directory of this run
 run_dir=$rfpet_home_dir/output/$run_id
 
-# creating the run directory if it does not exist
-if [ ! -d $run_dir ]
-then
+rm -r $run_dir
 mkdir $run_dir
-fi
 
 mv namelist.nml $run_dir
 

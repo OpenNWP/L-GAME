@@ -10,7 +10,7 @@ ncpus=1
 cat > namelist.nml << EOF
 
 &run
-nlins=101
+nlins=3
 ncols=101
 nlays=20
 dy=800
@@ -26,7 +26,7 @@ lmom_diff_v=.false.
 /
 
 &io
-dt_write_min=60
+dt_write_min=1
 /
 
 EOF

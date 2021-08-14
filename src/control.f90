@@ -174,7 +174,7 @@ program control
     if (t_0 + dtime >= t_write) then
     
       call interpolation_t(state_old,state_new,state_write,t_0,t_0+dtime,t_write)
-      call write_output(state_write,diag,int((t_write-t_0)/60._wp),grid)
+      call write_output(state_write,diag,int((t_write-t_init)/60._wp),grid)
     
       t_write = t_write + dt_write
     

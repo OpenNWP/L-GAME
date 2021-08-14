@@ -152,7 +152,7 @@ module io
     ! defining the dimensions
     call check(nf90_def_dim(ncid,"x",ncols,x_dimid))
     call check(nf90_def_dim(ncid,"y",nlins,y_dimid))
-    call check(nf90_def_dim(ncid,"z",nlays,  z_dimid))
+    call check(nf90_def_dim(ncid,"z",nlays,z_dimid))
 
     ! setting the dimension ID arrays
     ! 2D
@@ -165,8 +165,8 @@ module io
 
     ! Define the variable. The type of the variable in this case is
     ! NF90_INT (4-byte integer).
-    call check(nf90_def_var(ncid,"p",NF90_REAL,dimids_3d,varid_p))
     call check(nf90_def_var(ncid,"T",NF90_REAL,dimids_3d,varid_t))
+    call check(nf90_def_var(ncid,"p",NF90_REAL,dimids_3d,varid_p))
     call check(nf90_def_var(ncid,"u",NF90_REAL,dimids_3d,varid_u))
     call check(nf90_def_var(ncid,"v",NF90_REAL,dimids_3d,varid_v))
     call check(nf90_def_var(ncid,"w",NF90_REAL,dimids_3d,varid_w))
@@ -174,17 +174,18 @@ module io
     ! ending the definition section
     call check(nf90_enddef(ncid))
   
+     
     ! 3D temperature
-    call check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
     diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) =  (grid%theta_bg(2:nlins+1,2:ncols+1,:) &
     + state%theta_pert(2:nlins+1,2:ncols+1,:)) &
     *(grid%exner_bg(2:nlins+1,2:ncols+1,:) + state%exner_pert(2:nlins+1,2:ncols+1,:))
+    call check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
     
     ! writing the data to the output file
     ! 3D pressure
-    call check(nf90_put_var(ncid,varid_p,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
     diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) = state%rho(2:nlins+1,2:ncols+1,:) &
     *gas_constant_diagnostics(1)*diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
+    call check(nf90_put_var(ncid,varid_p,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
     
     ! 3D u wind
     do jk=1,ncols
@@ -238,8 +239,8 @@ module io
           ! lowest layer
           if (jl == nlays) then
             pressure    = pres_lowest_layer(ji,jk)
-            state%theta_pert(ji,jk,jl) = temperature*(pressure/p_0)**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1))
-            state%exner_pert(ji,jk,jl) = temperature/state%theta_pert(ji,jk,jl)
+            state%exner_pert(ji,jk,jl) = (pressure/p_0)**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1))
+            state%theta_pert(ji,jk,jl) = temperature/state%exner_pert(ji,jk,jl)
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
@@ -254,17 +255,15 @@ module io
       enddo
     enddo
     
+    ! density
+    state%rho(:,:,:) = p_0*(state%exner_pert(:,:,:))**(spec_heat_cap_diagnostics_p(1)/gas_constant_diagnostics(1)) &
+    /(gas_constant_diagnostics(1)*diag%scalar_placeholder(:,:,:))
+    ! potential temperature density
+    state%rhotheta(:,:,:) = state%rho(:,:,:)*state%theta_pert(:,:,:)
+    
     ! substracting the background state
     state%theta_pert(:,:,:) = state%theta_pert(:,:,:) - grid%theta_bg(:,:,:)
     state%exner_pert(:,:,:) = state%exner_pert(:,:,:) - grid%exner_bg(:,:,:)
-    
-    ! potential temoerature density
-    state%rhotheta(:,:,:) = p_0/gas_constant_diagnostics(1)*(grid%exner_bg(:,:,:) + state%exner_pert(:,:,:)) &
-    **(spec_heat_cap_diagnostics_v(1)/gas_constant_diagnostics(1))
-    ! potential temperature
-    state%theta_pert(:,:,:) = diag%scalar_placeholder(:,:,:)/(grid%exner_bg(:,:,:) + state%exner_pert(:,:,:)) - grid%theta_bg(:,:,:)
-    ! density
-    state%rho(:,:,:)      = state%rhotheta(:,:,:)/(grid%theta_bg(:,:,:) + state%theta_pert(:,:,:))
     
     ! vertical wind velocity
     state%wind_w(:,:,:) = 0._wp
