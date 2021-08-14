@@ -39,7 +39,6 @@ module explicit_scalar_tendencies
     diag%u_placeholder,diag%v_placeholder)
     ! calculating the divergence of the potential temperature density flux
     call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
-    
     tend%rhotheta(:,:,:) = diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
   
   end subroutine

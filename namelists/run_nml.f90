@@ -55,7 +55,7 @@ module run_nml
     dx              = 850._wp
     run_span_hr     = 63
     t_init          = 0._wp
-    adv_sound_ratio = 4
+    adv_sound_ratio = 1
     toa             = 40000._wp
     sigma           = 1.3_wp
     semiminor       = 6356752.314_wp

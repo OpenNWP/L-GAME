@@ -49,7 +49,7 @@ module vorticities
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
     diag%z_eta_x(:,:,1) = diag%z_eta_x(:,:,2)
     ! dividing by the area
-    diag%z_eta_x(:,:,:) = grid%area_dual_x(:,:,:)
+    diag%z_eta_x(:,:,:) = diag%z_eta_x(:,:,:)/grid%area_dual_x(:,:,:)
     
     ! calculating the relative vorticity in y-direction
     do ji=1,nlins
@@ -68,8 +68,8 @@ module vorticities
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
     diag%z_eta_y(:,:,1) = diag%z_eta_y(:,:,2)
     ! dividing by the area
-    diag%z_eta_y(:,:,:) = grid%area_dual_y(:,:,:)
-    
+    diag%z_eta_y(:,:,:) = diag%z_eta_y(:,:,:)/grid%area_dual_y(:,:,:)
+      
     ! calculating the relative vorticity in z-direction
     do ji=1,nlins+1
       do jk=1,ncols+1
@@ -131,7 +131,7 @@ module vorticities
       enddo
     enddo
     ! dividing by the area
-    diag%z_eta_z(:,:,:) = grid%area_dual_z(:,:,:)
+    diag%z_eta_z(:,:,:) = diag%z_eta_z(:,:,:)/grid%area_dual_z(:,:,:)
       
   end subroutine rel_vort
   

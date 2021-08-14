@@ -156,8 +156,8 @@ program control
   call write_output(state_old,diag,0,grid)
   
   ! copying the new state to the old state
-  state_old = state_new
-
+  state_new = state_old
+  
   ! the loop over the time steps
   t_0 = t_init
   t_write = t_0 + dt_write
@@ -165,7 +165,7 @@ program control
   time_step_counter = 0
   do while (t_0 < t_init + run_span + 300)
     
-      call lin_combination(state_new,state_new,state_old,1._wp,0._wp)
+    state_old = state_new
       
     ! this is the RKHEVI routine performing the time stepping
     call rkhevi(state_old,state_new,tend,grid,diag,time_step_counter)
@@ -180,7 +180,7 @@ program control
     
     endif
     
-        t_0 = t_0 + dtime
+    t_0 = t_0 + dtime
     time_step_counter = time_step_counter + 1
     write(*,*) "Step ", time_step_counter, " completed."
     

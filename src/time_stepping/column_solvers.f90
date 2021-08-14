@@ -65,7 +65,7 @@ module column_solvers
     damping_start_height = klemp_begin_rel*toa
 
     ! setting the implicit weights
-    impl_weight = c_v/c_p
+    impl_weight = 0.75_wp
     partial_impl_weight = 0.5_wp
 
     do ji=1,nlins

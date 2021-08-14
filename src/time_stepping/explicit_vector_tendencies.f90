@@ -21,11 +21,11 @@ module explicit_vector_tendencies
   
   private
   
-  public :: vector_tendencies_expl
+  public :: expl_vector_tend
   
   contains
 
-  subroutine vector_tendencies_expl(state,tend,diag,grid,slow_update_bool,rk_step,total_step_counter)
+  subroutine expl_vector_tend(state,tend,diag,grid,slow_update_bool,rk_step,total_step_counter)
   
     type(t_state), intent(in)    :: state              ! state to use for calculating the tendencies
     type(t_tend),  intent(inout) :: tend               ! the tendency
@@ -40,9 +40,9 @@ module explicit_vector_tendencies
     real(wp)                     :: new_hor_pgrad_sound_weight ! new time step pressure gradient weight
     real(wp)                     :: old_weight, new_weight     ! Runge-Kutta weights
     
-    old_hor_pgrad_sound_weight = 0.5_wp - spec_heat_cap_diagnostics_v(1)/spec_heat_cap_diagnostics_p(1)
-    new_hor_pgrad_sound_weight = 1._wp - old_hor_pgrad_sound_weight
-    
+    new_hor_pgrad_sound_weight = 1.25_wp
+    old_hor_pgrad_sound_weight = 1._wp - new_hor_pgrad_sound_weight
+     
     ! momentum advection
     if (((slow_update_bool .and. rk_step == 2) .or. total_step_counter == 0) .and. .not. llinear) then
       ! calculating the mass flux density
@@ -107,7 +107,7 @@ module explicit_vector_tendencies
     ! momentum diffusion
     + diag%mom_diff_tend_z)
   
-  end subroutine vector_tendencies_expl
+  end subroutine expl_vector_tend
 
 end module explicit_vector_tendencies
 
