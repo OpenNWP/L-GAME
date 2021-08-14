@@ -94,7 +94,7 @@ module column_solvers
             beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl)
             gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
             *(grid%exner_bg(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
-            ! interpolation of partial derivatives of theta and Pi
+            ! interpolation of partial derivatives of theta and Pi (divided by the volume)
             alpha (jl) = ((1._wp - partial_impl_weight)*alpha_old(jl) + partial_impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
             beta  (jl) = ((1._wp - partial_impl_weight)*beta_old (jl) + partial_impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
             gammaa(jl) = ((1._wp - partial_impl_weight)*gamma_old(jl) + partial_impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
