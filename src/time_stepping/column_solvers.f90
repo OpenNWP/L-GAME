@@ -177,7 +177,7 @@ module column_solvers
         ! vertical velocity
         do jl=2,nlays
           rho_int_new = 0.5_wp*(state_new%rho(ji+1,jk+1,jl-1)+state_new%rho(ji+1,jk+1,jl))
-          state_new%wind_w(ji+1,jk+1,jl)  = (2._wp*solution(jl-1)/grid%area_z(ji,jk,jl) &
+          state_new%wind_w(ji+1,jk+1,jl) = (2._wp*solution(jl-1)/grid%area_z(ji,jk,jl) &
           - rho_int_new*state_old%wind_w(ji+1,jk+1,jl))/rho_int_old(jl-1)
         enddo
         ! Exner pressure
