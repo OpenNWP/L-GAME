@@ -216,6 +216,7 @@ module io
   subroutine unessential_init(state,diag,grid,pres_lowest_layer)
   
     ! setting the unessential quantities of an initial state
+    ! scalar_placeholder is the temperature here
     
     type(t_state), intent(inout) :: state                  ! state to work with
     type(t_diag),  intent(in)    :: diag                   ! diagnostic quantities
