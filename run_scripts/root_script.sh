@@ -3,7 +3,10 @@
 # the directory of this run
 run_dir=$rfpet_home_dir/output/$run_id
 
+if [ -d $run_dir ]
+then
 rm -r $run_dir
+fi
 mkdir $run_dir
 
 mv namelist.nml $run_dir
