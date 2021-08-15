@@ -78,7 +78,7 @@ module manage_rkhevi
     
     ! in this case, a large time step has been taken, which we modify into a small step here  
     if (slow_update_bool .and. adv_sound_ratio > 1) then
-      call lin_combination(state_old,state_new,state_new,1._wp-dtime/delta_t_step,dtime/delta_t_step)
+      call lin_combination(state_old,state_new,state_new,1._wp-dtime/delta_t_step,dtime/delta_t_step,grid)
     endif
     
     ! calling the boundary conditions subroutine

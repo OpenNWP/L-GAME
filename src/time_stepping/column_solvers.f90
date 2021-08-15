@@ -164,16 +164,17 @@ module column_solvers
         ! results
         ! density, potential temperature density
         do jl=2,nlays-1
-          state_new%rho(ji+1,jk+1,jl) = rho_expl(jl) + dtime*(-solution(jl-1)+solution(jl))
+          state_new%rho(ji+1,jk+1,jl) = rho_expl(jl) + dtime*(-solution(jl-1)+solution(jl))/grid%volume(ji,jk,jl)
           state_new%rhotheta(ji+1,jk+1,jl) = rhotheta_expl(jl) &
-          + dtime*(-theta_int_new(jl-1)*solution(jl-1)+theta_int_new(jl)*solution(jl))
+          + dtime*(-theta_int_new(jl-1)*solution(jl-1)+theta_int_new(jl)*solution(jl))/grid%volume(ji,jk,jl)
         enddo
         ! uppermost layer
-        state_new%rho(ji+1,jk+1,1) = rho_expl(1) + dtime*solution(1)
-        state_new%rhotheta(ji+1,jk+1,1) = rhotheta_expl(1) + dtime*theta_int_new(1)*solution(1)
+        state_new%rho(ji+1,jk+1,1) = rho_expl(1) + dtime*solution(1)/grid%volume(ji,jk,1)
+        state_new%rhotheta(ji+1,jk+1,1) = rhotheta_expl(1)+dtime*theta_int_new(1)*solution(1)/grid%volume(ji,jk,1)
         ! lowest layer
-        state_new%rho(ji+1,jk+1,nlays) = rho_expl(nlays) - dtime*solution(nlays-1)
-        state_new%rhotheta(ji+1,jk+1,nlays) = rhotheta_expl(nlays) - dtime*theta_int_new(nlays-1)*solution(nlays-1)
+        state_new%rho(ji+1,jk+1,nlays) = rho_expl(nlays) - dtime*solution(nlays-1)/grid%volume(ji,jk,nlays)
+        state_new%rhotheta(ji+1,jk+1,nlays) = rhotheta_expl(nlays) &
+        -dtime*theta_int_new(nlays-1)*solution(nlays-1)/grid%volume(ji,jk,nlays)
         ! vertical velocity
         do jl=2,nlays
           rho_int_new = 0.5_wp*(state_new%rho(ji+1,jk+1,jl-1)+state_new%rho(ji+1,jk+1,jl))

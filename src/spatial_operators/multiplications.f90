@@ -32,9 +32,6 @@ module multiplications
     ! local variables
     integer                     :: ji,jk ! loop indices
     
-    result_vector_x(:,:,:) = 0._wp
-    result_vector_y(:,:,:) = 0._wp
-    
     do jk=1,ncols+1
       result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk,:) + scalar_field(:,jk+1,:))*in_vector_x(:,jk,:)
     enddo
@@ -58,9 +55,6 @@ module multiplications
   
     ! local variables
     integer                     :: ji,jk ! loop indices
-    
-    result_vector_x(:,:,:) = 0._wp
-    result_vector_y(:,:,:) = 0._wp
     
     do jk=1,ncols-1
       result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(2:nlins+1,jk,:) + scalar_field(2:nlins+1,jk+1,:))*in_vector_x(:,jk,:)
