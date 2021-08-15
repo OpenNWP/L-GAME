@@ -7,7 +7,7 @@ module io
 
   use definitions,    only: t_state,wp,t_diag,t_grid
   use netcdf
-  use run_nml,        only: nlins,ncols,nlays,scenario,p_0
+  use run_nml,        only: nlins,ncols,nlays,scenario,p_0,run_id
   use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics,spec_heat_cap_diagnostics_p
   use grid_generator, only: bg_temp,bg_pres,geopot
 
@@ -141,12 +141,15 @@ module io
     integer                   :: varid_u                   ! variable ID of the 3D u wind field
     integer                   :: varid_v                   ! variable ID of the 3D v wind field
     integer                   :: varid_w                   ! variable ID of the 3D w wind field
-    character(len=32)         :: filename                  ! output filename
+    character(len=64)         :: filename                  ! output filename
+    character(len=64)         :: time_since_init_min_str   ! time_since_init_min as string
     integer                   :: ji,jk,jl                  ! line indices
     real(wp)                  :: upper_weight(nlins,ncols) ! interpolation weights
     
     ! creating the netcdf file
-    write(filename,"(I10,A3)") time_since_init_min,".nc"
+    write(time_since_init_min_str,*) time_since_init_min
+    time_since_init_min_str = adjustl(time_since_init_min_str)
+    filename = trim(run_id) // "+" // trim(time_since_init_min_str) // "min.nc"
     call check(nf90_create(trim(filename),NF90_CLOBBER,ncid))
     
     ! defining the dimensions

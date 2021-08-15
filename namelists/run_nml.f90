@@ -27,6 +27,7 @@ module run_nml
   logical           :: l3dvar             ! switch for 3d-Var
   logical           :: l4dvar             ! switch for 4d-Var
   character(len=64) :: scenario           ! scenario for ideal runs
+  character(len=64) :: run_id             ! ID of the model run
   real(wp)          :: p_0                ! reference pressure
   real(wp)          :: omega              ! angular frequency of Earth rotation
   real(wp)          :: lapse_rate         ! lapse_rate within the troposphere
@@ -39,7 +40,7 @@ module run_nml
   logical           :: llinear            ! switch to turn momentum advection on or off
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr, &
-  adv_sound_ratio,toa,scenario,llinear
+  adv_sound_ratio,toa,scenario,llinear,run_id
 
   contains
 
@@ -66,6 +67,7 @@ module run_nml
     l3dvar          = .false.
     l4dvar          = .false.
     scenario        = "standard"
+    run_id          = "ideal"
     p_0             = 100000._wp
     omega           = 7.292115e-5
     lapse_rate      = 0.0065_wp
