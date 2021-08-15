@@ -1,5 +1,5 @@
-! This source file is part of the Regional Forecasting with Poisson-brackets in Exner-Theta formulation (RFPET), which is released under the MIT license.
-! Github repository: https://github.com/OpenNWP/RFPET
+! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
+! Github repository: https://github.com/OpenNWP/L-GAME
 
 ! This file contains the calculation of the grid properties as well as some type definitions.
 

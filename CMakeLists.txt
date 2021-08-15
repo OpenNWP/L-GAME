@@ -1,19 +1,19 @@
-# This source file is part of the Regional Forecasting with Poisson-brackets in Exner-Theta formulation (RFPET), which is released under the MIT license.
-# Github repository: https://github.com/OpenNWP/RFPET
+# This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
+# Github repository: https://github.com/OpenNWP/L-GAME
 
 cmake_minimum_required(VERSION 3.10)
 set(version_major 0)
 set(version_minor 1)
 set(version_patch 1)
 set(version ${version_major}.${version_minor}.${version_patch})
-project(rfpet VERSION ${version})
+project(lgame VERSION ${version})
 set(CMAKE_C_COMPILER mpicc)
 set(CMAKE_Fortran_COMPILER mpifort)
 enable_language(Fortran)
                  # insert the root directory of RTE+RRTMGP here
 set(RTERRTMGPDIR /home/max/code/rte-rrtmgp)
 add_executable(
-rfpet
+lgame
 src/definitions/definitions.f90
 src/control.f90
 src/io/io.f90
@@ -78,7 +78,7 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -O1 -Wall")
 SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS} -lgfortran -O1 -Wall -Wno-c-binding-type -Wno-unused-dummy-argument")
                                                 # insert output of 'nf-config --fflags --flibs' here
 SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -I/usr/include -L/usr/lib/x86_64-linux-gnu -lnetcdff -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -lnetcdf -lnetcdf -ldl -lm")
-target_link_libraries(rfpet m netcdf netcdff atmostracers geos95)
+target_link_libraries(lgame m netcdf netcdff atmostracers geos95)
 
 
 

@@ -1,7 +1,10 @@
 #!/bin/bash
 
+# This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
+# Github repository: https://github.com/OpenNWP/L-GAME
+
 # the directory of this run
-run_dir=$rfpet_home_dir/output/$run_id
+run_dir=$lgame_home_dir/output/$run_id
 
 if [ -d $run_dir ]
 then
@@ -13,20 +16,20 @@ mv namelist.nml $run_dir
 
 cd $run_dir
 
-if [ ! -f ../../build/rfpet ]
+if [ ! -f ../../build/lgame ]
 then
-echo "Executable rfpet missing. Compile first. Aborting run."
+echo "Executable lgame missing. Compile first. Aborting run."
 cd - > /dev/null
 exit 1
 fi
 
-if [ -f rfpet ]
+if [ -f lgame ]
 then
-rm rfpet
+rm lgame
 fi
 
-cp ../../build/rfpet .
+cp ../../build/lgame .
 
-mpirun -np $ncpus ./rfpet
+mpirun -np $ncpus ./lgame
 
 cd - > /dev/null

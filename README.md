@@ -1,6 +1,6 @@
-## Regional Forecasting with Poisson brackets in Exner-Theta formulation
+## Limited-area Version of GAME
 
-RFPET is a numerical weather prediction (NWP) model. It is the application of the theory behind [GAME](https://github.com/opennwp/game) to a regional quadrilateral grid. Properties:
+L-GAME is a numerical weather prediction (NWP) model. It is the application of the theory behind [GAME](https://github.com/opennwp/game) to a regional quadrilateral grid. Properties:
 
 * non-hydrostatic
 * Eulerian
@@ -9,10 +9,10 @@ RFPET is a numerical weather prediction (NWP) model. It is the application of th
 * uses a hybrid of finite volume and finite difference methods
 * time stepping: two-time-level Runge-Kutta scheme, modified into a HEVI (horizontally explicit, vertically implicit) and forward-backward scheme for stability, horizontal pressure gradient extrapolated and kept constant
 * radiation: coupled to [RTE+RRTMGP](https://github.com/earth-system-radiation/rte-rrtmgp)
-* uses the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
+* uses the Poisson bracket  by Gassmann and Herzog (2008) and Gassmann (2013)
 * assigns individual mass densities to all tracers and calculates interactions using the [atmostracers](https://github.com/OpenNWP/atmostracers) library
 
-RFPET is meant to be applied at resolutions finer than 7 km. The default configuration is a 800 m resolution implementation nested into ICON-D2. Other nesting options are of course possible but require more work.
+L-GAME is meant to be applied at resolutions finer than 7 km. The default configuration is a 800 m resolution implementation nested into ICON-D2. Other nesting options are of course possible but require more work.
 
 ## Installation
 
@@ -29,8 +29,8 @@ Everything is easy and quick to install. These instructions are for Ubuntu.
 
 
 ```
-git clone https://github.com/OpenNWP/RFPET.git
-cd RFPET
+git clone https://github.com/OpenNWP/L-GAME.git
+cd L-GAME
 ./setup_directories.sh
 ```
 
