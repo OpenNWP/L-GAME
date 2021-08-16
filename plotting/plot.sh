@@ -4,6 +4,6 @@
 # Github repository: https://github.com/OpenNWP/L-GAME
 
 run_id=ideal
-plot_time_since_init_min=1
-varname="u"
+plot_time_since_init_min=0
+varname="w"
 source .sh/root_script.sh

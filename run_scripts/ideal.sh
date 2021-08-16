@@ -16,7 +16,7 @@ nlays=20
 dy=800
 dx=850
 run_span_hr=1
-scenario="standard"
+scenario="schaer"
 /
 
 &diff
