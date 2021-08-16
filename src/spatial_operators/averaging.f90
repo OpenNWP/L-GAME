@@ -39,19 +39,19 @@ module averaging
         - 0.5_wp*vector_field_x(ji+1,jk+1,jl  )*grid%slope_x(ji+1,jk+1,jl  )*grid%inner_product_weights(ji,jk,jl  ,1) &
         - 0.5_wp*vector_field_y(ji+1,jk+1,jl  )*grid%slope_y(ji+1,jk+1,jl  )*grid%inner_product_weights(ji,jk,jl  ,2) &
         - 0.5_wp*vector_field_x(ji+1,jk  ,jl  )*grid%slope_x(ji+1,jk  ,jl  )*grid%inner_product_weights(ji,jk,jl  ,3) &
-        - 0.5_wp*vector_field_y(ji+1,jk+1,jl  )*grid%slope_y(ji+1,jk+1,jl  )*grid%inner_product_weights(ji,jk,jl  ,4)
+        - 0.5_wp*vector_field_y(ji  ,jk+1,jl  )*grid%slope_y(ji  ,jk+1,jl  )*grid%inner_product_weights(ji,jk,jl  ,4)
       ! levels in between
       else
         vertical_contravariant_corr = vertical_contravariant_corr &
         - 0.5_wp*vector_field_x(ji+1,jk+1,jl-1)*grid%slope_x(ji+1,jk+1,jl-1)*grid%inner_product_weights(ji,jk,jl-1,1) &
         - 0.5_wp*vector_field_y(ji+1,jk+1,jl-1)*grid%slope_y(ji+1,jk+1,jl-1)*grid%inner_product_weights(ji,jk,jl-1,2) &
         - 0.5_wp*vector_field_x(ji+1,jk  ,jl-1)*grid%slope_x(ji+1,jk  ,jl-1)*grid%inner_product_weights(ji,jk,jl-1,3) &
-        - 0.5_wp*vector_field_y(ji+1,jk+1,jl-1)*grid%slope_y(ji+1,jk+1,jl-1)*grid%inner_product_weights(ji,jk,jl-1,4)
+        - 0.5_wp*vector_field_y(ji  ,jk+1,jl-1)*grid%slope_y(ji  ,jk+1,jl-1)*grid%inner_product_weights(ji,jk,jl-1,4)
         vertical_contravariant_corr = vertical_contravariant_corr &
         - 0.5_wp*vector_field_x(ji+1,jk+1,jl  )*grid%slope_x(ji+1,jk+1,jl  )*grid%inner_product_weights(ji,jk,jl  ,1) &
         - 0.5_wp*vector_field_y(ji+1,jk+1,jl  )*grid%slope_y(ji+1,jk+1,jl  )*grid%inner_product_weights(ji,jk,jl  ,2) &
         - 0.5_wp*vector_field_x(ji+1,jk  ,jl  )*grid%slope_x(ji+1,jk  ,jl  )*grid%inner_product_weights(ji,jk,jl  ,3) &
-        - 0.5_wp*vector_field_y(ji+1,jk+1,jl  )*grid%slope_y(ji+1,jk+1,jl  )*grid%inner_product_weights(ji,jk,jl  ,4)
+        - 0.5_wp*vector_field_y(ji  ,jk+1,jl  )*grid%slope_y(ji  ,jk+1,jl  )*grid%inner_product_weights(ji,jk,jl  ,4)
       endif
     endif
   
@@ -150,10 +150,10 @@ module averaging
     
     horizontal_covariant_x = hor_comp_x(ji,jk,jl)
     if (jl > nlays - nlays_oro) then
-      horizontal_covariant_x = horizontal_covariant_x + &
+      horizontal_covariant_x = horizontal_covariant_x &
       ! more self-consistency is not required, more accuracy would be an option however
-      grid%slope_x(ji,jk,jl)*0.25_wp*(vert_comp(ji,jk,jl)+vert_comp(ji,jk+1,jl)+ &
-      vert_comp(ji,jk,jl+1)+vert_comp(ji,jk+1,jl+1))
+      + grid%slope_x(ji,jk,jl)*0.25_wp*(vert_comp(ji,jk,jl)+vert_comp(ji,jk+1,jl) &
+      + vert_comp(ji,jk,jl+1)+vert_comp(ji,jk+1,jl+1))
     endif
     
   end function horizontal_covariant_x
@@ -172,10 +172,10 @@ module averaging
   
     horizontal_covariant_y = hor_comp_y(ji,jk,jl)
     if (jl > nlays - nlays_oro) then
-      horizontal_covariant_y = horizontal_covariant_y + &
+      horizontal_covariant_y = horizontal_covariant_y &
       ! more self-consistency is not required, more accuracy would be an option however
-      grid%slope_y(ji,jk,jl)*0.25_wp*(vert_comp(ji,jk,jl)+vert_comp(ji+1,jk,jl)+ &
-      vert_comp(ji,jk,jl+1)+vert_comp(ji+1,jk,jl+1))
+      + grid%slope_y(ji,jk,jl)*0.25_wp*(vert_comp(ji,jk,jl)+vert_comp(ji+1,jk,jl) &
+      + vert_comp(ji,jk,jl+1)+vert_comp(ji+1,jk,jl+1))
     endif
   
   end function horizontal_covariant_y

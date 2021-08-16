@@ -43,7 +43,7 @@ module vorticities
           - grid%dy(ji  ,jk+1,jl  )*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,jl  )
         enddo
         ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
-        diag%z_eta_x(ji,jk,nlays+1) = grid%dy(ji,jk+1,jl-1)*state%wind_v(ji,jk+1,nlays)
+        diag%z_eta_x(ji,jk,nlays+1) = grid%dy(ji,jk+1,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,nlays)
       enddo
     enddo
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
@@ -62,7 +62,7 @@ module vorticities
           + grid%dx(ji+1,jk  ,jl  )*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,jl  )
         enddo
         ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
-        diag%z_eta_y(ji,jk,nlays+1) = -grid%dy(ji+1,jk,nlays)*state%wind_v(ji+1,jk,jl-1)
+        diag%z_eta_y(ji,jk,nlays+1) = -grid%dx(ji+1,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,nlays)
       enddo
     enddo
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
