@@ -57,11 +57,11 @@ module multiplications
     integer                     :: ji,jk ! loop indices
     
     do jk=1,ncols-1
-      result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(2:nlins+1,jk,:) + scalar_field(2:nlins+1,jk+1,:))*in_vector_x(:,jk,:)
+      result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(2:nlins+1,jk+1,:) + scalar_field(2:nlins+1,jk+2,:))*in_vector_x(:,jk,:)
     enddo
     
     do ji=1,nlins-1
-      result_vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji,2:ncols+1,:) + scalar_field(ji+1,2:ncols+1,:))*in_vector_y(ji,:,:)
+      result_vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji+1,2:ncols+1,:) + scalar_field(ji+2,2:ncols+1,:))*in_vector_y(ji,:,:)
     enddo
   
   end subroutine scalar_times_vector_h_for_gradient
