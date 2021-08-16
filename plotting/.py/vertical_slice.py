@@ -32,9 +32,9 @@ for i in range(len(x_array[:, 0])):
 
 # plotting
 fig = plt.figure();
-c = plt.contour(1e-3*x_array, 1e-3*z_array[:,:,2], plot_array[:,:,2], colors="black");
-plt.clabel(c);
-plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname + " / " + unit);
+cf = plt.contourf(1e-3*x_array, 1e-3*z_array[:,:,2], plot_array[:,:,2], cmap="jet");
+plt.colorbar(cf, label = unit);
+plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname);
 plt.xlabel("x / km");
 plt.ylabel("z / km");
 fig.savefig("../figs/" + run_id + "+" + plot_time_since_init_min + "min_" + varname + ".png");

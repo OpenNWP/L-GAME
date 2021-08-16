@@ -43,7 +43,7 @@ module run_nml
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr, &
-  adv_sound_ratio,toa,scenario,llinear,run_id
+  adv_sound_ratio,toa,scenario,llinear,run_id,lcorio
 
   contains
 
@@ -56,7 +56,7 @@ module run_nml
     ncols               = 101
     nlays               = 80
     dy                  = 800._wp
-    dx                  = 850._wp
+    dx                  = 850._wplcorio
     run_span_hr         = 63
     t_init              = 0._wp
     adv_sound_ratio     = 1
