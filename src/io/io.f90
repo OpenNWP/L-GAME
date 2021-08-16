@@ -136,6 +136,9 @@ module io
     integer                   :: z_dimid                   ! ID of the z dimension
     integer                   :: dimids_2d(2)              ! dimensions of horizontal fields
     integer                   :: dimids_3d(3)              ! dimensions of 3D fields
+    integer                   :: varid_lat                 ! variable ID of the lat coordinates
+    integer                   :: varid_lon                 ! variable ID of the lon coordinates
+    integer                   :: varid_z                   ! variable ID of the z coordinates
     integer                   :: varid_p                   ! variable ID of the 3D pressure field
     integer                   :: varid_t                   ! variable ID of the 3D temperature field
     integer                   :: varid_u                   ! variable ID of the 3D u wind field
@@ -157,8 +160,8 @@ module io
     call check(nf90_put_att(ncid,NF90_GLOBAL,"Time_since_initialization_in_minutes",trim(time_since_init_min_str)))
     
     ! defining the dimensions
-    call check(nf90_def_dim(ncid,"x",ncols,x_dimid))
-    call check(nf90_def_dim(ncid,"y",nlins,y_dimid))
+    call check(nf90_def_dim(ncid,"lon_model",ncols,x_dimid))
+    call check(nf90_def_dim(ncid,"lat_model",nlins,y_dimid))
     call check(nf90_def_dim(ncid,"z",nlays,z_dimid))
 
     ! setting the dimension ID arrays
@@ -172,6 +175,15 @@ module io
 
     ! Define the variable. The type of the variable in this case is
     ! NF90_INT (4-byte integer).
+    call check(nf90_def_var(ncid,"lat_model",NF90_REAL,y_dimid,varid_lat))
+    call check(nf90_put_att(ncid,varid_lat,"Description","latitudes of the grid points (in the frame of reference of the model)"))
+    call check(nf90_put_att(ncid,varid_lat,"Unit","rad"))
+    call check(nf90_def_var(ncid,"lon_model",NF90_REAL,x_dimid,varid_lon))
+    call check(nf90_put_att(ncid,varid_lon,"Description","longitudes of the grid points (in the frame of reference of the model)"))
+    call check(nf90_put_att(ncid,varid_lon,"Unit","rad"))
+    call check(nf90_def_var(ncid,"z",NF90_REAL,dimids_3d,varid_z))
+    call check(nf90_put_att(ncid,varid_z,"Description","z coordinates of the grid points (MSL)"))
+    call check(nf90_put_att(ncid,varid_z,"Unit","m"))
     call check(nf90_def_var(ncid,"T",NF90_REAL,dimids_3d,varid_t))
     call check(nf90_put_att(ncid,varid_t,"Description","air temperature"))
     call check(nf90_put_att(ncid,varid_t,"Unit","K"))
@@ -190,7 +202,14 @@ module io
   
     ! ending the definition section
     call check(nf90_enddef(ncid))
-     
+    
+    ! latitude coordinates of the grid points
+    call check(nf90_put_var(ncid,varid_lat,grid%lat_scalar(2:nlins+1)))
+    ! longitude coordinates of the grid points
+    call check(nf90_put_var(ncid,varid_lon,grid%lon_scalar(2:ncols+1)))
+    ! z coordinates of the grid points
+    call check(nf90_put_var(ncid,varid_z,grid%z_geo_scal(2:nlins+1,2:ncols+1,:)))
+    
     ! 3D temperature
     diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) =  (grid%theta_bg(2:nlins+1,2:ncols+1,:) &
     + state%theta_pert(2:nlins+1,2:ncols+1,:)) &
