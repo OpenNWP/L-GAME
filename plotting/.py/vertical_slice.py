@@ -31,8 +31,9 @@ for i in range(len(x_array[:, 0])):
 	x_array[i, :] = x_vector;
 
 # plotting
+bounds=np.linspace(np.floor(np.min(plot_array[:,:,2])), np.ceil(np.max(plot_array[:,:,2])), 1000);
 fig = plt.figure();
-cf = plt.contourf(1e-3*x_array, 1e-3*z_array[:,:,2], plot_array[:,:,2], cmap="jet");
+cf = plt.contourf(1e-3*x_array, 1e-3*z_array[:,:,2], plot_array[:,:,2], cmap = "jet", levels = bounds);
 plt.colorbar(cf, label = unit);
 plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname);
 plt.xlabel("x / km");

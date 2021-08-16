@@ -25,8 +25,8 @@ module diff_nml
     lklemp          = .true.
     klemp_damp_max  = 0.25_wp
     klemp_begin_rel = 0.53_wp
-    lmom_diff_h     = .true.
-    lmom_diff_v     = .true.
+    lmom_diff_h     = .false.
+    lmom_diff_v     = .false.
   
       ! Open and read Namelist file.
       open(action="read", file="namelist.nml", newunit=fileunit)
