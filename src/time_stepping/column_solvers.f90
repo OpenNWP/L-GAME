@@ -5,7 +5,7 @@ module column_solvers
 
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
-  use run_nml,        only: nlins,ncols,wp,nlays,dtime,p_0,toa
+  use run_nml,        only: nlins,ncols,wp,nlays,dtime,p_0,toa,impl_weight,partial_impl_weight
   use definitions,    only: t_grid,t_state,t_tend
   use thermodynamics, only: spec_heat_cap_diagnostics_v,spec_heat_cap_diagnostics_p,gas_constant_diagnostics
   use diff_nml,       only: lklemp,klemp_damp_max,klemp_begin_rel
@@ -50,23 +50,17 @@ module column_solvers
     real(wp)                 :: alpha(nlays)            ! alpha
     real(wp)                 :: beta(nlays)             ! beta
     real(wp)                 :: gammaa(nlays)           ! gamma
-    real(wp)                 :: impl_weight             ! implicit weight
     real(wp)                 :: c_v                     ! specific heat capacity at constant volume
     real(wp)                 :: c_p                     ! specific heat capacity at constant pressure
     real(wp)                 :: r_d                     ! individual gas constant of dry air
     real(wp)                 :: damping_start_height    ! lower boundary height of the Klemp layer
     real(wp)                 :: damping_coeff           ! damping coefficient of the Klemp layer
     real(wp)                 :: z_above_damping         ! height above the lower boundary of the damping height
-    real(wp)                 :: partial_impl_weight     ! partial derivatives new time step weight
 
     c_v = spec_heat_cap_diagnostics_v(1)
     c_p = spec_heat_cap_diagnostics_p(1)
     r_d = gas_constant_diagnostics(1)
     damping_start_height = klemp_begin_rel*toa
-
-    ! setting the implicit weights
-    impl_weight = 0.75_wp
-    partial_impl_weight = 0.5_wp
 
     do ji=1,nlins
       do jk=1,ncols

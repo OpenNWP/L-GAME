@@ -8,7 +8,7 @@ module explicit_vector_tendencies
   use definitions,        only: t_grid,t_state,t_diag,t_tend,wp
   use inner_product,      only: kinetic_energy
   use gradient_operators, only: grad
-  use run_nml,            only: nlins,ncols,nlays,llinear
+  use run_nml,            only: nlins,ncols,nlays,llinear,impl_weight
   use vorticities,        only: calc_pot_vort
   use multiplications,    only: scalar_times_vector
   use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_v, &
@@ -40,7 +40,7 @@ module explicit_vector_tendencies
     real(wp)                     :: new_hor_pgrad_weight ! new time step pressure gradient weight
     real(wp)                     :: old_weight, new_weight     ! Runge-Kutta weights
     
-    new_hor_pgrad_weight = 1.25_wp
+    new_hor_pgrad_weight = 0.5_wp + impl_weight
     old_hor_pgrad_weight = 1._wp - new_hor_pgrad_weight
      
     ! momentum advection
@@ -100,7 +100,7 @@ module explicit_vector_tendencies
     tend%wind_w = old_weight*tend%wind_w &
     + new_weight*( &
     ! old time step component of the pressure gradient acceleration
-    -gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1) &
+    -(1._wp - impl_weight) &
     *(diag%p_grad_acc_neg_nl_w + diag%p_grad_acc_neg_l_w) &
     ! momentum advection
     - diag%e_kin_grad_z + diag%pot_vort_tend_z &

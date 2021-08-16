@@ -209,7 +209,7 @@ module grid_generator
     ! setting the horizontal areas at the higher points (above the surface)
     do ji=1,nlins
       do jk=1,ncols
-        do jl=1,nlays+1
+        do jl=1,nlays
           grid%area_z(ji,jk,jl) = grid%area_z(ji,jk,nlays+1)*(re + grid%z_geo_w(ji+1,jk+1,jl))**2 &
           /(re + grid%z_geo_w(ji+1,jk+1,nlays+1))**2
         enddo
