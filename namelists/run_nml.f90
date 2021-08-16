@@ -56,7 +56,7 @@ module run_nml
     ncols               = 101
     nlays               = 80
     dy                  = 800._wp
-    dx                  = 850._wplcorio
+    dx                  = 850._wp
     run_span_hr         = 63
     t_init              = 0._wp
     adv_sound_ratio     = 1
