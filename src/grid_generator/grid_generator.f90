@@ -58,6 +58,7 @@ module grid_generator
                                 ! variables needed for area calculations
     real(wp) :: height_mountain ! height of Gaussian mountain (needed for test case)
     real(wp) :: sigma_mountain  ! standard deviation of Gaussian mountain (needed for test case)
+    real(wp) :: x_coord         ! help variable needed for the Schär test
     
     ! setting the latitude and longitude coordinates of the scalar grid points
     ! setting the dy of the model grid
@@ -100,13 +101,24 @@ module grid_generator
           enddo
         enddo
 
-      case("resting_mountain","schaer")
-        height_mountain = 100._wp
+      case("resting_mountain")
+        height_mountain = 1000._wp
         sigma_mountain = 7000._wp
         do ji=1,nlins+2
           do jk=1,ncols+2
-            grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk), &
-            0._wp,0._wp,re)**2/(2._wp*sigma_mountain**2))
+            x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
+            grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))
+          enddo
+        enddo
+        
+      case("schaer")
+        height_mountain = 250._wp
+        sigma_mountain = 5000._wp/sqrt(2._wp)
+        do ji=1,nlins+2
+          do jk=1,ncols+2
+            x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
+            grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2)) &
+            *cos(4*atan(1.d0)*x_coord/4000._wp)**2
           enddo
         enddo
     

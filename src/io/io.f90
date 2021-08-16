@@ -57,7 +57,7 @@ module io
       
         ! This test case is the standard atmosphere with a Gaussian mountain.
       
-        state%wind_u(:,:,:) = 1._wp
+        state%wind_u(:,:,:) = 18.71_wp
         state%wind_v(:,:,:) = 0._wp
        
         do ji=1,nlins+2

@@ -4,20 +4,23 @@
 # Github repository: https://github.com/OpenNWP/L-GAME
 
 lgame_home_dir=~/code/L-GAME
-run_id=ideal
+run_id=schaer
 ncpus=1
 
 cat > namelist.nml << EOF
 
 &run
 run_id="$run_id"
-nlins=101
-ncols=101
-nlays=30
-dy=850
-dx=800
+nlins=3
+ncols=201
+nlays=65
+toa=19500.0
+dy=1050
+dx=1000
 run_span_hr=1
-scenario="standard"
+scenario="schaer"
+llinear=.true.
+lcorio=.false.
 /
 
 &diff
