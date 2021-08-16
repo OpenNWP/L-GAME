@@ -152,6 +152,10 @@ module io
     filename = trim(run_id) // "+" // trim(time_since_init_min_str) // "min.nc"
     call check(nf90_create(trim(filename),NF90_CLOBBER,ncid))
     
+    call check(nf90_put_att(ncid,NF90_GLOBAL,"Description","This is output of L-GAME."))
+    call check(nf90_put_att(ncid,NF90_GLOBAL,"Run_ID",trim(run_id)))
+    call check(nf90_put_att(ncid,NF90_GLOBAL,"Time_since_initialization_in_minutes",trim(time_since_init_min_str)))
+    
     ! defining the dimensions
     call check(nf90_def_dim(ncid,"x",ncols,x_dimid))
     call check(nf90_def_dim(ncid,"y",nlins,y_dimid))
@@ -169,14 +173,23 @@ module io
     ! Define the variable. The type of the variable in this case is
     ! NF90_INT (4-byte integer).
     call check(nf90_def_var(ncid,"T",NF90_REAL,dimids_3d,varid_t))
+    call check(nf90_put_att(ncid,varid_t,"Description","air temperature"))
+    call check(nf90_put_att(ncid,varid_t,"Unit","K"))
     call check(nf90_def_var(ncid,"p",NF90_REAL,dimids_3d,varid_p))
+    call check(nf90_put_att(ncid,varid_p,"Description","air pressure"))
+    call check(nf90_put_att(ncid,varid_p,"Unit","Pa"))
     call check(nf90_def_var(ncid,"u",NF90_REAL,dimids_3d,varid_u))
+    call check(nf90_put_att(ncid,varid_u,"Description","zonal wind (in the frame of reference of the model)"))
+    call check(nf90_put_att(ncid,varid_u,"Unit","m/s"))
     call check(nf90_def_var(ncid,"v",NF90_REAL,dimids_3d,varid_v))
+    call check(nf90_put_att(ncid,varid_v,"Description","meridional wind (in the frame of reference of the model)"))
+    call check(nf90_put_att(ncid,varid_v,"Unit","m/s"))
     call check(nf90_def_var(ncid,"w",NF90_REAL,dimids_3d,varid_w))
+    call check(nf90_put_att(ncid,varid_w,"Description","vertical wind"))
+    call check(nf90_put_att(ncid,varid_w,"Unit","m/s"))
   
     ! ending the definition section
     call check(nf90_enddef(ncid))
-  
      
     ! 3D temperature
     diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) =  (grid%theta_bg(2:nlins+1,2:ncols+1,:) &
