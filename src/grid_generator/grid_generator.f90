@@ -100,9 +100,9 @@ module grid_generator
           enddo
         enddo
 
-      case("resting_mountain")
-        height_mountain = 8848._wp ! Mount Everest
-        sigma_mountain = 3000._wp
+      case("resting_mountain","schaer")
+        height_mountain = 100._wp
+        sigma_mountain = 7000._wp
         do ji=1,nlins+2
           do jk=1,ncols+2
             grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk), &

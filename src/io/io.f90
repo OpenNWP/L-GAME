@@ -37,7 +37,7 @@ module io
       
     select case (trim(scenario))
     
-      case("standard")
+      case("standard","resting_mountain")
       
         ! This test case is the standard atmosphere.
       
@@ -53,11 +53,11 @@ module io
           enddo
         enddo
 
-      case("resting_mountain")
+      case("schaer")
       
         ! This test case is the standard atmosphere with a Gaussian mountain.
       
-        state%wind_u(:,:,:) = 0._wp
+        state%wind_u(:,:,:) = 5._wp
         state%wind_v(:,:,:) = 0._wp
        
         do ji=1,nlins+2

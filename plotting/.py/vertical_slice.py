@@ -18,6 +18,7 @@ lon_vector = ds["lon_model"][:];
 z_array = ds["z"][:];
 # reading the variable
 plot_array = ds[varname][:];
+unit = ds[varname].Unit;
 ds.close();
 
 # preparations for the plot
@@ -25,13 +26,15 @@ semiminor = 6356752.314
 semimajor = 6378137.0
 re = (semimajor*semimajor*semiminor)**(1/3)
 x_vector = lon_vector*re;
-number_of_levels = len(z_array[:,0,0]);
-z_vector = np.linspace(0,np.max(z_array),number_of_levels);
+x_array = np.zeros([len(z_array[:,0,2]), len(z_array[0,:,2])]);
+for i in range(len(x_array[:, 0])):
+	x_array[i, :] = x_vector;
 
 # plotting
 fig = plt.figure();
-plt.contour(1e-3*x_vector, 1e-3*z_vector, plot_array[:,:,2]);
-plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname);
+c = plt.contour(1e-3*x_array, 1e-3*z_array[:,:,2], plot_array[:,:,2], colors="black");
+plt.clabel(c);
+plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname + " / " + unit);
 plt.xlabel("x / km");
 plt.ylabel("z / km");
 fig.savefig("../figs/" + run_id + "+" + plot_time_since_init_min + "min_" + varname + ".png");
