@@ -6,7 +6,7 @@ module vorticities
   ! This module contians the calculation of the vorticities.
 
   use definitions, only: t_state,t_diag,t_grid,wp
-  use run_nml,     only: nlins,ncols,nlays,nlays_oro,re,toa
+  use run_nml,     only: nlins,ncols,nlays,nlays_oro,re,toa,lcorio,llinear
   use averaging,   only: horizontal_covariant_x,horizontal_covariant_y
   
   implicit none
@@ -147,17 +147,26 @@ module vorticities
     integer                      :: ji,jk,jl ! loop index
   
     ! calculating the relative vorticity
-    call rel_vort(state,diag,grid)
+    if (.not. llinear) then
+      call rel_vort(state,diag,grid)
+    else
+      diag%z_eta_x(:,:,:) = 0._wp
+      diag%z_eta_y(:,:,:) = 0._wp
+      diag%z_eta_z(:,:,:) = 0._wp
+    endif
+    
     ! adding the Coriolis vector to the relative vorticity to obtain the absolute vorticity
-    do jl=1,nlays+1
-      diag%z_eta_x(:,:,jl) = diag%z_eta_x(:,:,jl) + grid%fvec_x(:,:)
-    enddo
-    do jl=1,nlays+1
-      diag%z_eta_y(:,:,jl) = diag%z_eta_y(:,:,jl) + grid%fvec_y(:,:)
-    enddo
-    do jl=1,nlays
-      diag%z_eta_z(:,:,jl) = diag%z_eta_z(:,:,jl) + grid%fvec_z(:,:)
-    enddo
+    if (lcorio) then
+      do jl=1,nlays+1
+        diag%z_eta_x(:,:,jl) = diag%z_eta_x(:,:,jl) + grid%fvec_x(:,:)
+      enddo
+      do jl=1,nlays+1
+        diag%z_eta_y(:,:,jl) = diag%z_eta_y(:,:,jl) + grid%fvec_y(:,:)
+      enddo
+      do jl=1,nlays
+        diag%z_eta_z(:,:,jl) = diag%z_eta_z(:,:,jl) + grid%fvec_z(:,:)
+      enddo
+    endif
     
     ! dividing by the averaged density to obtain the "potential vorticity"
     ! horizontal vorticity in x-direction

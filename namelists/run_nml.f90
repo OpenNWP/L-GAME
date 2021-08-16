@@ -23,6 +23,7 @@ module run_nml
   real(wp)          :: semiminor           ! small halfaxis of the Earth
   real(wp)          :: re                  ! Earth radius
   logical           :: lrestart            ! switch for restart runs
+  logical           :: lcorio              ! switch for the Coriolis force
   logical           :: lideal              ! switch for analytic test cases
   logical           :: l3dvar              ! switch for 3d-Var
   logical           :: l4dvar              ! switch for 4d-Var
@@ -80,6 +81,7 @@ module run_nml
     p_0_standard        = 101325._wp
     gravity             = 9.80616_wp
     llinear             = .false.
+    lcorio              = .true.
     impl_weight         = 0.75_wp
     partial_impl_weight = 0.5_wp
     

@@ -8,7 +8,7 @@ module explicit_vector_tendencies
   use definitions,        only: t_grid,t_state,t_diag,t_tend,wp
   use inner_product,      only: kinetic_energy
   use gradient_operators, only: grad
-  use run_nml,            only: nlins,ncols,nlays,llinear,impl_weight
+  use run_nml,            only: nlins,ncols,nlays,impl_weight,llinear,lcorio
   use vorticities,        only: calc_pot_vort
   use multiplications,    only: scalar_times_vector
   use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_v, &
@@ -44,7 +44,7 @@ module explicit_vector_tendencies
     old_hor_pgrad_weight = 1._wp - new_hor_pgrad_weight
      
     ! momentum advection
-    if (((slow_update_bool .and. rk_step == 2) .or. total_step_counter == 0) .and. .not. llinear) then
+    if (((slow_update_bool .and. rk_step == 2) .or. total_step_counter == 0) .and. ((.not. llinear) .or. lcorio)) then
       ! calculating the mass flux density
       call scalar_times_vector(state%rho,state%wind_u,state%wind_v,state%wind_w, &
       diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
@@ -53,10 +53,12 @@ module explicit_vector_tendencies
       ! calculating the potential voritcity flux term
       call calc_vorticity_flux_term(diag,grid)
       
-      ! Kinetic energy is prepared for the gradient term of the Lamb transformation.
-      call kinetic_energy(state,diag,grid)
-      ! taking the gradient of the kinetic energy
-      call grad(diag%e_kin,diag%e_kin_grad_x,diag%e_kin_grad_y,diag%e_kin_grad_z,grid)
+      if (.not. llinear) then
+        ! Kinetic energy is prepared for the gradient term of the Lamb transformation.
+        call kinetic_energy(state,diag,grid)
+        ! taking the gradient of the kinetic energy
+        call grad(diag%e_kin,diag%e_kin_grad_x,diag%e_kin_grad_y,diag%e_kin_grad_z,grid)
+      endif
     endif
     
     ! momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
