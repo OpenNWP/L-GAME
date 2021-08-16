@@ -6,4 +6,4 @@ then
 mkdir ../figs
 fi
 
-python3 .py/vertical_slice.py
+python3 .py/vertical_slice.py $run_id $plot_time_since_init_min $varname
