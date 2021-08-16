@@ -234,7 +234,7 @@ module grid_generator
         do jl=1,nlays
           lower_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl+1) + grid%z_geo_w(ji+1,jk+1,jl+1))
           upper_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl  ) + grid%z_geo_w(ji+1,jk+1,jl  ))
-          lower_length = dx*cos(0.5_wp*(grid%lat_scalar(jk)+grid%lat_scalar(jk+1)))*(re+lower_z)/re
+          lower_length = dx*cos(0.5_wp*(grid%lat_scalar(ji)+grid%lat_scalar(ji+1)))*(re+lower_z)/re
           grid%area_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
       enddo
