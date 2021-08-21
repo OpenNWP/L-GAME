@@ -35,7 +35,7 @@ cd L-GAME
 ./setup_directories.sh
 ```
 
-Modify the file CMakeLists.txt (read the comments). If you want to use radiation, modify rrtmgp_coefficients_file_sw and rrtmgp_coefficients_file_lw in the file src/radiation/rterrtmgp_coupler.f90.
+If you want to use radiation, modify rrtmgp_coefficients_file_sw and rrtmgp_coefficients_file_lw in the file src/radiation/rterrtmgp_coupler.f90.
 
 ```
 ./compile.sh
