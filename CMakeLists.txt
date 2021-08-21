@@ -65,8 +65,11 @@ namelists/surface_nml.f90
 ../rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90
 ../rte-rrtmgp/extensions/mo_fluxes_byband.F90
 ../rte-rrtmgp/extensions/mo_fluxes_byband_kernels.F90
+../rte-rrtmgp/extensions/cloud_optics/mo_cloud_optics.F90
 ../rte-rrtmgp/examples/mo_load_coefficients.F90
-../rte-rrtmgp/examples/mo_simple_netcdf.F90)
+../rte-rrtmgp/examples/mo_simple_netcdf.F90
+../rte-rrtmgp/examples/all-sky/mo_load_cloud_coefficients.F90
+)
 SET(CMAKE_Fortran_FLAGS "-O1 -Wall -Wno-c-binding-type -Wno-unused-dummy-argument -I/usr/include -L/usr/lib/x86_64-linux-gnu -lnetcdff -lnetcdf")
 target_link_libraries(lgame m netcdff atmostracers geos95)
 
