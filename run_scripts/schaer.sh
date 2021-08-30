@@ -36,4 +36,4 @@ dt_write_min=1
 EOF
 
 # That's it, here we go.
-source root_script.sh
+source .sh/root_script.sh
