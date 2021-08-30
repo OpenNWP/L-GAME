@@ -76,7 +76,6 @@ module io
         enddo
       !$OMP END DO
       !$OMP END PARALLEL
-      !$OMP END DO
     
     endselect
     

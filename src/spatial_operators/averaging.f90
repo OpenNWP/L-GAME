@@ -79,7 +79,7 @@ module averaging
         enddo
       enddo
     enddo
-    !$OMP END PRIVATE
+    !$OMP END DO
     !$OMP END PARALLEL
     
     ! correction to the y-component
@@ -93,7 +93,7 @@ module averaging
         enddo
       enddo
     enddo
-    !$OMP END PRIVATE
+    !$OMP END DO
     !$OMP END PARALLEL
   
   end subroutine hor_cov_to_con

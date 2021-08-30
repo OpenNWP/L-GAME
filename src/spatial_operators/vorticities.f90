@@ -57,7 +57,7 @@ module vorticities
     
     ! calculating the relative vorticity in y-direction
     !$OMP PARALLEL
-    !$ OMP DO PRIVATE(ji,jk,jl)
+    !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=2,nlays

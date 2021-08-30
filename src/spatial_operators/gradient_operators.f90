@@ -44,7 +44,7 @@ module gradient_operators
 
     ! calculating the y-component of the gradient
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,)
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins-1
       do jk=1,ncols
         result_field_y(ji,jk,:) = (scalar_field(ji+1,jk,:) - scalar_field(ji,jk,:))/grid%dy(ji+1,jk+1,:)

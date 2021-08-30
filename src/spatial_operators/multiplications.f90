@@ -33,7 +33,7 @@ module multiplications
     integer                     :: ji,jk ! loop indices
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$OMP DO PRIVATE(jk)
     do jk=1,ncols+1
       result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk,:) + scalar_field(:,jk+1,:))*in_vector_x(:,jk,:)
     enddo
@@ -41,7 +41,7 @@ module multiplications
     !$OMP END PARALLEL
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$OMP DO PRIVATE(ji)
     do ji=1,nlins+1
       result_vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji,:,:) + scalar_field(ji+1,:,:))*in_vector_y(ji,:,:)
     enddo
@@ -65,7 +65,7 @@ module multiplications
     integer                     :: ji,jk ! loop indices
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$OMP DO PRIVATE(jk)
     do jk=1,ncols-1
       result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(2:nlins+1,jk+1,:) + scalar_field(2:nlins+1,jk+2,:))*in_vector_x(:,jk,:)
     enddo
@@ -73,7 +73,7 @@ module multiplications
     !$OMP END PARALLEL
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$OMP DO PRIVATE(ji)
     do ji=1,nlins-1
       result_vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji+1,2:ncols+1,:) + scalar_field(ji+2,2:ncols+1,:))*in_vector_y(ji,:,:)
     enddo
