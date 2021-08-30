@@ -15,16 +15,16 @@ nlins=3
 ncols=201
 nlays=65
 toa=19500.0
-dy=1050
+dy=1000
 dx=1000
-run_span_hr=1
+run_span_hr=10
 scenario="schaer"
 llinear=.true.
 lcorio=.false.
 /
 
 &diff
-lklemp=.false.
+lklemp=.true.
 lmom_diff_h=.false.
 lmom_diff_v=.false.
 /
