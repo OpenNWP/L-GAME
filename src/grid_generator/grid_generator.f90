@@ -154,7 +154,7 @@ module grid_generator
         
         ! placing the scalar points in the middle between the preliminary values of the adjacent levels
         do jl=1,nlays
-          grid%z_geo_scal(ji,jk,jl) = 0.5_wp*(z_vertical_vector_pre(jl) + z_vertical_vector_pre(jl + 1))
+          grid%z_geo_scal(ji,jk,jl) = 0.5_wp*(z_vertical_vector_pre(jl) + z_vertical_vector_pre(jl+1))
         enddo
       enddo
     enddo
@@ -180,7 +180,7 @@ module grid_generator
     enddo
     
     ! calculating the coordinate slopes
-    call grad_hor_cov_extended(grid%z_geo_scal, grid%slope_x, grid%slope_y, grid)
+    call grad_hor_cov_extended(grid%z_geo_scal,grid%slope_x,grid%slope_y,grid)
     
     ! setting the z coordinates of the vertical vector points
     do ji=1,nlins+2
