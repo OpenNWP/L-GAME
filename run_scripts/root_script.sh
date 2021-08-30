@@ -30,6 +30,6 @@ fi
 
 cp ../../build/lgame .
 
-mpirun -np $ncpus ./lgame
+./lgame
 
 cd - > /dev/null

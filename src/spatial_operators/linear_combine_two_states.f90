@@ -25,13 +25,13 @@ module linear_combine_two_states
     real(wp),      intent(in)    :: coeff_1
     type(t_grid),  intent(in)    :: grid
     
-    state_out%rho        = coeff_0*state_0%rho        + coeff_1*state_1%rho
-    state_out%rhotheta   = coeff_0*state_0%rhotheta   + coeff_1*state_1%rhotheta
-    state_out%theta_pert = state_out%rhotheta/state_out%rho - grid%theta_bg
-    state_out%exner_pert = coeff_0*state_0%exner_pert + coeff_1*state_1%exner_pert
-    state_out%wind_u     = coeff_0*state_0%wind_u     + coeff_1*state_1%wind_u
-    state_out%wind_v     = coeff_0*state_0%wind_v     + coeff_1*state_1%wind_v
-    state_out%wind_w     = coeff_0*state_0%wind_w     + coeff_1*state_1%wind_w
+    state_out%rho(:,:,:)        = coeff_0*state_0%rho(:,:,:)                     + coeff_1*state_1%rho(:,:,:)
+    state_out%rhotheta(:,:,:)   = coeff_0*state_0%rhotheta(:,:,:)                + coeff_1*state_1%rhotheta(:,:,:)
+    state_out%theta_pert(:,:,:) = state_out%rhotheta(:,:,:)/state_out%rho(:,:,:) - grid%theta_bg(:,:,:)
+    state_out%exner_pert(:,:,:) = coeff_0*state_0%exner_pert(:,:,:)              + coeff_1*state_1%exner_pert(:,:,:)
+    state_out%wind_u(:,:,:)     = coeff_0*state_0%wind_u(:,:,:)                  + coeff_1*state_1%wind_u(:,:,:)
+    state_out%wind_v(:,:,:)     = coeff_0*state_0%wind_v(:,:,:)                  + coeff_1*state_1%wind_v(:,:,:)
+    state_out%wind_w(:,:,:)     = coeff_0*state_0%wind_w(:,:,:)                  + coeff_1*state_1%wind_w(:,:,:)
   
   end subroutine lin_combination
   

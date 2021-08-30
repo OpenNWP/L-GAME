@@ -174,6 +174,12 @@ module vorticities
       do jl=1,nlays+1
         diag%z_eta_x(:,:,jl) = diag%z_eta_x(:,:,jl) + grid%fvec_x(:,:)
         diag%z_eta_y(:,:,jl) = diag%z_eta_y(:,:,jl) + grid%fvec_y(:,:)
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP DO PRIVATE(jl)
+      do jl=1,nlays
         diag%z_eta_z(:,:,jl) = diag%z_eta_z(:,:,jl) + grid%fvec_z(:,:)
       enddo
       !$OMP END DO

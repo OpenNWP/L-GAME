@@ -5,7 +5,7 @@
 
 lgame_home_dir=~/code/L-GAME
 run_id=ideal
-ncpus=1
+export OMP_NUM_THREADS=2
 
 cat > namelist.nml << EOF
 
@@ -31,8 +31,6 @@ dt_write_min=1
 /
 
 EOF
-
-export OMP_NUM_THREADS=2
 
 # That's it, here we go.
 source root_script.sh
