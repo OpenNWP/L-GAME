@@ -32,18 +32,26 @@ module gradient_operators
     integer                     :: ji,jk                  ! loop variables
 
     ! calculating the x-component of the gradient
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins
       do jk=1,ncols-1
         result_field_x(ji,jk,:) = (scalar_field(ji,jk+1,:) - scalar_field(ji,jk,:))/grid%dx(ji+1,jk+1,:)
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
 
     ! calculating the y-component of the gradient
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,)
     do ji=1,nlins-1
       do jk=1,ncols
         result_field_y(ji,jk,:) = (scalar_field(ji+1,jk,:) - scalar_field(ji,jk,:))/grid%dy(ji+1,jk+1,:)
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
 
   end subroutine grad_hor_cov
   
@@ -59,18 +67,26 @@ module gradient_operators
     integer                     :: ji,jk                  ! loop variables
 
     ! calculating the x-component of the gradient
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins+2
       do jk=1,ncols+1
         result_field_x(ji,jk,:) = (scalar_field(ji,jk+1,:) - scalar_field(ji,jk,:))/grid%dx(ji,jk,:)
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
 
     ! calculating the y-component of the gradient
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins+1
       do jk=1,ncols+2
         result_field_y(ji,jk,:) = (scalar_field(ji+1,jk,:) - scalar_field(ji,jk,:))/grid%dy(ji,jk,:)
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
 
   end subroutine grad_hor_cov_extended
   

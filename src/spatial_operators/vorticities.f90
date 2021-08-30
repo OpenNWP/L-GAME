@@ -33,6 +33,8 @@ module vorticities
     integer                      :: ind_shift         ! needed for handling terrain
     
     ! calculating the relative vorticity in x-direction
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=2,nlays
@@ -46,12 +48,16 @@ module vorticities
         diag%z_eta_x(ji,jk,nlays+1) = grid%dy(ji,jk+1,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,nlays)
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
     diag%z_eta_x(:,:,1) = diag%z_eta_x(:,:,2)
     ! dividing by the area
     diag%z_eta_x(:,:,:) = diag%z_eta_x(:,:,:)/grid%area_dual_x(:,:,:)
     
     ! calculating the relative vorticity in y-direction
+    !$OMP PARALLEL
+    !$ OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=2,nlays
@@ -65,12 +71,16 @@ module vorticities
         diag%z_eta_y(ji,jk,nlays+1) = -grid%dx(ji+1,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,nlays)
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
     diag%z_eta_y(:,:,1) = diag%z_eta_y(:,:,2)
     ! dividing by the area
     diag%z_eta_y(:,:,:) = diag%z_eta_y(:,:,:)/grid%area_dual_y(:,:,:)
       
     ! calculating the relative vorticity in z-direction
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,l_rescale,delta_z,ind_shift,vertical_gradient)
     do ji=1,nlins+1
       do jk=1,ncols+1
         ! layers which do not follow the orography
@@ -130,6 +140,8 @@ module vorticities
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     ! dividing by the area
     diag%z_eta_z(:,:,:) = diag%z_eta_z(:,:,:)/grid%area_dual_z(:,:,:)
       
@@ -157,19 +169,21 @@ module vorticities
     
     ! adding the Coriolis vector to the relative vorticity to obtain the absolute vorticity
     if (lcorio) then
+      !$OMP PARALLEL
+      !$OMP DO PRIVATE(jl)
       do jl=1,nlays+1
         diag%z_eta_x(:,:,jl) = diag%z_eta_x(:,:,jl) + grid%fvec_x(:,:)
-      enddo
-      do jl=1,nlays+1
         diag%z_eta_y(:,:,jl) = diag%z_eta_y(:,:,jl) + grid%fvec_y(:,:)
-      enddo
-      do jl=1,nlays
         diag%z_eta_z(:,:,jl) = diag%z_eta_z(:,:,jl) + grid%fvec_z(:,:)
       enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
     endif
     
     ! dividing by the averaged density to obtain the "potential vorticity"
     ! horizontal vorticity in x-direction
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays+1
@@ -198,8 +212,12 @@ module vorticities
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
     ! horizontal vorticity in y-direction
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays+1
@@ -228,14 +246,20 @@ module vorticities
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! vertical vorticity
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins+1
       do jk=1,ncols+1
         diag%z_eta_z(ji,jk,:) = diag%z_eta_z(ji,jk,:)/(0.25_wp*(state%rho(ji,jk,:)+state%rho(ji+1,jk,:)+ &
         state%rho(ji+1,jk+1,:)+state%rho(ji,jk+1,:)))
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
   end subroutine calc_pot_vort
 

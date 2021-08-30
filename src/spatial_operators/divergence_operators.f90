@@ -32,6 +32,8 @@ module divergence_operators
                                                          ! from the horizontal vector components through the lower area
 
     ! performing the actual calculation
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,comp_h,comp_v)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -63,6 +65,8 @@ module divergence_operators
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
 
   end subroutine divv_h
 

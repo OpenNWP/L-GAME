@@ -32,13 +32,21 @@ module multiplications
     ! local variables
     integer                     :: ji,jk ! loop indices
     
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
     do jk=1,ncols+1
       result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk,:) + scalar_field(:,jk+1,:))*in_vector_x(:,jk,:)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
     do ji=1,nlins+1
       result_vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji,:,:) + scalar_field(ji+1,:,:))*in_vector_y(ji,:,:)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
   end subroutine scalar_times_vector_h
   
@@ -56,13 +64,21 @@ module multiplications
     ! local variables
     integer                     :: ji,jk ! loop indices
     
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
     do jk=1,ncols-1
       result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(2:nlins+1,jk+1,:) + scalar_field(2:nlins+1,jk+2,:))*in_vector_x(:,jk,:)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
     do ji=1,nlins-1
       result_vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji+1,2:ncols+1,:) + scalar_field(ji+2,2:ncols+1,:))*in_vector_y(ji,:,:)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
   end subroutine scalar_times_vector_h_for_gradient
   
@@ -78,9 +94,13 @@ module multiplications
     ! local variables
     integer                     :: jl ! loop index
     
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
     do jl=2,nlays
       result_vector_z(:,:,jl) = 0.5_wp*(scalar_field(:,:,jl-1) + scalar_field(:,:,jl))*in_vector_z(:,:,jl)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
   end subroutine scalar_times_vector_v
   
@@ -96,10 +116,14 @@ module multiplications
     ! local variables
     integer                     :: jl ! loop index
     
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
     do jl=2,nlays
       result_vector_z(:,:,jl) = 0.5_wp*(scalar_field(2:nlins+1,2:ncols+1,jl-1) + scalar_field(2:nlins+1,2:ncols+1,jl)) &
       *in_vector_z(:,:,jl)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
   end subroutine scalar_times_vector_v_for_gradient
   

@@ -62,6 +62,11 @@ module column_solvers
     r_d = gas_constant_diagnostics(1)
     damping_start_height = klemp_begin_rel*toa
 
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,c_vector,d_vector,e_vector,r_vector,solution, &
+    !$OMP rho_expl,rhotheta_expl,exner_pert_expl,theta_pert_expl,rho_int_old, &
+    !$OMP rho_int_expl,theta_int_new,rho_int_new,alpha_old,beta_old,gamma_old,alpha_new, &
+    !$OMP beta_new,gamma_new,alpha,beta,gammaa,damping_coeff,z_above_damping)
     do ji=1,nlins
       do jk=1,ncols
       
@@ -183,6 +188,8 @@ module column_solvers
         
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! potential temperature perturbation at the new time step
     state_new%theta_pert(:,:,:) = state_new%rhotheta(:,:,:)/state_new%rho(:,:,:) - grid%theta_bg(:,:,:)

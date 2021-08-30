@@ -43,7 +43,9 @@ module io
       
         state%wind_u(:,:,:) = 0._wp
         state%wind_v(:,:,:) = 0._wp
-       
+        
+        !$OMP PARALLEL
+        !$OMP DO PRIVATE(ji,jk,jl)
         do ji=1,nlins+2
           do jk=1,ncols+2
             do jl=1,nlays
@@ -52,6 +54,8 @@ module io
             pres_lowest_layer(ji,jk) = bg_pres(grid%z_geo_scal(ji,jk,nlays))
           enddo
         enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
 
       case("schaer")
       
@@ -60,6 +64,8 @@ module io
         state%wind_u(:,:,:) = 18.71_wp
         state%wind_v(:,:,:) = 0._wp
        
+        !$OMP PARALLEL
+        !$OMP DO PRIVATE(ji,jk,jl)
         do ji=1,nlins+2
           do jk=1,ncols+2
             do jl=1,nlays
@@ -68,6 +74,9 @@ module io
             pres_lowest_layer(ji,jk) = bg_pres(grid%z_geo_scal(ji,jk,nlays))
           enddo
         enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+      !$OMP END DO
     
     endselect
     
@@ -223,18 +232,28 @@ module io
     call check(nf90_put_var(ncid,varid_p,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
     
     ! 3D u wind
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jk)
     do jk=1,ncols
       diag%scalar_placeholder(2:nlins+1,jk+1,:) = 0.5_wp*(state%wind_u(2:nlins+1,jk,:)+state%wind_u(2:nlins+1,jk+1,:))
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     call check(nf90_put_var(ncid,varid_u,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
     
     ! 3D v wind
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji)
     do ji=1,nlins
       diag%scalar_placeholder(ji+1,2:ncols+1,:) = 0.5_wp*(state%wind_v(ji,2:ncols+1,:)+state%wind_v(ji+1,2:ncols+1,:))
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     call check(nf90_put_var(ncid,varid_v,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
     
     ! 3D w wind
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl,upper_weight)
     do jl=1,nlays
       upper_weight(:,:) = (grid%z_geo_scal(2:nlins+1,2:ncols+1,jl) -&
       grid%z_geo_w(2:nlins+1,2:ncols+1,jl+1))/(grid%z_geo_w(2:nlins+1,2:ncols+1,jl)  &
@@ -242,6 +261,8 @@ module io
       diag%scalar_placeholder(2:nlins+1,2:ncols+1,jl) = &
       upper_weight(:,:)*state%wind_w(2:nlins+1,2:ncols+1,jl)+(1._wp-upper_weight(:,:))*state%wind_w(2:nlins+1,2:ncols+1,jl+1)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     call check(nf90_put_var(ncid,varid_w,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
   
     ! closing the netcdf file
@@ -266,6 +287,8 @@ module io
     real(wp)                     :: pressure          ! single pressure value
     
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,b,c,temperature,pressure)
     do ji=1,nlins+2
       do jk=1,ncols+2  
         ! integrating from bottom to top
@@ -289,6 +312,8 @@ module io
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! density
     state%rho(:,:,:) = p_0*(state%exner_pert(:,:,:))**(spec_heat_cap_diagnostics_p(1)/gas_constant_diagnostics(1)) &
