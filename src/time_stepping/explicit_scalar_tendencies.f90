@@ -24,7 +24,7 @@ module explicit_scalar_tendencies
     type(t_state), intent(in)    :: state ! state with which to calculate the divergence
     type(t_tend),  intent(inout) :: tend  ! state which will contain the tendencies
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-  
+    
     ! explicit mass density integration
     ! calculating the mass density flux
     call scalar_times_vector_h(state%rho,state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
@@ -40,7 +40,7 @@ module explicit_scalar_tendencies
     ! calculating the divergence of the potential temperature density flux
     call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
     tend%rhotheta(:,:,:) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
-  
+        
   end subroutine
 
 end module explicit_scalar_tendencies

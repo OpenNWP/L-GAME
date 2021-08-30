@@ -103,6 +103,8 @@ module gradient_operators
     do jl=2,nlays
       result_field(:,:,jl) = (scalar_field(:,:,jl-1) - scalar_field(:,:,jl))/grid%dz(2:nlins+1,2:ncols+1,jl)
     enddo
+    result_field(:,:,1) = 0._wp
+    result_field(:,:,nlays+1) = 0._wp
 
   end subroutine grad_vert_cov
   

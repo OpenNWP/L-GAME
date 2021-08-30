@@ -101,6 +101,8 @@ module multiplications
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
+    result_vector_z(:,:,1) = 0._wp
+    result_vector_z(:,:,nlays+1) = 0._wp
   
   end subroutine scalar_times_vector_v
   

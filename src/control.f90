@@ -155,6 +155,20 @@ program control
   ! writing out the initial state
   call write_output(state_old,diag,0,grid)
   
+  ! initializing the wind tendencies with zero
+  diag%e_kin_grad_x = 0._wp
+  diag%e_kin_grad_y = 0._wp
+  diag%e_kin_grad_z = 0._wp
+  diag%pot_vort_tend_x = 0._wp
+  diag%pot_vort_tend_y = 0._wp
+  diag%pot_vort_tend_z = 0._wp
+  diag%mom_diff_tend_x = 0._wp
+  diag%mom_diff_tend_y = 0._wp
+  diag%mom_diff_tend_z = 0._wp
+  tend%wind_u = 0._wp
+  tend%wind_v = 0._wp
+  tend%wind_w = 0._wp
+  
   ! copying the new state to the old state
   state_new = state_old
   
