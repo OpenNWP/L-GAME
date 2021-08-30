@@ -237,10 +237,10 @@ module io
     ! 3D w wind
     do jl=1,nlays
       upper_weight(:,:) = (grid%z_geo_scal(2:nlins+1,2:ncols+1,jl) -&
-      grid%z_geo_w(2:nlins+1,2:ncols+1,jl+1))-(grid%z_geo_w(2:nlins+1,2:ncols+1,jl)  &
+      grid%z_geo_w(2:nlins+1,2:ncols+1,jl+1))/(grid%z_geo_w(2:nlins+1,2:ncols+1,jl)  &
       - grid%z_geo_w(2:nlins+1,2:ncols+1,jl+1))
       diag%scalar_placeholder(2:nlins+1,2:ncols+1,jl) = &
-      upper_weight*state%wind_w(2:nlins+1,2:ncols+1,jl)+(1-upper_weight)*state%wind_w(2:nlins+1,2:ncols+1,jl+1)
+      upper_weight(:,:)*state%wind_w(2:nlins+1,2:ncols+1,jl)+(1._wp-upper_weight(:,:))*state%wind_w(2:nlins+1,2:ncols+1,jl+1)
     enddo
     call check(nf90_put_var(ncid,varid_w,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
   

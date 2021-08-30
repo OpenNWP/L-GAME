@@ -92,9 +92,9 @@ module run_nml
     close(fileunit)
     
     ! this calculates the time step using the CFL criterion
-    dtime           = 0.7_wp*dy/350._wp
+    dtime           = 1.5_wp*dy/1000._wp
     ! number of layers following orography
-    nlays_oro       = int(0.66*nlays)
+    nlays_oro       = int(0.66_wp*nlays)
         
     ! checking input data for correctness
     if (mod(nlins, 2) == 0) then

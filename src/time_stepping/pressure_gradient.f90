@@ -18,15 +18,15 @@ module pressure_gradient
   
   contains
 
-  subroutine manage_pressure_gradient(state,diag,grid,first)
+  subroutine manage_pressure_gradient(state,diag,grid,lfirst)
   
     type(t_state), intent(in)    :: state ! state to work with
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! model grid
-    logical,       intent(in)    :: first ! true for the first model step
+    logical,       intent(in)    :: lfirst ! true for the lfirst model step
   
     ! saving the old pressure gradient acceleration before it is overwritten with the new one
-    if (.not. first) then
+    if (.not. lfirst) then
       diag%p_grad_acc_old_u(:,:,:) = -diag%p_grad_acc_neg_nl_u(:,:,:) - diag%p_grad_acc_neg_l_u(:,:,:)
       diag%p_grad_acc_old_v(:,:,:) = -diag%p_grad_acc_neg_nl_v(:,:,:) - diag%p_grad_acc_neg_l_v(:,:,:)
       diag%p_grad_acc_old_w(:,:,:) = -diag%p_grad_acc_neg_nl_w(:,:,:) - diag%p_grad_acc_neg_l_w(:,:,:)
@@ -47,8 +47,8 @@ module pressure_gradient
     call scalar_times_vector_for_gradient(state%theta_pert,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
     grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v,diag%p_grad_acc_neg_l_w,grid)
     
-    ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
-    if (first) then
+    ! At the lfirst step, the "old" pressure gradient acceleration is saved for the lfirst time.
+    if (lfirst) then
       diag%p_grad_acc_old_u(:,:,:) = -diag%p_grad_acc_neg_nl_u(:,:,:) - diag%p_grad_acc_neg_l_u(:,:,:)
       diag%p_grad_acc_old_v(:,:,:) = -diag%p_grad_acc_neg_nl_v(:,:,:) - diag%p_grad_acc_neg_l_v(:,:,:)
       diag%p_grad_acc_old_w(:,:,:) = -diag%p_grad_acc_neg_nl_w(:,:,:) - diag%p_grad_acc_neg_l_w(:,:,:)
