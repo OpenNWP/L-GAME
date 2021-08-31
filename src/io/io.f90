@@ -38,7 +38,6 @@ module io
     real(wp)                     :: gravity                            ! gravity acceleration
     real(wp)                     :: delta_z                            ! delta z
     real(wp)                     :: T_0                                ! MSLP temperature variable
-    real(wp)                     :: p_0                                ! MSLP pressure variable
     real(wp)                     :: r_d                                ! specific gas constant of dry air
     real(wp)                     :: c_p                                ! specific heat capacity at const. pressure of dry air
     
@@ -66,19 +65,16 @@ module io
         enddo
         !$OMP END DO
         !$OMP END PARALLEL
-        
-        call unessential_init(state,diag,grid,pres_lowest_layer)
 
       case("schaer")
       
-        ! This test case is the standard atmosphere with a Gaussian mountain.
-      
+        ! Schär et al. (2001): A New Terrain-Following Vertical Coordinate Formulation for Atmospheric Prediction Models
+        
         state%wind_u(:,:,:) = 18.71_wp
         state%wind_v(:,:,:) = 0._wp
        
         n_squared = (0.01871_wp)**2
         T_0 = 273.16_wp
-        p_0 = 100000._wp
        
         !$OMP PARALLEL
         !$OMP DO PRIVATE(ji,jk,jl,delta_z,gravity)
@@ -96,7 +92,8 @@ module io
             + T_0/gravity*n_squared*grid%z_geo_scal(ji,jk,nlays) &
             ! substracting the background state
             - grid%theta_bg(ji,jk,nlays)
-            state%exner_pert(ji,jk,nlays)=(exp(-grid%z_geo_scal(ji,jk,nlays)/8000._wp))**(r_d/c_p)
+            state%exner_pert(ji,jk,nlays)=(exp(-grid%z_geo_scal(ji,jk,nlays)/8000._wp))**(r_d/c_p) &
+            - grid%exner_bg(ji,jk,nlays)
             ! stacking the potential temperature
             do jl=nlays-1,1,-1
               ! calculating delta_z
@@ -113,14 +110,26 @@ module io
             enddo
             ! stacking the Exner pressure
             do jl=nlays-1,1,-1
-              state%exner_pert(ji,jk,jl)=state%exner_pert(ji,jk,jl+1)
+              state%exner_pert(ji,jk,jl)=state%exner_pert(ji,jk,jl+1) &
+              - (state%theta_pert(ji,jk,jl)+state%theta_pert(ji,jk,jl+1))/(grid%theta_bg(ji,jk,jl)+grid%theta_bg(ji,jk,jl+1) &
+              +state%theta_pert(ji,jk,jl)+state%theta_pert(ji,jk,jl+1))*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1))
             enddo
+            ! filling up what's needed for the unessential_init routine
+            ! temperature
+            do jl=1,nlays
+              diag%scalar_placeholder(ji,jk,jl)=(grid%exner_bg(ji,jk,jl)+state%exner_pert(ji,jk,jl)) &
+              *(grid%theta_bg(ji,jk,jl)+state%theta_pert(ji,jk,jl))
+            enddo
+            ! pressure in the lowest layer
+            pres_lowest_layer(ji,jk)=p_0*(grid%exner_bg(ji,jk,nlays)+state%exner_pert(ji,jk,nlays))**(c_p/r_d)
           enddo
         enddo
         !$OMP END DO
         !$OMP END PARALLEL
     
     endselect
+    
+    call unessential_init(state,diag,grid,pres_lowest_layer)
     
   end subroutine ideal
   
@@ -325,6 +334,11 @@ module io
     real(wp)                     :: b,c               ! abbreviations needed for the hydrostatic initialization routine
     real(wp)                     :: temperature       ! single temperature value
     real(wp)                     :: pressure          ! single pressure value
+    real(wp)                     :: r_d               ! specific gas constant of dry air
+    real(wp)                     :: c_p               ! specific heat capacity at const. pressure of dry air
+    
+    r_d = gas_constant_diagnostics(1)
+    c_p = spec_heat_cap_diagnostics_p(1)
     
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
     !$OMP PARALLEL
@@ -337,7 +351,7 @@ module io
           ! lowest layer
           if (jl == nlays) then
             pressure    = pres_lowest_layer(ji,jk)
-            state%exner_pert(ji,jk,jl) = (pressure/p_0)**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1))
+            state%exner_pert(ji,jk,jl) = (pressure/p_0)**(r_d/c_p)
             state%theta_pert(ji,jk,jl) = temperature/state%exner_pert(ji,jk,jl)
           ! other layers
           else
@@ -356,8 +370,8 @@ module io
     !$OMP END PARALLEL
     
     ! density
-    state%rho(:,:,:) = p_0*(state%exner_pert(:,:,:))**(spec_heat_cap_diagnostics_p(1)/gas_constant_diagnostics(1)) &
-    /(gas_constant_diagnostics(1)*diag%scalar_placeholder(:,:,:))
+    state%rho(:,:,:) = p_0*(state%exner_pert(:,:,:))**(c_p/r_d) &
+    /(r_d*diag%scalar_placeholder(:,:,:))
     ! potential temperature density
     state%rhotheta(:,:,:) = state%rho(:,:,:)*state%theta_pert(:,:,:)
     
