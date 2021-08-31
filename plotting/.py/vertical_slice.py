@@ -26,14 +26,14 @@ semiminor = 6356752.314
 semimajor = 6378137.0
 re = (semimajor*semimajor*semiminor)**(1/3)
 x_vector = lon_vector*re;
-x_array = np.zeros([len(z_array[:,0,2]), len(z_array[0,:,2])]);
+x_array = np.zeros([len(z_array[:,0,0]), len(z_array[0,:,0])]);
 for i in range(len(x_array[:, 0])):
 	x_array[i, :] = x_vector;
 
 # plotting
-bounds=np.linspace(np.floor(np.min(plot_array[:,:,2])), np.ceil(np.max(plot_array[:,:,2])), 1000);
+bounds=np.linspace(np.floor(np.min(plot_array[:,:,0])), np.ceil(np.max(plot_array[:,:,0])), 1000);
 fig = plt.figure();
-cf = plt.contourf(1e-3*x_array[:,50:150], 1e-3*z_array[:,50:150,2], plot_array[:,50:150,2], cmap = "jet", levels = bounds);
+cf = plt.contourf(1e-3*x_array[:,50:150], 1e-3*z_array[:,50:150,0], plot_array[:,50:150,0], cmap = "jet", levels = bounds);
 plt.colorbar(cf, label = unit);
 plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname);
 plt.ylim([0, 10]);

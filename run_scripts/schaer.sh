@@ -11,7 +11,7 @@ cat > namelist.nml << EOF
 
 &run
 run_id="$run_id"
-nlins=3
+nlins=1
 ncols=201
 nlays=65
 toa=19500.0
@@ -19,7 +19,6 @@ dy=1000
 dx=1000
 run_span_hr=10
 scenario="schaer"
-llinear=.true.
 lcorio=.false.
 l_z_equidist=.true.
 /
