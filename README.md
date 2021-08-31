@@ -9,10 +9,10 @@ L-GAME is a numerical weather prediction (NWP) model. It is the application of t
 * uses a hybrid of finite volume and finite difference methods
 * time stepping: two-time-level Runge-Kutta scheme, modified into a HEVI (horizontally explicit, vertically implicit) and forward-backward scheme for stability, horizontal pressure gradient extrapolated and kept constant
 * radiation: coupled to [RTE+RRTMGP](https://github.com/earth-system-radiation/rte-rrtmgp)
-* uses the Poisson bracket  by Gassmann and Herzog (2008) and Gassmann (2013)
+* uses the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
 * assigns individual mass densities to all tracers and calculates interactions using the [atmostracers](https://github.com/OpenNWP/atmostracers) library
 
-L-GAME is meant to be applied at resolutions finer than 7 km. The default configuration is a 800 m resolution implementation nested into ICON-D2. Other nesting options are of course possible but require more work.
+L-GAME is meant to be applied at resolutions finer than 7 km.
 
 ## Installation
 
@@ -23,7 +23,7 @@ Everything is easy and quick to install. These instructions are for Ubuntu.
 * cmake: `sudo apt-get install cmake`
 * [geos95](https://github.com/OpenNWP/geos95)
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
-* Clone the RTE+RRTMGP repository: `git clone https://github.com/earth-system-radiation/rte-rrtmgp`
+* Clone our fork of the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp`
 * pip (only needed for the plotting routines): `sudo apt-get install python3-pip`
 * Python packages (only needed for the plotting routines): `pip3 install matplotlib numpy netCDF4`
 
