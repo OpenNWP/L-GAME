@@ -14,6 +14,7 @@ run_id="$run_id"
 nlins=101
 ncols=101
 nlays=30
+nlays_oro=20
 dy=850
 dx=800
 run_span_hr=1

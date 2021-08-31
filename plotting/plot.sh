@@ -4,6 +4,6 @@
 # Github repository: https://github.com/OpenNWP/L-GAME
 
 run_id=schaer
-plot_time_since_init_min=600
+plot_time_since_init_min=60
 varname="w"
 source .sh/root_script.sh
