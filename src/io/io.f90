@@ -34,6 +34,9 @@ module io
     ! local variables
     integer                      :: ji,jk,jl                           ! loop indices
     real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
+    real(wp)                     :: n_squared                          ! Brunt-Väisälä frequency for the Schär test case
+    real(wp)                     :: gravity                            ! gravity acceleration
+    real(wp)                     :: delta_z                            ! delta z
       
     select case (trim(scenario))
     
@@ -54,8 +57,10 @@ module io
             pres_lowest_layer(ji,jk) = bg_pres(grid%z_geo_scal(ji,jk,nlays))
           enddo
         enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+        !$OMP END DO
+        !$OMP END PARALLEL
+        
+        call unessential_init(state,diag,grid,pres_lowest_layer)
 
       case("schaer")
       
@@ -64,22 +69,35 @@ module io
         state%wind_u(:,:,:) = 18.71_wp
         state%wind_v(:,:,:) = 0._wp
        
+        n_squared = (0.01871_wp)**2
+       
         !$OMP PARALLEL
-        !$OMP DO PRIVATE(ji,jk,jl)
+        !$OMP DO PRIVATE(ji,jk,jl,delta_z,gravity)
         do ji=1,nlins+2
           do jk=1,ncols+2
-            do jl=1,nlays
-              diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_geo_scal(ji,jk,jl))
+            ! stacking the potential temperature
+            do jl=nlays-1,1,-1
+              ! calculating delta_z
+              delta_z = grid%z_geo_scal(ji,jk,jl)-grid%z_geo_scal(ji,jk,jl+1)
+              ! calculating the gravity
+              gravity = (geopot(grid%z_geo_scal(ji,jk,jl))-geopot(grid%z_geo_scal(ji,jk,jl+1)))/delta_z
+              state%theta_pert(ji,jk,jl) &
+              ! value in the lower layer
+              = state%theta_pert(ji,jk,jl+1)+grid%theta_bg(ji,jk,jl+1) &
+              + (state%theta_pert(ji,jk,jl+1)+grid%theta_bg(ji,jk,jl+1))/gravity*n_squared*delta_z &
+              ! substracting the background state
+              - grid%theta_bg(ji,jk,jl)
             enddo
-            pres_lowest_layer(ji,jk) = bg_pres(grid%z_geo_scal(ji,jk,nlays))
+            ! stacking the Exner pressure
+            do jl=nlays-1,1,-1
+              
+            enddo
           enddo
         enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+        !$OMP END DO
+        !$OMP END PARALLEL
     
     endselect
-    
-    call unessential_init(state,diag,grid,pres_lowest_layer)
     
   end subroutine ideal
   
