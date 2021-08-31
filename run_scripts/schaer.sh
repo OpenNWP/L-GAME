@@ -21,6 +21,7 @@ run_span_hr=10
 scenario="schaer"
 llinear=.true.
 lcorio=.false.
+l_z_equidist=.true.
 /
 
 &diff

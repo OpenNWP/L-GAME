@@ -41,9 +41,10 @@ module run_nml
   logical           :: llinear             ! switch to turn momentum advection on or off
   real(wp)          :: impl_weight         ! implicit weight of the pressure gradient
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
+  logical           :: l_z_equidist        ! swtich to determine if the vertical grid spacing is homogeneous
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr, &
-  adv_sound_ratio,toa,scenario,llinear,run_id,lcorio
+  adv_sound_ratio,toa,scenario,llinear,run_id,lcorio,l_z_equidist
 
   contains
 
@@ -84,6 +85,7 @@ module run_nml
     lcorio              = .true.
     impl_weight         = 0.75_wp
     partial_impl_weight = 0.5_wp
+    l_z_equidist        = .false.
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)

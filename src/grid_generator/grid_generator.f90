@@ -8,7 +8,7 @@ module grid_generator
   use definitions,        only: wp,t_grid
   use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re,omega,p_0,gravity, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard, &
-                                scenario
+                                scenario,l_z_equidist
   use gradient_operators, only: grad_hor_cov_extended,grad
   use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_p
 
@@ -130,16 +130,21 @@ module grid_generator
       do jk=1,ncols+2
         ! filling up z_vertical_vector_pre
         do jl=1,nlays+1
-          z_rel = 1._wp - (jl - 1._wp)/(nlays+1) ! z/toa
-          sigma_z = z_rel**sigma
-          A = sigma_z*toa; ! the height without orography
-          ! B corrects for orography
-          if (jl >= nlays - nlays_oro + 1._wp) then
-            B = (jl - (nlays - nlays_oro + 1._wp))/nlays_oro
+          if (l_z_equidist) then
+            z_vertical_vector_pre(jl) = toa &
+            - (jl-1)*(toa - grid%z_geo_w(ji,jk,nlays+1))/nlays
           else
-            B = 0
+            z_rel = 1._wp-(jl-1._wp)/(nlays+1) ! z/toa
+            sigma_z = z_rel**sigma
+            A = sigma_z*toa; ! the height without orography
+            ! B corrects for orography
+            if (jl >= nlays-nlays_oro+1._wp) then
+              B = (jl-(nlays-nlays_oro+1._wp))/nlays_oro
+            else
+              B = 0
+            endif
+            z_vertical_vector_pre(jl)=A+B*grid%z_geo_w(ji,jk,nlays+1)
           endif
-          z_vertical_vector_pre(jl) = A + B*grid%z_geo_w(ji,jk,nlays+1)
         enddo
         
         ! doing a check
