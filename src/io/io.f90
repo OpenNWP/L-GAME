@@ -8,7 +8,7 @@ module io
   use definitions,    only: t_state,wp,t_diag,t_grid
   use netcdf
   use run_nml,        only: nlins,ncols,nlays,scenario,p_0,run_id
-  use thermodynamics, only: spec_heat_cap_diagnostics_v,gas_constant_diagnostics,spec_heat_cap_diagnostics_p
+  use thermodynamics, only: gas_constant_diagnostics,spec_heat_cap_diagnostics_p
   use grid_generator, only: bg_temp,bg_pres,geopot
 
   implicit none
@@ -37,6 +37,13 @@ module io
     real(wp)                     :: n_squared                          ! Brunt-Väisälä frequency for the Schär test case
     real(wp)                     :: gravity                            ! gravity acceleration
     real(wp)                     :: delta_z                            ! delta z
+    real(wp)                     :: T_0                                ! MSLP temperature variable
+    real(wp)                     :: p_0                                ! MSLP pressure variable
+    real(wp)                     :: r_d                                ! specific gas constant of dry air
+    real(wp)                     :: c_p                                ! specific heat capacity at const. pressure of dry air
+    
+    r_d = gas_constant_diagnostics(1)
+    c_p = spec_heat_cap_diagnostics_p(1)
       
     select case (trim(scenario))
     
@@ -70,17 +77,33 @@ module io
         state%wind_v(:,:,:) = 0._wp
        
         n_squared = (0.01871_wp)**2
+        T_0 = 273.16_wp
+        p_0 = 100000._wp
        
         !$OMP PARALLEL
         !$OMP DO PRIVATE(ji,jk,jl,delta_z,gravity)
         do ji=1,nlins+2
           do jk=1,ncols+2
+            ! potential temperature in the lowest layer
+            ! calculating delta_z
+            delta_z = grid%z_geo_scal(ji,jk,nlays-1)-grid%z_geo_scal(ji,jk,nlays)
+            ! calculating the gravity
+            gravity = (geopot(grid%z_geo_scal(ji,jk,nlays-1))-geopot(grid%z_geo_scal(ji,jk,nlays)))/delta_z
+            ! result
+            state%theta_pert(ji,jk,nlays) &
+            ! value at MSL
+            = T_0 &
+            + T_0/gravity*n_squared*grid%z_geo_scal(ji,jk,nlays) &
+            ! substracting the background state
+            - grid%theta_bg(ji,jk,nlays)
+            state%exner_pert(ji,jk,nlays)=(exp(-grid%z_geo_scal(ji,jk,nlays)/8000._wp))**(r_d/c_p)
             ! stacking the potential temperature
             do jl=nlays-1,1,-1
               ! calculating delta_z
               delta_z = grid%z_geo_scal(ji,jk,jl)-grid%z_geo_scal(ji,jk,jl+1)
               ! calculating the gravity
               gravity = (geopot(grid%z_geo_scal(ji,jk,jl))-geopot(grid%z_geo_scal(ji,jk,jl+1)))/delta_z
+              ! result
               state%theta_pert(ji,jk,jl) &
               ! value in the lower layer
               = state%theta_pert(ji,jk,jl+1)+grid%theta_bg(ji,jk,jl+1) &
@@ -90,7 +113,7 @@ module io
             enddo
             ! stacking the Exner pressure
             do jl=nlays-1,1,-1
-              
+              state%exner_pert(ji,jk,jl)=state%exner_pert(ji,jk,jl+1)
             enddo
           enddo
         enddo
