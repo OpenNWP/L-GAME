@@ -103,7 +103,7 @@ module vorticity_flux
     ! vertical velocity tendency due to horizontal vorticity and horizontal wind
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
-    do ji = 1,nlins
+    do ji=1,nlins
       do jk=1,ncols
         do jl=2,nlays-1
           diag%pot_vort_tend_z(ji,jk,jl) = 0.5_wp*( &
