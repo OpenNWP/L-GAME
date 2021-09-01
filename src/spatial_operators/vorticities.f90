@@ -39,13 +39,13 @@ module vorticities
       do jk=1,ncols
         do jl=2,nlays
           diag%z_eta_x(ji,jk,jl) = &
-          + grid%dz(ji  ,jk+1,jl  )*state%wind_w(ji  ,jk+1,jl  )                                         &
-          + grid%dy(ji  ,jk+1,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,jl-1)  &
-          - grid%dz(ji+1,jk+1,jl  )*state%wind_w(ji+1,jk+1,jl  )                                         &
-          - grid%dy(ji  ,jk+1,jl  )*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,jl  )
+          + grid%dz(ji+1,jk+1,jl  )*state%wind_w(ji+1,jk+1,jl  )                                         &
+          - grid%dy(ji  ,jk+1,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,jl-1)  &
+          - grid%dz(ji  ,jk+1,jl  )*state%wind_w(ji  ,jk+1,jl  )                                         &
+          + grid%dy(ji  ,jk+1,jl  )*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,jl  )
         enddo
         ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
-        diag%z_eta_x(ji,jk,nlays+1) = grid%dy(ji,jk+1,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,nlays)
+        diag%z_eta_x(ji,jk,nlays+1) = -grid%dy(ji,jk+1,nlays)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,nlays)
       enddo
     enddo
     !$OMP END DO
@@ -62,13 +62,13 @@ module vorticities
       do jk=1,ncols+1
         do jl=2,nlays
           diag%z_eta_y(ji,jk,jl) = &
-          + grid%dz(ji+1,jk+1,jl  )*state%wind_w(ji+1,jk+1,jl  )                                         &
-          - grid%dx(ji+1,jk  ,jl-1)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,jl-1)  &
-          - grid%dz(ji+1,jk  ,jl  )*state%wind_w(ji+1,jk  ,jl  )                                         &
-          + grid%dx(ji+1,jk  ,jl  )*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,jl  )
+          + grid%dz(ji+1,jk  ,jl  )*state%wind_w(ji+1,jk  ,jl  )                                         &
+          + grid%dx(ji+1,jk  ,jl-1)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,jl-1)  &
+          - grid%dz(ji+1,jk+1,jl  )*state%wind_w(ji+1,jk+1,jl  )                                         &
+          - grid%dx(ji+1,jk  ,jl  )*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,jl  )
         enddo
         ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
-        diag%z_eta_y(ji,jk,nlays+1) = -grid%dx(ji+1,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,nlays)
+        diag%z_eta_y(ji,jk,nlays+1) = grid%dx(ji+1,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,nlays)
       enddo
     enddo
     !$OMP END DO

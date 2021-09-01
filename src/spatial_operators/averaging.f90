@@ -151,7 +151,7 @@ module averaging
     real(wp),     intent(in) :: hor_comp_x(:,:,:) ! horizontal component in x-direction of vector field to work with
     real(wp),     intent(in) :: vert_comp(:,:,:)  ! vertical component of vector field to work with
     type(t_grid), intent(in) :: grid              ! model grid
-    integer,      intent(in) :: ji,jk,jl         ! positional indices
+    integer,      intent(in) :: ji,jk,jl          ! positional indices
     
     ! output
     real(wp)                 :: horizontal_covariant_x
@@ -173,7 +173,7 @@ module averaging
     real(wp),     intent(in) :: hor_comp_y(:,:,:) ! horizontal component in x-direction of vector field to work with
     real(wp),     intent(in) :: vert_comp(:,:,:)  ! vertical component of vector field to work with
     type(t_grid), intent(in) :: grid              ! model grid
-    integer,      intent(in) :: ji,jk,jl         ! positional indices
+    integer,      intent(in) :: ji,jk,jl          ! positional indices
     
     ! output
     real(wp)                 :: horizontal_covariant_y

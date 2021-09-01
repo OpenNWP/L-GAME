@@ -130,7 +130,7 @@ module grid_generator
       do jk=1,ncols+2
         ! filling up z_vertical_vector_pre
         do jl=1,nlays+1
-          z_rel = 1._wp-(jl-1._wp)/(nlays+1) ! z/toa
+          z_rel = 1._wp-(jl-1._wp)/nlays ! z/toa
           sigma_z = z_rel**sigma
           A = sigma_z*toa; ! the height without orography
           ! B corrects for orography
