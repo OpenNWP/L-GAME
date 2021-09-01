@@ -204,11 +204,11 @@ module vorticities
             (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))))
           elseif (jl==nlays+1) then
             diag%z_eta_x(ji,jk,jl) = diag%z_eta_x(ji,jk,jl)/(0.5_wp*(state%rho(ji,jk+1,jl-1) &
-            ! linear extrapolation to the TOA
+            ! linear extrapolation to the surface
             +(grid%z_geo_w(ji,jk+1,jl)-grid%z_geo_scal(ji,jk+1,jl-1))*(state%rho(ji,jk+1,jl-2)-state%rho(ji,jk+1,jl-1))/ &
             (grid%z_geo_scal(ji,jk+1,jl-2)-grid%z_geo_scal(ji,jk+1,jl-1)) &
             +state%rho(ji+1,jk+1,jl-1) &
-            ! linear extrapolation to the TOA
+            ! linear extrapolation to the surface
             +(grid%z_geo_w(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl-1))*(state%rho(ji+1,jk+1,jl-2)-state%rho(ji+1,jk+1,jl-1))/ &
             (grid%z_geo_scal(ji+1,jk+1,jl-2)-grid%z_geo_scal(ji+1,jk+1,jl-1))))
           else
@@ -238,11 +238,11 @@ module vorticities
             (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))))
           elseif (jl==nlays+1) then
             diag%z_eta_y(ji,jk,jl) = diag%z_eta_y(ji,jk,jl)/(0.5_wp*(state%rho(ji+1,jk,jl-1) &
-            ! linear extrapolation to the TOA
+            ! linear extrapolation to the surface
             +(grid%z_geo_w(ji+1,jk,jl)-grid%z_geo_scal(ji+1,jk,jl-1))*(state%rho(ji+1,jk,jl-2)-state%rho(ji+1,jk,jl-1))/ &
             (grid%z_geo_scal(ji+1,jk,jl-2)-grid%z_geo_scal(ji+1,jk,jl-1)) &
             +state%rho(ji+1,jk+1,jl-1) &
-            ! linear extrapolation to the TOA
+            ! linear extrapolation to the surface
             +(grid%z_geo_w(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl-1))*(state%rho(ji+1,jk+1,jl-2)-state%rho(ji+1,jk+1,jl-1))/ &
             (grid%z_geo_scal(ji+1,jk+1,jl-2)-grid%z_geo_scal(ji+1,jk+1,jl-1))))
           else
