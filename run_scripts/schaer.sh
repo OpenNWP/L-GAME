@@ -21,7 +21,6 @@ dx=1000
 run_span_hr=10
 scenario="schaer"
 lcorio=.false.
-llinear=.true.
 sigma=1.0
 /
 

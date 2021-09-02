@@ -105,7 +105,7 @@ module vorticity_flux
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
-        do jl=2,nlays-1
+        do jl=2,nlays
           diag%pot_vort_tend_z(ji,jk,jl) = 0.5_wp*( &
           + grid%inner_product_weights(ji,jk,jl-1,1)*diag%u_placeholder(ji+1,jk+1,jl-1)*diag%z_eta_y(ji  ,jk+1,jl) &
           - grid%inner_product_weights(ji,jk,jl-1,2)*diag%v_placeholder(ji+1,jk+1,jl-1)*diag%z_eta_x(ji+1,jk  ,jl) &
