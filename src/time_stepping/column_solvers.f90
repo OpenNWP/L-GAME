@@ -213,31 +213,15 @@ module column_solvers
     integer  :: jl                                ! loop index
     
     ! downward sweep (matrix)
-    if (d_vector(1) /= 0._wp) then
-      e_prime_vector(1) = e_vector(1)/d_vector(1)
-    else
-      e_prime_vector(1) = 0._wp
-    endif
+    e_prime_vector(1) = e_vector(1)/d_vector(1)
     do jl=2,solution_length-1
-      if (d_vector(jl) - e_prime_vector(jl-1)*c_vector(jl-1) /= 0) then
-        e_prime_vector(jl) = e_vector(jl)/(d_vector(jl) - e_prime_vector(jl-1)*c_vector(jl-1))
-      else
-        e_prime_vector(jl) = 0._wp
-      endif
+      e_prime_vector(jl) = e_vector(jl)/(d_vector(jl) - e_prime_vector(jl-1)*c_vector(jl-1))
     enddo
     ! downward sweep (right-hand side)
-    if (d_vector(1) /= 0) then
-      r_prime_vector(1) = r_vector(1)/d_vector(1)
-    else
-      r_prime_vector(1) = 0._wp
-    endif
+    r_prime_vector(1) = r_vector(1)/d_vector(1)
     do jl=2,solution_length
-      if (d_vector(jl) - e_prime_vector(jl-1)*c_vector(jl-1) /= 0) then
-        r_prime_vector(jl) = (r_vector(jl) - r_prime_vector(jl-1)*c_vector(jl-1)) &
-        /(d_vector(jl) - e_prime_vector(jl-1)*c_vector(jl-1))
-      else
-        r_prime_vector(jl) = 0._wp
-      endif
+      r_prime_vector(jl) = (r_vector(jl) - r_prime_vector(jl-1)*c_vector(jl-1)) &
+      /(d_vector(jl) - e_prime_vector(jl-1)*c_vector(jl-1))
     enddo
     
     ! upward sweep (final solution)
