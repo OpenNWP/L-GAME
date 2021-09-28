@@ -20,7 +20,6 @@ L-GAME is meant to be applied at resolutions finer than 7 km.
 
 Everything is easy and quick to install. These instructions are for Ubuntu.
 
-* cmake: `sudo apt-get install cmake`
 * [geos95](https://github.com/OpenNWP/geos95)
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
 * Clone our fork of the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp`
