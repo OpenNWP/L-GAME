@@ -15,7 +15,6 @@ src/control.f90
 src/io/io.f90
 src/boundaries/boundaries.f90
 src/grid_generator/grid_generator.f90
-src/waves_coupler/waves_coupler.f90
 src/time_stepping/column_solvers.f90
 src/time_stepping/explicit_vector_tendencies.f90
 src/time_stepping/explicit_scalar_tendencies.f90
@@ -33,9 +32,8 @@ src/spatial_operators/vorticities.f90
 src/spatial_operators/momentum_diff_diss.f90
 src/spatial_operators/inner_product.f90
 src/spatial_operators/divergence_operators.f90
-src/soil_coupler/soil_coupler.f90
+src/soil/soil.f90
 src/radiation/rterrtmgp_coupler.f90
-src/ocean_coupler/ocean_coupler.f90
 namelists/bc_nml.f90
 namelists/diff_nml.f90
 namelists/hetero_nml.f90
