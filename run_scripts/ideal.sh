@@ -34,4 +34,4 @@ dt_write_min=1
 EOF
 
 # That's it, here we go.
-source .sh/root_script.sh
+source $lgame_home_dir/run_scripts/.sh/root_script.sh
