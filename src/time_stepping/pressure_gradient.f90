@@ -47,7 +47,7 @@ module pressure_gradient
     call scalar_times_vector_for_gradient(state%theta_pert,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
     grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v,diag%p_grad_acc_neg_l_w,grid)
     
-    ! At the lfirst step, the "old" pressure gradient acceleration is saved for the lfirst time.
+    ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
     if (lfirst) then
       diag%p_grad_acc_old_u(:,:,:) = -diag%p_grad_acc_neg_nl_u(:,:,:) - diag%p_grad_acc_neg_l_u(:,:,:)
       diag%p_grad_acc_old_v(:,:,:) = -diag%p_grad_acc_neg_nl_v(:,:,:) - diag%p_grad_acc_neg_l_v(:,:,:)
