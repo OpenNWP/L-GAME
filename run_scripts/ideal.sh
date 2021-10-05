@@ -19,6 +19,7 @@ dy=850
 dx=800
 run_span_hr=1
 scenario="standard"
+slow_fast_ratio=3
 /
 
 &diff

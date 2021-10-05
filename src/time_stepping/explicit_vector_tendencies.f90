@@ -44,7 +44,7 @@ module explicit_vector_tendencies
     old_hor_pgrad_weight = 1._wp - new_hor_pgrad_weight
      
     ! momentum advection
-    if (((slow_update_bool .and. rk_step == 2) .or. total_step_counter == 0) .and. ((.not. llinear) .or. lcorio)) then
+    if ((rk_step == 2 .or. total_step_counter == 0) .and. ((.not. llinear) .or. lcorio)) then
       ! calculating the mass flux density
       call scalar_times_vector(state%rho,state%wind_u,state%wind_v,state%wind_w, &
       diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)

@@ -18,7 +18,7 @@ module run_nml
   real(wp)          :: sigma               ! vertical grid stretching parameter
   integer           :: run_span_hr         ! run span in hours
   real              :: t_init              ! epoch time stamp of the initialization
-  integer           :: adv_sound_ratio     ! ratio of advective to sound time step
+  integer           :: slow_fast_ratio     ! ratio of advective to sound time step
   real(wp)          :: semimajor           ! large halfaxis of the Earth
   real(wp)          :: semiminor           ! small halfaxis of the Earth
   real(wp)          :: re                  ! Earth radius
@@ -43,7 +43,7 @@ module run_nml
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr,sigma, &
-  adv_sound_ratio,toa,scenario,llinear,run_id,lcorio,nlays_oro
+  slow_fast_ratio,toa,scenario,llinear,run_id,lcorio,nlays_oro
 
   contains
 
@@ -59,7 +59,7 @@ module run_nml
     dx                  = 850._wp
     run_span_hr         = 63
     t_init              = 0._wp
-    adv_sound_ratio     = 1
+    slow_fast_ratio     = 1
     toa                 = 40000._wp
     sigma               = 1.3_wp
     semiminor           = 6356752.314_wp

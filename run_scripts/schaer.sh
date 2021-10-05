@@ -22,6 +22,7 @@ run_span_hr=10
 scenario="schaer"
 lcorio=.false.
 sigma=1.0
+slow_fast_ratio=3
 /
 
 &diff
@@ -37,4 +38,4 @@ dt_write_min=1
 EOF
 
 # That's it, here we go.
-source .sh/root_script.sh
+source $lgame_home_dir/run_scripts/.sh/root_script.sh
