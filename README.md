@@ -23,7 +23,7 @@ Everything is easy and quick to install. These instructions are for Ubuntu.
 * [geos95](https://github.com/OpenNWP/geos95)
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
 * Clone our fork of the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp`
-* pip (only needed for the plotting routines): `sudo apt-get install python3-pip`
+* Python and pip (only needed for the plotting routines): `sudo apt-get install python3 python3-pip`
 * Python packages (only needed for the plotting routines): `pip3 install matplotlib numpy netCDF4`
 
 ### Installation
