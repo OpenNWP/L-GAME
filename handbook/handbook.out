@@ -1,0 +1,18 @@
+\BOOKMARK [0][-]{chapter.1}{Overview}{}% 1
+\BOOKMARK [0][-]{chapter.2}{Code structure}{}% 2
+\BOOKMARK [1][-]{section.2.1}{Spatial operators}{chapter.2}% 3
+\BOOKMARK [1][-]{section.2.2}{Time stepping}{chapter.2}% 4
+\BOOKMARK [0][-]{chapter.3}{Installation}{}% 5
+\BOOKMARK [1][-]{section.3.1}{Dependencies}{chapter.3}% 6
+\BOOKMARK [1][-]{section.3.2}{Building}{chapter.3}% 7
+\BOOKMARK [0][-]{chapter.4}{Grid generation}{}% 8
+\BOOKMARK [1][-]{section.4.1}{Vertical grid structure}{chapter.4}% 9
+\BOOKMARK [1][-]{section.4.2}{Horizontal grid properties}{chapter.4}% 10
+\BOOKMARK [1][-]{section.4.3}{Vertical grid properties}{chapter.4}% 11
+\BOOKMARK [1][-]{section.4.4}{How to generate a grid}{chapter.4}% 12
+\BOOKMARK [0][-]{chapter.5}{Running the model}{}% 13
+\BOOKMARK [1][-]{section.5.1}{Dynamics configuration}{chapter.5}% 14
+\BOOKMARK [1][-]{section.5.2}{Physics configuration}{chapter.5}% 15
+\BOOKMARK [2][-]{subsection.5.2.1}{Local thermodynamic equilibrium option}{section.5.2}% 16
+\BOOKMARK [1][-]{section.5.3}{Coupling to the radiation field}{chapter.5}% 17
+\BOOKMARK [0][-]{chapter.6}{Configuring output}{}% 18

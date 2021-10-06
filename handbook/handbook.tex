@@ -1,0 +1,199 @@
+% This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
+% Github repository: https://github.com/OpenNWP/GAME
+
+\documentclass[10pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide, amsmath, xcolor, longtable, geometry, fancyhdr, mathtools, array, listings}
+\usepackage[style = numeric, backend = biber]{biblatex}
+\usepackage{fouriernc}
+\usepackage[T1]{fontenc}
+\usepackage[hidelinks]{hyperref}
+\geometry{a4paper, top = 15mm, left = 5mm, right = 5mm, bottom = 17mm}
+\fancypagestyle{plain}{
+\fancyhead[L]{\texttt{GAME} handbook}
+\fancyhead[R]{\textsc{\texttt{GAME} development team}}
+\fancyfoot[C]{\thepage}
+\addtolength\footskip{12pt}}
+\definecolor{table_green}{rgb}{0, 0.6, 0}
+\title{\texttt{Local Geophysical Fluids Modeling Framework (L-GAME)} Handbook}
+\author{\texttt{L-GAME} Development Team}
+\date{}
+\newcommand{\md}[1]{\frac{D#1}{Dt}}
+\newcommand{\omegabi}{\text{{\osgbi ω}}}
+\newcommand{\mubi}{\text{{\osgbi μ}}}
+\newcommand{\sigmabi}{\text{{\osgbi σ}}}
+\newcommand{\epsilonbi}{\text{{\osgbi ϵ}}}
+\newcommand{\etabi}{\text{{\osgbi η}}}
+\newcommand{\zetabi}{\text{{\osgbi ζ}}}
+\addbibresource{references.bib}
+\DeclareFieldFormat[article]{title}{{#1}}
+
+\begin{document}
+
+\maketitle
+
+\vspace*{5 cm}
+\begin{center}
+All physical quantities in this document are to be multiplied with their respective SI units.
+\end{center}
+
+\newpage
+
+\tableofcontents
+
+\chapter{Overview}
+\label{chap:overview}
+
+
+\chapter{Code structure}
+\label{chap:code_structure}
+
+The code of the model resides in the directory \texttt{src}.
+
+\section{Spatial operators}
+\label{sec:spatial_operators}
+
+\begin{itemize}
+\item Coriolis: \cite{thuburn_f_discrete_plane} and \cite{ringler_trsk} modified by \cite{doi:10.1002/qj.3294}
+\item kinetic energy: \cite{doi:10.1002/qj.1960}
+\end{itemize}
+
+\section{Time stepping}
+\label{sec:time_stepping}
+
+A fully Eulerian time stepping is employed. The basic building structure is Runge-Kutta second order (RK2). In the vertical, at every substep, an implicit column solver is used, which makes it possible to violate the CFL criterion of vertically propagating sound and fast gravity waves. This has the cost of decreasing the accuracy of these modes, which is however a bearable trade-off, since these waves are of low meteorological relevance. Furthermore, a forward-backward scheme is used, where the divergence term is backward.
+
+
+\chapter{Installation}
+\label{chap:installation}
+
+\section{Dependencies}
+\label{sec:dependencies}
+
+The following dependencies must be installed before being able to successfully build the model:
+
+\begin{itemize}
+\item geos95 (\url{https://github.com/OpenNWP/geos95})
+\item eccodes library (installation manual: \url{https://gist.github.com/MHBalsmeier/a01ad4e07ecf467c90fad2ac7719844a})
+\item atmostracers (\url{https://github.com/OpenNWP/atmostracers})
+\item Python and the visualization library scitools-iris (installation manual: \url{https://scitools-iris.readthedocs.io/en/stable/installing.html#installing-from-source-without-conda-on-debian-based-linux-distros-developers}, only for the plotting routines)
+\item FFMPEG (Ubuntu: \texttt{sudo apt-get install ffmpeg}, only for the plotting routines)
+\item Valgrind (Ubuntu: \texttt{sudo apt-get install valgrind}, for doing checks)
+\end{itemize}
+
+\section{Building}
+\label{sec:building}
+
+\texttt{CMake} is used for building \texttt{GAME}. Execute \texttt{./compile.sh} to build the model.
+
+\chapter{Grid generation}
+\label{chap:grid_generation}
+
+
+
+\section{Vertical grid structure}
+\label{sec:vertical_grid_structure}
+
+So far, only a horizontal grid has been examined. The grid generator, however, shall produce full three-dimensional grids. In order to simplify matters, the following conventions are made:
+%
+\begin{itemize}
+\item Since the vertically oriented primal vector points have the same horizontal coordinates as the primal scalar points, their horizontal numbering is also the same.
+\item Since the vertically oriented dual vector points have the same horizontal coordinates as the dual scalar points, their horizontal numbering is also the same.
+\end{itemize}
+
+\section{Horizontal grid properties}
+\label{sec:horizontal_grid_properties}
+
+\section{Vertical grid properties}
+\label{sec:vertical_grid_properties}
+
+The vertical grid structure is determined by the following properties:
+
+\begin{itemize}
+\item the height of the top of the atmosphere, specified via the parameter \texttt{TOA}
+\item the number of layers, specified via the parameter \texttt{NUMBER\_OF\_LAYERS} $N_L$
+\item the number of layers following the orography, specified via the parameter \texttt{NUMBER\_OF\_ORO\_LAYERS} $N_O$
+\item the stretching parameter $\beta$, which can be set in the run script
+\item the orography, specified via the parameter \texttt{ORO\_ID}
+\end{itemize}
+
+The generation of the vertical position of the grid points works in three steps:
+%
+\begin{enumerate}
+\item First of all, vertical positions of preliminary levels with index $0 \leq j \leq N_L$ are determined by
+%
+\begin{align}
+z_j = T\sigma_{z, j} + B_jz_S,
+\end{align}
+%
+where $T$ is the top of the atmosphere, $\sigma_{z, j}$ is defined by
+%
+\begin{align}
+\sigma_{z, j} \coloneqq \left(1 - \frac{j}{N_L}\right)^\alpha,
+\end{align}
+%
+where $\alpha \geq 1$ is the so-called \textit{stretching parameter}, $z_s$ is the surface height and $B_j$ is defined by
+%
+\begin{align}
+B_j \coloneqq \frac{j - \left(N_L - N_O\right)}{N_O}.
+\end{align}
+%
+\item Then, the scalar points are positioned in the middle between the adjacent preliminary levels.
+\item Then, the vertical vector points are regenerated by placing them in the middle between the two adjacent layers.
+\item Finally, the vertical positions of the other points are diagnozed through interpolation.
+\end{enumerate}
+
+\section{How to generate a grid}
+\label{sec:how_to_generate_a_grid}
+
+
+
+\chapter{Running the model}
+\label{chap:running_the_model}
+
+The configuration of the model must be set in two different files:
+
+\begin{itemize}
+\item \texttt{core/src/enum\_and\_typedefs.h}: modify \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS}, \texttt{NO\_OF\_GASEOUS\_CONSTITUENTS} and \texttt{NO\_OF\_CONDENSED\_CONSTITUENTS}. These must conform with the grid file and the initialization state file. It must be done before the compilation.
+\item The run script: one of the files contained in the directory \texttt{run\_scripts}. The comments in these files explain the meaning of the variables. This can be done after the compilation.
+\end{itemize}
+%
+Since the files \texttt{core/src/enum\_and\_typedefs.h} and \texttt{core/src/settings.c} are part of the model's source code, the model must be recompiled if something is changed in them. Alternatively, one can compile several executables and name them according to their configuration.
+
+\section{Dynamics configuration}
+\label{sec:dynamics_configuration}
+
+\section{Physics configuration}
+\label{sec:physics_configuration}
+
+\subsection{Local thermodynamic equilibrium option}
+\label{sec:local_thermodynamic_equilibrium_option}
+
+Assuming a local thermodynamic equilibrium in a heterogeneous fluid boils down to assuming that all constituents have the same temperature. This reduces the complexity of the simulation by about 40 \%, since now internal energy densities are not prognostic variables anymore.
+
+\section{Coupling to the radiation field}
+\label{sec:coupling_to_the_radiation_field}
+
+\texttt{GAME} employs the so-called \texttt{RTE+RRTMGP (Radiative Transfer for Energetics + Rapid and Accurate Radiative Transfer Model for Geophysical Circulation Model Applications—Parallel)} \cite{doi:10.1029/2019MS001621}, \cite{rte-rrtmgp-github} scheme.
+
+\chapter{Configuring output}
+\label{sec:configuring_output}
+
+\appendix
+
+\printbibliography
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
