@@ -1,4 +1,4 @@
-# Limited-area Version of GAME (L-GAME)
+# Limited-area GAME (L-GAME)
 
 L-GAME is a numerical weather prediction (NWP) model. It is the application of the theory behind [GAME](https://github.com/opennwp/game) to a regional quadrilateral grid. Properties:
 
