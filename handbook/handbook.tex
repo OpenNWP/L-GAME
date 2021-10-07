@@ -63,7 +63,6 @@ The code of the model resides in the directory \texttt{src}.
 
 A fully Eulerian time stepping is employed. The basic building structure is Runge-Kutta second order (RK2). In the vertical, at every substep, an implicit column solver is used, which makes it possible to violate the CFL criterion of vertically propagating sound and fast gravity waves. This has the cost of decreasing the accuracy of these modes, which is however a bearable trade-off, since these waves are of low meteorological relevance. Furthermore, a forward-backward scheme is used, where the divergence term is backward.
 
-
 \chapter{Installation}
 \label{chap:installation}
 
@@ -149,15 +148,6 @@ B_j \coloneqq \frac{j - \left(N_L - N_O\right)}{N_O}.
 
 \chapter{Running the model}
 \label{chap:running_the_model}
-
-The configuration of the model must be set in two different files:
-
-\begin{itemize}
-\item \texttt{core/src/enum\_and\_typedefs.h}: modify \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS}, \texttt{NO\_OF\_GASEOUS\_CONSTITUENTS} and \texttt{NO\_OF\_CONDENSED\_CONSTITUENTS}. These must conform with the grid file and the initialization state file. It must be done before the compilation.
-\item The run script: one of the files contained in the directory \texttt{run\_scripts}. The comments in these files explain the meaning of the variables. This can be done after the compilation.
-\end{itemize}
-%
-Since the files \texttt{core/src/enum\_and\_typedefs.h} and \texttt{core/src/settings.c} are part of the model's source code, the model must be recompiled if something is changed in them. Alternatively, one can compile several executables and name them according to their configuration.
 
 \section{Dynamics configuration}
 \label{sec:dynamics_configuration}
