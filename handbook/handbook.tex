@@ -44,7 +44,13 @@ All physical quantities in this document are to be multiplied with their respect
 \chapter{Overview}
 \label{chap:overview}
 
-\texttt{L-GAME} is the application of the theory and numerics of \texttt{GAME} to a quadrilateral latitude-longitude grid in a regional domain.
+\texttt{L-GAME} is the application of the theory and numerics of \texttt{GAME} to a quadrilateral latitude-longitude grid in a regional domain. The spatial and temporal discretizations are identical, apart from the following differences:
+%
+\begin{enumerate}
+\item The domain is regional and not global (as mentioned).
+\item The grid is a quadrilateral (rotated) latitude-longitude grid.
+\item The connections of the gridpoints in longitude direction are small circles instead of great circles.
+\end{enumerate}
 
 \chapter{Code structure}
 \label{chap:code_structure}
