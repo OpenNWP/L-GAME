@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  9 OCT 2021 20:28
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  9 OCT 2021 22:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1042,27 +1042,31 @@ Chapter 6.
 [8
 
 ]
-LaTeX Font Info:    Font shape `T1/fnc/m/it' will be
-(Font)              scaled to size 9.29993pt on input line 130.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 132.
- [9
+Chapter 7.
+[9
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 132.
+LaTeX Font Info:    Font shape `T1/fnc/m/it' will be
+(Font)              scaled to size 9.29993pt on input line 133.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 135.
+ [10
+
+]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 135.
  (./handbook.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 132.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 132.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 135.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 135.
 Package rerunfilecheck Info: File `handbook.out' has not changed.
-(rerunfilecheck)             Checksum: F7DBA8D13729216272677E8DD2322DF3;906.
+(rerunfilecheck)             Checksum: 5E1B78670B0340317E8CB9F6B474302D;961.
 Package logreq Info: Writing requests to 'handbook.run.xml'.
 \openout1 = `handbook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 16459 strings out of 482480
- 273672 string characters out of 5946190
- 933525 words of memory out of 5000000
- 31248 multiletter control sequences out of 15000+600000
+ 16463 strings out of 482480
+ 273725 string characters out of 5946190
+ 933567 words of memory out of 5000000
+ 31250 multiletter control sequences out of 15000+600000
  579875 words of font info for 87 fonts, out of 8000000 for 9000
  395 hyphenation exceptions out of 8191
  38i,11n,45p,1925b,1270s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1074,10 +1078,10 @@ e2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/max/.texlive
 xmf-dist/fonts/type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fon
 ts/type1/urw/ncntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw
 /ncntrsbk/uncri8a.pfb>
-Output written on handbook.pdf (10 pages, 88277 bytes).
+Output written on handbook.pdf (11 pages, 89229 bytes).
 PDF statistics:
- 308 PDF objects out of 1000 (max. 8388607)
- 193 compressed objects within 2 object streams
- 38 named destinations out of 1000 (max. 500000)
- 121 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 318 PDF objects out of 1000 (max. 8388607)
+ 201 compressed objects within 3 object streams
+ 40 named destinations out of 1000 (max. 500000)
+ 129 words of extra memory for PDF output out of 10000 (max. 10000000)
 

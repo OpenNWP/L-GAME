@@ -28,4 +28,6 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {5.3}Coupling to the radiation field}{7}{section.5.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Configuring output}{8}{chapter.6}%
+\contentsline {chapter}{\numberline {6}Boundary conditions}{8}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {7}Configuring output}{9}{chapter.7}%
