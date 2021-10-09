@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  8 OCT 2021 22:06
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  9 OCT 2021 10:22
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1004,16 +1004,16 @@ LaTeX Font Info:    Font shape `T1/fnc/b/n' will be
 ]
 Chapter 2.
 LaTeX Font Info:    Font shape `T1/fnc/m/n' will be
-(Font)              scaled to size 13.39188pt on input line 60.
+(Font)              scaled to size 13.39188pt on input line 62.
 LaTeX Font Info:    Font shape `T1/fnc/b/n' will be
-(Font)              scaled to size 13.39188pt on input line 60.
+(Font)              scaled to size 13.39188pt on input line 62.
 LaTeX Font Info:    Trying to load font information for TS1+fnc on input line 6
-4.
+6.
 (/usr/share/texlive/texmf-dist/tex/latex/fouriernc/ts1fnc.fd
 File: ts1fnc.fd 2005/12/13 font definitions for TS1/fnc.
 )
 LaTeX Font Info:    Font shape `TS1/fnc/m/n' will be
-(Font)              scaled to size 9.29993pt on input line 64.
+(Font)              scaled to size 9.29993pt on input line 66.
  [4
 
 ]
@@ -1022,14 +1022,12 @@ Chapter 3.
 
 ]
 Chapter 4.
-LaTeX Font Info:    Font shape `T1/fnc/m/it' will be
-(Font)              scaled to size 9.29993pt on input line 140.
 [6
 
 ]
 Chapter 5.
 LaTeX Font Info:    Font shape `T1/fnc/b/n' will be
-(Font)              scaled to size 11.15991pt on input line 165.
+(Font)              scaled to size 11.15991pt on input line 115.
 [7
 
 ]
@@ -1037,26 +1035,28 @@ Chapter 6.
 [8
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 182.
+LaTeX Font Info:    Font shape `T1/fnc/m/it' will be
+(Font)              scaled to size 9.29993pt on input line 130.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 132.
  [9
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 182.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 132.
  (./handbook.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 182.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 182.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 132.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 132.
 Package rerunfilecheck Info: File `handbook.out' has not changed.
-(rerunfilecheck)             Checksum: 170327ED2363BE9323450B6A74B60D06;1119.
+(rerunfilecheck)             Checksum: F7DBA8D13729216272677E8DD2322DF3;906.
 Package logreq Info: Writing requests to 'handbook.run.xml'.
 \openout1 = `handbook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 16478 strings out of 482480
- 273752 string characters out of 5946190
- 933570 words of memory out of 5000000
+ 16459 strings out of 482480
+ 273672 string characters out of 5946190
+ 933521 words of memory out of 5000000
  31248 multiletter control sequences out of 15000+600000
- 586144 words of font info for 98 fonts, out of 8000000 for 9000
+ 579875 words of font info for 87 fonts, out of 8000000 for 9000
  395 hyphenation exceptions out of 8191
  38i,11n,45p,1925b,1270s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc} </home/max/.texli
@@ -1064,16 +1064,13 @@ ve2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectc1000.600pk> </home/max/.texliv
 e2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/max/.texlive
 2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </home/max/.texlive2
 019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1728.600pk></usr/share/texlive/te
-xmf-dist/fonts/type1/public/fourier/fourier-mex.pfb></usr/share/texlive/texmf-d
-ist/fonts/type1/public/fourier/fourier-mlit.pfb></usr/share/texlive/texmf-dist/
-fonts/type1/public/fourier/fourier-ms.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/nc
-ntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri
-8a.pfb>
-Output written on handbook.pdf (10 pages, 98569 bytes).
+xmf-dist/fonts/type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fon
+ts/type1/urw/ncntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw
+/ncntrsbk/uncri8a.pfb>
+Output written on handbook.pdf (10 pages, 87863 bytes).
 PDF statistics:
- 337 PDF objects out of 1000 (max. 8388607)
- 217 compressed objects within 3 object streams
- 46 named destinations out of 1000 (max. 500000)
- 145 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 306 PDF objects out of 1000 (max. 8388607)
+ 193 compressed objects within 2 object streams
+ 38 named destinations out of 1000 (max. 500000)
+ 121 words of extra memory for PDF output out of 10000 (max. 10000000)
 

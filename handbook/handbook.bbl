@@ -48,6 +48,33 @@
       \field{pages}{8321\bibrangedash 8335}
       \range{pages}{15}
     \endentry
+    \entry{kompendium}{book}{}
+      \name{author}{1}{}{%
+        {{hash=28c5cd8780b41f05e52c6535be65b17e}{%
+           family={Balsmeier},
+           familyi={B\bibinitperiod},
+           given={M.\bibnamedelimi H.},
+           giveni={M\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+      }
+      \strng{namehash}{28c5cd8780b41f05e52c6535be65b17e}
+      \strng{fullhash}{28c5cd8780b41f05e52c6535be65b17e}
+      \strng{bibnamehash}{28c5cd8780b41f05e52c6535be65b17e}
+      \strng{authorbibnamehash}{28c5cd8780b41f05e52c6535be65b17e}
+      \strng{authornamehash}{28c5cd8780b41f05e52c6535be65b17e}
+      \strng{authorfullhash}{28c5cd8780b41f05e52c6535be65b17e}
+      \field{sortinit}{B}
+      \field{sortinithash}{8de16967003c7207dae369d874f1456e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Kompendium Theoretische Meteorologie}
+      \field{year}{2021}
+      \verb{urlraw}
+      \verb https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
+      \endverb
+      \verb{url}
+      \verb https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
+      \endverb
+    \endentry
     \entry{doi:10.1002/qj.1960}{article}{}
       \name{author}{1}{}{%
         {{hash=47e86804a39af5692446ea877f120940}{%
@@ -238,6 +265,33 @@
       \endverb
       \verb{url}
       \verb https://github.com/earth-system-radiation/rte-rrtmgp
+      \endverb
+    \endentry
+    \entry{game_handbook}{report}{}
+      \name{author}{1}{}{%
+        {{hash=5aaa390069d4389ad569485467307589}{%
+           family={Team},
+           familyi={T\bibinitperiod},
+           given={GAME\bibnamedelima Development},
+           giveni={G\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+      }
+      \strng{namehash}{5aaa390069d4389ad569485467307589}
+      \strng{fullhash}{5aaa390069d4389ad569485467307589}
+      \strng{bibnamehash}{5aaa390069d4389ad569485467307589}
+      \strng{authorbibnamehash}{5aaa390069d4389ad569485467307589}
+      \strng{authornamehash}{5aaa390069d4389ad569485467307589}
+      \strng{authorfullhash}{5aaa390069d4389ad569485467307589}
+      \field{sortinit}{T}
+      \field{sortinithash}{51f9faf24c60c62ca764a77f78cf5666}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Geophysical Fluids Modeling Framework Handbook}
+      \field{year}{2021}
+      \verb{urlraw}
+      \verb https://github.com/OpenNWP/GAME/blob/main/handbook/handbook.pdf
+      \endverb
+      \verb{url}
+      \verb https://github.com/OpenNWP/GAME/blob/main/handbook/handbook.pdf
       \endverb
     \endentry
   \enddatalist

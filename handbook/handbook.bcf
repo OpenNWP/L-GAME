@@ -2182,12 +2182,14 @@
     <bcf:datasource type="file" datatype="bibtex">references.bib</bcf:datasource>
   </bcf:bibdata>
   <bcf:section number="0">
-    <bcf:citekey order="1">thuburn_f_discrete_plane</bcf:citekey>
-    <bcf:citekey order="2">ringler_trsk</bcf:citekey>
-    <bcf:citekey order="3">doi:10.1002/qj.3294</bcf:citekey>
-    <bcf:citekey order="4">doi:10.1002/qj.1960</bcf:citekey>
-    <bcf:citekey order="5">doi:10.1029/2019MS001621</bcf:citekey>
-    <bcf:citekey order="6">rte-rrtmgp-github</bcf:citekey>
+    <bcf:citekey order="1">kompendium</bcf:citekey>
+    <bcf:citekey order="2">thuburn_f_discrete_plane</bcf:citekey>
+    <bcf:citekey order="3">ringler_trsk</bcf:citekey>
+    <bcf:citekey order="4">doi:10.1002/qj.3294</bcf:citekey>
+    <bcf:citekey order="5">doi:10.1002/qj.1960</bcf:citekey>
+    <bcf:citekey order="6">game_handbook</bcf:citekey>
+    <bcf:citekey order="7">doi:10.1029/2019MS001621</bcf:citekey>
+    <bcf:citekey order="8">rte-rrtmgp-github</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nty">
