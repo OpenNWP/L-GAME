@@ -14,20 +14,22 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {3.2}Building}{5}{section.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Grid generation}{6}{chapter.4}%
+\contentsline {chapter}{\numberline {4}Running the model}{6}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.1}Vertical grid structure}{6}{section.4.1}%
+\contentsline {section}{\numberline {4.1}Grid generation}{6}{section.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Running the model}{7}{chapter.5}%
+\contentsline {subsection}{\numberline {4.1.1}Vertical grid structure}{6}{subsection.4.1.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.1}Dynamics configuration}{7}{section.5.1}%
+\contentsline {section}{\numberline {4.2}Dynamics configuration}{6}{section.4.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.2}Physics configuration}{7}{section.5.2}%
+\contentsline {section}{\numberline {4.3}Physics configuration}{6}{section.4.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {5.2.1}Local thermodynamic equilibrium option}{7}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {4.3.1}Local thermodynamic equilibrium option}{6}{subsection.4.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.3}Coupling to the radiation field}{7}{section.5.3}%
+\contentsline {section}{\numberline {4.4}Coupling to the radiation field}{6}{section.4.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Boundary conditions}{8}{chapter.6}%
+\contentsline {chapter}{\numberline {5}Configuring Output}{7}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {7}Configuring output}{9}{chapter.7}%
+\contentsline {chapter}{\numberline {6}Initialization}{8}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {7}Boundary conditions}{9}{chapter.7}%

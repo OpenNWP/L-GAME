@@ -5,12 +5,13 @@
 \BOOKMARK [0][-]{chapter.3}{Installation}{}% 5
 \BOOKMARK [1][-]{section.3.1}{Dependencies}{chapter.3}% 6
 \BOOKMARK [1][-]{section.3.2}{Building}{chapter.3}% 7
-\BOOKMARK [0][-]{chapter.4}{Grid generation}{}% 8
-\BOOKMARK [1][-]{section.4.1}{Vertical grid structure}{chapter.4}% 9
-\BOOKMARK [0][-]{chapter.5}{Running the model}{}% 10
-\BOOKMARK [1][-]{section.5.1}{Dynamics configuration}{chapter.5}% 11
-\BOOKMARK [1][-]{section.5.2}{Physics configuration}{chapter.5}% 12
-\BOOKMARK [2][-]{subsection.5.2.1}{Local thermodynamic equilibrium option}{section.5.2}% 13
-\BOOKMARK [1][-]{section.5.3}{Coupling to the radiation field}{chapter.5}% 14
-\BOOKMARK [0][-]{chapter.6}{Boundary conditions}{}% 15
-\BOOKMARK [0][-]{chapter.7}{Configuring output}{}% 16
+\BOOKMARK [0][-]{chapter.4}{Running the model}{}% 8
+\BOOKMARK [1][-]{section.4.1}{Grid generation}{chapter.4}% 9
+\BOOKMARK [2][-]{subsection.4.1.1}{Vertical grid structure}{section.4.1}% 10
+\BOOKMARK [1][-]{section.4.2}{Dynamics configuration}{chapter.4}% 11
+\BOOKMARK [1][-]{section.4.3}{Physics configuration}{chapter.4}% 12
+\BOOKMARK [2][-]{subsection.4.3.1}{Local thermodynamic equilibrium option}{section.4.3}% 13
+\BOOKMARK [1][-]{section.4.4}{Coupling to the radiation field}{chapter.4}% 14
+\BOOKMARK [0][-]{chapter.5}{Configuring Output}{}% 15
+\BOOKMARK [0][-]{chapter.6}{Initialization}{}% 16
+\BOOKMARK [0][-]{chapter.7}{Boundary conditions}{}% 17
