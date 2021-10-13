@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  10 OCT 2021 10:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  13 OCT 2021 18:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1056,18 +1056,8 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 136.
  (./handbook.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 136.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 136.
-
-
-Package rerunfilecheck Warning: File `handbook.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `handbook.out':
-(rerunfilecheck)             Before: 12F9C12F3C648F8959817E1CCD059147;1029
-(rerunfilecheck)             After:  12EAD68E06963A0DFAE2A2848BC0E30A;1029.
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
+Package rerunfilecheck Info: File `handbook.out' has not changed.
+(rerunfilecheck)             Checksum: 12EAD68E06963A0DFAE2A2848BC0E30A;1029.
 Package logreq Info: Writing requests to 'handbook.run.xml'.
 \openout1 = `handbook.run.xml'.
 
@@ -1088,10 +1078,10 @@ e2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/max/.texlive
 xmf-dist/fonts/type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fon
 ts/type1/urw/ncntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw
 /ncntrsbk/uncri8a.pfb>
-Output written on handbook.pdf (11 pages, 89498 bytes).
+Output written on handbook.pdf (11 pages, 89851 bytes).
 PDF statistics:
- 323 PDF objects out of 1000 (max. 8388607)
- 206 compressed objects within 3 object streams
+ 325 PDF objects out of 1000 (max. 8388607)
+ 208 compressed objects within 3 object streams
  41 named destinations out of 1000 (max. 500000)
  137 words of extra memory for PDF output out of 10000 (max. 10000000)
 
