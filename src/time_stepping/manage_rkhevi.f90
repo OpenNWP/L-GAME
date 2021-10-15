@@ -67,7 +67,7 @@ module manage_rkhevi
       call expl_scalar_tend(grid,state_new,tend,diag)
       
       ! 3.) implicit dynamic vertical solver
-      ! -------------------------------
+      ! ------------------------------------
       call three_band_solver_ver(state_old,state_new,tend,grid,rk_step)
   
     enddo
