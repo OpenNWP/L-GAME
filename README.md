@@ -12,8 +12,6 @@ L-GAME is a numerical weather prediction (NWP) model. It is the application of t
 * uses the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
 * assigns individual mass densities to all tracers and calculates interactions using the [atmostracers](https://github.com/OpenNWP/atmostracers) library
 
-L-GAME is meant to be applied at resolutions finer than 7 km.
-
 ## Installation
 
 ### Dependencies
