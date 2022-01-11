@@ -1,35 +1,35 @@
 \boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {1}Overview}{3}{chapter.1}%
+\contentsline {chapter}{\numberline {1}Overview}{2}{chapter.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {2}Code structure}{4}{chapter.2}%
+\contentsline {chapter}{\numberline {2}Code structure}{3}{chapter.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.1}Spatial operators}{4}{section.2.1}%
+\contentsline {section}{\numberline {2.1}Spatial operators}{3}{section.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.2}Time stepping}{4}{section.2.2}%
+\contentsline {section}{\numberline {2.2}Time stepping}{3}{section.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {3}Installation}{5}{chapter.3}%
+\contentsline {chapter}{\numberline {3}Installation}{4}{chapter.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.1}Dependencies}{5}{section.3.1}%
+\contentsline {section}{\numberline {3.1}Dependencies}{4}{section.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.2}Building}{5}{section.3.2}%
+\contentsline {section}{\numberline {3.2}Building}{4}{section.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Running the model}{6}{chapter.4}%
+\contentsline {chapter}{\numberline {4}Running the model}{5}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.1}Grid generation}{6}{section.4.1}%
+\contentsline {section}{\numberline {4.1}Grid generation}{5}{section.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.1.1}Vertical grid structure}{6}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.1}Vertical grid structure}{5}{subsection.4.1.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.2}Dynamics configuration}{6}{section.4.2}%
+\contentsline {section}{\numberline {4.2}Dynamics configuration}{5}{section.4.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.3}Physics configuration}{6}{section.4.3}%
+\contentsline {section}{\numberline {4.3}Physics configuration}{5}{section.4.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.3.1}Local thermodynamic equilibrium option}{6}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.1}Local thermodynamic equilibrium option}{5}{subsection.4.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.4}Coupling to the radiation field}{6}{section.4.4}%
+\contentsline {section}{\numberline {4.4}Coupling to the radiation field}{5}{section.4.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Configuring Output}{7}{chapter.5}%
+\contentsline {section}{\numberline {4.5}Configuring Output}{5}{section.4.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Initialization}{8}{chapter.6}%
+\contentsline {chapter}{\numberline {5}Initialization}{6}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {7}Boundary conditions}{9}{chapter.7}%
+\contentsline {chapter}{\numberline {6}Boundary conditions}{7}{chapter.6}%
