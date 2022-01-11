@@ -29,7 +29,7 @@ Everything is easy and quick to install. These instructions are for Ubuntu.
 ```
 git clone https://github.com/OpenNWP/L-GAME.git
 cd L-GAME
-./setup_directories.sh
+./create_directories.sh
 ```
 
 If you want to use radiation, modify the spectral properties filenames in the file `src/radiation/rterrtmgp_coupler.f90`. Then run
