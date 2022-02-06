@@ -10,7 +10,7 @@ L-GAME is a numerical weather prediction (NWP) model. It is the application of t
 * time stepping: two-time-level Runge-Kutta scheme, modified into a HEVI (horizontally explicit, vertically implicit) and forward-backward scheme for stability, horizontal pressure gradient extrapolated and kept constant
 * radiation: coupled to [RTE+RRTMGP](https://github.com/earth-system-radiation/rte-rrtmgp)
 * uses the Poisson bracket formulation by Gassmann and Herzog (2008) and Gassmann (2013)
-* assigns individual mass densities to all tracers and calculates interactions using the [atmostracers](https://github.com/OpenNWP/atmostracers) library
+* assigns individual mass densities to all tracers and calculates interactions
 
 ## Installation
 
