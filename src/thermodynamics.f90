@@ -4,9 +4,7 @@
 module thermodynamics
 
   ! In this file, thermodynamic relations are calculated.
-
-  use hetero_nml,  only: spec_heat_capacities_v_gas_lookup, spec_heat_capacities_p_gas_lookup, &
-                         specific_gas_constants_lookup
+  
   use definitions, only: wp
   
   implicit none
@@ -26,7 +24,13 @@ module thermodynamics
     ! specific heat capacity at constant volume
     real(wp) :: spec_heat_cap_diagnostics_v
     
-    spec_heat_cap_diagnostics_v = spec_heat_capacities_v_gas_lookup(1)
+    if (j_constituent == 0) then
+      spec_heat_cap_diagnostics_v = 717.942189_wp
+    endif
+    
+    if (j_constituent == 1) then
+      spec_heat_cap_diagnostics_v = 1396.475121_wp
+    endif
     
   end function spec_heat_cap_diagnostics_v
 
@@ -37,7 +41,13 @@ module thermodynamics
     ! specific heat capacity at constant pressure
     real(wp) :: spec_heat_cap_diagnostics_p
     
-    spec_heat_cap_diagnostics_p = spec_heat_capacities_p_gas_lookup(1)
+    if (j_constituent == 0) then
+      spec_heat_cap_diagnostics_p = 1005.0_wp
+    endif
+    
+    if (j_constituent == 1) then
+      spec_heat_cap_diagnostics_p = 1858.0_wp
+    endif
     
   end function spec_heat_cap_diagnostics_p
   
@@ -48,7 +58,13 @@ module thermodynamics
     ! specific heat capacity at constant pressure
     real(wp) :: gas_constant_diagnostics
     
-    gas_constant_diagnostics = specific_gas_constants_lookup(1)
+    if (j_constituent == 0) then
+      gas_constant_diagnostics = 287.057811_wp
+    endif
+    
+    if (j_constituent == 1) then
+      gas_constant_diagnostics = 461.524879_wp
+    endif
     
   end function gas_constant_diagnostics
 

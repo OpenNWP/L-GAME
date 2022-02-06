@@ -62,21 +62,81 @@ module radiation
   ! the gases in lowercase
   character(len = 32),dimension(size(active_gases)) :: gases_lowercase
   
-  ! interface to C functions
-  interface
-    real(C_DOUBLE) function molar_fraction_in_dry_air(gas_number) bind(c,name = "molar_fraction_in_dry_air")
-      use,intrinsic::iso_c_binding
-      implicit none
-      integer(C_INT),value :: gas_number
-    end function molar_fraction_in_dry_air
-    real(C_DOUBLE) function calc_o3_vmr(z_height) bind(c,name = "calc_o3_vmr")
-      use,intrinsic::iso_c_binding
-      implicit none
-      real(C_DOUBLE),value :: z_height
-    end function calc_o3_vmr
-  end interface
-  
   contains
+  
+  real(wp) function molar_fraction_in_dry_air(gas_number)
+    
+    ! This function returns the molar fraction of certain gases in dry air.
+    
+    integer                           :: gas_number
+  
+    ! 0: dry air
+    ! 1: H2O
+    ! 2: N2
+    ! 3: O2
+    ! 4: Ar
+    ! 5: CO2
+    ! 6: Ne
+    ! 7: He
+    ! 8: CH4
+    ! 9: CO
+    ! 10: O3
+    ! 11: N2O
+  
+    if (gas_number == 2) then
+      molar_fraction_in_dry_air = 0.7809_wp
+    endif
+    if (gas_number == 3) then
+      molar_fraction_in_dry_air = 0.2095_wp
+    endif
+    if (gas_number == 4) then
+      molar_fraction_in_dry_air = 0.0093_wp
+    endif
+    if (gas_number == 5) then
+      molar_fraction_in_dry_air = 0.0003_wp
+    endif
+    if (gas_number == 6) then
+      molar_fraction_in_dry_air = 1.8e-5_wp
+    endif
+    if (gas_number == 7) then
+      molar_fraction_in_dry_air = 5.2e-6_wp
+    endif
+    if (gas_number == 8) then
+      molar_fraction_in_dry_air = 1.5e-6_wp
+    endif
+    if (gas_number == 9) then
+      molar_fraction_in_dry_air = 1.0e-7_wp
+    endif
+    if (gas_number == 10) then
+      molar_fraction_in_dry_air = 1e-6_wp
+    endif
+    if (gas_number == 11) then
+	  ! https://www.epa.gov/climate-indicators/climate-change-indicators-atmospheric-concentrations-greenhouse-gases
+      molar_fraction_in_dry_air = 0.3e-6_wp
+    endif
+  
+  end function molar_fraction_in_dry_air
+  
+  real(wp) function calc_o3_vmr(z_height)
+
+    ! This function calculates the ozone VMR as a function of height.
+    ! assumes a Gaussian distribution
+    
+    real(wp)                          :: z_height            ! height above MSL
+    
+    ! local variables
+    real(wp)                          :: fwhm = 20e3_wp      ! full width at half maximum
+    real(wp)                          :: z_max = 34e3_wp     ! height of the maximum of the distribution
+    real(wp)                          :: max_vmr = 8.5e-6_wp ! maximum volume mixing ratio
+    real(wp)                          :: sigma               ! standard deviation
+    real(wp)                          :: distance            ! distance from the maximum
+    
+    ! calculation of the result
+    sigma = fwhm/(8*log(2._wp))**0.5_wp
+    distance = z_height - z_max
+    calc_o3_vmr = max_vmr*exp(-distance**2/(2*sigma**2))
+    
+  end function calc_o3_vmr
   
   subroutine radiation_init() &
   bind(c,name = "radiation_init")
