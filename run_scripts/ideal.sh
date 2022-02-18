@@ -11,15 +11,14 @@ cat > namelist.nml << EOF
 
 &run
 run_id="$run_id"
-nlins=101
-ncols=101
-nlays=30
-nlays_oro=20
-dy=850
-dx=800
-run_span_hr=1
+nlins=51
+ncols=51
+nlays=40
+nlays_oro=30
+dy=24000
+dx=26000
+run_span_hr=60
 scenario="standard"
-slow_fast_ratio=3
 /
 
 &diff

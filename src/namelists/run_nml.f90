@@ -18,7 +18,6 @@ module run_nml
   real(wp)          :: sigma               ! vertical grid stretching parameter
   integer           :: run_span_hr         ! run span in hours
   real              :: t_init              ! epoch time stamp of the initialization
-  integer           :: slow_fast_ratio     ! ratio of advective to sound time step
   real(wp)          :: semimajor           ! large halfaxis of the Earth
   real(wp)          :: semiminor           ! small halfaxis of the Earth
   real(wp)          :: re                  ! Earth radius
@@ -43,7 +42,7 @@ module run_nml
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr,sigma, &
-  slow_fast_ratio,toa,scenario,llinear,run_id,lcorio,nlays_oro
+  toa,scenario,llinear,run_id,lcorio,nlays_oro
 
   contains
 
@@ -52,19 +51,17 @@ module run_nml
     ! local variables
     integer :: fileunit
     
-    nlins               = 101
-    ncols               = 101
-    nlays               = 80
-    dy                  = 800._wp
-    dx                  = 850._wp
+    nlins               = 51
+    ncols               = 51
+    nlays               = 40
+    nlays_oro           = 30
+    dy                  = 24000._wp
+    dx                  = 25000._wp
     run_span_hr         = 63
     t_init              = 0._wp
-    slow_fast_ratio     = 1
     toa                 = 40000._wp
     sigma               = 1.3_wp
-    semiminor           = 6356752.314_wp
-    semimajor           = 6378137.0_wp
-    re                  = (semimajor*semimajor*semiminor)**(1._wp/3._wp)
+    re                  = 6371000.789927_wp
     lrestart            = .false.
     lideal              = .true.
     l3dvar              = .false.

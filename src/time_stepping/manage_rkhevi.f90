@@ -7,7 +7,7 @@ module manage_rkhevi
 
   use definitions,                only: t_grid,t_state,t_diag,wp,t_tend
   use linear_combine_two_states,  only: lin_combination
-  use run_nml,                    only: slow_fast_ratio,dtime,nlins,ncols
+  use run_nml,                    only: dtime,nlins,ncols
   use pressure_gradient,          only: manage_pressure_gradient
   use explicit_vector_tendencies, only: expl_vector_tend
   use thermodynamics,             only: spec_heat_cap_diagnostics_v, gas_constant_diagnostics
@@ -34,15 +34,6 @@ module manage_rkhevi
     
     ! local variables
     integer  :: rk_step          ! index of the Runge-Kutta step
-    logical  :: slow_update_bool ! switch to determine if slow terms will be updated
-    
-    ! slow terms (momentum advection and diffusion) update switch
-    slow_update_bool = .false.
-    ! check if slow terms have to be updated
-    if (mod(total_step_counter, slow_fast_ratio) == 0) then
-      ! set the respective update switch to one
-      slow_update_bool = .true.
-    endif
     
     do rk_step = 1,2
     
@@ -56,7 +47,7 @@ module manage_rkhevi
         call manage_pressure_gradient(state_new,diag,grid,total_step_counter==0)
       endif
       ! Only the horizontal momentum is a forward tendency.
-      call expl_vector_tend(state_new,tend,diag,grid,slow_update_bool,rk_step,total_step_counter)
+      call expl_vector_tend(state_new,tend,diag,grid,rk_step,total_step_counter)
       ! time stepping for the horizontal momentum can be directly executed
       state_new%wind_u(2:nlins+1,2:ncols  ,:) = state_old%wind_u(2:nlins+1,2:ncols  ,:) + dtime*tend%wind_u(:,:,:)
       state_new%wind_v(2:nlins  ,2:ncols+1,:) = state_old%wind_v(2:nlins  ,2:ncols+1,:) + dtime*tend%wind_v(:,:,:)

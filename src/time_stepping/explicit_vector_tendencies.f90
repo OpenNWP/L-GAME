@@ -25,13 +25,12 @@ module explicit_vector_tendencies
   
   contains
 
-  subroutine expl_vector_tend(state,tend,diag,grid,slow_update_bool,rk_step,total_step_counter)
+  subroutine expl_vector_tend(state,tend,diag,grid,rk_step,total_step_counter)
   
     type(t_state), intent(in)    :: state              ! state to use for calculating the tendencies
     type(t_tend),  intent(inout) :: tend               ! the tendency
     type(t_diag),  intent(inout) :: diag               ! diagnostic properties (e_kin is a diagnostic property)
     type(t_grid),  intent(in)    :: grid               ! grid propertiesgrid)
-    logical,       intent(in)    :: slow_update_bool   ! switch to set wether the slow terms will be updated or not
     integer,       intent(in)    :: rk_step            ! Runge-Kutta step
     integer,       intent(in)    :: total_step_counter ! time step counter of the model integration
     
@@ -62,7 +61,7 @@ module explicit_vector_tendencies
     endif
     
     ! momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
-    if (rk_step == 1 .and. slow_update_bool) then
+    if (rk_step == 1) then
       ! horizontal momentum diffusion
       if (lmom_diff_h) then
         call mom_diff_h(state,diag,grid)
