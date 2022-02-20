@@ -4,7 +4,7 @@
 # Github repository: https://github.com/OpenNWP/L-GAME
 
 lgame_home_dir=~/code/L-GAME
-run_id=ideal
+run_id=op
 export OMP_NUM_THREADS=2
 
 cat > namelist.nml << EOF
@@ -28,7 +28,7 @@ lmom_diff_v=.false.
 /
 
 &io
-dt_write_min=1
+dt_write_min=60
 /
 
 EOF
