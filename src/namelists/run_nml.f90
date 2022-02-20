@@ -55,8 +55,8 @@ module run_nml
     ncols               = 51
     nlays               = 40
     nlays_oro           = 30
-    dy                  = 24000._wp
-    dx                  = 25000._wp
+    dy                  = 48000._wp
+    dx                  = 52000._wp
     run_span_hr         = 63
     t_init              = 0._wp
     toa                 = 40000._wp
