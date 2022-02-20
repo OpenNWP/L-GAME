@@ -5,7 +5,7 @@ module momentum_diff_diss
 
   ! This module handles momentum diffusion and dissipation.
   
-  use definitions,          only: t_grid,t_diag,t_state
+  use definitions,          only: t_grid,t_diag,t_irrev,t_state
   use divergence_operators, only: divv_h
   use gradient_operators,   only: grad_hor
   use run_nml,              only: nlins,ncols
@@ -19,19 +19,20 @@ module momentum_diff_diss
   
   contains
   
-  subroutine mom_diff_h(state,diag,grid)
+  subroutine mom_diff_h(state,diag,irrev,grid)
   
     ! This subroutine handles horizontal momentum diffusion.
     
     type(t_state), intent(in)    :: state
     type(t_diag),  intent(inout) :: diag
+    type(t_irrev), intent(inout) :: irrev
     type(t_grid),  intent(in)    :: grid
     
     ! calculating the divergence of the horizontal wind field
     call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
     ! calculating the gradient of the divergence
-    call grad_hor(diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),diag%mom_diff_tend_x, &
-    diag%mom_diff_tend_y,diag%mom_diff_tend_z,grid)
+    call grad_hor(diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),irrev%mom_diff_tend_x, &
+    irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
   
   end subroutine mom_diff_h
 

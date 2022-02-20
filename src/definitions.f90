@@ -108,9 +108,6 @@ module definitions
     real(wp), allocatable :: pot_vort_tend_x(:,:,:)     ! tendency due to the vorticity flux term in x-direction
     real(wp), allocatable :: pot_vort_tend_y(:,:,:)     ! tendency due to the vorticity flux term in y-direction
     real(wp), allocatable :: pot_vort_tend_z(:,:,:)     ! tendency due to the vorticity flux term in z-direction
-    real(wp), allocatable :: mom_diff_tend_x(:,:,:)     ! tendency due to momentum diffusion in x-direction
-    real(wp), allocatable :: mom_diff_tend_y(:,:,:)     ! tendency due to momentum diffusion in y-direction
-    real(wp), allocatable :: mom_diff_tend_z(:,:,:)     ! tendency due to momentum diffusion in z-direction
     real(wp), allocatable :: scalar_placeholder(:,:,:)  ! placeholder for scalar fields
     real(wp), allocatable :: u_placeholder(:,:,:)       ! placeholder for vector fields in x-direction
     real(wp), allocatable :: v_placeholder(:,:,:)       ! placeholder for vector fields in y-direction
@@ -126,8 +123,13 @@ module definitions
   end type t_diag
   
   type t_irrev
-  
+    
+    ! type cotaining irreversible quantities
     real(wp), allocatable :: tke(:,:,:)                 ! turbulent kinetic energy (unit: J/kg)
+    real(wp), allocatable :: mom_diff_tend_x(:,:,:)     ! tendency due to momentum diffusion in x-direction
+    real(wp), allocatable :: mom_diff_tend_y(:,:,:)     ! tendency due to momentum diffusion in y-direction
+    real(wp), allocatable :: mom_diff_tend_z(:,:,:)     ! tendency due to momentum diffusion in z-direction
+    real(wp), allocatable :: heating_diss(:,:,:)        ! dissipative heating power density
   
   end type t_irrev
   

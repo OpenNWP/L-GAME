@@ -5,7 +5,7 @@ module explicit_vector_tendencies
 
   ! this module manages the calculation of the explicit part of the wind tendencies
 
-  use definitions,        only: t_grid,t_state,t_diag,t_tend,wp
+  use definitions,        only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
   use inner_product,      only: kinetic_energy
   use gradient_operators, only: grad
   use run_nml,            only: nlins,ncols,nlays,impl_weight,llinear,lcorio
@@ -23,11 +23,12 @@ module explicit_vector_tendencies
   
   contains
 
-  subroutine expl_vector_tend(state,tend,diag,grid,rk_step,total_step_counter)
+  subroutine expl_vector_tend(state,tend,diag,irrev,grid,rk_step,total_step_counter)
   
     type(t_state), intent(in)    :: state              ! state to use for calculating the tendencies
     type(t_tend),  intent(inout) :: tend               ! the tendency
-    type(t_diag),  intent(inout) :: diag               ! diagnostic properties (e_kin is a diagnostic property)
+    type(t_diag),  intent(inout) :: diag               ! diagnostic properties
+    type(t_irrev), intent(inout) :: irrev              ! irreversible quantities
     type(t_grid),  intent(in)    :: grid               ! grid propertiesgrid)
     integer,       intent(in)    :: rk_step            ! Runge-Kutta step
     integer,       intent(in)    :: total_step_counter ! time step counter of the model integration
@@ -62,7 +63,7 @@ module explicit_vector_tendencies
     if (rk_step == 1) then
       ! horizontal momentum diffusion
       if (lmom_diff_h) then
-        call mom_diff_h(state,diag,grid)
+        call mom_diff_h(state,diag,irrev,grid)
       endif
     endif
     
@@ -83,7 +84,7 @@ module explicit_vector_tendencies
     ! momentum advection
     - diag%e_kin_grad_x + diag%pot_vort_tend_x & 
     ! momentum diffusion
-    + diag%mom_diff_tend_x)
+    + irrev%mom_diff_tend_x)
     ! y-direction
     tend%wind_v = old_weight*tend%wind_v &
     + new_weight*( &
@@ -94,7 +95,7 @@ module explicit_vector_tendencies
     ! momentum advection
     - diag%e_kin_grad_y + diag%pot_vort_tend_y &
     ! momentum diffusion
-    + diag%mom_diff_tend_y)
+    + irrev%mom_diff_tend_y)
     ! z-direction
     tend%wind_w = old_weight*tend%wind_w &
     + new_weight*( &
@@ -104,7 +105,7 @@ module explicit_vector_tendencies
     ! momentum advection
     - diag%e_kin_grad_z + diag%pot_vort_tend_z &
     ! momentum diffusion
-    + diag%mom_diff_tend_z)
+    + irrev%mom_diff_tend_z)
   
   end subroutine expl_vector_tend
 

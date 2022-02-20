@@ -10,7 +10,7 @@ program control
                                        lideal,l3dvar,l4dvar
   use io_nml,                    only: io_nml_setup,dt_write
   use diff_nml,                  only: diff_nml_setup
-  use definitions,               only: t_grid,t_state,wp,t_diag,t_tend
+  use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_irrev
   use grid_generator,            only: grid_setup,bg_setup
   use io,                        only: restart,ideal,var_3d,var_4d,write_output
   use manage_rkhevi,             only: rkhevi
@@ -24,6 +24,7 @@ program control
   type(t_state) :: state_old, state_new, state_write
   type(t_diag)  :: diag
   type(t_tend)  :: tend
+  type(t_irrev) :: irrev
 
   ! reading in all namelists so that we know what we have to do
   write(*,*) "Reading in run namelist ..."
@@ -98,7 +99,7 @@ program control
   allocate(state_write%wind_u(nlins+2,ncols+1,nlays))
   allocate(state_write%wind_v(nlins+1,ncols+2,nlays))
   allocate(state_write%wind_w(nlins+2,ncols+2,nlays+1))
-  ! state containing diagnostic quantities
+  ! type containing diagnostic quantities
   allocate(diag%e_kin(nlins,ncols,nlays))
   allocate(diag%e_kin_grad_x(nlins,ncols-1,nlays))
   allocate(diag%e_kin_grad_y(nlins-1,ncols,nlays))
@@ -115,9 +116,6 @@ program control
   allocate(diag%pot_vort_tend_x(nlins,ncols-1,nlays))
   allocate(diag%pot_vort_tend_y(nlins-1,ncols,nlays))
   allocate(diag%pot_vort_tend_z(nlins,ncols,nlays+1))
-  allocate(diag%mom_diff_tend_x(nlins,ncols-1,nlays))
-  allocate(diag%mom_diff_tend_y(nlins-1,ncols,nlays))
-  allocate(diag%mom_diff_tend_z(nlins,ncols,nlays+1))
   allocate(diag%scalar_placeholder(nlins+2,ncols+2,nlays))
   allocate(diag%u_placeholder(nlins+2,ncols+1,nlays))
   allocate(diag%v_placeholder(nlins+1,ncols+2,nlays))
@@ -129,6 +127,11 @@ program control
   allocate(diag%z_eta_x(nlins+1,ncols,nlays+1))
   allocate(diag%z_eta_y(nlins,ncols+1,nlays+1))
   allocate(diag%z_eta_z(nlins+1,ncols+1,nlays))
+  ! type containing irreversible quantities
+  allocate(irrev%tke(nlins,ncols,nlays))
+  allocate(irrev%mom_diff_tend_x(nlins,ncols-1,nlays))
+  allocate(irrev%mom_diff_tend_y(nlins-1,ncols,nlays))
+  allocate(irrev%mom_diff_tend_z(nlins,ncols,nlays+1))
   write(*,*) "... finished."
 
   ! firstly, the grid generator needs to be called to calculate the grid properties
@@ -162,9 +165,9 @@ program control
   diag%pot_vort_tend_x = 0._wp
   diag%pot_vort_tend_y = 0._wp
   diag%pot_vort_tend_z = 0._wp
-  diag%mom_diff_tend_x = 0._wp
-  diag%mom_diff_tend_y = 0._wp
-  diag%mom_diff_tend_z = 0._wp
+  irrev%mom_diff_tend_x = 0._wp
+  irrev%mom_diff_tend_y = 0._wp
+  irrev%mom_diff_tend_z = 0._wp
   tend%wind_u = 0._wp
   tend%wind_v = 0._wp
   tend%wind_w = 0._wp
@@ -182,7 +185,7 @@ program control
     state_old = state_new
       
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,grid,diag,time_step_counter)
+    call rkhevi(state_old,state_new,tend,grid,diag,irrev,time_step_counter)
     
     ! managing the calls to the output routine
     if (t_0 + dtime >= t_write) then
@@ -262,7 +265,7 @@ program control
   deallocate(state_write%wind_u)
   deallocate(state_write%wind_v)
   deallocate(state_write%wind_w)
-  ! state containing diagnostic quantities
+  ! type containing diagnostic quantities
   deallocate(diag%e_kin)
   deallocate(diag%p_grad_acc_neg_l_u)
   deallocate(diag%p_grad_acc_neg_l_v)
@@ -279,9 +282,6 @@ program control
   deallocate(diag%pot_vort_tend_x)
   deallocate(diag%pot_vort_tend_y)
   deallocate(diag%pot_vort_tend_z)
-  deallocate(diag%mom_diff_tend_x)
-  deallocate(diag%mom_diff_tend_y)
-  deallocate(diag%mom_diff_tend_z)
   deallocate(diag%scalar_placeholder)
   deallocate(diag%u_placeholder)
   deallocate(diag%v_placeholder)
@@ -293,6 +293,11 @@ program control
   deallocate(diag%z_eta_x)
   deallocate(diag%z_eta_y)
   deallocate(diag%z_eta_z)
+  ! type containing irreversible quantities
+  deallocate(irrev%tke)
+  deallocate(irrev%mom_diff_tend_x)
+  deallocate(irrev%mom_diff_tend_y)
+  deallocate(irrev%mom_diff_tend_z)
   write(*,*) "... finished."
   
 end program control
