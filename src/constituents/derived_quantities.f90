@@ -3,7 +3,7 @@
 
 module thermodynamics
 
-  ! In this file, thermodynamic relations are calculated.
+  ! In this file, more complex thermodynamic quantities are being calculated.
   
   use definitions, only: wp
   
