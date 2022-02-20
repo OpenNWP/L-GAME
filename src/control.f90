@@ -9,6 +9,7 @@ program control
                                        t_init,nlins,ncols,nlays,lrestart, &
                                        lideal,l3dvar,l4dvar
   use io_nml,                    only: io_nml_setup,dt_write
+  use constituents_nml,          only: no_of_constituents
   use diff_nml,                  only: diff_nml_setup
   use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_irrev
   use grid_generator,            only: grid_setup,bg_setup
@@ -70,7 +71,7 @@ program control
   allocate(grid%exner_bg_grad_v(nlins-1,ncols,nlays))
   allocate(grid%exner_bg_grad_w(nlins,ncols,nlays+1))
   ! state at the old time step
-  allocate(state_old%rho(nlins+2,ncols+2,nlays))
+  allocate(state_old%rho(nlins+2,ncols+2,nlays,no_of_constituents))
   allocate(state_old%rhotheta(nlins+2,ncols+2,nlays))
   allocate(state_old%theta_pert(nlins+2,ncols+2,nlays))
   allocate(state_old%exner_pert(nlins+2,ncols+2,nlays))

@@ -68,10 +68,11 @@ module definitions
   type t_state
   
     ! type containing the state variables
-    real(wp), allocatable :: rho(:,:,:)
+    real(wp), allocatable :: rho(:,:,:,:)
     real(wp), allocatable :: rhotheta(:,:,:)
     real(wp), allocatable :: theta_pert(:,:,:)
     real(wp), allocatable :: exner_pert(:,:,:)
+    real(wp), allocatable :: condensed_rho_t(:,:,:,:)
     real(wp), allocatable :: wind_u(:,:,:)
     real(wp), allocatable :: wind_v(:,:,:)
     real(wp), allocatable :: wind_w(:,:,:)
@@ -81,7 +82,7 @@ module definitions
   type t_tend
   
     ! type containing tendencies
-    real(wp), allocatable :: rho(:,:,:)
+    real(wp), allocatable :: rho(:,:,:,:)
     real(wp), allocatable :: rhotheta(:,:,:)
     real(wp), allocatable :: wind_u(:,:,:)
     real(wp), allocatable :: wind_v(:,:,:)

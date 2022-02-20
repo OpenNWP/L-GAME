@@ -9,8 +9,9 @@ module hetero_nml
   
   integer :: no_of_gaseous_constituents   ! number of constituents of the gas phase
   integer :: no_of_condensed_constituents ! number of condensed constituents
+  integer :: no_of_constituents           ! the total number of constituents
   
-  namelist /constituents/no_of_gaseous_constituents,no_of_condensed_constituents
+  namelist /constituents/no_of_condensed_constituents,no_of_gaseous_constituents
 
   contains
 
@@ -20,14 +21,16 @@ module hetero_nml
     integer :: fileunit
     
     ! default values
-    no_of_gaseous_constituents = 2
     no_of_condensed_constituents = 4
+    no_of_gaseous_constituents = 2
     
     ! open and read namelist file
     open(action="read", file="namelist.nml", newunit=fileunit)
     read(nml=constituents, unit=fileunit)
         
     close(fileunit)
+    
+    no_of_constituents = no_of_condensed_constituents + no_of_gaseous_constituents
     
   end subroutine hetero_nml_setup
   
