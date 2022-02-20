@@ -12,8 +12,11 @@ module diff_nml
   real(wp) :: klemp_begin_rel  ! lower boundary of the Klemp damping layer in relation to TOA
   logical  :: lmom_diff_h      ! switch for horizontal momentum diffusion
   logical  :: lmom_diff_v      ! switch for vertical momentum diffusion
+  real(wp) :: diff_h_smag_div  ! horizontal diffusion Smagorinsky factor acting on divergent movements
+  real(wp) :: diff_h_smag_rot  ! horizontal diffusion Smagorinsky factor acting on vortical movements
   
-  namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v
+  
+  namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v,diff_h_smag_div,diff_h_smag_rot
   
   contains
   
@@ -22,17 +25,20 @@ module diff_nml
     ! local variables
     integer :: fileunit
     
+    ! default values
     lklemp          = .true.
     klemp_damp_max  = 0.25_wp
     klemp_begin_rel = 0.53_wp
-    lmom_diff_h     = .false.
-    lmom_diff_v     = .false.
-  
-      ! Open and read Namelist file.
-      open(action="read", file="namelist.nml", newunit=fileunit)
-      read(nml=diff, unit=fileunit)
+    lmom_diff_h     = .true.
+    lmom_diff_v     = .true.
+    diff_h_smag_div = 0.01_wp
+    diff_h_smag_rot = 0.01_wp
+    
+    ! Open and read Namelist file.
+    open(action="read", file="namelist.nml", newunit=fileunit)
+    read(nml=diff, unit=fileunit)
         
-      close(fileunit)
+    close(fileunit)
   
   end subroutine diff_nml_setup
   

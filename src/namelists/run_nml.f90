@@ -88,7 +88,7 @@ module run_nml
     EPSILON_SECURITY    = 1e-10_wp
     PRANDTL_HEIGHT      = 100._wp
     
-    ! Open and read Namelist file.
+    ! open and read Namelist file
     open(action="read", file="namelist.nml", newunit=fileunit)
     read(nml=run, unit=fileunit)
         
