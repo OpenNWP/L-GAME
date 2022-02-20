@@ -30,8 +30,15 @@ module io_nml
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
     read(nml=io, unit=fileunit)
-        
+    
     close(fileunit)
+    
+    ! sanity check
+    if (read_grid .and. write_grid) then
+      write(*,*) "Error: read_grid and write_grid should not both be true at the same time."
+      write(*,*) "Aborting."
+      call exit(1)
+    endif
     
     ! calculating the output timestep in seconds
     dt_write        = 60._wp*dt_write_min
