@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module hetero_nml
+module constituents_nml
 
   use definitions, only: wp
 
@@ -34,7 +34,7 @@ module hetero_nml
     
   end subroutine hetero_nml_setup
   
-end module hetero_nml
+end module constituents_nml
 
 
 

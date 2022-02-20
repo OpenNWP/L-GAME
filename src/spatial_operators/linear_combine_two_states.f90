@@ -4,6 +4,7 @@
 module linear_combine_two_states
 
   use definitions, only: t_state,wp,t_grid
+  use constituents_nml, only: no_of_condensed_constituents
   
   implicit none
   
@@ -27,7 +28,7 @@ module linear_combine_two_states
     
     state_out%rho        = coeff_0*state_0%rho              + coeff_1*state_1%rho
     state_out%rhotheta   = coeff_0*state_0%rhotheta         + coeff_1*state_1%rhotheta
-    state_out%theta_pert = state_out%rhotheta/state_out%rho - grid%theta_bg
+    state_out%theta_pert = state_out%rhotheta/state_out%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_bg
     state_out%exner_pert = coeff_0*state_0%exner_pert       + coeff_1*state_1%exner_pert
     state_out%wind_u     = coeff_0*state_0%wind_u           + coeff_1*state_1%wind_u
     state_out%wind_v     = coeff_0*state_0%wind_v           + coeff_1*state_1%wind_v

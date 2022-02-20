@@ -5,11 +5,12 @@ module io
 
   ! This module handles everything dealing with IO.
 
-  use definitions,    only: t_state,wp,t_diag,t_grid
+  use definitions,      only: t_state,wp,t_diag,t_grid
   use netcdf
-  use run_nml,        only: nlins,ncols,nlays,scenario,p_0,run_id
-  use dictionary,     only: specific_gas_constants,spec_heat_capacities_p_gas
-  use grid_generator, only: bg_temp,bg_pres,geopot
+  use run_nml,          only: nlins,ncols,nlays,scenario,p_0,run_id
+  use constituents_nml, only: no_of_condensed_constituents
+  use dictionary,       only: specific_gas_constants,spec_heat_capacities_p_gas
+  use grid_generator,   only: bg_temp,bg_pres,geopot
 
   implicit none
   
@@ -276,7 +277,7 @@ module io
     
     ! writing the data to the output file
     ! 3D pressure
-    diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) = state%rho(2:nlins+1,2:ncols+1,:) &
+    diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) = state%rho(2:nlins+1,2:ncols+1,:,no_of_condensed_constituents+1) &
     *specific_gas_constants(0)*diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
     call check(nf90_put_var(ncid,varid_p,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
     
@@ -370,10 +371,10 @@ module io
     !$OMP END PARALLEL
     
     ! density
-    state%rho(:,:,:) = p_0*(state%exner_pert(:,:,:))**(c_p/r_d) &
+    state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert(:,:,:))**(c_p/r_d) &
     /(r_d*diag%scalar_placeholder(:,:,:))
     ! potential temperature density
-    state%rhotheta(:,:,:) = state%rho(:,:,:)*state%theta_pert(:,:,:)
+    state%rhotheta(:,:,:) = state%rho(:,:,:,no_of_condensed_constituents+1)*state%theta_pert(:,:,:)
     
     ! substracting the background state
     state%theta_pert(:,:,:) = state%theta_pert(:,:,:) - grid%theta_bg(:,:,:)
