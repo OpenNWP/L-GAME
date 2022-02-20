@@ -22,7 +22,7 @@ scenario="standard"
 /
 
 &diff
-lklemp=.false.
+lklemp=.true.
 lmom_diff_h=.false.
 lmom_diff_v=.false.
 /
