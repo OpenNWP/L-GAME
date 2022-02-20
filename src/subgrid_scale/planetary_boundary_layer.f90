@@ -14,12 +14,7 @@ module planetary_boundary_layer
   
   real(wp) :: KARMAN = 0.4_wp
   
-  public :: roughness_length_from_u10_sea
-  public :: scalar_flux_resistance
   public :: momentum_flux_resistance
-  public :: roughness_velocity
-  public :: psi_h
-  public :: psi_m
   
   contains
   
