@@ -14,6 +14,7 @@ module definitions
   public :: t_state
   public :: t_diag
   public :: t_tend
+  public :: t_irrev
   
   ! setting the floating point precision
   ! single precision
@@ -123,6 +124,12 @@ module definitions
     real(wp), allocatable :: z_eta_z(:,:,:)             ! relative vorticity in z-direction
   
   end type t_diag
+  
+  type t_irrev
+  
+    real(wp), allocatable :: tke(:,:,:)                 ! turbulent kinetic energy (unit: J/kg)
+  
+  end type t_irrev
   
 end module definitions
 

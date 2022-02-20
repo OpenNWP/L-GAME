@@ -31,7 +31,6 @@ module divergence_operators
     real(wp)                    :: contra_lower          ! contravariant mass flux density resulting
                                                          ! from the horizontal vector components through the lower area
 
-    ! performing the actual calculation
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,comp_h,comp_v)
     do ji=1,nlins
