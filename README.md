@@ -41,7 +41,7 @@ If you want to use radiation, modify the spectral properties filenames in the fi
 
 ```
 cd run_scripts
-./ideal.sh
+./schaer.sh
 ```
 
 Output will be placed in the directory `output`.
