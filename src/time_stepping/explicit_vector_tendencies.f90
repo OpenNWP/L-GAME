@@ -11,8 +11,6 @@ module explicit_vector_tendencies
   use run_nml,            only: nlins,ncols,nlays,impl_weight,llinear,lcorio
   use vorticities,        only: calc_pot_vort
   use multiplications,    only: scalar_times_vector
-  use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_v, &
-                                spec_heat_cap_diagnostics_p
   use vorticity_flux,     only: calc_vorticity_flux_term
   use diff_nml,           only: lmom_diff_h
   use momentum_diff_diss, only: mom_diff_h

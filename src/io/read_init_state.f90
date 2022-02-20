@@ -8,7 +8,7 @@ module io
   use definitions,    only: t_state,wp,t_diag,t_grid
   use netcdf
   use run_nml,        only: nlins,ncols,nlays,scenario,p_0,run_id
-  use thermodynamics, only: gas_constant_diagnostics,spec_heat_cap_diagnostics_p
+  use dictionary,     only: specific_gas_constants,spec_heat_capacities_p_gas
   use grid_generator, only: bg_temp,bg_pres,geopot
 
   implicit none
@@ -41,8 +41,8 @@ module io
     real(wp)                     :: r_d                                ! specific gas constant of dry air
     real(wp)                     :: c_p                                ! specific heat capacity at const. pressure of dry air
     
-    r_d = gas_constant_diagnostics(1)
-    c_p = spec_heat_cap_diagnostics_p(1)
+    r_d = specific_gas_constants(0)
+    c_p = spec_heat_capacities_p_gas(0)
       
     select case (trim(scenario))
     
@@ -277,7 +277,7 @@ module io
     ! writing the data to the output file
     ! 3D pressure
     diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) = state%rho(2:nlins+1,2:ncols+1,:) &
-    *gas_constant_diagnostics(1)*diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
+    *specific_gas_constants(0)*diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
     call check(nf90_put_var(ncid,varid_p,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
     
     ! 3D u wind
@@ -337,8 +337,8 @@ module io
     real(wp)                     :: r_d               ! specific gas constant of dry air
     real(wp)                     :: c_p               ! specific heat capacity at const. pressure of dry air
     
-    r_d = gas_constant_diagnostics(1)
-    c_p = spec_heat_cap_diagnostics_p(1)
+    r_d = specific_gas_constants(0)
+    c_p = spec_heat_capacities_p_gas(0)
     
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
     !$OMP PARALLEL
@@ -358,7 +358,7 @@ module io
             ! solving a quadratic equation for the Exner pressure
             b = -0.5_wp*state%exner_pert(ji,jk,jl+1)/bg_temp(grid%z_geo_scal(ji,jk,jl+1)) &
             *(temperature - bg_temp(grid%z_geo_scal(ji,jk,jl+1)) + 2.0_wp/ &
-            spec_heat_cap_diagnostics_p(1)*(geopot(grid%z_geo_scal(ji,jk,jl)) - geopot(grid%z_geo_scal(ji,jk,jl+1))))
+            c_p*(geopot(grid%z_geo_scal(ji,jk,jl)) - geopot(grid%z_geo_scal(ji,jk,jl+1))))
             c = state%exner_pert(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_geo_scal(ji,jk,jl+1))
             state%exner_pert(ji,jk,jl) = b+sqrt(b**2+c)
             state%theta_pert(ji,jk,jl) = temperature/state%exner_pert(ji,jk,jl)

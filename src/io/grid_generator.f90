@@ -10,7 +10,7 @@ module grid_generator
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard, &
                                 scenario
   use gradient_operators, only: grad_hor_cov_extended,grad
-  use thermodynamics,     only: gas_constant_diagnostics,spec_heat_cap_diagnostics_p
+  use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
 
   implicit none
   
@@ -383,14 +383,14 @@ module grid_generator
           ! lowest layer
           if (jl == nlays) then
             pressure    = bg_pres(grid%z_geo_scal(ji,jk,jl))
-            grid%exner_bg(ji,jk,jl) = (pressure/p_0)**(gas_constant_diagnostics(1)/spec_heat_cap_diagnostics_p(1))
+            grid%exner_bg(ji,jk,jl) = (pressure/p_0)**(specific_gas_constants(0)/spec_heat_capacities_p_gas(0))
             grid%theta_bg(ji,jk,jl) = temperature/grid%exner_bg(ji,jk,jl)
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
             b = -0.5_wp*grid%exner_bg(ji,jk,jl+1)/bg_temp(grid%z_geo_scal(ji,jk,jl+1)) &
             *(temperature - bg_temp(grid%z_geo_scal(ji,jk,jl+1)) + 2.0_wp/ &
-            spec_heat_cap_diagnostics_p(1)*(geopot(grid%z_geo_scal(ji,jk,jl)) - geopot(grid%z_geo_scal(ji,jk,jl+1))))
+            spec_heat_capacities_p_gas(0)*(geopot(grid%z_geo_scal(ji,jk,jl)) - geopot(grid%z_geo_scal(ji,jk,jl+1))))
             c = grid%exner_bg(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_geo_scal(ji,jk,jl+1))
             grid%exner_bg(ji,jk,jl) = b+sqrt(b**2+c)
             grid%theta_bg(ji,jk,jl) = temperature/grid%exner_bg(ji,jk,jl)
@@ -464,10 +464,10 @@ module grid_generator
     real(wp)             :: bg_pres
 
     if (z_height < inv_height) then  
-      bg_pres = p_0_standard*(1 - lapse_rate*z_height/surface_temp)**(gravity/(gas_constant_diagnostics(1)*lapse_rate));
+      bg_pres = p_0_standard*(1 - lapse_rate*z_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate));
     elseif (z_height < tropo_height) then
-      bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(gas_constant_diagnostics(1)*lapse_rate)) &
-      *exp(-gravity*(z_height - tropo_height)/(gas_constant_diagnostics(1)*(surface_temp - lapse_rate*tropo_height)));
+      bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate)) &
+      *exp(-gravity*(z_height - tropo_height)/(specific_gas_constants(0)*(surface_temp - lapse_rate*tropo_height)));
     else
       write(*,*) "Argument of bg_pres is above the inversion height. This is unrealistic in the lowest layer."
       write(*,*) "Aborting."

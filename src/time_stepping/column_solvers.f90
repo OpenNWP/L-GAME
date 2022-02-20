@@ -7,7 +7,7 @@ module column_solvers
 
   use run_nml,        only: nlins,ncols,wp,nlays,dtime,p_0,toa,impl_weight,partial_impl_weight
   use definitions,    only: t_grid,t_state,t_tend
-  use thermodynamics, only: spec_heat_cap_diagnostics_v,spec_heat_cap_diagnostics_p,gas_constant_diagnostics
+  use dictionary,     only: spec_heat_capacities_v_gas,spec_heat_capacities_p_gas,specific_gas_constants
   use diff_nml,       only: lklemp,klemp_damp_max,klemp_begin_rel
 
   implicit none
@@ -57,9 +57,9 @@ module column_solvers
     real(wp)                 :: damping_coeff           ! damping coefficient of the Klemp layer
     real(wp)                 :: z_above_damping         ! height above the lower boundary of the damping height
 
-    c_v = spec_heat_cap_diagnostics_v(1)
-    c_p = spec_heat_cap_diagnostics_p(1)
-    r_d = gas_constant_diagnostics(1)
+    c_v = spec_heat_capacities_v_gas(0)
+    c_p = spec_heat_capacities_p_gas(0)
+    r_d = specific_gas_constants(0)
     damping_start_height = klemp_begin_rel*toa
 
     !$OMP PARALLEL

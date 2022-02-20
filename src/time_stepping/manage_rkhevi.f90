@@ -10,7 +10,6 @@ module manage_rkhevi
   use run_nml,                    only: dtime,nlins,ncols
   use pressure_gradient,          only: manage_pressure_gradient
   use explicit_vector_tendencies, only: expl_vector_tend
-  use thermodynamics,             only: spec_heat_cap_diagnostics_v, gas_constant_diagnostics
   use explicit_scalar_tendencies, only: expl_scalar_tend
   use column_solvers,             only: three_band_solver_ver
   use boundaries,                 only: bc

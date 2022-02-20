@@ -21,7 +21,7 @@ module radiation
   use mo_cloud_optics,      only: ty_cloud_optics
   use mo_load_cloud_coefficients, &
                             only: load_cld_lutcoeff, load_cld_padecoeff
-  use thermodynamics,       only: gas_constant_diagnostics
+  use dictionary,           only: specific_gas_constants
   
   implicit none
   
@@ -303,7 +303,7 @@ module radiation
       do jk = 1,no_of_layers
         temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
         ! the pressure is diagnozed here,using the equation of state for ideal gases
-        pressure_rad(ji,jk) = gas_constant_diagnostics(0) &
+        pressure_rad(ji,jk) = specific_gas_constants(0) &
         *mass_densities(no_of_condensed_constituents*no_of_scalars &
         + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
       enddo
@@ -799,9 +799,9 @@ module radiation
               do jl=1,no_of_layers
                 vol_mix_ratio(jk,jl) = & 
                 mass_densities((no_of_condensed_constituents+1)*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h) &
-                *gas_constant_diagnostics(1)/ &
+                *specific_gas_constants(1)/ &
                 (mass_densities(no_of_condensed_constituents*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h) &
-                *gas_constant_diagnostics(0))
+                *specific_gas_constants(0))
               enddo
             enddo
           ! in the long wave case,all points matter
@@ -810,9 +810,9 @@ module radiation
               do jl=1,no_of_layers
                 vol_mix_ratio(jk,jl) = & 
                 mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
-                *gas_constant_diagnostics(1)/ &
+                *specific_gas_constants(1)/ &
                 (mass_densities(no_of_condensed_constituents*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
-                *gas_constant_diagnostics(0))
+                *specific_gas_constants(0))
               enddo
             enddo
           endif

@@ -29,6 +29,7 @@ module run_nml
   character(len=64) :: scenario            ! scenario for ideal runs
   character(len=64) :: run_id              ! ID of the model run
   real(wp)          :: p_0                 ! reference pressure
+  real(wp)          :: T_0                 ! 273.15 K
   real(wp)          :: omega               ! angular frequency of Earth rotation
   real(wp)          :: lapse_rate          ! lapse_rate within the troposphere
   real(wp)          :: surface_temp        ! the temperature at the surface
@@ -69,6 +70,7 @@ module run_nml
     scenario            = "standard"
     run_id              = "ideal"
     p_0                 = 100000._wp
+    T_0                 = 273.15_wp
     omega               = 7.292115e-5
     lapse_rate          = 0.0065_wp
     surface_temp        = 288.15_wp
