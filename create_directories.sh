@@ -22,3 +22,8 @@ if [ ! -d grids ]
 then
 mkdir grids
 fi
+
+if [ ! -d grids/phys_sfc_properties ]
+then
+mkdir grids/phys_sfc_properties
+fi
