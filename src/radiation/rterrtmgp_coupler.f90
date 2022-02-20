@@ -49,10 +49,10 @@ module radiation
   
   character(len = *),parameter      :: rrtmgp_coefficients_file_sw =  &
   ! insert the name of the short wave data file here
-  "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g224-2018-12-04.nc"
+  "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g112-2018-12-04.nc"
   character(len = *),parameter      :: rrtmgp_coefficients_file_lw =  &
   ! insert the name of the long wave data file here
-  "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g256-2018-12-04.nc"
+  "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g128-2018-12-04.nc"
   character(len = *),parameter      :: cloud_coefficients_file_sw =  &
   ! insert the name of the short wave cloud optics file here
   "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-sw.nc"
