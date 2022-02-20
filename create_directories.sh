@@ -17,3 +17,8 @@ if [ ! -d figs ]
 then
 mkdir figs
 fi
+
+if [ ! -d grids ]
+then
+mkdir grids
+fi
