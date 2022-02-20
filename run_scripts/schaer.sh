@@ -30,6 +30,11 @@ lmom_diff_h=.false.
 lmom_diff_v=.false.
 /
 
+&constituents
+no_of_gaseous_constituents=1
+no_of_condensed_constituents=0
+/
+
 &io
 dt_write_min=1
 /
