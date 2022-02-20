@@ -118,7 +118,7 @@ module grid_generator
           do jk=1,ncols+2
             x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
             grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2)) &
-            *cos(4*atan(1.d0)*x_coord/4000._wp)**2
+            *cos(4._wp*atan(1.d0)*x_coord/4000._wp)**2
           enddo
         enddo
     

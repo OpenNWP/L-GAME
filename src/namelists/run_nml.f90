@@ -41,6 +41,7 @@ module run_nml
   logical           :: llinear             ! switch to turn momentum advection on or off
   real(wp)          :: impl_weight         ! implicit weight of the pressure gradient
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
+  real(wp)          :: EPSILON_SECURITY    ! small security constant
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr,sigma, &
   toa,scenario,llinear,run_id,lcorio,nlays_oro
@@ -71,7 +72,7 @@ module run_nml
     run_id              = "ideal"
     p_0                 = 100000._wp
     T_0                 = 273.15_wp
-    omega               = 7.292115e-5
+    omega               = 7.292115e-5_wp
     lapse_rate          = 0.0065_wp
     surface_temp        = 288.15_wp
     tropo_height        = 12000._wp
@@ -83,6 +84,7 @@ module run_nml
     lcorio              = .true.
     impl_weight         = 0.75_wp
     partial_impl_weight = 0.5_wp
+    EPSILON_SECURITY    = 1e-10_wp
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
