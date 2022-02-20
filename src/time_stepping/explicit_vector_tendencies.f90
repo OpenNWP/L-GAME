@@ -9,6 +9,7 @@ module explicit_vector_tendencies
   use inner_product,      only: kinetic_energy
   use gradient_operators, only: grad
   use run_nml,            only: nlins,ncols,nlays,impl_weight,llinear,lcorio
+  use constituents_nml,   only: no_of_condensed_constituents
   use vorticities,        only: calc_pot_vort
   use multiplications,    only: scalar_times_vector
   use vorticity_flux,     only: calc_vorticity_flux_term
@@ -44,7 +45,7 @@ module explicit_vector_tendencies
     ! momentum advection
     if ((rk_step == 2 .or. total_step_counter == 0) .and. ((.not. llinear) .or. lcorio)) then
       ! calculating the mass flux density
-      call scalar_times_vector(state%rho,state%wind_u,state%wind_v,state%wind_w, &
+      call scalar_times_vector(state%rho(:,:,:,no_of_condensed_constituents+1),state%wind_u,state%wind_v,state%wind_w, &
       diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
       ! calculating the potential vorticity
       call calc_pot_vort(state,diag,grid)

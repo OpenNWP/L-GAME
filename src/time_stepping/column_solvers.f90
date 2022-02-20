@@ -5,10 +5,11 @@ module column_solvers
 
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
-  use run_nml,        only: nlins,ncols,wp,nlays,dtime,p_0,toa,impl_weight,partial_impl_weight
-  use definitions,    only: t_grid,t_state,t_tend
-  use dictionary,     only: spec_heat_capacities_v_gas,spec_heat_capacities_p_gas,specific_gas_constants
-  use diff_nml,       only: lklemp,klemp_damp_max,klemp_begin_rel
+  use run_nml,          only: nlins,ncols,wp,nlays,dtime,p_0,toa,impl_weight,partial_impl_weight
+  use constituents_nml, only: no_of_condensed_constituents
+  use definitions,      only: t_grid,t_state,t_tend
+  use dictionary,       only: spec_heat_capacities_v_gas,spec_heat_capacities_p_gas,specific_gas_constants
+  use diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
 
   implicit none
   
@@ -73,24 +74,26 @@ module column_solvers
         ! explicit quantities
         do jl=1,nlays
           ! explicit density
-          rho_expl(jl) = state_old%rho(ji+1,jk+1,jl) + dtime*tend%rho(ji,jk,jl)
+          rho_expl(jl) = state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) &
+          +dtime*tend%rho(ji,jk,jl,no_of_condensed_constituents+1)
           ! explicit potential temperature density
           rhotheta_expl(jl) = state_old%rhotheta(ji+1,jk+1,jl) + dtime*tend%rhotheta(ji,jk,jl)
           if (rk_Step == 1) then
             ! old time step partial derivatives of theta and Pi (divided by the volume)
-            alpha(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2/grid%volume(ji,jk,jl)
-            beta(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)/grid%volume(ji,jk,jl)
+            alpha(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)**2 &
+            /grid%volume(ji,jk,jl)
+            beta(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)/grid%volume(ji,jk,jl)
             gammaa(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
             (grid%exner_bg(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))/grid%volume(ji,jk,jl)
           else
             ! old time step partial derivatives of theta and Pi
-            alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl)**2
-            beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl)
+            alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)**2
+            beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)
             gamma_old(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
             (grid%exner_bg(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))
             ! new time step partial derivatives of theta and Pi
-            alpha_new(jl) = -state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl)**2
-            beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl)
+            alpha_new(jl) = -state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)**2
+            beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)
             gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
             *(grid%exner_bg(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
             ! interpolation of partial derivatives of theta and Pi (divided by the volume)
@@ -99,7 +102,8 @@ module column_solvers
             gammaa(jl) = ((1._wp - partial_impl_weight)*gamma_old(jl) + partial_impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
           endif
           ! explicit potential temperature perturbation
-          theta_pert_expl(jl) = state_old%theta_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl) &
+          theta_pert_expl(jl) = state_old%theta_pert(ji+1,jk+1,jl) &
+          + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl,no_of_condensed_constituents+1) &
           + beta(jl)*tend%rhotheta(ji,jk,jl))
           ! explicit Exner pressure perturbation
           exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*gammaa(jl)*tend%rhotheta(ji,jk,jl)
@@ -107,10 +111,11 @@ module column_solvers
         
         ! interface values
         do jl=1,nlays-1
-          rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl)+state_old%rho(ji+1,jk+1,jl+1))
+          rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) &
+          +state_old%rho(ji+1,jk+1,jl+1,no_of_condensed_constituents+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
-          theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl) &
-          + state_new%rhotheta(ji+1,jk+1,jl+1)/state_new%rho(ji+1,jk+1,jl+1))
+          theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) &
+          + state_new%rhotheta(ji+1,jk+1,jl+1)/state_new%rho(ji+1,jk+1,jl+1,no_of_condensed_constituents+1))
         enddo
       
         ! filling up the coefficient vectors
@@ -163,20 +168,23 @@ module column_solvers
         ! results
         ! density, potential temperature density
         do jl=2,nlays-1
-          state_new%rho(ji+1,jk+1,jl) = rho_expl(jl) + dtime*(-solution(jl-1)+solution(jl))/grid%volume(ji,jk,jl)
+          state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) = rho_expl(jl) &
+          + dtime*(-solution(jl-1)+solution(jl))/grid%volume(ji,jk,jl)
           state_new%rhotheta(ji+1,jk+1,jl) = rhotheta_expl(jl) &
           + dtime*(-theta_int_new(jl-1)*solution(jl-1)+theta_int_new(jl)*solution(jl))/grid%volume(ji,jk,jl)
         enddo
         ! uppermost layer
-        state_new%rho(ji+1,jk+1,1) = rho_expl(1) + dtime*solution(1)/grid%volume(ji,jk,1)
+        state_new%rho(ji+1,jk+1,1,no_of_condensed_constituents+1) = rho_expl(1) + dtime*solution(1)/grid%volume(ji,jk,1)
         state_new%rhotheta(ji+1,jk+1,1) = rhotheta_expl(1)+dtime*theta_int_new(1)*solution(1)/grid%volume(ji,jk,1)
         ! lowest layer
-        state_new%rho(ji+1,jk+1,nlays) = rho_expl(nlays) - dtime*solution(nlays-1)/grid%volume(ji,jk,nlays)
+        state_new%rho(ji+1,jk+1,nlays,no_of_condensed_constituents+1) = rho_expl(nlays)&
+        - dtime*solution(nlays-1)/grid%volume(ji,jk,nlays)
         state_new%rhotheta(ji+1,jk+1,nlays) = rhotheta_expl(nlays) &
         -dtime*theta_int_new(nlays-1)*solution(nlays-1)/grid%volume(ji,jk,nlays)
         ! vertical velocity
         do jl=2,nlays
-          rho_int_new = 0.5_wp*(state_new%rho(ji+1,jk+1,jl-1)+state_new%rho(ji+1,jk+1,jl))
+          rho_int_new = 0.5_wp*(state_new%rho(ji+1,jk+1,jl-1,no_of_condensed_constituents+1) &
+          +state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1))
           state_new%wind_w(ji+1,jk+1,jl) = (2._wp*solution(jl-1)/grid%area_z(ji,jk,jl) &
           - rho_int_new*state_old%wind_w(ji+1,jk+1,jl))/rho_int_old(jl-1)
         enddo
@@ -192,7 +200,8 @@ module column_solvers
     !$OMP END PARALLEL
     
     ! potential temperature perturbation at the new time step
-    state_new%theta_pert(:,:,:) = state_new%rhotheta(:,:,:)/state_new%rho(:,:,:) - grid%theta_bg(:,:,:)
+    state_new%theta_pert(:,:,:) = state_new%rhotheta(:,:,:)/state_new%rho(:,:,:,no_of_condensed_constituents+1) &
+    - grid%theta_bg(:,:,:)
 
   end subroutine three_band_solver_ver
   

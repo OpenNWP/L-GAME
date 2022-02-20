@@ -9,6 +9,7 @@ module explicit_scalar_tendencies
   use multiplications,      only: scalar_times_vector_h
   use divergence_operators, only: divv_h
   use run_nml,              only: nlins,ncols
+  use constituents_nml,     only: no_of_constituents
 
   implicit none
   
@@ -25,12 +26,17 @@ module explicit_scalar_tendencies
     type(t_tend),  intent(inout) :: tend  ! state which will contain the tendencies
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     
-    ! explicit mass density integration
+    ! local variables
+    integer                      :: j_constituent ! loop variable
+    
+    ! explicit mass densities integration
     ! calculating the mass density flux
-    call scalar_times_vector_h(state%rho,state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
-    ! calculating the divergence of the mass density flux
-    call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
-    tend%rho(:,:,:) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
+    do j_constituent=1,no_of_constituents
+      call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
+      ! calculating the divergence of the mass density flux
+      call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
+      tend%rho(:,:,:,j_constituent) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
+    enddo
     
     ! explicit potential temperature density integration
     ! calculating the potential temperature density flux
@@ -44,3 +50,7 @@ module explicit_scalar_tendencies
   end subroutine
 
 end module explicit_scalar_tendencies
+
+
+
+

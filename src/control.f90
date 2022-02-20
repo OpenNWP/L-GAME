@@ -79,7 +79,7 @@ program control
   allocate(state_old%wind_v(nlins+1,ncols+2,nlays))
   allocate(state_old%wind_w(nlins+2,ncols+2,nlays+1))
   ! state at the new time step
-  allocate(state_new%rho(nlins+2,ncols+2,nlays))
+  allocate(state_new%rho(nlins+2,ncols+2,nlays,no_of_constituents))
   allocate(state_new%rhotheta(nlins+2,ncols+2,nlays))
   allocate(state_new%theta_pert(nlins+2,ncols+2,nlays))
   allocate(state_new%exner_pert(nlins+2,ncols+2,nlays))
@@ -87,13 +87,13 @@ program control
   allocate(state_new%wind_v(nlins+1,ncols+2,nlays))
   allocate(state_new%wind_w(nlins+2,ncols+2,nlays+1))
   ! state containing the tendency
-  allocate(tend%rho(nlins,ncols,nlays))
+  allocate(tend%rho(nlins,ncols,nlays,no_of_constituents))
   allocate(tend%rhotheta(nlins,ncols,nlays))
   allocate(tend%wind_u(nlins,ncols-1,nlays))
   allocate(tend%wind_v(nlins-1,ncols,nlays))
   allocate(tend%wind_w(nlins,ncols,nlays+1))
   ! state to be written out
-  allocate(state_write%rho(nlins+2,ncols+2,nlays))
+  allocate(state_write%rho(nlins+2,ncols+2,nlays,no_of_constituents))
   allocate(state_write%rhotheta(nlins+2,ncols+2,nlays))
   allocate(state_write%theta_pert(nlins+2,ncols+2,nlays))
   allocate(state_write%exner_pert(nlins+2,ncols+2,nlays))
