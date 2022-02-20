@@ -22,7 +22,6 @@ run_span_hr=10
 scenario="schaer"
 lcorio=.false.
 sigma=1.0
-slow_fast_ratio=3
 /
 
 &diff
