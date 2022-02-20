@@ -27,7 +27,7 @@ module planetary_boundary_layer
     ! output variable
     real(wp)             :: roughness_length_from_u10_sea
 
-    ! local variales
+    ! local variables
     real(wp)             :: swh, period, wavelength
 
     ! refer to Stensrud, Parameterization schemes (2007), p.130
@@ -58,7 +58,7 @@ module planetary_boundary_layer
     ! output variable
     real(wp)             :: scalar_flux_resistance
 
-    ! local variales
+    ! local variables
     real(wp)             :: used_vertical_height
 
     ! height of the prandtl layer
@@ -88,7 +88,7 @@ module planetary_boundary_layer
     ! output variable
     real(wp)             :: momentum_flux_resistance
 
-    ! local variales
+    ! local variables
     real(wp)             :: used_vertical_height
 
     ! height of the prandtl layer
@@ -116,7 +116,7 @@ module planetary_boundary_layer
     ! output variable
     real(wp)             :: roughness_velocity
 
-    ! local variales
+    ! local variables
     real(wp)             :: denominator
 
     denominator = log(z_agl/roughness_length_value)
@@ -141,7 +141,7 @@ module planetary_boundary_layer
     ! output variable
     real(wp)             :: psi_h
 
-    ! local variales
+    ! local variables
     real(wp)             :: x,l_local
 
     ! z_eff: effective height above the surface
@@ -174,7 +174,7 @@ module planetary_boundary_layer
     ! output variable
     real(wp)             :: psi_m
 
-    ! local variales
+    ! local variables
     real(wp)             :: x,l_local
 
     ! z_eff: effective height above the surface
