@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-! This file containss some definitions.
+! This file contains some definitions.
 
 module definitions
                             
@@ -32,16 +32,16 @@ module definitions
   
   type t_grid
   
-    real(wp), allocatable :: lat_scalar(:)
-    real(wp), allocatable :: lon_scalar(:)
-    real(wp), allocatable :: z_geo_scal(:,:,:)
-    real(wp), allocatable :: dx(:,:,:)
-    real(wp), allocatable :: dy(:,:,:)
-    real(wp), allocatable :: dz(:,:,:)
+    real(wp), allocatable :: lat_scalar(:)                 ! latitudes of the scalar gridpoints
+    real(wp), allocatable :: lon_scalar(:)                 ! longitudes of the scalar gridpoints
+    real(wp), allocatable :: z_geo_scal(:,:,:)             ! geometric heights of the scalar gridpoints
+    real(wp), allocatable :: dx(:,:,:)                     ! grid point distance in x-direction
+    real(wp), allocatable :: dy(:,:,:)                     ! grid point distance in y-direction
+    real(wp), allocatable :: dz(:,:,:)                     ! grid point distance in z-direction
     real(wp), allocatable :: z_geo_u(:,:,:)
     real(wp), allocatable :: z_geo_v(:,:,:)
     real(wp), allocatable :: z_geo_w(:,:,:)
-    real(wp), allocatable :: volume(:,:,:)
+    real(wp), allocatable :: volume(:,:,:)                 ! volumes of the gridboxes
     real(wp), allocatable :: area_x(:,:,:)
     real(wp), allocatable :: area_y(:,:,:)
     real(wp), allocatable :: area_z(:,:,:)
@@ -57,9 +57,9 @@ module definitions
     real(wp), allocatable :: fvec_z(:,:)                    ! z-component of Coriolis vector
     real(wp), allocatable :: trsk_weights_u(:,:,:)
     real(wp), allocatable :: trsk_weights_v(:,:,:)
-    real(wp), allocatable :: exner_bg_grad_u(:,:,:)
-    real(wp), allocatable :: exner_bg_grad_v(:,:,:)
-    real(wp), allocatable :: exner_bg_grad_w(:,:,:)
+    real(wp), allocatable :: exner_bg_grad_u(:,:,:)         ! gradient of background exner pressure in x-direction
+    real(wp), allocatable :: exner_bg_grad_v(:,:,:)         ! gradient of background exner pressure in y-direction
+    real(wp), allocatable :: exner_bg_grad_w(:,:,:)         ! gradient of background exner pressure in z-direction
     real(wp), allocatable :: theta_bg(:,:,:)                ! background potential temperature
     real(wp), allocatable :: exner_bg(:,:,:)                ! background Exner pressure
   
@@ -73,20 +73,20 @@ module definitions
     real(wp), allocatable :: theta_pert(:,:,:)
     real(wp), allocatable :: exner_pert(:,:,:)
     real(wp), allocatable :: condensed_rho_t(:,:,:,:)
-    real(wp), allocatable :: wind_u(:,:,:)
-    real(wp), allocatable :: wind_v(:,:,:)
-    real(wp), allocatable :: wind_w(:,:,:)
+    real(wp), allocatable :: wind_u(:,:,:)              ! x-component of the wind
+    real(wp), allocatable :: wind_v(:,:,:)              ! y-component of the wind
+    real(wp), allocatable :: wind_w(:,:,:)              ! vertical wind
   
   end type t_state
   
   type t_tend
   
     ! type containing tendencies
-    real(wp), allocatable :: rho(:,:,:,:)
-    real(wp), allocatable :: rhotheta(:,:,:)
-    real(wp), allocatable :: wind_u(:,:,:)
-    real(wp), allocatable :: wind_v(:,:,:)
-    real(wp), allocatable :: wind_w(:,:,:)
+    real(wp), allocatable :: rho(:,:,:,:)               ! mass densities
+    real(wp), allocatable :: rhotheta(:,:,:)            ! potential temperature densities
+    real(wp), allocatable :: wind_u(:,:,:)              ! x-component of the wind
+    real(wp), allocatable :: wind_v(:,:,:)              ! y-component of the wind
+    real(wp), allocatable :: wind_w(:,:,:)              ! vertical wind
   
   end type t_tend
   
@@ -126,7 +126,7 @@ module definitions
   type t_irrev
     
     ! type cotaining irreversible quantities
-    real(wp), allocatable :: tke(:,:,:)                 ! turbulent kinetic energy (unit: J/kg)
+    real(wp), allocatable :: tke(:,:,:)                 ! specific turbulent kinetic energy
     real(wp), allocatable :: mom_diff_tend_x(:,:,:)     ! tendency due to momentum diffusion in x-direction
     real(wp), allocatable :: mom_diff_tend_y(:,:,:)     ! tendency due to momentum diffusion in y-direction
     real(wp), allocatable :: mom_diff_tend_z(:,:,:)     ! tendency due to momentum diffusion in z-direction
