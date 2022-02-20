@@ -30,6 +30,13 @@ module tke
       do jk=1,ncols
         do jl=1,nlays
           irrev%tke(ji,jk,jl) = irrev%tke(ji,jk,jl) + dtime
+          
+          ! clipping negative values
+          
+          if (irrev%tke(ji,jk,jl) < 0._wp) then
+            irrev%tke(ji,jk,jl) = 0._wp
+          endif
+          
         enddo
       enddo
     enddo
