@@ -20,7 +20,7 @@ src/time_stepping/explicit_vector_tendencies.f90
 src/time_stepping/explicit_scalar_tendencies.f90
 src/time_stepping/manage_rkhevi.f90
 src/time_stepping/pressure_gradient.f90
-src/thermodynamics.f90
+src/constituents.f90
 src/subgrid_scale/effective_diff_coeffs.f90
 src/spatial_operators/vorticity_flux.f90
 src/spatial_operators/multiplications.f90
