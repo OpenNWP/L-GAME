@@ -7,13 +7,13 @@ program control
 
   use run_nml,                   only: run_nml_setup,run_span_hr,dtime, &
                                        t_init,nlins,ncols,nlays,lrestart, &
-                                       lideal,l3dvar,l4dvar
+                                       lideal
   use io_nml,                    only: io_nml_setup,dt_write
-  use constituents_nml,          only: no_of_condensed_constituents,no_of_constituents
+  use constituents_nml,          only: constituents_nml_setup,no_of_condensed_constituents,no_of_constituents
   use diff_nml,                  only: diff_nml_setup
   use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_irrev
   use grid_generator,            only: grid_setup,bg_setup
-  use io,                        only: restart,ideal,var_3d,var_4d,write_output
+  use io,                        only: restart,ideal,write_output
   use manage_rkhevi,             only: rkhevi
   use linear_combine_two_states, only: lin_combination,interpolation_t
   
@@ -37,6 +37,9 @@ program control
   write(*,*) "Reading in I/O namelist ..."
   call io_nml_setup
   write(*,*) "... I/O namelist read."
+  write(*,*) "Reading in constituents namelist ..."
+  call constituents_nml_setup
+  write(*,*) "... constituents namelist read."
   
   ! allocating memory
   write(*,*) "Allocating memory ..."
@@ -152,10 +155,6 @@ program control
     call restart(state_old,diag,grid)
   elseif (lideal) then
     call ideal(state_old,diag,grid)
-  elseif (l3dvar) then
-    call var_3d(state_old,diag,grid)
-  elseif (l4dvar) then
-    call var_4d(state_old,diag,grid)
   endif
   write(*,*) "... initial state set."
   

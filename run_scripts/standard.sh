@@ -27,6 +27,9 @@ lmom_diff_h=.false.
 lmom_diff_v=.false.
 /
 
+&constituents
+/
+
 &io
 dt_write_min=1
 /

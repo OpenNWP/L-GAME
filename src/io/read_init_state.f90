@@ -18,8 +18,6 @@ module io
   
   public :: ideal
   public :: restart
-  public :: var_3d
-  public :: var_4d
   public :: write_output
   
   contains
@@ -148,36 +146,6 @@ module io
     call unessential_init(state,diag,grid,pres_lowest_layer)
     
   end subroutine restart
-  
-  subroutine var_3d(state,diag,grid)
-  
-    ! three-dimensional variational data assimilation
-    
-    type(t_state), intent(inout) :: state ! state to write the initial state to
-    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_grid),  intent(in)    :: grid  ! model grid
-    
-    ! local variables
-    real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
-    
-    call unessential_init(state,diag,grid,pres_lowest_layer)
-  
-  end subroutine var_3d
-  
-  subroutine var_4d(state,diag,grid)
-  
-    ! four-dimensional variational data assimilation
-    
-    type(t_state), intent(inout) :: state ! state to write the initial state to
-    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_grid),  intent(in)    :: grid  ! model grid
-    
-    ! local variables
-    real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
-    
-    call unessential_init(state,diag,grid,pres_lowest_layer)
-  
-  end subroutine var_4d
   
   subroutine write_output(state,diag,time_since_init_min,grid)
     ! reads out the state of the model atmosphere
@@ -371,8 +339,10 @@ module io
     !$OMP END PARALLEL
     
     ! density
+    write(*,*) "here"
     state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert(:,:,:))**(c_p/r_d) &
     /(r_d*diag%scalar_placeholder(:,:,:))
+    write(*,*) "here"
     ! potential temperature density
     state%rhotheta(:,:,:) = state%rho(:,:,:,no_of_condensed_constituents+1)*state%theta_pert(:,:,:)
     

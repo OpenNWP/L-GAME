@@ -11,11 +11,13 @@ module constituents_nml
   integer :: no_of_condensed_constituents ! number of condensed constituents
   integer :: no_of_constituents           ! the total number of constituents
   
+  public :: no_of_constituents
+    
   namelist /constituents/no_of_condensed_constituents,no_of_gaseous_constituents
 
   contains
 
-  subroutine hetero_nml_setup
+  subroutine constituents_nml_setup
   
     ! local variables
     integer :: fileunit
@@ -27,12 +29,12 @@ module constituents_nml
     ! open and read namelist file
     open(action="read", file="namelist.nml", newunit=fileunit)
     read(nml=constituents, unit=fileunit)
-        
+    
     close(fileunit)
     
     no_of_constituents = no_of_condensed_constituents + no_of_gaseous_constituents
     
-  end subroutine hetero_nml_setup
+  end subroutine constituents_nml_setup
   
 end module constituents_nml
 
