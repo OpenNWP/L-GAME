@@ -16,6 +16,7 @@ module explicit_scalar_tendencies
   private
   
   public :: expl_scalar_tend
+  public :: moisturizer
   
   contains
   
@@ -30,8 +31,8 @@ module explicit_scalar_tendencies
     integer                      :: j_constituent ! loop variable
     
     ! explicit mass densities integration
-    ! calculating the mass density flux
     do j_constituent=1,no_of_constituents
+      ! calculating the mass density flux
       call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
       ! calculating the divergence of the mass density flux
       call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
@@ -48,8 +49,29 @@ module explicit_scalar_tendencies
     tend%rhotheta(:,:,:) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
         
   end subroutine
+  
+  subroutine moisturizer
+  
+    ! This subroutine manages the calculation of the phase transition rates.
+    
+    
+  
+  end subroutine moisturizer
 
 end module explicit_scalar_tendencies
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
