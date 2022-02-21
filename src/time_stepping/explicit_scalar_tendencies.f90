@@ -5,11 +5,13 @@ module explicit_scalar_tendencies
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
-  use definitions,          only: wp,t_grid,t_state,t_diag,t_tend
+  use definitions,          only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
   use multiplications,      only: scalar_times_vector_h
   use divergence_operators, only: divv_h
   use run_nml,              only: nlins,ncols
   use constituents_nml,     only: no_of_constituents
+  use phase_trans,          only: calc_h2otracers_source_rates
+  use constituents_nml,     only: no_of_condensed_constituents,no_of_constituents
 
   implicit none
   
@@ -50,11 +52,27 @@ module explicit_scalar_tendencies
         
   end subroutine
   
-  subroutine moisturizer
+  subroutine moisturizer(state,irrev,dtime)
   
     ! This subroutine manages the calculation of the phase transition rates.
     
+    type(t_state), intent(inout) :: state
+    type(t_irrev), intent(inout) :: irrev
+    real(wp),      intent(in)    :: dtime
+      
+    if (no_of_constituents > 1) then
     
+      ! calculating the source rates
+      call calc_h2otracers_source_rates()
+      
+      ! condensates
+      state%rho(:,:,:,1:no_of_condensed_constituents) = state%rho(:,:,:,1:no_of_condensed_constituents) &
+      + dtime*irrev%mass_source_rates(:,:,:,1:no_of_condensed_constituents)
+      ! water vapour
+      state%rho(:,:,:,no_of_constituents) = state%rho(:,:,:,no_of_constituents) &
+      + dtime*irrev%mass_source_rates(:,:,:,no_of_constituents-1)
+      
+    endif
   
   end subroutine moisturizer
 

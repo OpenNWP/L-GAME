@@ -64,7 +64,7 @@ module manage_rkhevi
     enddo
     
     ! saturation adjustment, calculation of latent heating rates, evaporation at the surface
-    call moisturizer()
+    call moisturizer(state_new,irrev,dtime)
     
     ! calling the boundary conditions subroutine
     call bc()
