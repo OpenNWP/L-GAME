@@ -6,8 +6,9 @@ module derived_quantities
   ! In this module, more complex thermodynamic quantities are being calculated.
   
   use definitions,      only: wp,t_grid,t_state,t_diag,t_config
-  use dictionary,       only: mean_particle_masses_gas
-  use run_nml,          only: nlins,ncols,nlays
+  use dictionary,       only: mean_particle_masses_gas,spec_heat_capacities_p_gas,spec_heat_capacities_v_gas, &
+                        specific_gas_constants
+  use run_nml,          only: nlins,ncols,nlays,K_B
   use constituents_nml, only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
   
   implicit none
@@ -33,12 +34,15 @@ module derived_quantities
     type(t_grid),  intent(in)    :: grid
     type(t_diag),  intent(inout) :: diag
     
+    ! local variables
+    integer                      :: ji,jk,jl
+    
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,comp_h,comp_v)
+    !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins+2
       do jk=1,ncols+2
         do jl=1,nlays
-          diag%temperature_gas(ji,jk,hl) = (grid%theta_bg(ji,jk,jl) + state%theta_pert(ji,jk,jl)) &
+          diag%temperature_gas(ji,jk,jl) = (grid%theta_bg(ji,jk,jl) + state%theta_pert(ji,jk,jl)) &
           *(grid%exner_bg(ji,jk,jl) + state%exner_pert(ji,jk,jl))
         enddo
       enddo
@@ -51,12 +55,16 @@ module derived_quantities
   function spec_heat_cap_diagnostics_v(state,ji,jk,jl,config)
   
     ! input arguments
-    type(t_state), intent(in)    :: state
-    integer, intent(in)          :: ji,jk,jl
-    type(t_config), intent(in)   :: config
+    type(t_state), intent(in)  :: state
+    integer, intent(in)        :: ji,jk,jl
+    type(t_config), intent(in) :: config
     
     ! output
-    real(wp)              :: spec_heat_cap_diagnostics_v
+    real(wp)                   :: spec_heat_cap_diagnostics_v
+    
+    ! local variables
+    integer                    :: no_of_relevant_constituents,j_constituent
+    real(wp)                   :: rho_g
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
@@ -89,6 +97,10 @@ module derived_quantities
     real(wp)                   :: spec_heat_cap_diagnostics_p
     integer                    :: no_of_relevant_constituents
     
+    ! local variables
+    integer                    :: j_constituent
+    real(wp)                   :: rho_g
+    
     rho_g = 0._wp
     no_of_relevant_constituents = 0
     
@@ -99,13 +111,13 @@ module derived_quantities
     
     if (config%lassume_lte) then
       no_of_relevant_constituents = 1
-      rho_g = state%rho(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + ji,jk,jl)
+      rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
     endif
     
     spec_heat_cap_diagnostics_p = 0._wp
     do j_constituent=1,no_of_relevant_constituents
-      spec_heat_cap_diagnostics_p = spec_heat_cap_diagnostics_p + state%rho(ji,jk,jl,j_constituents) &
-      /rho_g*spec_heat_capacities_p_gas(i)
+      spec_heat_cap_diagnostics_p = spec_heat_cap_diagnostics_p + state%rho(ji,jk,jl,j_constituent) &
+      /rho_g*spec_heat_capacities_p_gas(j_constituent)
     enddo
     
   end function spec_heat_cap_diagnostics_p
@@ -121,6 +133,10 @@ module derived_quantities
     real(wp)                   :: gas_constant_diagnostics
     integer                    :: no_of_relevant_constituents
     
+    ! local variables
+    integer                    :: j_constituent
+    real(wp)                   :: rho_g
+    
     rho_g = 0._wp
     no_of_relevant_constituents = 0
     
@@ -131,13 +147,13 @@ module derived_quantities
     
     if (config%lassume_lte) then
       no_of_relevant_constituents = 1
-      rho_g = state%rho(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + ji,jk,jl)
+      rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
     endif
     
     gas_constant_diagnostics = 0._wp
     
     do j_constituent=1,no_of_relevant_constituents
-      gas_constant_diagnostics = gas_constant_diagnostics + state%rho((i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + ji,jk,jl) &
+      gas_constant_diagnostics = gas_constant_diagnostics + state%rho(ji,jk,jl,j_constituent) &
       /rho_g*specific_gas_constants(j_constituent)
     enddo
     
@@ -154,27 +170,30 @@ module derived_quantities
     ! output
     real(wp)                  :: density_total
     
+    ! local variables
+    integer                   :: j_constituent
+    
     density_total = 0._wp
     
     do j_constituent=1,no_of_constituents
-      density_gas = density_gas + state%rho(ji,jk,jl,j_constituent)
+      density_total = density_total + state%rho(ji,jk,jl,j_constituent)
     enddo
     
   end function density_total
 
   function density_gas(state,ji,jk,jl)
     
-    ! input arguments
-    type(t_state), intent(in)    :: state
-    integer, intent(in)          :: ji,jk,jl
-    
     ! This function calculates the density of the gas phase at a certain gridpoint.
-  
+    
     ! input arguments
-    integer, intent(in)   :: ji,jk,jl
+    type(t_state), intent(in) :: state
+    integer, intent(in)       :: ji,jk,jl
     
     ! output
-    real(wp)              :: density_gas
+    real(wp)                  :: density_gas
+    
+    ! local variables
+    integer                   :: j_constituent
     
     density_gas = 0._wp
     
@@ -202,9 +221,9 @@ module derived_quantities
     particle_mass = mean_particle_masses_gas(0)
     
     ! actual calculation
-    thermal_velocity = sqrt(8.0_wp*K_B*temperature/(M_PI*particle_mass))
+    thermal_velocity = sqrt(8.0_wp*K_B*temperature/(4._wp*atan(1.d0)*particle_mass))
     particle_density = density/particle_mass
-    cross_section = 4.0_wp*M_PI*pow(particle_radius, 2.0_wp)
+    cross_section = 4.0_wp*4._wp*atan(1.d0)*particle_radius**2.0_wp
     mean_free_path = 1.0_wp/(sqrt(2.0_wp)*particle_density*cross_section)
     calc_diffusion_coeff = 1.0_wp/3.0_wp*thermal_velocity*mean_free_path
     
