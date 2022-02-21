@@ -40,7 +40,7 @@ program control
   call io_nml_setup
   write(*,*) "... I/O namelist read."
   write(*,*) "Reading in constituents namelist ..."
-  call constituents_nml_setup
+  call constituents_nml_setup(config)
   write(*,*) "... constituents namelist read."
   
   ! allocating memory
@@ -190,6 +190,7 @@ program control
   tend%wind_u = 0._wp
   tend%wind_v = 0._wp
   tend%wind_w = 0._wp
+  tend%condensed_rho_t = 0._wp
   
   ! copying the new state to the old state
   state_new = state_old

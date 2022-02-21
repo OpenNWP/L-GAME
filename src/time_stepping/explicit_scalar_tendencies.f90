@@ -9,7 +9,6 @@ module explicit_scalar_tendencies
   use multiplications,      only: scalar_times_vector_h
   use divergence_operators, only: divv_h
   use run_nml,              only: nlins,ncols
-  use constituents_nml,     only: no_of_constituents
   use phase_trans,          only: calc_h2otracers_source_rates
   use constituents_nml,     only: no_of_condensed_constituents,no_of_constituents
 
@@ -40,7 +39,7 @@ module explicit_scalar_tendencies
     do j_constituent=1,no_of_constituents
       new_weight(j_constituent) = 1._wp
         if (rk_step == 2 .and. j_constituent /= no_of_condensed_constituents+1) then
-          new_weight(j_constituent) = 0.5;
+          new_weight(j_constituent) = 0.5_wp
         endif
       old_weight(j_constituent) = 1._wp - new_weight(j_constituent)
     enddo
@@ -73,7 +72,8 @@ module explicit_scalar_tendencies
         call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v, &
         diag%u_placeholder,diag%v_placeholder)
         call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
-        tend%condensed_rho_t(:,:,:,j_constituent) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
+        tend%condensed_rho_t(:,:,:,j_constituent) = old_weight(j_constituent)*tend%condensed_rho_t(:,:,:,j_constituent) &
+        + new_weight(j_constituent)*(-diag%scalar_placeholder(2:nlins+1,2:ncols+1,:))
       endif
       
     enddo

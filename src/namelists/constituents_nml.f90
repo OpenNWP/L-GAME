@@ -3,28 +3,33 @@
 
 module constituents_nml
 
-  use definitions, only: wp
+  use definitions, only: wp,t_config
 
   implicit none
   
   integer :: no_of_gaseous_constituents   ! number of constituents of the gas phase
   integer :: no_of_condensed_constituents ! number of condensed constituents
   integer :: no_of_constituents           ! the total number of constituents
+  logical :: lassume_lte                  ! switch for the local thermodynamic equilibrium option
   
   public :: no_of_constituents
     
-  namelist /constituents/no_of_condensed_constituents,no_of_gaseous_constituents
+  namelist /constituents/no_of_condensed_constituents,no_of_gaseous_constituents,lassume_lte
 
   contains
 
-  subroutine constituents_nml_setup
+  subroutine constituents_nml_setup(config)
+  
+    ! input variables
+    type(t_config) :: config
   
     ! local variables
-    integer :: fileunit
+    integer        :: fileunit
     
     ! default values
     no_of_condensed_constituents = 4
     no_of_gaseous_constituents = 2
+    lassume_lte = .true.
     
     ! open and read namelist file
     open(action="read", file="namelist.nml", newunit=fileunit)
@@ -33,6 +38,9 @@ module constituents_nml
     close(fileunit)
     
     no_of_constituents = no_of_condensed_constituents + no_of_gaseous_constituents
+    
+    ! copying the lassume_lte variable to the config type
+    config%lassume_lte = lassume_lte
     
   end subroutine constituents_nml_setup
   
