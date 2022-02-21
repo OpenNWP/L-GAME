@@ -339,10 +339,8 @@ module io
     !$OMP END PARALLEL
     
     ! density
-    write(*,*) "here"
     state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert(:,:,:))**(c_p/r_d) &
     /(r_d*diag%scalar_placeholder(:,:,:))
-    write(*,*) "here"
     ! potential temperature density
     state%rhotheta(:,:,:) = state%rho(:,:,:,no_of_condensed_constituents+1)*state%theta_pert(:,:,:)
     
