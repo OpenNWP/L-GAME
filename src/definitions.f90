@@ -77,6 +77,7 @@ module definitions
     real(wp), allocatable :: wind_u(:,:,:)                  ! x-component of the wind
     real(wp), allocatable :: wind_v(:,:,:)                  ! y-component of the wind
     real(wp), allocatable :: wind_w(:,:,:)                  ! vertical wind
+    real(wp), allocatable :: temperature_soil(:,:,:)        ! temperature of the soil
   
   end type t_state
   

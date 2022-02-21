@@ -135,6 +135,13 @@ module set_initial_state
     state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
     state%condensed_rho_t(:,:,:,:) = 0._wp
     
+    
+      do ji=1,nlins
+        do jk=1,ncols
+          state%temperature_soil(ji,jk,:)=280._wp
+        enddo
+      enddo
+    
     call unessential_init(state,diag,grid,pres_lowest_layer)
     
   end subroutine ideal

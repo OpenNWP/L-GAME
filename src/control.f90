@@ -6,7 +6,7 @@ program control
   ! This controls the model run from the beginning to the end.
 
   use run_nml,                   only: run_nml_setup,run_span_hr,dtime, &
-                                       t_init,nlins,ncols,nlays,lrestart, &
+                                       t_init,nlins,ncols,nlays,nsoillays,lrestart, &
                                        lideal
   use io_nml,                    only: io_nml_setup,dt_write
   use constituents_nml,          only: constituents_nml_setup,no_of_condensed_constituents,no_of_constituents
@@ -83,6 +83,7 @@ program control
   allocate(state_old%wind_u(nlins+2,ncols+1,nlays))
   allocate(state_old%wind_v(nlins+1,ncols+2,nlays))
   allocate(state_old%wind_w(nlins+2,ncols+2,nlays+1))
+  allocate(state_old%temperature_soil(nlins,ncols,nsoillays))
   ! state at the new time step
   allocate(state_new%rho(nlins+2,ncols+2,nlays,no_of_constituents))
   allocate(state_new%rhotheta(nlins+2,ncols+2,nlays))
@@ -92,6 +93,7 @@ program control
   allocate(state_new%wind_u(nlins+2,ncols+1,nlays))
   allocate(state_new%wind_v(nlins+1,ncols+2,nlays))
   allocate(state_new%wind_w(nlins+2,ncols+2,nlays+1))
+  allocate(state_new%temperature_soil(nlins,ncols,nsoillays))
   ! state containing the tendency
   allocate(tend%rho(nlins,ncols,nlays,no_of_constituents))
   allocate(tend%rhotheta(nlins,ncols,nlays))
@@ -107,6 +109,7 @@ program control
   allocate(state_write%wind_u(nlins+2,ncols+1,nlays))
   allocate(state_write%wind_v(nlins+1,ncols+2,nlays))
   allocate(state_write%wind_w(nlins+2,ncols+2,nlays+1))
+  allocate(state_write%temperature_soil(nlins,ncols,nsoillays))
   ! type containing diagnostic quantities
   allocate(diag%e_kin(nlins,ncols,nlays))
   allocate(diag%e_kin_grad_x(nlins,ncols-1,nlays))
@@ -249,6 +252,7 @@ program control
   deallocate(state_old%wind_u)
   deallocate(state_old%wind_v)
   deallocate(state_old%wind_w)
+  deallocate(state_old%temperature_soil)
   ! state at the new time step
   deallocate(state_new%rho)
   deallocate(state_new%rhotheta)
@@ -258,6 +262,7 @@ program control
   deallocate(state_new%wind_u)
   deallocate(state_new%wind_v)
   deallocate(state_new%wind_w)
+  deallocate(state_new%temperature_soil)
   ! state containing the tendency
   deallocate(tend%rho)
   deallocate(tend%rhotheta)
@@ -273,6 +278,7 @@ program control
   deallocate(state_write%wind_u)
   deallocate(state_write%wind_v)
   deallocate(state_write%wind_w)
+  deallocate(state_write%temperature_soil)
   ! type containing diagnostic quantities
   deallocate(diag%e_kin)
   deallocate(diag%p_grad_acc_neg_l_u)
