@@ -10,7 +10,7 @@ module manage_rkhevi
   use run_nml,                    only: dtime,nlins,ncols
   use pressure_gradient,          only: manage_pressure_gradient
   use explicit_vector_tendencies, only: expl_vector_tend
-  use explicit_scalar_tendencies, only: expl_scalar_tend
+  use explicit_scalar_tendencies, only: expl_scalar_tend,moisturizer
   use column_solvers,             only: three_band_solver_ver
   use boundaries,                 only: bc
 
@@ -62,6 +62,9 @@ module manage_rkhevi
       call three_band_solver_ver(state_old,state_new,tend,grid,rk_step)
   
     enddo
+    
+    ! saturation adjustment, calculation of latent heating rates, evaporation at the surface
+    call moisturizer()
     
     ! calling the boundary conditions subroutine
     call bc()
