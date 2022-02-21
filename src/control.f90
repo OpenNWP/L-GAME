@@ -13,7 +13,8 @@ program control
   use diff_nml,                  only: diff_nml_setup
   use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_irrev
   use grid_generator,            only: grid_setup,bg_setup
-  use io,                        only: restart,ideal,write_output
+  use set_initial_state,         only: restart,ideal
+  use write_out,                 only: write_output
   use manage_rkhevi,             only: rkhevi
   use linear_combine_two_states, only: lin_combination,interpolation_t
   
