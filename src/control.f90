@@ -11,7 +11,7 @@ program control
   use io_nml,                    only: io_nml_setup,dt_write
   use constituents_nml,          only: constituents_nml_setup,no_of_condensed_constituents,no_of_constituents
   use diff_nml,                  only: diff_nml_setup
-  use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_irrev
+  use definitions,               only: t_grid,t_state,wp,t_diag,t_config,t_tend,t_irrev
   use grid_generator,            only: grid_setup,bg_setup
   use set_initial_state,         only: restart,ideal
   use write_out,                 only: write_output
@@ -20,13 +20,14 @@ program control
   
   implicit none
 
-  integer       :: time_step_counter
-  real(wp)      :: t_0,run_span,t_write
-  type(t_grid)  :: grid
-  type(t_state) :: state_old, state_new, state_write
-  type(t_diag)  :: diag
-  type(t_tend)  :: tend
-  type(t_irrev) :: irrev
+  integer        :: time_step_counter
+  real(wp)       :: t_0,run_span,t_write
+  type(t_grid)   :: grid
+  type(t_state)  :: state_old, state_new, state_write
+  type(t_diag)   :: diag
+  type(t_config) :: config
+  type(t_tend)   :: tend
+  type(t_irrev)  :: irrev
 
   ! reading in all namelists so that we know what we have to do
   write(*,*) "Reading in run namelist ..."
@@ -107,6 +108,7 @@ program control
   allocate(tend%wind_u(nlins,ncols-1,nlays))
   allocate(tend%wind_v(nlins-1,ncols,nlays))
   allocate(tend%wind_w(nlins,ncols,nlays+1))
+  allocate(tend%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
   ! state to be written out
   allocate(state_write%rho(nlins+2,ncols+2,nlays,no_of_constituents))
   allocate(state_write%rhotheta(nlins+2,ncols+2,nlays))
@@ -202,7 +204,7 @@ program control
     state_old = state_new
       
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,grid,diag,irrev,time_step_counter)
+    call rkhevi(state_old,state_new,tend,grid,diag,config,irrev,time_step_counter)
     
     ! managing the calls to the output routine
     if (t_0 + dtime >= t_write) then
@@ -285,6 +287,7 @@ program control
   deallocate(tend%wind_u)
   deallocate(tend%wind_v)
   deallocate(tend%wind_w)
+  deallocate(tend%condensed_rho_t)
   ! state to be written out
   deallocate(state_write%rho)
   deallocate(state_write%rhotheta)

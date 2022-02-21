@@ -5,7 +5,7 @@ module manage_rkhevi
 
   ! In this module, the RKHEVI time stepping is managed.
 
-  use definitions,                only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
+  use definitions,                only: t_grid,t_state,t_diag,t_config,t_irrev,t_tend,wp
   use linear_combine_two_states,  only: lin_combination
   use run_nml,                    only: dtime,nlins,ncols
   use pressure_gradient,          only: manage_pressure_gradient
@@ -22,13 +22,14 @@ module manage_rkhevi
 
   contains
   
-  subroutine rkhevi(state_old,state_new,tend,grid,diag,irrev,total_step_counter)
+  subroutine rkhevi(state_old,state_new,tend,grid,diag,config,irrev,total_step_counter)
     
     type(t_state),  intent(inout) :: state_old          ! the state at the old timestep
     type(t_state),  intent(inout) :: state_new          ! the state at the new timestep
     type(t_tend),   intent(inout) :: tend               ! the tendency
     type(t_grid),   intent(in)    :: grid               ! the grid of the model
     type(t_diag),   intent(inout) :: diag               ! diagnostic quantities
+    type(t_config), intent(in)    :: config             ! configuration
     type(t_irrev),  intent(inout) :: irrev              ! irreversible quantities
     integer,        intent(in)    :: total_step_counter ! time step counter
     
@@ -55,7 +56,7 @@ module manage_rkhevi
 
       ! 2.) Explicit component of the generalized density equations.
       ! ------------------------------------------------------------
-      call expl_scalar_tend(grid,state_new,tend,diag,rk_step)
+      call expl_scalar_tend(grid,state_new,tend,diag,config,rk_step)
       
       ! 3.) implicit dynamic vertical solver
       ! ------------------------------------

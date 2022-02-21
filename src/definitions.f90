@@ -97,6 +97,7 @@ module definitions
     real(wp), allocatable :: wind_u(:,:,:)                  ! x-component of the wind
     real(wp), allocatable :: wind_v(:,:,:)                  ! y-component of the wind
     real(wp), allocatable :: wind_w(:,:,:)                  ! vertical wind
+    real(wp), allocatable :: condensed_rho_t(:,:,:,:)       ! temperature densities of the constituents
   
   end type t_tend
   

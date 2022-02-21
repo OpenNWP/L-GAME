@@ -365,7 +365,7 @@ module grid_generator
     
     ! soil grid
     sigma_soil = 0.36_wp
-    grid%z_t_const=10._wp
+    grid%z_t_const=-10._wp
 
     ! the surface is always at zero
     grid%z_soil_interface(1) = 0._wp

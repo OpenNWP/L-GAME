@@ -5,7 +5,7 @@ module explicit_scalar_tendencies
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
-  use definitions,          only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
+  use definitions,          only: wp,t_grid,t_state,t_diag,t_config,t_irrev,t_tend
   use multiplications,      only: scalar_times_vector_h
   use divergence_operators, only: divv_h
   use run_nml,              only: nlins,ncols
@@ -22,18 +22,19 @@ module explicit_scalar_tendencies
   
   contains
   
-  subroutine expl_scalar_tend(grid,state,tend,diag,rk_step)
+  subroutine expl_scalar_tend(grid,state,tend,diag,config,rk_step)
   
-    type(t_grid),  intent(in)    :: grid       ! model grid
-    type(t_state), intent(in)    :: state      ! state with which to calculate the divergence
-    type(t_tend),  intent(inout) :: tend       ! state which will contain the tendencies
-    type(t_diag),  intent(inout) :: diag       ! diagnostic quantities
-    integer, intent(in)          :: rk_step    ! RK substep index
+    type(t_grid),   intent(in)    :: grid       ! model grid
+    type(t_state),  intent(in)    :: state      ! state with which to calculate the divergence
+    type(t_tend),   intent(inout) :: tend       ! state which will contain the tendencies
+    type(t_diag),   intent(inout) :: diag       ! diagnostic quantities
+    type(t_config), intent(in)    :: config     ! configuration
+    integer,        intent(in)    :: rk_step    ! RK substep index
     
     ! local variables
-    integer                      :: j_constituent                   ! loop variable
-    real(wp)                     :: old_weight(no_of_constituents)  ! time stepping weight
-    real(wp)                     :: new_weight(no_of_constituents)  ! time stepping weight
+    integer                       :: j_constituent                   ! loop variable
+    real(wp)                      :: old_weight(no_of_constituents)  ! time stepping weight
+    real(wp)                      :: new_weight(no_of_constituents)  ! time stepping weight
     
     ! setting the time stepping weights
     do j_constituent=1,no_of_constituents
@@ -53,17 +54,29 @@ module explicit_scalar_tendencies
       call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
       tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
       + new_weight(j_constituent)*(-diag%scalar_placeholder(2:nlins+1,2:ncols+1,:))
-    enddo
     
-    ! explicit potential temperature density integration
-    ! --------------------------------------------------
-    ! calculating the potential temperature density flux
-    diag%scalar_placeholder(:,:,:) = grid%theta_bg(:,:,:) + state%theta_pert(:,:,:)
-    call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder, &
-    diag%u_placeholder,diag%v_placeholder)
-    ! calculating the divergence of the potential temperature density flux
-    call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
-    tend%rhotheta(:,:,:) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
+      ! explicit potential temperature density integration
+      ! --------------------------------------------------
+      ! calculating the potential temperature density flux
+      if (j_constituent == no_of_condensed_constituents+1) then
+        diag%scalar_placeholder(:,:,:) = grid%theta_bg(:,:,:) + state%theta_pert(:,:,:)
+        call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder, &
+        diag%u_placeholder,diag%v_placeholder)
+        ! calculating the divergence of the potential temperature density flux
+        call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
+        tend%rhotheta(:,:,:) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
+      endif
+      
+      ! explicit potential temperature density integration
+      ! --------------------------------------------------
+      if (j_constituent <= no_of_condensed_constituents .and. (.not. config%lassume_lte)) then
+        call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v, &
+        diag%u_placeholder,diag%v_placeholder)
+        call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
+        tend%condensed_rho_t(:,:,:,j_constituent) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
+      endif
+      
+    enddo
         
   end subroutine
   
