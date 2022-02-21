@@ -18,14 +18,36 @@ module dictionary
   public :: spec_heat_capacities_v_gas
   public :: spec_heat_capacities_p_gas
   public :: specific_gas_constants
+  public :: mean_particle_masses_gas
   
   contains
 
+  function mean_particle_masses_gas(gas_constituent_id)
+  
+    ! mean particle masses of the constituents of the gas phase
+    
+    integer, intent(in) :: gas_constituent_id
+    
+    ! output
+    real(wp)            :: mean_particle_masses_gas
+  
+    if (gas_constituent_id == 0) then
+      mean_particle_masses_gas = 0.004810e-23;
+    endif
+  
+    if (gas_constituent_id == 1) then
+      mean_particle_masses_gas = 0.002991e-23
+    endif
+  
+  end function mean_particle_masses_gas
+
   function spec_heat_capacities_v_gas(j_constituent)
+    
+    ! specific heat capacity at constant volume
     
     integer, intent(in) :: j_constituent
     
-    ! specific heat capacity at constant volume
+    ! output
     real(wp) :: spec_heat_capacities_v_gas
     
     if (j_constituent == 0) then
@@ -40,9 +62,10 @@ module dictionary
 
   function spec_heat_capacities_p_gas(j_constituent)
     
+    ! specific heat capacity at constant pressure
+    
     integer, intent(in) :: j_constituent
     
-    ! specific heat capacity at constant pressure
     real(wp) :: spec_heat_capacities_p_gas
     
     if (j_constituent == 0) then

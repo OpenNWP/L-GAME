@@ -6,6 +6,7 @@ module derived_quantities
   ! In this module, more complex thermodynamic quantities are being calculated.
   
   use definitions, only: wp
+  use dictionary,  only: mean_particle_masses_gas
   
   implicit none
   
@@ -27,14 +28,14 @@ module derived_quantities
 
     #pragma omp parallel for
     do (i = 0 i < NO_OF_SCALARS ++i)
-      diagnostics -> temperature_gas[i] = (grid -> theta_bg[i] + state -> theta_pert[i])*(grid -> exner_bg[i] + state -> exner_pert[i])
+      diagnostics%temperature_gas(i) = (grid%theta_bg(i) + state%theta_pert(i))*(grid%exner_bg(i) + state%exner_pert(i))
     enddo
     
   end subroutine temperature_diagnostics
 
   function spec_heat_cap_diagnostics_v(state,grid_point_index,config)
   
-    ! output argument
+    ! output
     real(wp)              :: spec_heat_cap_diagnostics_v
     
     rho_g = 0._wp
@@ -46,19 +47,19 @@ module derived_quantities
     
     if (config%lassume_lte) then
       no_of_relevant_constituents = 1
-      rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index]
+      rho_g = state%rho(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index)
     endif
     
     spec_heat_cap_diagnostics_v = 0._wp
     do i=1,no_of_relevant_constituents
-      spec_heat_cap_diagnostics_v += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_v_gas(i)
+      spec_heat_cap_diagnostics_v = spec_heat_cap_diagnostics_v +  state%rho((i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index)/rho_g*spec_heat_capacities_v_gas(i)
     enddo
     
   end function spec_heat_cap_diagnostics_v
 
   function spec_heat_cap_diagnostics_p(state,grid_point_index,config)
   
-    ! output argument
+    ! output
     real(wp)              :: spec_heat_cap_diagnostics_p
     
     rho_g = 0._wp
@@ -70,19 +71,19 @@ module derived_quantities
     
     if (config%assume_lte) then
       no_of_relevant_constituents = 1
-      rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index]
+      rho_g = state%rho(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index)
     endif
     
     spec_heat_cap_diagnostics_p = 0._wp
     do (i = 0 i < no_of_relevant_constituents ++i)
-      spec_heat_cap_diagnostics_p += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_p_gas(i)
+      spec_heat_cap_diagnostics_p = spec_heat_cap_diagnostics_p +  state%rho((i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index)/rho_g*spec_heat_capacities_p_gas(i)
     enddo
     
   end function spec_heat_cap_diagnostics_p
     
   function gas_constant_diagnostics(state,grid_point_index,config)
   
-    ! output argument
+    ! output
     real(wp)              :: gas_constant_diagnostics
     
     rho_g = 0._wp
@@ -95,45 +96,48 @@ module derived_quantities
     
     if (config%assume_lte == 1)
       no_of_relevant_constituents = 1
-      rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index]
+      rho_g = state%rho(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index)
     endif
     
     gas_constant_diagnostics = 0
     
     do i=1,no_of_relevant_constituents
-      gas_constant_diagnostics += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*specific_gas_constants(i)
+      gas_constant_diagnostics = gas_constant_diagnostics + state%rho((i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index)/rho_g*specific_gas_constants(i)
     enddo
     
   end function gas_constant_diagnostics
 
   function density_total(state,grid_point_index)
   
-    ! output argument
+    ! output
     real(wp)              :: density_total
     
     density_total = 0._wp
     
     do i=1,NO_OF_CONSTITUENTS
-      density_total += state -> rho[i*NO_OF_SCALARS + grid_point_index]
+      density_total = density_total +  state%rho(i*NO_OF_SCALARS + grid_point_index)
     enddo
     
   end functiondensity_total
 
-  function density_gas(state,grid_point_index)
-    ! output argument
+  function density_gas(state,ji,jk,jl)
+    ! output
     real(wp)              :: density_total
     
     density_gas = 0._wp
     
     do i=1,no_of_gaseous_constituents
-      density_gas = density_gas + state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]
+      density_gas = density_gas + state%rho((i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index)
     enddo
     
   end function density_gas
 
   function calc_diffusion_coeff(temperature,density)
   
-    ! output argument
+    ! input arguments
+    real(wp)              :: temperature,density
+  
+    ! output
     real(wp)              :: calc_diffusion_coeff
     
     ! local variables
