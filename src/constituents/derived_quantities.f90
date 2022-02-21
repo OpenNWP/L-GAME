@@ -80,7 +80,7 @@ module derived_quantities
     
     spec_heat_cap_diagnostics_v = 0._wp
     do j_constituent=1,no_of_relevant_constituents
-      spec_heat_cap_diagnostics_v = spec_heat_cap_diagnostics_v +  state%rho(ji,jk,jl,j_constituent) &
+      spec_heat_cap_diagnostics_v = spec_heat_cap_diagnostics_v +  state%rho(ji,jk,jl,no_of_condensed_constituents+j_constituent) &
       /rho_g*spec_heat_capacities_v_gas(j_constituent)
     enddo
     
@@ -116,7 +116,7 @@ module derived_quantities
     
     spec_heat_cap_diagnostics_p = 0._wp
     do j_constituent=1,no_of_relevant_constituents
-      spec_heat_cap_diagnostics_p = spec_heat_cap_diagnostics_p + state%rho(ji,jk,jl,j_constituent) &
+      spec_heat_cap_diagnostics_p = spec_heat_cap_diagnostics_p + state%rho(ji,jk,jl,no_of_condensed_constituents+j_constituent) &
       /rho_g*spec_heat_capacities_p_gas(j_constituent)
     enddo
     
@@ -153,7 +153,7 @@ module derived_quantities
     gas_constant_diagnostics = 0._wp
     
     do j_constituent=1,no_of_relevant_constituents
-      gas_constant_diagnostics = gas_constant_diagnostics + state%rho(ji,jk,jl,j_constituent) &
+      gas_constant_diagnostics = gas_constant_diagnostics + state%rho(ji,jk,jl,no_of_condensed_constituents+j_constituent) &
       /rho_g*specific_gas_constants(j_constituent)
     enddo
     
