@@ -9,7 +9,7 @@ program control
                                        t_init,nlins,ncols,nlays,lrestart, &
                                        lideal,l3dvar,l4dvar
   use io_nml,                    only: io_nml_setup,dt_write
-  use constituents_nml,          only: no_of_constituents
+  use constituents_nml,          only: no_of_condensed_constituents,no_of_constituents
   use diff_nml,                  only: diff_nml_setup
   use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_irrev
   use grid_generator,            only: grid_setup,bg_setup
@@ -75,6 +75,7 @@ program control
   allocate(state_old%rhotheta(nlins+2,ncols+2,nlays))
   allocate(state_old%theta_pert(nlins+2,ncols+2,nlays))
   allocate(state_old%exner_pert(nlins+2,ncols+2,nlays))
+  allocate(state_old%condensed_rho_t(nlins+2,ncols+2,nlays,no_of_condensed_constituents))
   allocate(state_old%wind_u(nlins+2,ncols+1,nlays))
   allocate(state_old%wind_v(nlins+1,ncols+2,nlays))
   allocate(state_old%wind_w(nlins+2,ncols+2,nlays+1))
@@ -83,6 +84,7 @@ program control
   allocate(state_new%rhotheta(nlins+2,ncols+2,nlays))
   allocate(state_new%theta_pert(nlins+2,ncols+2,nlays))
   allocate(state_new%exner_pert(nlins+2,ncols+2,nlays))
+  allocate(state_new%condensed_rho_t(nlins+2,ncols+2,nlays,no_of_condensed_constituents))
   allocate(state_new%wind_u(nlins+2,ncols+1,nlays))
   allocate(state_new%wind_v(nlins+1,ncols+2,nlays))
   allocate(state_new%wind_w(nlins+2,ncols+2,nlays+1))
@@ -97,6 +99,7 @@ program control
   allocate(state_write%rhotheta(nlins+2,ncols+2,nlays))
   allocate(state_write%theta_pert(nlins+2,ncols+2,nlays))
   allocate(state_write%exner_pert(nlins+2,ncols+2,nlays))
+  allocate(state_write%condensed_rho_t(nlins+2,ncols+2,nlays,no_of_condensed_constituents))
   allocate(state_write%wind_u(nlins+2,ncols+1,nlays))
   allocate(state_write%wind_v(nlins+1,ncols+2,nlays))
   allocate(state_write%wind_w(nlins+2,ncols+2,nlays+1))
@@ -241,6 +244,7 @@ program control
   deallocate(state_old%rhotheta)
   deallocate(state_old%theta_pert)
   deallocate(state_old%exner_pert)
+  deallocate(state_old%condensed_rho_t)
   deallocate(state_old%wind_u)
   deallocate(state_old%wind_v)
   deallocate(state_old%wind_w)
@@ -249,6 +253,7 @@ program control
   deallocate(state_new%rhotheta)
   deallocate(state_new%theta_pert)
   deallocate(state_new%exner_pert)
+  deallocate(state_new%condensed_rho_t)
   deallocate(state_new%wind_u)
   deallocate(state_new%wind_v)
   deallocate(state_new%wind_w)
@@ -263,6 +268,7 @@ program control
   deallocate(state_write%rhotheta)
   deallocate(state_write%theta_pert)
   deallocate(state_write%exner_pert)
+  deallocate(state_write%condensed_rho_t)
   deallocate(state_write%wind_u)
   deallocate(state_write%wind_v)
   deallocate(state_write%wind_w)
