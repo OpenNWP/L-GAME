@@ -5,8 +5,9 @@ module derived_quantities
 
   ! In this module, more complex thermodynamic quantities are being calculated.
   
-  use definitions, only: wp
+  use definitions, only: wp,t_grid,t_state,t_diag,t_config
   use dictionary,  only: mean_particle_masses_gas
+  use run_nml,     only: nlins,ncols,nlays
   
   implicit none
   
@@ -25,22 +26,40 @@ module derived_quantities
   subroutine temperature_diagnostics(state,grid,diag)
     
     ! This function diagnoses the temperature of the gas phase.
-
-    #pragma omp parallel for
-    do (i = 0 i < NO_OF_SCALARS ++i)
-      diagnostics%temperature_gas(i) = (grid%theta_bg(i) + state%theta_pert(i))*(grid%exner_bg(i) + state%exner_pert(i))
+    
+    ! input arguments
+    type(t_state), intent(in)    :: state
+    type(t_grid),  intent(in)    :: grid
+    type(t_diag),  intent(inout) :: diag
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,comp_h,comp_v)
+    do ji=1,nlins+2
+      do jk=1,ncols+2
+        do jl=1,nlays
+          diag%temperature_gas(ji,jk,hl) = (grid%theta_bg(ji,jk,jl) + state%theta_pert(ji,jk,jl)) &
+          *(grid%exner_bg(ji,jk,jl) + state%exner_pert(ji,jk,jl))
+        enddo
+      enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
   end subroutine temperature_diagnostics
 
-  function spec_heat_cap_diagnostics_v(state,grid_point_index,config)
+  function spec_heat_cap_diagnostics_v(state,ji,jk,jl,config)
   
+    ! input arguments
+    type(t_state), intent(in)    :: state
+    integer, intent(in)          :: ji,jk,jl
+    type(t_config), intent(in)   :: config
+    
     ! output
     real(wp)              :: spec_heat_cap_diagnostics_v
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
-    if (.not. config%assume_lte) then
+    if (.not. config%lassume_lte) then
       no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS
       rho_g = density_gas(state,grid_point_index)
     endif
@@ -64,12 +83,12 @@ module derived_quantities
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
-    if (.not. config%assume_lte) then
+    if (.not. config%lassume_lte) then
       no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS
       rho_g = density_gas(state,grid_point_index)
     endif
     
-    if (config%assume_lte) then
+    if (config%lassume_lte) then
       no_of_relevant_constituents = 1
       rho_g = state%rho(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index)
     endif
@@ -89,12 +108,12 @@ module derived_quantities
     rho_g = 0._wp
     no_of_relevant_constituents = 0
     
-    if (config%assume_lte == 0) then
+    if (config%lassume_lte == 0) then
       no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS
       rho_g = density_gas(state,grid_point_index)
     endif
     
-    if (config%assume_lte == 1)
+    if (config%lassume_lte == 1)
       no_of_relevant_constituents = 1
       rho_g = state%rho(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index)
     endif
