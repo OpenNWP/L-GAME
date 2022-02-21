@@ -74,6 +74,11 @@ program control
   allocate(grid%exner_bg_grad_u(nlins,ncols-1,nlays))
   allocate(grid%exner_bg_grad_v(nlins-1,ncols,nlays))
   allocate(grid%exner_bg_grad_w(nlins,ncols,nlays+1))
+  allocate(grid%sfc_albedo(nlins,ncols))
+  allocate(grid%sfc_rho_c(nlins,ncols))
+  allocate(grid%t_conduc_soil(nlins,ncols))
+  allocate(grid%roughness_length(nlins,ncols))
+  allocate(grid%is_land(nlins,ncols))
   ! state at the old time step
   allocate(state_old%rho(nlins+2,ncols+2,nlays,no_of_constituents))
   allocate(state_old%rhotheta(nlins+2,ncols+2,nlays))
@@ -245,6 +250,11 @@ program control
   deallocate(grid%exner_bg_grad_u)
   deallocate(grid%exner_bg_grad_v)
   deallocate(grid%exner_bg_grad_w)
+  deallocate(grid%sfc_albedo)
+  deallocate(grid%sfc_rho_c)
+  deallocate(grid%t_conduc_soil)
+  deallocate(grid%roughness_length)
+  deallocate(grid%is_land)
   ! state at the old time step
   deallocate(state_old%rho)
   deallocate(state_old%rhotheta)

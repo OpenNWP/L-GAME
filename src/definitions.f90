@@ -63,6 +63,11 @@ module definitions
     real(wp), allocatable :: exner_bg_grad_w(:,:,:)         ! gradient of background exner pressure in z-direction
     real(wp), allocatable :: theta_bg(:,:,:)                ! background potential temperature
     real(wp), allocatable :: exner_bg(:,:,:)                ! background Exner pressure
+    real(wp), allocatable :: sfc_albedo(:,:)                ! albedo of the surface
+    real(wp), allocatable :: sfc_rho_c(:,:)                 ! volumetric heat capacity of the surface
+    real(wp), allocatable :: t_conduc_soil(:,:)             ! temperature conductivity of the soil
+    real(wp), allocatable :: roughness_length(:,:)          ! roughness length of the surface
+    logical,  allocatable :: is_land(:,:)                   ! land-sea-mask
   
   end type t_grid
   
