@@ -144,6 +144,8 @@ program control
   allocate(irrev%mom_diff_tend_x(nlins,ncols-1,nlays))
   allocate(irrev%mom_diff_tend_y(nlins-1,ncols,nlays))
   allocate(irrev%mom_diff_tend_z(nlins,ncols,nlays+1))
+  allocate(irrev%mass_source_rates(nlins,ncols,nlays,no_of_condensed_constituents+1))
+  allocate(irrev%heat_source_rates(nlins,ncols,nlays,no_of_condensed_constituents))
   write(*,*) "... finished."
 
   ! firstly, the grid generator needs to be called to calculate the grid properties
@@ -313,6 +315,8 @@ program control
   deallocate(irrev%mom_diff_tend_x)
   deallocate(irrev%mom_diff_tend_y)
   deallocate(irrev%mom_diff_tend_z)
+  deallocate(irrev%mass_source_rates)
+  deallocate(irrev%heat_source_rates)
   write(*,*) "... finished."
   
 end program control
