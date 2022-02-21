@@ -5,6 +5,8 @@ module derived_quantities
 
   ! In this module, more complex thermodynamic quantities are being calculated.
   
+  use definitions, only: wp
+  
   implicit none
   
   private
@@ -16,6 +18,8 @@ module derived_quantities
   public :: density_total
   public :: density_gas
   public :: calc_diffusion_coeff
+  
+  contains
 
   subroutine temperature_diagnostics(state,grid,diag)
     
@@ -30,11 +34,14 @@ module derived_quantities
 
   function spec_heat_cap_diagnostics_v(state,grid_point_index,config)
   
-    rho_g = 0
+    ! output argument
+    real(wp)              :: spec_heat_cap_diagnostics_v
+    
+    rho_g = 0._wp
     no_of_relevant_constituents = 0
     if (.not. config%assume_lte) then
       no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS
-      rho_g = density_gas(state, grid_point_index)
+      rho_g = density_gas(state,grid_point_index)
     endif
     
     if (config%lassume_lte) then
@@ -42,26 +49,31 @@ module derived_quantities
       rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index]
     endif
     
-    spec_heat_cap_diagnostics_v = 0
-    do i=1.,o_of_relevant_constituents
+    spec_heat_cap_diagnostics_v = 0._wp
+    do i=1,no_of_relevant_constituents
       spec_heat_cap_diagnostics_v += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_v_gas(i)
     enddo
     
   end function spec_heat_cap_diagnostics_v
 
-  function spec_heat_cap_diagnostics_p(state, grid_point_index,config)
+  function spec_heat_cap_diagnostics_p(state,grid_point_index,config)
   
-    rho_g = 0
+    ! output argument
+    real(wp)              :: spec_heat_cap_diagnostics_p
+    
+    rho_g = 0._wp
     no_of_relevant_constituents = 0
-    if (config -> assume_lte == 0) then
+    if (.not. config%assume_lte) then
       no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS
-      rho_g = density_gas(state, grid_point_index)
+      rho_g = density_gas(state,grid_point_index)
     endif
-    if (config -> assume_lte == 1) then
+    
+    if (config%assume_lte) then
       no_of_relevant_constituents = 1
       rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index]
     endif
-    spec_heat_cap_diagnostics_p = 0
+    
+    spec_heat_cap_diagnostics_p = 0._wp
     do (i = 0 i < no_of_relevant_constituents ++i)
       spec_heat_cap_diagnostics_p += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_p_gas(i)
     enddo
@@ -70,15 +82,18 @@ module derived_quantities
     
   function gas_constant_diagnostics(state,grid_point_index,config)
   
-    rho_g = 0
+    ! output argument
+    real(wp)              :: gas_constant_diagnostics
+    
+    rho_g = 0._wp
     no_of_relevant_constituents = 0
     
-    if (config -> assume_lte == 0) then
+    if (config%assume_lte == 0) then
       no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS
-      rho_g = density_gas(state, grid_point_index)
+      rho_g = density_gas(state,grid_point_index)
     endif
     
-    if (config -> assume_lte == 1)
+    if (config%assume_lte == 1)
       no_of_relevant_constituents = 1
       rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index]
     endif
@@ -91,16 +106,22 @@ module derived_quantities
     
   end function gas_constant_diagnostics
 
-  function density_total(state, grid_point_index)
-    density_total = 0
+  function density_total(state,grid_point_index)
+  
+    ! output argument
+    real(wp)              :: density_total
     
-    do (i = 0 i < NO_OF_CONSTITUENTS ++i)
+    density_total = 0._wp
+    
+    do i=1,NO_OF_CONSTITUENTS
       density_total += state -> rho[i*NO_OF_SCALARS + grid_point_index]
     enddo
     
   end functiondensity_total
 
   function density_gas(state,grid_point_index)
+    ! output argument
+    real(wp)              :: density_total
     
     density_gas = 0._wp
     
@@ -112,6 +133,12 @@ module derived_quantities
 
   function calc_diffusion_coeff(temperature,density)
   
+    ! output argument
+    real(wp)              :: calc_diffusion_coeff
+    
+    ! local variables
+    real(wp)              :: particle_radius,particle_mass,thermal_velocity,particle_density,cross_section,mean_free_path
+    
     ! This function calculates the molecular diffusion coefficient according to the kinetic gas theory.
 
     ! these things are hardly ever modified
