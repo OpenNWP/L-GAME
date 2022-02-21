@@ -61,7 +61,7 @@ module derived_quantities
     rho_g = 0._wp
     no_of_relevant_constituents = 0
     if (.not. config%lassume_lte) then
-      no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS
+      no_of_relevant_constituents = no_of_gaseous_constituents
       rho_g = density_gas(state,ji,jk,jl)
     endif
     
@@ -71,8 +71,9 @@ module derived_quantities
     endif
     
     spec_heat_cap_diagnostics_v = 0._wp
-    do i=1,no_of_relevant_constituents
-      spec_heat_cap_diagnostics_v = spec_heat_cap_diagnostics_v +  state%rho((i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + ji,jk,jl)/rho_g*spec_heat_capacities_v_gas(i)
+    do j_constituent=1,no_of_relevant_constituents
+      spec_heat_cap_diagnostics_v = spec_heat_cap_diagnostics_v +  state%rho(ji,jk,jl,j_constituent) &
+      /rho_g*spec_heat_capacities_v_gas(j_constituent)
     enddo
     
   end function spec_heat_cap_diagnostics_v
@@ -80,17 +81,19 @@ module derived_quantities
   function spec_heat_cap_diagnostics_p(state,ji,jk,jl,config)
   
     ! input arguments
-    type(t_state), intent(in)    :: state
-    integer, intent(in)          :: ji,jk,jl
-    type(t_config), intent(in)   :: config
+    type(t_state), intent(in)  :: state
+    integer, intent(in)        :: ji,jk,jl
+    type(t_config), intent(in) :: config
     
     ! output
-    real(wp)              :: spec_heat_cap_diagnostics_p
+    real(wp)                   :: spec_heat_cap_diagnostics_p
+    integer                    :: no_of_relevant_constituents
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
+    
     if (.not. config%lassume_lte) then
-      no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS
+      no_of_relevant_constituents = no_of_gaseous_constituents
       rho_g = density_gas(state,ji,jk,jl)
     endif
     
@@ -101,7 +104,8 @@ module derived_quantities
     
     spec_heat_cap_diagnostics_p = 0._wp
     do j_constituent=1,no_of_relevant_constituents
-      spec_heat_cap_diagnostics_p = spec_heat_cap_diagnostics_p +  state%rho((i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + ji,jk,jl)/rho_g*spec_heat_capacities_p_gas(i)
+      spec_heat_cap_diagnostics_p = spec_heat_cap_diagnostics_p + state%rho(ji,jk,jl,j_constituents) &
+      /rho_g*spec_heat_capacities_p_gas(i)
     enddo
     
   end function spec_heat_cap_diagnostics_p
@@ -109,22 +113,23 @@ module derived_quantities
   function gas_constant_diagnostics(state,ji,jk,jl,config)
   
     ! input arguments
-    type(t_state), intent(in)    :: state
-    integer, intent(in)          :: ji,jk,jl
-    type(t_config), intent(in)   :: config
+    type(t_state), intent(in)  :: state
+    integer, intent(in)        :: ji,jk,jl
+    type(t_config), intent(in) :: config
     
     ! output
-    real(wp)              :: gas_constant_diagnostics
+    real(wp)                   :: gas_constant_diagnostics
+    integer                    :: no_of_relevant_constituents
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
     
     if (.not. config%lassume_lte) then
-      no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS
+      no_of_relevant_constituents = no_of_gaseous_constituents
       rho_g = density_gas(state,ji,jk,jl)
     endif
     
-    if (config%lassume_lte)
+    if (config%lassume_lte) then
       no_of_relevant_constituents = 1
       rho_g = state%rho(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + ji,jk,jl)
     endif
@@ -141,8 +146,8 @@ module derived_quantities
   function density_total(state,ji,jk,jl)
   
     ! input arguments
-    type(t_state), intent(in)    :: state
-    integer, intent(in)          :: ji,jk,jl
+    type(t_state), intent(in) :: state
+    integer, intent(in)       :: ji,jk,jl
     
     ! This function calculates the total density of the air at a certain gridpoint.
     
