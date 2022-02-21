@@ -22,26 +22,41 @@ module explicit_scalar_tendencies
   
   contains
   
-  subroutine expl_scalar_tend(grid,state,tend,diag)
+  subroutine expl_scalar_tend(grid,state,tend,diag,rk_step)
   
-    type(t_grid),  intent(in)    :: grid  ! model grid
-    type(t_state), intent(in)    :: state ! state with which to calculate the divergence
-    type(t_tend),  intent(inout) :: tend  ! state which will contain the tendencies
-    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_grid),  intent(in)    :: grid       ! model grid
+    type(t_state), intent(in)    :: state      ! state with which to calculate the divergence
+    type(t_tend),  intent(inout) :: tend       ! state which will contain the tendencies
+    type(t_diag),  intent(inout) :: diag       ! diagnostic quantities
+    integer, intent(in)          :: rk_step    ! RK substep index
     
     ! local variables
-    integer                      :: j_constituent ! loop variable
+    integer                      :: j_constituent                   ! loop variable
+    real(wp)                     :: old_weight(no_of_constituents)  ! time stepping weight
+    real(wp)                     :: new_weight(no_of_constituents)  ! time stepping weight
+    
+    ! setting the time stepping weights
+    do j_constituent=1,no_of_constituents
+      new_weight(j_constituent) = 1._wp
+        if (rk_step == 2 .and. j_constituent /= no_of_condensed_constituents+1) then
+          new_weight(j_constituent) = 0.5;
+        endif
+      old_weight(j_constituent) = 1._wp - new_weight(j_constituent)
+    enddo
     
     ! explicit mass densities integration
+    ! -----------------------------------
     do j_constituent=1,no_of_constituents
       ! calculating the mass density flux
       call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
       ! calculating the divergence of the mass density flux
       call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
-      tend%rho(:,:,:,j_constituent) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
+      tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
+      + new_weight(j_constituent)*(-diag%scalar_placeholder(2:nlins+1,2:ncols+1,:))
     enddo
     
     ! explicit potential temperature density integration
+    ! --------------------------------------------------
     ! calculating the potential temperature density flux
     diag%scalar_placeholder(:,:,:) = grid%theta_bg(:,:,:) + state%theta_pert(:,:,:)
     call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder, &
