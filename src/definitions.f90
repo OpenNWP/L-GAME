@@ -68,6 +68,8 @@ module definitions
     real(wp), allocatable :: t_conduc_soil(:,:)             ! temperature conductivity of the soil
     real(wp), allocatable :: roughness_length(:,:)          ! roughness length of the surface
     logical,  allocatable :: is_land(:,:)                   ! land-sea-mask
+    real(wp), allocatable :: z_soil_interface(:)            ! heights of the interfaces of the soil layers
+    real(wp), allocatable :: z_soil_center(:)               ! heights of the centers of the soil layers
   
   end type t_grid
   

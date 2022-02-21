@@ -79,6 +79,8 @@ program control
   allocate(grid%t_conduc_soil(nlins,ncols))
   allocate(grid%roughness_length(nlins,ncols))
   allocate(grid%is_land(nlins,ncols))
+  allocate(grid%z_soil_interface(nsoillays+1))
+  allocate(grid%z_soil_center(nsoillays))
   ! state at the old time step
   allocate(state_old%rho(nlins+2,ncols+2,nlays,no_of_constituents))
   allocate(state_old%rhotheta(nlins+2,ncols+2,nlays))
@@ -255,6 +257,8 @@ program control
   deallocate(grid%t_conduc_soil)
   deallocate(grid%roughness_length)
   deallocate(grid%is_land)
+  deallocate(grid%z_soil_interface)
+  deallocate(grid%z_soil_center)
   ! state at the old time step
   deallocate(state_old%rho)
   deallocate(state_old%rhotheta)
