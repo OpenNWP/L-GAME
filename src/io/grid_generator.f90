@@ -6,7 +6,7 @@
 module grid_generator
 
   use definitions,        only: wp,t_grid
-  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re,omega,p_0,gravity, &
+  use run_nml,            only: nlins,ncols,nlays,nsoillays,dy,dx,toa,nlays_oro,sigma,re,omega,p_0,gravity, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard, &
                                 scenario
   use gradient_operators, only: grad_hor_cov_extended,grad
@@ -59,6 +59,8 @@ module grid_generator
     real(wp) :: height_mountain ! height of Gaussian mountain (needed for test case)
     real(wp) :: sigma_mountain  ! standard deviation of Gaussian mountain (needed for test case)
     real(wp) :: x_coord         ! help variable needed for the Schär test
+    real(wp) :: rescale_factor  ! soil grid rescaling factor
+    real(wp) :: sigma_soil      ! sigma of the soil grid
     
     ! setting the latitude and longitude coordinates of the scalar grid points
     ! setting the dy of the model grid
@@ -132,7 +134,7 @@ module grid_generator
         do jl=1,nlays+1
           z_rel = 1._wp-(jl-1._wp)/nlays ! z/toa
           sigma_z = z_rel**sigma
-          A = sigma_z*toa; ! the height without orography
+          A = sigma_z*toa ! the height without orography
           ! B corrects for orography
           if (jl >= nlays-nlays_oro+1._wp) then
             B = (jl-(nlays-nlays_oro+1._wp))/nlays_oro
@@ -360,6 +362,27 @@ module grid_generator
         grid%trsk_weights_v(ji,jk,4) = grid%trsk_weights_v(ji,jk,3)
       enddo
     enddo
+    
+    ! soil grid
+    sigma_soil = 0.36_wp
+    grid%z_t_const=10._wp
+
+    ! the surface is always at zero
+    grid%z_soil_interface(1) = 0._wp
+    do jk=2,nsoillays+1
+      grid%z_soil_interface(jk) = grid%z_soil_interface(jk-1) + sigma_soil**(nsoillays-jk)
+    enddo
+    
+    rescale_factor = grid%z_t_const/grid%z_soil_interface(nsoillays+1)
+    
+    do jk=2,nsoillays+1
+      grid%z_soil_interface(jk) = rescale_factor*grid%z_soil_interface(jk)
+    enddo
+    do jk=1,nsoillays
+      grid%z_soil_center(jk) = 0.5_wp*(grid%z_soil_interface(jk) + grid%z_soil_interface(jk+1))
+    enddo
+    
+    write(*,*) "Thickness of the uppermost soil layer: ", -grid%z_soil_interface(2), "m."
   
   end subroutine grid_setup
   
@@ -464,10 +487,10 @@ module grid_generator
     real(wp)             :: bg_pres
 
     if (z_height < inv_height) then  
-      bg_pres = p_0_standard*(1 - lapse_rate*z_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate));
+      bg_pres = p_0_standard*(1 - lapse_rate*z_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate))
     elseif (z_height < tropo_height) then
       bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate)) &
-      *exp(-gravity*(z_height - tropo_height)/(specific_gas_constants(0)*(surface_temp - lapse_rate*tropo_height)));
+      *exp(-gravity*(z_height - tropo_height)/(specific_gas_constants(0)*(surface_temp - lapse_rate*tropo_height)))
     else
       write(*,*) "Argument of bg_pres is above the inversion height. This is unrealistic in the lowest layer."
       write(*,*) "Aborting."

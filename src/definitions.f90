@@ -70,6 +70,7 @@ module definitions
     logical,  allocatable :: is_land(:,:)                   ! land-sea-mask
     real(wp), allocatable :: z_soil_interface(:)            ! heights of the interfaces of the soil layers
     real(wp), allocatable :: z_soil_center(:)               ! heights of the centers of the soil layers
+    real(wp)              :: z_t_const                      ! depth where the soil temperature is constant
   
   end type t_grid
   
