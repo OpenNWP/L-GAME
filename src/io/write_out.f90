@@ -102,10 +102,9 @@ module write_out
     call nc_check(nf90_def_var(ncid,"w",NF90_REAL,dimids_3d,varid_w))
     call nc_check(nf90_put_att(ncid,varid_w,"Description","vertical wind"))
     call nc_check(nf90_put_att(ncid,varid_w,"Unit","m/s"))
-  
+    
     ! ending the definition section
     call nc_check(nf90_enddef(ncid))
-    
     ! latitude coordinates of the grid points
     call nc_check(nf90_put_var(ncid,varid_lat,grid%lat_scalar(2:nlins+1)))
     ! longitude coordinates of the grid points
@@ -158,7 +157,7 @@ module write_out
     !$OMP END DO
     !$OMP END PARALLEL
     call nc_check(nf90_put_var(ncid,varid_w,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
-  
+    
     ! closing the netcdf file
     call nc_check(nf90_close(ncid))
     
