@@ -3,7 +3,7 @@
 
 module dictionary
 
-  ! In this file, properties of the constituents are being stored.
+  ! In this module, properties of the constituents are being stored.
   
   ! gaseous constituents IDs:
   ! 0: dry air

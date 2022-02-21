@@ -3,7 +3,7 @@
 
 module humidity
 
-  ! In this file, humidity quantities are being calculated.
+  ! In this module, humidity quantities are being calculated.
   
   use definitions, only: wp
   use run_nml,     only: T_0

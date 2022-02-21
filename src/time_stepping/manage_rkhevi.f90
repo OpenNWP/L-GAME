@@ -3,7 +3,7 @@
 
 module manage_rkhevi
 
-  ! In this file, the RKHEVI time stepping is managed.
+  ! In this module, the RKHEVI time stepping is managed.
 
   use definitions,                only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
   use linear_combine_two_states,  only: lin_combination

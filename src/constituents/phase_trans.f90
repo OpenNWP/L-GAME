@@ -3,7 +3,7 @@
 
 module phase_trans
 
-  ! In this file, phase transition rates are being calculated.
+  ! In this module, phase transition rates are being calculated.
   
 	
 
