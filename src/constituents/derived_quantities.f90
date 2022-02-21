@@ -145,10 +145,6 @@ module derived_quantities
 
   function density_total(state,ji,jk,jl)
   
-    ! input arguments
-    type(t_state), intent(in) :: state
-    integer, intent(in)       :: ji,jk,jl
-    
     ! This function calculates the total density of the air at a certain gridpoint.
     
     ! input arguments
@@ -178,7 +174,7 @@ module derived_quantities
     integer, intent(in)   :: ji,jk,jl
     
     ! output
-    real(wp)              :: density_total
+    real(wp)              :: density_gas
     
     density_gas = 0._wp
     
