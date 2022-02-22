@@ -8,9 +8,9 @@ module explicit_scalar_tendencies
   use definitions,          only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
   use multiplications,      only: scalar_times_vector_h
   use divergence_operators, only: divv_h
-  use run_nml,              only: nlins,ncols
+  use run_nml,              only: nlins,ncols,dtime
   use phase_trans,          only: calc_h2otracers_source_rates
-  use constituents_nml,     only: no_of_condensed_constituents,no_of_constituents
+  use constituents_nml,     only: no_of_condensed_constituents,no_of_constituents,lassume_lte
   use dictionary,           only: spec_heat_capacities_p_gas
 
   implicit none
@@ -88,7 +88,7 @@ module explicit_scalar_tendencies
     ! This subroutine manages the calculation of the phase transition rates.
     
     type(t_state), intent(inout) :: state
-    type(t_diag), intent(in)     :: diag
+    type(t_diag), intent(inout)  :: diag
     type(t_irrev), intent(inout) :: irrev
     type(t_grid), intent(in)     :: grid
       

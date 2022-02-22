@@ -7,8 +7,11 @@ module surface_nml
   
   implicit none
   
-  logical  :: lsoil     ! soil switch
-  integer  :: nsoillays ! number of soil layers
+  logical  :: lsoil                   ! soil switch
+  integer  :: nsoillays               ! number of soil layers
+  real(wp) :: snow_velocity           ! velocity of the falling snow
+  real(wp) :: rain_velocity           ! velocity of the falling snow
+  real(wp) :: cloud_droplets_velocity ! velocity of the falling snow
   
   
   namelist /surface/lsoil,nsoillays
@@ -21,8 +24,11 @@ module surface_nml
     integer :: fileunit
     
     ! default values
-    lsoil          = .true.
-    nsoillays      = 5
+    lsoil                   = .true.
+    nsoillays               = 5
+    snow_velocity           = 10._wp
+    rain_velocity           = 10._wp
+    cloud_droplets_velocity = .01_wp
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)

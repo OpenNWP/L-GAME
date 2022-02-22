@@ -10,7 +10,7 @@ module column_solvers
   use definitions,      only: t_grid,t_state,t_tend,t_diag
   use dictionary,       only: spec_heat_capacities_v_gas,spec_heat_capacities_p_gas,specific_gas_constants
   use diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
-  use surface_nml,      only: nsoillays
+  use surface_nml,      only: nsoillays,lsoil,snow_velocity,rain_velocity,cloud_droplets_velocity
 
   implicit none
   
@@ -26,7 +26,7 @@ module column_solvers
     ! input arguments and output
     type(t_state), intent(in)    :: state_old ! state at the old timestep
     type(t_state), intent(inout) :: state_new ! state at the new timestep
-    type(t_diag),  intent(in)    :: diag      ! diagnostic quantities
+    type(t_diag),  intent(inout) :: diag      ! diagnostic quantities
     type(t_tend),  intent(in)    :: tend      ! explicit tendencies
     type(t_grid),  intent(in)    :: grid      ! model grid
     integer,       intent(in)    :: rk_step   ! Runge Kutta substep
@@ -95,7 +95,7 @@ module column_solvers
 
           ! contribution of sensible heat to rhotheta
           state_new%rhotheta(ji,jk,jl) = state_new%rhotheta(ji,jk,jl) &
-          - dtime*grid%area_z(nlays*NO_OF_VECTORS_PER_LAYER+i)*diag%power_flux_density_sensible(ji,jk) &
+          - dtime*grid%area_z(ji,jk,jl)*diag%power_flux_density_sensible(ji,jk) &
           /((grid%exner_bg(ji,jk,jl)+state_new%exner_pert(ji,jk,jl))*c_p)/grid%volume(ji,jk,jl)
           
         enddo
@@ -204,12 +204,12 @@ module column_solvers
           ! calculating the explicit part of the heat flux density
           do jl=1,nsoillays-1
             heat_flux_density_expl(jl) &
-            = -grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)*(state_old%temperature_soil(i+j*NO_OF_SCALARS_H) &
+            = -grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)*(state_old%temperature_soil(ji,jk,jl) &
             - state_old%temperature_soil(ji,jk,jl+1)) &
             /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
           enddo
           heat_flux_density_expl(nsoillays - 1) &
-          = -grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)*(state_old%temperature_soil(i+(nsoillays - 1)*NO_OF_SCALARS_H) &
+          = -grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)*(state_old%temperature_soil(ji,jk,nsoillays) &
           - grid%t_const_soil(ji,jk)) &
           /(2*(grid%z_soil_center(nsoillays - 1) - grid%z_t_const))
 
@@ -230,12 +230,12 @@ module column_solvers
           /((grid%z_soil_interface(1) - grid%z_soil_interface(2))*grid%sfc_rho_c(ji,jk))*dtime
 
           ! loop over all soil layers below the first layer
-          do j=1,nsoillays
+          do jl=1,nsoillays
             r_vector(jl+nlays-1) &
             ! old temperature
-            = state_old%temperature_soil(i+j*NO_OF_SCALARS_H) &
+            = state_old%temperature_soil(ji,jk,jl) &
             ! heat conduction from above
-            + 0.5_wp*(-heat_flux_density_expl(j-1) &
+            + 0.5_wp*(-heat_flux_density_expl(jl) &
             ! heat conduction from below
             + heat_flux_density_expl(jl)) &
             /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))*dtime
@@ -250,11 +250,11 @@ module column_solvers
             elseif (jl == nsoillays) then
               d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
               /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
-              *1/(grid%z_soil_center(j-1) - grid%z_soil_center(jl))
+              *1/(grid%z_soil_center(jl-1) - grid%z_soil_center(jl))
             else
               d_vector(jl+nlays-1) = 1.0+0.5*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
               /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
-              *(1/(grid%z_soil_center(j-1) - grid%z_soil_center(jl)) &
+              *(1/(grid%z_soil_center(jl-1) - grid%z_soil_center(jl)) &
               + 1/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1)))
             endif
           enddo
@@ -262,7 +262,7 @@ module column_solvers
           ! the off-diagonal components
           c_vector(nlays-2) = 0._wp
           e_vector(nlays-2) = 0._wp
-          do j=1,nsoillays-1
+          do jl=1,nsoillays-1
             c_vector(jl+nlays-1) = -0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
             /((grid%z_soil_interface(jl+1) - grid%z_soil_interface(jl+2))*grid%sfc_rho_c(ji,jk)) &
             /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
@@ -383,7 +383,7 @@ module column_solvers
       ! loop over all relevant constituents
       do j_constituent=1,no_of_relevant_constituents
         ! This is done do all tracers apart from the main gaseous constituent.
-        if (quantity_id /= 1 .or. k /= no_of_condensed_constituents+1) then
+        if (quantity_id /= 1 .or. j_constituent /= no_of_condensed_constituents+1) then
           ! loop over all columns
           !$OMP PARALLEL
           !$OMP DO PRIVATE(ji,jk)
@@ -452,15 +452,15 @@ module column_solvers
                   r_vector(jl) = r_vector(jl) - expl_weight*dtime*vertical_flux_vector_rhs(jl-1)/grid%volume(ji,jk,jl)
                   ! precipitation
                   ! snow
-                  if (k < no_of_condensed_constituents/4) then
+                  if (j_constituent < no_of_condensed_constituents/4) then
                     r_vector(jl) = r_vector(jl) - snow_velocity*dtime*state_old%rho(ji,jk,jl-1,j_constituent) &
                     *grid%area_z(ji,jk,jl-1)/grid%volume(ji,jk,jl)
                   ! rain
-                  elseif (k < no_of_condensed_constituents/2) then
+                  elseif (j_constituent < no_of_condensed_constituents/2) then
                     r_vector(jl) = r_vector(jl) - rain_velocity*dtime*state_old%rho(ji,jk,jl-1,j_constituent) &
                     *grid%area_z(ji,jk,jl-1)/grid%volume(ji,jk,jl)
                   ! clouds
-                  elseif (k < no_of_condensed_constituents) then
+                  elseif (j_constituent < no_of_condensed_constituents) then
                     r_vector(jl) = r_vector(jl) - cloud_droplets_velocity*dtime*state_old%rho(ji,jk,jl-1,j_constituent) &
                     *grid%area_z(ji,jk,jl-1)/grid%volume(ji,jk,jl)
                   endif
@@ -482,7 +482,7 @@ module column_solvers
                   if (jl == 1) then
                     solution_vector(jl+1) = solution_vector(jl+1) -  added_mass/grid%volume(ji,jk,jl+1)
                   elseif (jl == nlays) then
-                    if (k >= no_of_condensed_constituents) then
+                    if (j_constituent > no_of_condensed_constituents) then
                       solution_vector(jl-1) = solution_vector(jl-1) - added_mass/grid%volume(ji,jk,jl-1)
                     endif
                   else

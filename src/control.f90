@@ -6,12 +6,12 @@ program control
   ! This controls the model run from the beginning to the end.
 
   use run_nml,                   only: run_nml_setup,run_span_hr,dtime, &
-                                       t_init,nlins,ncols,nlays,nsoillays,lrestart, &
+                                       t_init,nlins,ncols,nlays,lrestart, &
                                        lideal
   use io_nml,                    only: io_nml_setup,dt_write
   use constituents_nml,          only: constituents_nml_setup,no_of_condensed_constituents,no_of_constituents
   use diff_nml,                  only: diff_nml_setup
-  use surface_nml,               only: surface_nml_setup
+  use surface_nml,               only: surface_nml_setup,nsoillays
   use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_irrev
   use grid_generator,            only: grid_setup,bg_setup
   use set_initial_state,         only: restart,ideal
@@ -150,14 +150,14 @@ program control
   allocate(diag%t_2(nlins,ncols))
   allocate(diag%z_eta_x(nlins+1,ncols,nlays+1))
   allocate(diag%z_eta_y(nlins,ncols+1,nlays+1))
-  allocate(diag%z_eta_z(nlins+1,ncols+1,nlays))monin_obukhov_length
+  allocate(diag%z_eta_z(nlins+1,ncols+1,nlays))
   allocate(diag%scalar_flux_resistance(nlins,ncols))
   allocate(diag%monin_obukhov_length(nlins,ncols))
   allocate(diag%power_flux_density_sensible(nlins,ncols))
   allocate(diag%power_flux_density_latent(nlins,ncols))
   allocate(diag%sfc_sw_in(nlins,ncols))
   allocate(diag%sfc_lw_out(nlins,ncols))
-  allocate(grid%roughness_velocity(nlins,ncols))
+  allocate(diag%roughness_velocity(nlins,ncols))
   ! type containing irreversible quantities
   allocate(irrev%tke(nlins,ncols,nlays))
   allocate(irrev%mom_diff_tend_x(nlins,ncols-1,nlays))
@@ -345,7 +345,7 @@ program control
   deallocate(diag%power_flux_density_latent)
   deallocate(diag%sfc_sw_in)
   deallocate(diag%sfc_lw_out)
-  deallocate(grid%roughness_velocity)
+  deallocate(diag%roughness_velocity)
   ! type containing irreversible quantities
   deallocate(irrev%tke)
   deallocate(irrev%mom_diff_tend_x)

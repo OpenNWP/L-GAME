@@ -16,6 +16,8 @@ module manage_rkhevi
   use derived_quantities,         only: temperature_diagnostics
   use constituents_nml,           only: no_of_constituents
   use diff_nml,                   only: lmom_diff_v
+  use surface_nml,                only: lsoil
+  use planetary_boundary_layer,   only: update_sfc_turb_quantities
 
   implicit none
   
@@ -30,7 +32,7 @@ module manage_rkhevi
     type(t_state),  intent(inout) :: state_old          ! the state at the old timestep
     type(t_state),  intent(inout) :: state_new          ! the state at the new timestep
     type(t_tend),   intent(inout) :: tend               ! the tendency
-    type(t_grid),   intent(in)    :: grid               ! the grid of the model
+    type(t_grid),   intent(inout) :: grid               ! the grid of the model
     type(t_diag),   intent(inout) :: diag               ! diagnostic quantities
     type(t_irrev),  intent(inout) :: irrev              ! irreversible quantities
     integer,        intent(in)    :: total_step_counter ! time step counter
@@ -39,10 +41,10 @@ module manage_rkhevi
     integer  :: rk_step          ! index of the Runge-Kutta step
     
     ! diagnosing the temperature
-    call temperature_diagnostics(state,diag,grid)
+    call temperature_diagnostics(state_old,diag,grid)
     
     ! updating surface-related turbulence quantities if it is necessary
-    if (lsoil .or. lmom_diff_v)
+    if (lsoil .or. lmom_diff_v) then
       call update_sfc_turb_quantities(state_old,diag,grid)
     endif
     
@@ -75,9 +77,9 @@ module manage_rkhevi
       
       ! 3.) vertical tracer advection
       ! -----------------------------
-      if (no_of_constituents > 1)
-        call three_band_solver_gen_densities(state_old,state_new,tend,grid,rk_step)
-      then
+      if (no_of_constituents > 1) then
+        call three_band_solver_gen_densities(state_old,state_new,tend,diag,grid,rk_step)
+      endif
   
     enddo
     
