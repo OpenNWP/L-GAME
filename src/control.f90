@@ -212,9 +212,9 @@ program control
   t_write = t_0 + dt_write
   run_span = 3600._wp*run_span_hr
   time_step_counter = 0
-  do while (t_0 < t_init + run_span + 300)
-    
-    state_old = state_new
+  
+  do while (t_0 < t_init + run_span + 300._wp)
+    call lin_combination(state_new,state_new,state_old,0._wp,1._wp,grid)
       
     ! this is the RKHEVI routine performing the time stepping
     call rkhevi(state_old,state_new,tend,grid,diag,irrev,time_step_counter)

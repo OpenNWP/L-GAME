@@ -137,11 +137,11 @@ module set_initial_state
     state%condensed_rho_t(:,:,:,:) = 0._wp
     
     
-      do ji=1,nlins
-        do jk=1,ncols
-          state%temperature_soil(ji,jk,:)=280._wp
-        enddo
+    do ji=1,nlins
+      do jk=1,ncols
+        state%temperature_soil(ji,jk,:)=280._wp
       enddo
+    enddo
     
     call unessential_init(state,diag,grid,pres_lowest_layer)
     
