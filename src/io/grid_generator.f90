@@ -6,9 +6,10 @@
 module grid_generator
 
   use definitions,        only: wp,t_grid
-  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re,omega,p_0,gravity, &
+  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,omega,p_0,gravity, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard, &
                                 scenario
+  use constants,          only: re
   use surface_nml,        only: nsoillays
   use gradient_operators, only: grad_hor_cov_extended,grad
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
@@ -62,6 +63,10 @@ module grid_generator
     real(wp) :: x_coord         ! help variable needed for the Schär test
     real(wp) :: rescale_factor  ! soil grid rescaling factor
     real(wp) :: sigma_soil      ! sigma of the soil grid
+    real(wp) :: density_soil    ! typical density of soil
+    real(wp) :: c_p_soil        ! typical c_p of soil
+    real(wp) :: density_water   ! typical density of water
+    real(wp) :: c_p_water       ! typical c_p of water
     
     ! setting the latitude and longitude coordinates of the scalar grid points
     ! setting the dy of the model grid
@@ -216,7 +221,7 @@ module grid_generator
     ! setting the horizontal areas at the surface
     do ji=1,nlins
       do jk=1,ncols
-        grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji+1),dlon,dlat)*(re + grid%z_geo_w(ji+1,jk+1,nlays+1))**2 &
+        grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(re + grid%z_geo_w(ji+1,jk+1,nlays+1))**2 &
           /re**2
       enddo
     enddo
@@ -249,7 +254,7 @@ module grid_generator
         do jl=1,nlays
           lower_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl+1) + grid%z_geo_w(ji+1,jk+1,jl+1))
           upper_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl  ) + grid%z_geo_w(ji+1,jk+1,jl  ))
-          lower_length = dx*cos(0.5_wp*(grid%lat_scalar(ji)+grid%lat_scalar(ji+1)))*(re+lower_z)/re
+          lower_length = dx*cos(0.5_wp*(grid%lat_scalar(ji)+grid%lat_scalar(ji)))*(re+lower_z)/re
           grid%area_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
       enddo
@@ -261,7 +266,7 @@ module grid_generator
         do jl=1,nlays
           grid%z_geo_area_dual_z(ji,jk,jl) = 0.25_wp*(grid%z_geo_scal(ji,jk,jl)+grid%z_geo_scal(ji+1,jk,jl) &
           +grid%z_geo_scal(ji+1,jk+1,jl)+grid%z_geo_scal(ji,jk+1,jl))
-          grid%area_dual_z(ji,jk,jl) = patch_area(0.5_wp*(grid%lat_scalar(ji) + grid%lat_scalar(ji+1)),dlon,dlat) &
+          grid%area_dual_z(ji,jk,jl) = patch_area(0.5_wp*(grid%lat_scalar(ji) + grid%lat_scalar(ji)),dlon,dlat) &
           *(re + grid%z_geo_area_dual_z(ji,jk,jl))**2/re**2
         enddo
       enddo
@@ -339,14 +344,14 @@ module grid_generator
     ! u
     do ji=1,nlins
       do jk=1,ncols-1
-        base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
-        grid%trsk_weights_u(ji,jk,1) = (0.5_wp - patch_area(grid%lat_scalar(ji+1)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area) &
-        *dx*cos(0.5_wp*(grid%lat_scalar(ji+1)+grid%lat_scalar(ji+2)))/(dx*cos(grid%lat_scalar(ji+1)))
-        grid%trsk_weights_u(ji,jk,2) = -(0.5_wp - patch_area(grid%lat_scalar(ji+1)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area) &
-        *dy/(dx*cos(grid%lat_scalar(ji+1)))
-        grid%trsk_weights_u(ji,jk,3) = -(0.5_wp - (patch_area(grid%lat_scalar(ji+1)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
-        +patch_area(grid%lat_scalar(ji+1)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat))/base_area) &
-        *dx*cos(0.5_wp*(grid%lat_scalar(ji  )+grid%lat_scalar(ji+1)))/(dx*cos(grid%lat_scalar(ji+1)))
+        base_area = patch_area(grid%lat_scalar(ji),dlon,dlat)
+        grid%trsk_weights_u(ji,jk,1) = (0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area) &
+        *dx*cos(0.5_wp*(grid%lat_scalar(ji)+grid%lat_scalar(ji+1)))/(dx*cos(grid%lat_scalar(ji)))
+        grid%trsk_weights_u(ji,jk,2) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area) &
+        *dy/(dx*cos(grid%lat_scalar(ji)))
+        grid%trsk_weights_u(ji,jk,3) = -(0.5_wp - (patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
+        +patch_area(grid%lat_scalar(ji)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat))/base_area) &
+        *dx*cos(0.5_wp*(grid%lat_scalar(ji  )+grid%lat_scalar(ji)))/(dx*cos(grid%lat_scalar(ji)))
         grid%trsk_weights_u(ji,jk,4) = grid%trsk_weights_u(ji,jk,3)
         grid%trsk_weights_u(ji,jk,5) = -grid%trsk_weights_u(ji,jk,2)
         grid%trsk_weights_u(ji,jk,6) = grid%trsk_weights_u(ji,jk,1)
@@ -355,11 +360,11 @@ module grid_generator
     ! v
     do ji=1,nlins-1
       do jk=1,ncols
-        base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
-        grid%trsk_weights_v(ji,jk,1) = -(0.5_wp - patch_area(grid%lat_scalar(ji+1)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
+        base_area = patch_area(grid%lat_scalar(ji),dlon,dlat)
+        grid%trsk_weights_v(ji,jk,1) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
         grid%trsk_weights_v(ji,jk,2) = grid%trsk_weights_v(ji,jk,1)
-        base_area = patch_area(grid%lat_scalar(ji+2),dlon,dlat)
-        grid%trsk_weights_v(ji,jk,3) = -(0.5_wp - patch_area(grid%lat_scalar(ji+2)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
+        base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
+        grid%trsk_weights_v(ji,jk,3) = -(0.5_wp - patch_area(grid%lat_scalar(ji+1)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
         grid%trsk_weights_v(ji,jk,4) = grid%trsk_weights_v(ji,jk,3)
       enddo
     enddo
@@ -384,6 +389,47 @@ module grid_generator
     enddo
     
     write(*,*) "Thickness of the uppermost soil layer: ", -grid%z_soil_interface(2), "m."
+    
+    density_soil = 1442._wp
+    c_p_soil = 830._wp
+    density_water = 1024._wp
+    c_p_water = 4184._wp
+    
+    do ji=1,nlays
+      do jk=1,ncols
+		
+		! for water roughness_length is set to some sea-typical value, will not be used anyway
+        grid%roughness_length(ji,jk) = 0.08
+		
+		! albedo of water
+        grid%sfc_albedo(ji,jk) = 0.06_wp
+		
+        grid%sfc_rho_c(ji,jk) = density_water*c_p_water
+		
+		! land
+        if (grid%is_land(ji,jk)) then
+        
+          grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
+          grid%sfc_albedo(ji,jk) = 0.12_wp
+          
+          ! setting the surface albedo of land depending on the latitude
+          ! ice
+          if (abs(360._wp/(2._wp*4._wp*atan(1.d0))*grid%lat_scalar(ji)) > 70._wp) then
+            grid%sfc_albedo(ji,jk) = 0.8_wp
+          ! normal soil
+          else
+            grid%sfc_albedo(ji,jk) = 0.12_wp
+          endif
+          
+          grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_scalar(ji),grid%z_geo_w(ji,jk,nlays+1))/8._wp
+          
+        endif
+		
+		! restricting the roughness length to a minimum
+        grid%roughness_length(ji,jk) = max(0.0001_wp, grid%roughness_length(ji,jk))
+      
+      enddo
+    enddo
   
   end subroutine grid_setup
   

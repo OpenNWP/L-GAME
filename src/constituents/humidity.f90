@@ -6,7 +6,7 @@ module humidity
   ! In this module, humidity quantities are being calculated.
   
   use definitions, only: wp
-  use run_nml,     only: T_0
+  use constants,   only: T_0
   use dictionary,  only: specific_gas_constants
   
   implicit none

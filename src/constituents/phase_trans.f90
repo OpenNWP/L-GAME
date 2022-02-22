@@ -5,7 +5,8 @@ module phase_trans
 
   ! In this module,phase transition rates are being calculated.
   
-  use run_nml,          only: nlins,ncols,nlays,T_0,EPSILON_SECURITY,dtime,wp
+  use run_nml,          only: nlins,ncols,nlays,EPSILON_SECURITY,dtime,wp
+  use constants,        only: T_0
   use definitions,      only: t_state,t_diag,t_irrev,t_grid
   use humidity,         only: saturation_pressure_over_ice,saturation_pressure_over_water
   use dictionary,       only: specific_gas_constants,phase_trans_heat

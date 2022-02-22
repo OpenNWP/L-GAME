@@ -20,17 +20,12 @@ module run_nml
   real              :: t_init              ! epoch time stamp of the initialization
   real(wp)          :: semimajor           ! large halfaxis of the Earth
   real(wp)          :: semiminor           ! small halfaxis of the Earth
-  real(wp)          :: re                  ! Earth radius
   logical           :: lrestart            ! switch for restart runs
   logical           :: lcorio              ! switch for the Coriolis force
   logical           :: lideal              ! switch for analytic test cases
-  logical           :: l3dvar              ! switch for 3d-Var
-  logical           :: l4dvar              ! switch for 4d-Var
   character(len=64) :: scenario            ! scenario for ideal runs
   character(len=64) :: run_id              ! ID of the model run
   real(wp)          :: p_0                 ! reference pressure
-  real(wp)          :: K_B                 ! Boltzmann's constant
-  real(wp)          :: T_0                 ! 273.15 K
   real(wp)          :: omega               ! angular frequency of Earth rotation
   real(wp)          :: lapse_rate          ! lapse_rate within the troposphere
   real(wp)          :: surface_temp        ! the temperature at the surface
@@ -65,16 +60,11 @@ module run_nml
     t_init              = 0._wp
     toa                 = 40000._wp
     sigma               = 1.3_wp
-    re                  = 6371000.789927_wp
     lrestart            = .false.
     lideal              = .true.
-    l3dvar              = .false.
-    l4dvar              = .false.
     scenario            = "standard"
     run_id              = "ideal"
     p_0                 = 100000._wp
-    K_B                 = 1.380649e-23_wp
-    T_0                 = 273.15_wp
     omega               = 7.292115e-5_wp
     lapse_rate          = 0.0065_wp
     surface_temp        = 288.15_wp

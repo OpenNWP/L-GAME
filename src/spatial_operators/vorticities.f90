@@ -6,7 +6,8 @@ module vorticities
   ! This module contians the calculation of the vorticities.
 
   use definitions,      only: t_state,t_diag,t_grid,wp
-  use run_nml,          only: nlins,ncols,nlays,nlays_oro,re,toa,lcorio,llinear
+  use run_nml,          only: nlins,ncols,nlays,nlays_oro,toa,lcorio,llinear
+  use constants,        only: re
   use constituents_nml, only: no_of_condensed_constituents
   use averaging,        only: horizontal_covariant_x,horizontal_covariant_y
   

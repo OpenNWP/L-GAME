@@ -12,6 +12,7 @@ add_executable(
 lgame
 src/definitions.f90
 src/control.f90
+src/constants.f90
 src/io/boundaries.f90
 src/io/grid_generator.f90
 src/io/set_initial_state.f90
