@@ -15,7 +15,8 @@ module constants
   real(wp) :: k_B = 1.380649e-23_wp       ! Boltzmann's constant
   real(wp) :: T_0 = 273.15_wp             ! 273.15 K
   real(wp) :: EPSILON_SECURITY = 1e-10_wp ! security constant
-  
+  real(wp) :: density_water = 1024._wp    ! typical density of water
+
 end module constants
 
 

@@ -9,7 +9,7 @@ module grid_generator
   use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,omega,p_0,gravity, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard, &
                                 scenario
-  use constants,          only: re
+  use constants,          only: re, density_water
   use surface_nml,        only: nsoillays
   use gradient_operators, only: grad_hor_cov_extended,grad
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
@@ -27,13 +27,13 @@ module grid_generator
   interface
     real(C_DOUBLE) function calculate_distance_h(latitude_a,longitude_a,latitude_b,longitude_b,radius) &
     bind(c, name = "calculate_distance_h")
-        use, intrinsic::iso_c_binding
-        implicit none
-        real(C_DOUBLE), value :: latitude_a
-        real(C_DOUBLE), value :: longitude_a
-        real(C_DOUBLE), value :: latitude_b
-        real(C_DOUBLE), value :: longitude_b
-        real(C_DOUBLE), value :: radius
+      use, intrinsic::iso_c_binding
+      implicit none
+      real(C_DOUBLE), value :: latitude_a
+      real(C_DOUBLE), value :: longitude_a
+      real(C_DOUBLE), value :: latitude_b
+      real(C_DOUBLE), value :: longitude_b
+      real(C_DOUBLE), value :: radius
     end function calculate_distance_h
   end interface
   
@@ -65,7 +65,6 @@ module grid_generator
     real(wp) :: sigma_soil      ! sigma of the soil grid
     real(wp) :: density_soil    ! typical density of soil
     real(wp) :: c_p_soil        ! typical c_p of soil
-    real(wp) :: density_water   ! typical density of water
     real(wp) :: c_p_water       ! typical c_p of water
     
     ! setting the latitude and longitude coordinates of the scalar grid points
@@ -392,7 +391,6 @@ module grid_generator
     
     density_soil = 1442._wp
     c_p_soil = 830._wp
-    density_water = 1024._wp
     c_p_water = 4184._wp
     
     do ji=1,nlays
@@ -572,9 +570,9 @@ module grid_generator
     ! local variables
     real(wp) :: vegetation_height_equator
 
-    vegetation_height_equator = 20.0_wp
+    vegetation_height_equator = 20._wp
 
-    vegetation_height_ideal = vegetation_height_equator*cos(latitude)*exp(-oro/1500.0)
+    vegetation_height_ideal = vegetation_height_equator*cos(latitude)*exp(-oro/1500._wp)
 
   end function vegetation_height_ideal
 
