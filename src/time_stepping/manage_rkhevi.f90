@@ -71,7 +71,7 @@ module manage_rkhevi
       
       ! 3.) implicit dynamic vertical solver
       ! ------------------------------------
-      call three_band_solver_ver(state_old,state_new,tend,grid,rk_step)
+      call three_band_solver_ver(state_old,state_new,diag,tend,grid,rk_step)
       
       ! 3.) vertical tracer advection
       ! -----------------------------

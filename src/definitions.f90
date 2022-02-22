@@ -70,6 +70,7 @@ module definitions
     real(wp), allocatable :: z_soil_interface(:)            ! heights of the interfaces of the soil layers
     real(wp), allocatable :: z_soil_center(:)               ! heights of the centers of the soil layers
     real(wp)              :: z_t_const                      ! depth where the soil temperature is constant
+    real(wp), allocatable :: t_const_soil(:,:)              ! temperature of the soil below the depth where it is constant
   
   end type t_grid
   
