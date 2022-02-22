@@ -28,7 +28,7 @@ module run_nml
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
   real(wp)          :: PRANDTL_HEIGHT      ! height of the Prandtl layer
   real(wp)          :: lat_center_deg      ! latitude of the center of the model domain in degrees
-  real(wp)          :: lon_center_deg     ! longitude of the center of the model domain in degrees
+  real(wp)          :: lon_center_deg      ! longitude of the center of the model domain in degrees
   real(wp)          :: x_dir_deg           ! direction of the x-axis of the model in degrees
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr,sigma, &
@@ -87,11 +87,15 @@ module run_nml
       call exit(1)
     endif
     if (lat_center_deg < -90._wp .or. lat_center_deg > 90._wp) then
-      write(*,*) "Error: lat_center_deg outside valid range."
+      write(*,*) "Error: lat_center_deg must be between -90 and 90."
       call exit(1)
     endif
     if (lon_center_deg < -180._wp .or. lon_center_deg > 180._wp) then
-      write(*,*) "Error: lon_center_deg outside valid range."
+      write(*,*) "Error: lon_center_deg must be between -180 and 180."
+      call exit(1)
+    endif
+    if (lon_center_deg < 0._wp .or. lon_center_deg > 360._wp) then
+      write(*,*) "Error: x_dir_deg must be between 0 and 360."
       call exit(1)
     endif
     
