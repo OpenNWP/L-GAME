@@ -172,7 +172,7 @@ program control
   allocate(irrev%mass_source_rates(nlins,ncols,nlays,no_of_condensed_constituents+1))
   allocate(irrev%heat_source_rates(nlins,ncols,nlays,no_of_condensed_constituents))
   write(*,*) "... finished."
-
+  
   ! firstly, the grid generator needs to be called to calculate the grid properties
   write(*,*) "Setting up the grid ..."
   call grid_setup(grid)
