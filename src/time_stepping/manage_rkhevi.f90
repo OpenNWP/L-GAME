@@ -63,8 +63,12 @@ module manage_rkhevi
       ! Only the horizontal momentum is a forward tendency.
       call expl_vector_tend(state_new,tend,diag,irrev,grid,rk_step,total_step_counter)
       ! time stepping for the horizontal momentum can be directly executed
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       state_new%wind_u = state_old%wind_u + dtime*tend%wind_u
       state_new%wind_v = state_old%wind_v + dtime*tend%wind_v
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
       ! Horizontal velocity can be considered to be updated from now on.
 
       ! 2.) Explicit component of the generalized density equations.
