@@ -6,10 +6,9 @@
 module grid_generator
 
   use definitions,        only: wp,t_grid
-  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,omega,p_0,gravity, &
-                                lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard, &
-                                scenario
-  use constants,          only: re,density_water,T_0,M_PI
+  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,scenario
+  use constants,          only: re,density_water,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
+                                lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv
   use surface_nml,        only: nsoillays
   use gradient_operators, only: grad_hor_cov_extended,grad
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas

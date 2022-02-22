@@ -6,8 +6,8 @@ module planetary_boundary_layer
   ! This module computes everything related to the planetary boundary layer.
   
   use definitions, only: wp,t_state,t_grid,t_diag
-  use run_nml,     only: PRANDTL_HEIGHT,gravity,nlins,ncols,nlays,dtime
-  use constants,   only: EPSILON_SECURITY,M_PI
+  use run_nml,     only: PRANDTL_HEIGHT,nlins,ncols,nlays,dtime
+  use constants,   only: EPSILON_SECURITY,M_PI,gravity
   use surface_nml, only: lsoil
   
   implicit none

@@ -5,7 +5,7 @@ module column_solvers
 
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
-  use run_nml,          only: nlins,ncols,wp,nlays,dtime,p_0,toa,impl_weight,partial_impl_weight
+  use run_nml,          only: nlins,ncols,wp,nlays,dtime,toa,impl_weight,partial_impl_weight
   use constituents_nml, only: no_of_condensed_constituents,no_of_constituents,lassume_lte
   use definitions,      only: t_grid,t_state,t_tend,t_diag
   use dictionary,       only: spec_heat_capacities_v_gas,spec_heat_capacities_p_gas,specific_gas_constants

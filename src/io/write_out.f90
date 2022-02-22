@@ -7,7 +7,7 @@ module write_out
 
   use definitions,       only: t_state,wp,t_diag,t_grid
   use netcdf
-  use run_nml,           only: nlins,ncols,nlays,scenario,p_0,run_id
+  use run_nml,           only: nlins,ncols,nlays,scenario,run_id
   use constituents_nml,  only: no_of_condensed_constituents
   use dictionary,        only: specific_gas_constants,spec_heat_capacities_p_gas
   use grid_generator,    only: bg_temp,bg_pres,geopot
