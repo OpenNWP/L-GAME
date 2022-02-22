@@ -35,6 +35,9 @@ no_of_gaseous_constituents=1
 no_of_condensed_constituents=0
 /
 
+&surface
+/
+
 &io
 dt_write_min=1
 /

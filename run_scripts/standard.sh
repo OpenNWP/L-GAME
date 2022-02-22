@@ -30,6 +30,9 @@ lmom_diff_v=.false.
 &constituents
 /
 
+&surface
+/
+
 &io
 dt_write_min=1
 /
