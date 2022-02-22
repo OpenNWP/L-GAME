@@ -5,7 +5,7 @@ module multiplications
 
   ! This module is a collection of various multiplications of vector and/or scalar fields.
   
-  use definitions, only: t_grid,wp
+  use definitions, only: wp
   use run_nml,     only: nlins,ncols,nlays
   
   implicit none
@@ -82,14 +82,13 @@ module multiplications
   
   end subroutine scalar_times_vector_h_for_gradient
   
-  subroutine scalar_times_vector_v(scalar_field,in_vector_z,result_vector_z,grid)
+  subroutine scalar_times_vector_v(scalar_field,in_vector_z,result_vector_z)
   
     ! Multiplication of an extended scalar with an inner vector field at vertical points.
     
     real(wp),     intent(in)    :: scalar_field(:,:,:)
     real(wp),     intent(in)    :: in_vector_z(:,:,:)
     real(wp),     intent(inout) :: result_vector_z(:,:,:)
-    type(t_grid), intent(in)    :: grid
   
     ! local variables
     integer                     :: jl ! loop index
@@ -106,14 +105,13 @@ module multiplications
   
   end subroutine scalar_times_vector_v
   
-  subroutine scalar_times_vector_v_for_gradient(scalar_field,in_vector_z,result_vector_z,grid)
+  subroutine scalar_times_vector_v_for_gradient(scalar_field,in_vector_z,result_vector_z)
   
     ! Multiplication of an extended scalar with an inner vector field at vertical points.
     
     real(wp),     intent(in)    :: scalar_field(:,:,:)
     real(wp),     intent(in)    :: in_vector_z(:,:,:)
     real(wp),     intent(inout) :: result_vector_z(:,:,:)
-    type(t_grid), intent(in)    :: grid
   
     ! local variables
     integer                     :: jl ! loop index
@@ -130,7 +128,7 @@ module multiplications
   end subroutine scalar_times_vector_v_for_gradient
   
   subroutine scalar_times_vector(scalar_field,in_vector_x,in_vector_y,in_vector_z, &
-                   result_vector_x,result_vector_y,result_vector_z,grid)
+                   result_vector_x,result_vector_y,result_vector_z)
   
     ! Multiplication of a scalar with a vector field.
     
@@ -141,15 +139,14 @@ module multiplications
     real(wp),     intent(inout) :: result_vector_x(:,:,:)
     real(wp),     intent(inout) :: result_vector_y(:,:,:)
     real(wp),     intent(inout) :: result_vector_z(:,:,:)
-    type(t_grid), intent(in)    :: grid
     
     call scalar_times_vector_h(scalar_field,in_vector_x,in_vector_y,result_vector_x,result_vector_y)
-    call scalar_times_vector_v(scalar_field,in_vector_z,result_vector_z,grid)
+    call scalar_times_vector_v(scalar_field,in_vector_z,result_vector_z)
   
   end subroutine scalar_times_vector
 
   subroutine scalar_times_vector_for_gradient(scalar_field,in_vector_x,in_vector_y,in_vector_z, &
-                   result_vector_x,result_vector_y,result_vector_z,grid)
+                   result_vector_x,result_vector_y,result_vector_z)
   
     ! Multiplication of an extended scalar with an inner vector field.
     
@@ -160,10 +157,9 @@ module multiplications
     real(wp),     intent(inout) :: result_vector_x(:,:,:)
     real(wp),     intent(inout) :: result_vector_y(:,:,:)
     real(wp),     intent(inout) :: result_vector_z(:,:,:)
-    type(t_grid), intent(in)    :: grid
     
     call scalar_times_vector_h_for_gradient(scalar_field,in_vector_x,in_vector_y,result_vector_x,result_vector_y)
-    call scalar_times_vector_v_for_gradient(scalar_field,in_vector_z,result_vector_z,grid)
+    call scalar_times_vector_v_for_gradient(scalar_field,in_vector_z,result_vector_z)
   
   end subroutine scalar_times_vector_for_gradient
 

@@ -332,7 +332,7 @@ module column_solvers
 
   end subroutine three_band_solver_ver
   
-  subroutine three_band_solver_gen_densities(state_old,state_new,tend,diag,grid,rk_step)
+  subroutine three_band_solver_gen_densities(state_old,state_new,tend,grid)
   
     ! Vertical advection of generalized densities (of tracers) with 3-band matrices.
     ! mass densities, density x temperatures
@@ -341,9 +341,7 @@ module column_solvers
     type(t_state), intent(in)    :: state_old ! state at the old timestep
     type(t_state), intent(inout) :: state_new ! state at the new timestep
     type(t_tend),  intent(in)    :: tend      ! explicit tendencies
-    type(t_diag),  intent(in)    :: diag      ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid      ! model grid
-    integer,       intent(in)    :: rk_step   ! Runge Kutta substep
     
     ! local variables
     integer  :: no_of_relevant_constituents              ! number of relevant constituents for a certain quantity

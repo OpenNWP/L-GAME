@@ -40,12 +40,12 @@ module pressure_gradient
     diag%scalar_placeholder = grid%theta_bg + state%theta_pert
     ! multiplying the perturbed Exner pressure gradient by the full potential temperature
     call scalar_times_vector_for_gradient(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
-    diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
+    diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w)
     
     ! the linear pressure gradient term
     ! multiplying the background Exner pressure gradient by the perturbed potential temperature
     call scalar_times_vector_for_gradient(state%theta_pert,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
-    grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v,diag%p_grad_acc_neg_l_w,grid)
+    grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v,diag%p_grad_acc_neg_l_w)
     
     ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
     if (lfirst) then

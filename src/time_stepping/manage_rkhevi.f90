@@ -82,7 +82,7 @@ module manage_rkhevi
       ! 3.) vertical tracer advection
       ! -----------------------------
       if (no_of_constituents > 1) then
-        call three_band_solver_gen_densities(state_old,state_new,tend,diag,grid,rk_step)
+        call three_band_solver_gen_densities(state_old,state_new,tend,grid)
       endif
   
     enddo

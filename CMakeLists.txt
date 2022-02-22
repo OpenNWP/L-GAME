@@ -74,7 +74,7 @@ src/namelists/surface_nml.f90
 ../rte-rrtmgp/examples/all-sky/mo_load_cloud_coefficients.F90
 )
 find_package(OpenMP)
-SET(CMAKE_Fortran_FLAGS "-O2 ${OpenMP_Fortran_FLAGS} -Wall -Wno-c-binding-type -Wno-unused-dummy-argument -I/usr/include -L/usr/lib/x86_64-linux-gnu -lnetcdff -lnetcdf")
+SET(CMAKE_Fortran_FLAGS "-O2 ${OpenMP_Fortran_FLAGS} -Wall -Wno-c-binding-type -I/usr/include -L/usr/lib/x86_64-linux-gnu -lnetcdff -lnetcdf")
 target_link_libraries(lgame netcdff geos95)
 
 
