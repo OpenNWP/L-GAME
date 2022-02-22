@@ -153,6 +153,7 @@ program control
   allocate(irrev%mom_diff_tend_x(nlins,ncols-1,nlays))
   allocate(irrev%mom_diff_tend_y(nlins-1,ncols,nlays))
   allocate(irrev%mom_diff_tend_z(nlins,ncols,nlays+1))
+  allocate(irrev%heating_diss(nlins+2,ncols+2,nlays))
   allocate(irrev%mass_source_rates(nlins,ncols,nlays,no_of_condensed_constituents+1))
   allocate(irrev%heat_source_rates(nlins,ncols,nlays,no_of_condensed_constituents))
   write(*,*) "... finished."
@@ -333,6 +334,7 @@ program control
   deallocate(irrev%mom_diff_tend_x)
   deallocate(irrev%mom_diff_tend_y)
   deallocate(irrev%mom_diff_tend_z)
+  deallocate(irrev%heating_diss)
   deallocate(irrev%mass_source_rates)
   deallocate(irrev%heat_source_rates)
   write(*,*) "... finished."

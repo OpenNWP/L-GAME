@@ -11,6 +11,7 @@ module explicit_scalar_tendencies
   use run_nml,              only: nlins,ncols
   use phase_trans,          only: calc_h2otracers_source_rates
   use constituents_nml,     only: no_of_condensed_constituents,no_of_constituents
+  use dictionary,           only: spec_heat_capacities_p_gas
 
   implicit none
   
@@ -21,12 +22,13 @@ module explicit_scalar_tendencies
   
   contains
   
-  subroutine expl_scalar_tend(grid,state,tend,diag,config,rk_step)
+  subroutine expl_scalar_tend(grid,state,tend,diag,irrev,config,rk_step)
   
     type(t_grid),   intent(in)    :: grid       ! model grid
     type(t_state),  intent(in)    :: state      ! state with which to calculate the divergence
     type(t_tend),   intent(inout) :: tend       ! state which will contain the tendencies
     type(t_diag),   intent(inout) :: diag       ! diagnostic quantities
+    type(t_irrev),  intent(inout) :: irrev      ! irreversible quantities
     type(t_config), intent(in)    :: config     ! configuration
     integer,        intent(in)    :: rk_step    ! RK substep index
     
@@ -63,11 +65,13 @@ module explicit_scalar_tendencies
         diag%u_placeholder,diag%v_placeholder)
         ! calculating the divergence of the potential temperature density flux
         call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
-        tend%rhotheta(:,:,:) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
+        tend%rhotheta(:,:,:) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) &
+        ! dissipative heating
+        + irrev%heating_diss(:,:,:)/(spec_heat_capacities_p_gas(0)*(grid%exner_bg(:,:,:)+state%exner_pert(:,:,:)))
       endif
       
-      ! explicit potential temperature density integration
-      ! --------------------------------------------------
+      ! explicit temperature density integration for condensates
+      ! --------------------------------------------------------
       if (j_constituent <= no_of_condensed_constituents .and. (.not. config%lassume_lte)) then
         call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v, &
         diag%u_placeholder,diag%v_placeholder)
