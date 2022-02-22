@@ -36,6 +36,7 @@ no_of_condensed_constituents=0
 /
 
 &surface
+lsoil=.false.
 /
 
 &io
