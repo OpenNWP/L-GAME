@@ -27,9 +27,9 @@ module pressure_gradient
   
     ! saving the old pressure gradient acceleration before it is overwritten with the new one
     if (.not. lfirst) then
-      diag%p_grad_acc_old_u(:,:,:) = -diag%p_grad_acc_neg_nl_u(:,:,:) - diag%p_grad_acc_neg_l_u(:,:,:)
-      diag%p_grad_acc_old_v(:,:,:) = -diag%p_grad_acc_neg_nl_v(:,:,:) - diag%p_grad_acc_neg_l_v(:,:,:)
-      diag%p_grad_acc_old_w(:,:,:) = -diag%p_grad_acc_neg_nl_w(:,:,:) - diag%p_grad_acc_neg_l_w(:,:,:)
+      diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - diag%p_grad_acc_neg_l_u
+      diag%p_grad_acc_old_v = -diag%p_grad_acc_neg_nl_v - diag%p_grad_acc_neg_l_v
+      diag%p_grad_acc_old_w = -diag%p_grad_acc_neg_nl_w - diag%p_grad_acc_neg_l_w
     endif
     
     ! the nonlinear pressure gradient term
@@ -37,7 +37,7 @@ module pressure_gradient
     call grad(state%exner_pert(2:nlins+1,2:ncols+1,:), &
     diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
     ! calculating the full potential temperature
-    diag%scalar_placeholder(:,:,:) = grid%theta_bg(:,:,:) + state%theta_pert(:,:,:)
+    diag%scalar_placeholder = grid%theta_bg + state%theta_pert
     ! multiplying the perturbed Exner pressure gradient by the full potential temperature
     call scalar_times_vector_for_gradient(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
     diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
@@ -49,9 +49,9 @@ module pressure_gradient
     
     ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
     if (lfirst) then
-      diag%p_grad_acc_old_u(:,:,:) = -diag%p_grad_acc_neg_nl_u(:,:,:) - diag%p_grad_acc_neg_l_u(:,:,:)
-      diag%p_grad_acc_old_v(:,:,:) = -diag%p_grad_acc_neg_nl_v(:,:,:) - diag%p_grad_acc_neg_l_v(:,:,:)
-      diag%p_grad_acc_old_w(:,:,:) = -diag%p_grad_acc_neg_nl_w(:,:,:) - diag%p_grad_acc_neg_l_w(:,:,:)
+      diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - diag%p_grad_acc_neg_l_u
+      diag%p_grad_acc_old_v = -diag%p_grad_acc_neg_nl_v - diag%p_grad_acc_neg_l_v
+      diag%p_grad_acc_old_w = -diag%p_grad_acc_neg_nl_w - diag%p_grad_acc_neg_l_w
     endif
   
   end subroutine manage_pressure_gradient
