@@ -85,6 +85,7 @@ program control
   allocate(grid%is_land(nlins,ncols))
   allocate(grid%z_soil_interface(nsoillays+1))
   allocate(grid%z_soil_center(nsoillays))
+  allocate(grid%t_const_soil(nlins,ncols))
   ! state at the old time step
   allocate(state_old%rho(nlins,ncols,nlays,no_of_constituents))
   allocate(state_old%rhotheta(nlins,ncols,nlays))
@@ -273,6 +274,7 @@ program control
   deallocate(grid%is_land)
   deallocate(grid%z_soil_interface)
   deallocate(grid%z_soil_center)
+  deallocate(grid%t_const_soil)
   ! state at the old time step
   deallocate(state_old%rho)
   deallocate(state_old%rhotheta)

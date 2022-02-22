@@ -9,7 +9,7 @@ module grid_generator
   use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,omega,p_0,gravity, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard, &
                                 scenario
-  use constants,          only: re, density_water
+  use constants,          only: re,density_water,T_0
   use surface_nml,        only: nsoillays
   use gradient_operators, only: grad_hor_cov_extended,grad
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
@@ -396,12 +396,15 @@ module grid_generator
     do ji=1,nlays
       do jk=1,ncols
 		
-		! for water roughness_length is set to some sea-typical value, will not be used anyway
-        grid%roughness_length(ji,jk) = 0.08
+        grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_scalar(ji))
 		
 		! albedo of water
         grid%sfc_albedo(ji,jk) = 0.06_wp
 		
+		! for water, the roughness_length is set to some sea-typical value, will not be used anyway
+        grid%roughness_length(ji,jk) = 0.08_wp
+		
+		! will also not be used
         grid%sfc_rho_c(ji,jk) = density_water*c_p_water
 		
 		! land
