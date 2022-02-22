@@ -9,7 +9,7 @@ module grid_generator
   use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,omega,p_0,gravity, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard, &
                                 scenario
-  use constants,          only: re,density_water,T_0
+  use constants,          only: re,density_water,T_0,M_PI
   use surface_nml,        only: nsoillays
   use gradient_operators, only: grad_hor_cov_extended,grad
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
@@ -125,7 +125,7 @@ module grid_generator
           do jk=1,ncols
             x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
             grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2)) &
-            *cos(4._wp*atan(1.d0)*x_coord/4000._wp)**2
+            *cos(M_PI*x_coord/4000._wp)**2
           enddo
         enddo
     
@@ -415,7 +415,7 @@ module grid_generator
           
           ! setting the surface albedo of land depending on the latitude
           ! ice
-          if (abs(360._wp/(2._wp*4._wp*atan(1.d0))*grid%lat_scalar(ji)) > 70._wp) then
+          if (abs(360._wp/(2._wp*M_PI)*grid%lat_scalar(ji)) > 70._wp) then
             grid%sfc_albedo(ji,jk) = 0.8_wp
           ! normal soil
           else

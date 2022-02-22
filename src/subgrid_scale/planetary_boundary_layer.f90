@@ -7,7 +7,7 @@ module planetary_boundary_layer
   
   use definitions, only: wp,t_state,t_grid,t_diag
   use run_nml,     only: PRANDTL_HEIGHT,gravity,nlins,ncols,nlays,dtime
-  use constants,   only: EPSILON_SECURITY
+  use constants,   only: EPSILON_SECURITY,M_PI
   use surface_nml, only: lsoil
   
   implicit none
@@ -137,7 +137,7 @@ module planetary_boundary_layer
     period = 0.729_wp*u10
 
     ! deep-water gravity waves
-    wavelength = gravity*period**2._wp/(2._wp*4._wp*atan(1.d0))
+    wavelength = gravity*period**2._wp/(2._wp*M_PI)
 
     ! final result
     roughness_length_from_u10_sea = 1200._wp*swh*swh/max(wavelength,EPSILON_SECURITY)**4.5_wp
@@ -289,7 +289,7 @@ module planetary_boundary_layer
       ! helper variable
       x = (1._wp - 15._wp*z_eff/l_local)**0.25_wp
 
-      psi_m = 2.0_wp*log((1._wp + x)/2._wp) + log((1._wp + x**2._wp)/2._wp) - 2._wp*atan(x) + 4._wp*atan(1.d0)/2._wp
+      psi_m = 2.0_wp*log((1._wp + x)/2._wp) + log((1._wp + x**2._wp)/2._wp) - 2._wp*atan(x) + M_PI/2._wp
     ! neutral and stable conditions
     else
       psi_m = -4.7_wp*z_eff/l_local

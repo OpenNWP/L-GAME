@@ -16,6 +16,7 @@ module constants
   real(wp) :: T_0 = 273.15_wp             ! 273.15 K
   real(wp) :: EPSILON_SECURITY = 1e-10_wp ! security constant
   real(wp) :: density_water = 1024._wp    ! typical density of water
+  real(wp) :: M_PI = 4._wp*atan(1._wp)    ! pi
 
 end module constants
 

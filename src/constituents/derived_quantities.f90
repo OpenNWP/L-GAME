@@ -9,7 +9,7 @@ module derived_quantities
   use dictionary,       only: mean_particle_masses_gas,spec_heat_capacities_p_gas,spec_heat_capacities_v_gas, &
                         specific_gas_constants
   use run_nml,          only: nlins,ncols,nlays
-  use constants,        only: k_B
+  use constants,        only: k_B,M_PI
   use constituents_nml, only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents,lassume_lte
   
   implicit none
@@ -219,9 +219,9 @@ module derived_quantities
     particle_mass = mean_particle_masses_gas(0)
     
     ! actual calculation
-    thermal_velocity = sqrt(8.0_wp*k_B*temperature/(4._wp*atan(1.d0)*particle_mass))
+    thermal_velocity = sqrt(8.0_wp*k_B*temperature/(M_PI*particle_mass))
     particle_density = density/particle_mass
-    cross_section = 4.0_wp*4._wp*atan(1.d0)*particle_radius**2.0_wp
+    cross_section = 4.0_wp*M_PI*particle_radius**2.0_wp
     mean_free_path = 1.0_wp/(sqrt(2.0_wp)*particle_density*cross_section)
     calc_diffusion_coeff = 1.0_wp/3.0_wp*thermal_velocity*mean_free_path
     
