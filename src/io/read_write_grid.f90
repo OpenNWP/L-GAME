@@ -3,7 +3,7 @@
 
 module set_grid
 
-  ! This module reads the grid from a file or writes the grid to a file.
+  ! This module reads the grid from a file or writes the grid to a file. This is useful for efficiency.
 
    
 

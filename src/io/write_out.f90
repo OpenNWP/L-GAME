@@ -23,7 +23,7 @@ module write_out
   
   subroutine write_output(state,diag,time_since_init_min,grid)
     ! reads out the state of the model atmosphere
-    ! at a single timestep to a netcdf file
+    ! at a single timestep to a NetCDF file
     
     type(t_state), intent(in)    :: state               ! state to write out
     type(t_diag),  intent(inout) :: diag                ! diagnostic quantities
@@ -31,7 +31,7 @@ module write_out
     type(t_grid),  intent(in)    :: grid                ! model grid
     
     ! local variables
-    integer                   :: ncid                      ! ID of the netcdf file
+    integer                   :: ncid                      ! ID of the NetCDF file
     integer                   :: x_dimid                   ! ID of the x dimension
     integer                   :: y_dimid                   ! ID of the y dimension
     integer                   :: z_dimid                   ! ID of the z dimension
@@ -50,7 +50,7 @@ module write_out
     integer                   :: ji,jk,jl                  ! line indices
     real(wp)                  :: upper_weight(nlins,ncols) ! interpolation weights
     
-    ! creating the netcdf file
+    ! creating the NetCDF file
     write(time_since_init_min_str,*) time_since_init_min
     time_since_init_min_str = adjustl(time_since_init_min_str)
     filename = trim(run_id) // "+" // trim(time_since_init_min_str) // "min.nc"
@@ -158,7 +158,7 @@ module write_out
     !$OMP END PARALLEL
     call nc_check(nf90_put_var(ncid,varid_w,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
     
-    ! closing the netcdf file
+    ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
     
   end subroutine write_output
