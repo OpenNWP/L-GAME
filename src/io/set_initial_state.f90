@@ -51,8 +51,8 @@ module set_initial_state
         ! This test case is the standard atmosphere.
       
         ! There is no horizontal wind in this case.
-        state%wind_u(:,:,:) = 0._wp
-        state%wind_v(:,:,:) = 0._wp
+        state%wind_u = 0._wp
+        state%wind_v = 0._wp
         
         !$OMP PARALLEL
         !$OMP DO PRIVATE(ji,jk,jl)
@@ -71,8 +71,8 @@ module set_initial_state
       
         ! Schär et al. (2001): A New Terrain-Following Vertical Coordinate Formulation for Atmospheric Prediction Models
         
-        state%wind_u(:,:,:) = 18.71_wp
-        state%wind_v(:,:,:) = 0._wp
+        state%wind_u = 18.71_wp
+        state%wind_v = 0._wp
        
         n_squared = (0.01871_wp)**2
         T_0 = 273.16_wp
@@ -214,17 +214,17 @@ module set_initial_state
     !$OMP END PARALLEL
     
     ! density
-    state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert(:,:,:))**(c_p/r_d) &
-    /(r_d*diag%scalar_placeholder(:,:,:))
+    state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert)**(c_p/r_d) &
+    /(r_d*diag%scalar_placeholder)
     ! potential temperature density
-    state%rhotheta(:,:,:) = state%rho(:,:,:,no_of_condensed_constituents+1)*state%theta_pert(:,:,:)
+    state%rhotheta = state%rho(:,:,:,no_of_condensed_constituents+1)*state%theta_pert
     
     ! substracting the background state
-    state%theta_pert(:,:,:) = state%theta_pert(:,:,:) - grid%theta_bg(:,:,:)
-    state%exner_pert(:,:,:) = state%exner_pert(:,:,:) - grid%exner_bg(:,:,:)
+    state%theta_pert = state%theta_pert - grid%theta_bg
+    state%exner_pert = state%exner_pert - grid%exner_bg
     
     ! vertical wind velocity is always set to zero
-    state%wind_w(:,:,:) = 0._wp
+    state%wind_w = 0._wp
     
   end subroutine unessential_init
   
