@@ -18,6 +18,7 @@ program control
   use write_out,                 only: write_output
   use manage_rkhevi,             only: rkhevi
   use linear_combine_two_states, only: lin_combination,interpolation_t
+  use bc_nml,                    only: bc_nml_setup
   
   implicit none
 
@@ -45,6 +46,9 @@ program control
   write(*,*) "Reading in surface namelist ..."
   call surface_nml_setup()
   write(*,*) "... surface namelist read."
+  write(*,*) "Reading in boundary conditions namelist ..."
+  call bc_nml_setup()
+  write(*,*) "... boundary conditions namelist read."
   
   ! allocating memory
   write(*,*) "Allocating memory ..."

@@ -39,6 +39,9 @@ no_of_condensed_constituents=0
 lsoil=.false.
 /
 
+&bc
+/
+
 &io
 dt_write_min=1
 /

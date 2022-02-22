@@ -3,6 +3,8 @@
 
 module diff_nml
   
+  ! In this namelist, the diffusion properties are configured.
+  
   use definitions, only: wp
   
   implicit none

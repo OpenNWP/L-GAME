@@ -33,6 +33,9 @@ lmom_diff_v=.false.
 &surface
 /
 
+&bc
+/
+
 &io
 dt_write_min=1
 /

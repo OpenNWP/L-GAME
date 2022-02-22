@@ -36,6 +36,9 @@ lmom_diff_v=.true.
 &surface
 /
 
+&bc
+/
+
 &io
 dt_write_min=60
 /
