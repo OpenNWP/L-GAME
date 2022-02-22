@@ -27,9 +27,12 @@ module run_nml
   real(wp)          :: impl_weight         ! implicit weight of the pressure gradient
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
   real(wp)          :: PRANDTL_HEIGHT      ! height of the Prandtl layer
+  real(wp)          :: lat_center          ! latitude of the center of the model domain
+  real(wp)          :: lon_center          ! longitude of the center of the model domain
+  real(wp)          :: x_dir_deg           ! direction of the x-axis of the model in degrees
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr,sigma, &
-  toa,scenario,llinear,run_id,lcorio,nlays_oro
+  toa,scenario,llinear,run_id,lcorio,nlays_oro,lat_center,lon_center,x_dir_deg
 
   contains
 
@@ -57,6 +60,9 @@ module run_nml
     impl_weight         = 0.75_wp
     partial_impl_weight = 0.5_wp
     PRANDTL_HEIGHT      = 100._wp
+    lat_center          = 0._wp
+    lon_center          = 0._wp
+    x_dir_deg           = 90._wp
     
     ! open and read Namelist file
     open(action="read", file="namelist.nml", newunit=fileunit)

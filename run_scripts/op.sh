@@ -4,27 +4,30 @@
 # Github repository: https://github.com/OpenNWP/L-GAME
 
 lgame_home_dir=~/code/L-GAME
-run_id=op
+run_id=${BASH_ARGV[10]}
 export OMP_NUM_THREADS=2
 
 cat > namelist.nml << EOF
 
 &run
 run_id="$run_id"
-nlins=51
-ncols=51
-nlays=40
-nlays_oro=30
-dy=48000
-dx=52000
-run_span_hr=60
+nlins=${BASH_ARGV[9]}
+ncols=${BASH_ARGV[8]}
+nlays=${BASH_ARGV[7]}
+nlays_oro=${BASH_ARGV[6]}
+dy=${BASH_ARGV[5]}
+dx=${BASH_ARGV[4]}
+run_span_hr=${BASH_ARGV[3]}
 scenario="standard"
+lat_center=${BASH_ARGV[2]}
+lon_center=${BASH_ARGV[1]}
+x_dir_deg=${BASH_ARGV[0]}
 /
 
 &diff
 lklemp=.true.
-lmom_diff_h=.false.
-lmom_diff_v=.false.
+lmom_diff_h=.true.
+lmom_diff_v=.true.
 /
 
 &constituents
