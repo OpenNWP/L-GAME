@@ -94,9 +94,9 @@ module column_solvers
           *(t_gas_lowest_layer_new - state_new%temperature_soil(ji,jk,1)))/diag%scalar_flux_resistance(ji,jk)
 
           ! contribution of sensible heat to rhotheta
-          state_new%rhotheta(ji,jk,jl) = state_new%rhotheta(ji,jk,jl) &
-          - dtime*grid%area_z(ji,jk,jl)*diag%power_flux_density_sensible(ji,jk) &
-          /((grid%exner_bg(ji,jk,jl)+state_new%exner_pert(ji,jk,jl))*c_p)/grid%volume(ji,jk,jl)
+          state_new%rhotheta(ji,jk,nlays) = state_new%rhotheta(ji,jk,nlays) &
+          - dtime*grid%area_z(ji,jk,nlays+1)*diag%power_flux_density_sensible(ji,jk) &
+          /((grid%exner_bg(ji,jk,nlays)+state_new%exner_pert(ji,jk,nlays))*c_p)/grid%volume(ji,jk,nlays)
           
         enddo
       enddo
