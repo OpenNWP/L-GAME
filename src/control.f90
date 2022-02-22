@@ -109,8 +109,8 @@ program control
   ! state containing the tendency
   allocate(tend%rho(nlins,ncols,nlays,no_of_constituents))
   allocate(tend%rhotheta(nlins,ncols,nlays))
-  allocate(tend%wind_u(nlins,ncols-1,nlays))
-  allocate(tend%wind_v(nlins-1,ncols,nlays))
+  allocate(tend%wind_u(nlins,ncols+1,nlays))
+  allocate(tend%wind_v(nlins+1,ncols,nlays))
   allocate(tend%wind_w(nlins,ncols,nlays+1))
   allocate(tend%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
   ! state to be written out
