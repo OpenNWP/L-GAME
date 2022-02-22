@@ -15,7 +15,6 @@ module definitions
   public :: t_diag
   public :: t_tend
   public :: t_irrev
-  public :: t_config
   
   ! setting the floating point precision
   ! single precision
@@ -132,6 +131,13 @@ module definitions
     real(wp), allocatable :: z_eta_x(:,:,:)                 ! relative vorticity in x-direction
     real(wp), allocatable :: z_eta_y(:,:,:)                 ! relative vorticity in y-direction
     real(wp), allocatable :: z_eta_z(:,:,:)                 ! relative vorticity in z-direction
+    real(wp), allocatable :: scalar_flux_resistance(:,:)    ! surface flux resistance acting on scalar quantities
+    real(wp), allocatable :: monin_obukhov_length(:,:)      ! Monin-Obukhov length
+    real(wp), allocatable :: power_flux_density_sensible(:,:) ! power flux density acting on the surface due to sensible heat
+    real(wp), allocatable :: power_flux_density_latent(:,:) ! power flux density acting on the surface due to phase transitions
+    real(wp), allocatable :: sfc_sw_in(:,:)                 ! shortwave radiation in the surface
+    real(wp), allocatable :: sfc_lw_out(:,:)                ! longwave radiation out of the surface
+    real(wp), allocatable :: roughness_velocity(:,:)        ! roughness velocity
   
   end type t_diag
   
@@ -147,13 +153,6 @@ module definitions
     real(wp), allocatable :: heat_source_rates(:,:,:,:)     ! heat source rates due to phase transitions and cloud physics
   
   end type t_irrev
-  
-  type t_config
-  
-    ! type containing information on the configuration of the model
-    logical               :: lassume_lte                    ! switch for the local thermodynamic equilibrium option
-    
-  end type t_config
   
 end module definitions
 

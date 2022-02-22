@@ -6,9 +6,10 @@
 module grid_generator
 
   use definitions,        only: wp,t_grid
-  use run_nml,            only: nlins,ncols,nlays,nsoillays,dy,dx,toa,nlays_oro,sigma,re,omega,p_0,gravity, &
+  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,re,omega,p_0,gravity, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv,p_0_standard, &
                                 scenario
+  use surface_nml,        only: nsoillays
   use gradient_operators, only: grad_hor_cov_extended,grad
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
 
@@ -66,12 +67,12 @@ module grid_generator
     ! setting the dy of the model grid
     dlat = dy/re
     dlon = dx/re
-    lat_left_lower = -(nlins+2-1)/2*dlat
-    lon_left_lower = -(ncols+2-1)/2*dlon
-    do ji=1,nlins+2
+    lat_left_lower = -(nlins-1)/2*dlat
+    lon_left_lower = -(ncols-1)/2*dlon
+    do ji=1,nlins
       grid%lat_scalar(ji) = lat_left_lower + dlat*(ji - 1)
     enddo
-    do ji=1,ncols+2
+    do ji=1,ncols
       grid%lon_scalar(ji) = lon_left_lower + dlon*(ji - 1)
     enddo
     
@@ -97,8 +98,8 @@ module grid_generator
     select case (trim(scenario))
     
       case("standard")
-        do ji=1,nlins+2
-          do jk=1,ncols+2
+        do ji=1,nlins
+          do jk=1,ncols
             grid%z_geo_w(ji,jk,nlays+1) = 0._wp
           enddo
         enddo
@@ -106,8 +107,8 @@ module grid_generator
       case("resting_mountain")
         height_mountain = 1000._wp
         sigma_mountain = 7000._wp
-        do ji=1,nlins+2
-          do jk=1,ncols+2
+        do ji=1,nlins
+          do jk=1,ncols
             x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
             grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))
           enddo
@@ -116,8 +117,8 @@ module grid_generator
       case("schaer")
         height_mountain = 250._wp
         sigma_mountain = 5000._wp/sqrt(2._wp)
-        do ji=1,nlins+2
-          do jk=1,ncols+2
+        do ji=1,nlins
+          do jk=1,ncols
             x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
             grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2)) &
             *cos(4._wp*atan(1.d0)*x_coord/4000._wp)**2
@@ -128,8 +129,8 @@ module grid_generator
   
     ! calculating the vertical positions of the scalar points
     ! the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
-    do ji=1,nlins+2
-      do jk=1,ncols+2
+    do ji=1,nlins
+      do jk=1,ncols
         ! filling up z_vertical_vector_pre
         do jl=1,nlays+1
           z_rel = 1._wp-(jl-1._wp)/nlays ! z/toa
@@ -162,7 +163,7 @@ module grid_generator
     enddo
     
     ! setting dx
-    do ji=1,nlins+2
+    do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays
           grid%z_geo_u(ji,jk,jl) = 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji,jk+1,jl))
@@ -173,7 +174,7 @@ module grid_generator
     
     ! setting dy
     do ji=1,nlins+1
-      do jk=1,ncols+2
+      do jk=1,ncols
         do jl=1,nlays
           grid%z_geo_v(ji,jk,jl) = 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji+1,jk,jl))
           grid%dy(ji,jk,jl) = dy*(re + grid%z_geo_v(ji,jk,jl))/re
@@ -185,8 +186,8 @@ module grid_generator
     call grad_hor_cov_extended(grid%z_geo_scal,grid%slope_x,grid%slope_y,grid)
     
     ! setting the z coordinates of the vertical vector points
-    do ji=1,nlins+2
-      do jk=1,ncols+2
+    do ji=1,nlins
+      do jk=1,ncols
         do jl=1,nlays
           if (jl == 1) then
             grid%z_geo_w(ji,jk,jl) = toa
@@ -198,8 +199,8 @@ module grid_generator
     enddo
     
     ! setting the vertical distances between the scalar data points
-    do ji=1,nlins+2
-      do jk=1,ncols+2
+    do ji=1,nlins
+      do jk=1,ncols
         do jl=1,nlays+1
           if (jl == 1) then
             grid%dz(ji,jk,jl) = 2._wp*(toa - grid%z_geo_scal(ji,jk,jl))
@@ -398,8 +399,8 @@ module grid_generator
     real(wp)                    :: b,c      ! abbreviations needed for the hydrostatic initialization routine
     
     ! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
-    do ji=1,nlins+2
-      do jk=1,ncols+2
+    do ji=1,nlins
+      do jk=1,ncols
         ! integrating from bottom to top
         do jl=nlays,1,-1
           temperature = bg_temp(grid%z_geo_scal(ji,jk,jl))

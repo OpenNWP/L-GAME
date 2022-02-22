@@ -5,8 +5,9 @@ module tke
   
   ! This module computes everything related to the turbulent kinetic energy (TKE).
   
-  use definitions, only: wp,t_irrev
-  use run_nml,     only: nlins,ncols,nlays,dtime
+  use definitions,        only: wp,t_state,t_irrev
+  use run_nml,            only: nlins,ncols,nlays,dtime
+  use derived_quantities, only: density_gas
   
   implicit none
   
@@ -16,10 +17,11 @@ module tke
   
   contains
   
-  subroutine tke_update(irrev)
+  subroutine tke_update(state,irrev)
   
     ! This subroutine updates the specific turbulent kinetic energy (TKE), unit: J/kg.
   
+    type(t_state), intent(in)    :: state    ! state
     type(t_irrev), intent(inout) :: irrev    ! irreversible quantities
     ! local variables
     integer                      :: ji,jk,jl ! loop variables
@@ -29,7 +31,10 @@ module tke
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          irrev%tke(ji,jk,jl) = irrev%tke(ji,jk,jl) + dtime
+          irrev%tke(ji,jk,jl) = irrev%tke(ji,jk,jl) + dtime*( &
+          ! production of TKE through generation of resolved energy
+          irrev%heating_diss(ji+1,jk+1,jl)/density_gas(state,ji,jk,jl) &
+          )
           
           ! clipping negative values
           

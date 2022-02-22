@@ -5,11 +5,11 @@ module derived_quantities
 
   ! In this module, more complex thermodynamic quantities are being calculated.
   
-  use definitions,      only: wp,t_grid,t_state,t_diag,t_config
+  use definitions,      only: wp,t_grid,t_state,t_diag
   use dictionary,       only: mean_particle_masses_gas,spec_heat_capacities_p_gas,spec_heat_capacities_v_gas, &
                         specific_gas_constants
   use run_nml,          only: nlins,ncols,nlays,K_B
-  use constituents_nml, only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
+  use constituents_nml, only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents,lassume_lte
   
   implicit none
   
@@ -25,22 +25,22 @@ module derived_quantities
   
   contains
 
-  subroutine temperature_diagnostics(state,grid,diag)
+  subroutine temperature_diagnostics(state,diag,grid)
     
     ! This function diagnoses the temperature of the gas phase.
     
     ! input arguments
     type(t_state), intent(in)    :: state
-    type(t_grid),  intent(in)    :: grid
     type(t_diag),  intent(inout) :: diag
+    type(t_grid),  intent(in)    :: grid
     
     ! local variables
     integer                      :: ji,jk,jl
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
-    do ji=1,nlins+2
-      do jk=1,ncols+2
+    do ji=1,nlins
+      do jk=1,ncols
         do jl=1,nlays
           diag%temperature_gas(ji,jk,jl) = (grid%theta_bg(ji,jk,jl) + state%theta_pert(ji,jk,jl)) &
           *(grid%exner_bg(ji,jk,jl) + state%exner_pert(ji,jk,jl))
@@ -52,12 +52,11 @@ module derived_quantities
     
   end subroutine temperature_diagnostics
 
-  function spec_heat_cap_diagnostics_v(state,ji,jk,jl,config)
+  function spec_heat_cap_diagnostics_v(state,ji,jk,jl)
   
     ! input arguments
     type(t_state), intent(in)  :: state
     integer, intent(in)        :: ji,jk,jl
-    type(t_config), intent(in) :: config
     
     ! output
     real(wp)                   :: spec_heat_cap_diagnostics_v
@@ -68,12 +67,12 @@ module derived_quantities
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
-    if (.not. config%lassume_lte) then
+    if (.not. lassume_lte) then
       no_of_relevant_constituents = no_of_gaseous_constituents
       rho_g = density_gas(state,ji,jk,jl)
     endif
     
-    if (config%lassume_lte) then
+    if (lassume_lte) then
       no_of_relevant_constituents = 1
       rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
     endif
@@ -86,12 +85,11 @@ module derived_quantities
     
   end function spec_heat_cap_diagnostics_v
 
-  function spec_heat_cap_diagnostics_p(state,ji,jk,jl,config)
+  function spec_heat_cap_diagnostics_p(state,ji,jk,jl)
   
     ! input arguments
     type(t_state), intent(in)  :: state
     integer, intent(in)        :: ji,jk,jl
-    type(t_config), intent(in) :: config
     
     ! output
     real(wp)                   :: spec_heat_cap_diagnostics_p
@@ -104,12 +102,12 @@ module derived_quantities
     rho_g = 0._wp
     no_of_relevant_constituents = 0
     
-    if (.not. config%lassume_lte) then
+    if (.not. lassume_lte) then
       no_of_relevant_constituents = no_of_gaseous_constituents
       rho_g = density_gas(state,ji,jk,jl)
     endif
     
-    if (config%lassume_lte) then
+    if (lassume_lte) then
       no_of_relevant_constituents = 1
       rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
     endif
@@ -122,12 +120,11 @@ module derived_quantities
     
   end function spec_heat_cap_diagnostics_p
     
-  function gas_constant_diagnostics(state,ji,jk,jl,config)
+  function gas_constant_diagnostics(state,ji,jk,jl)
   
     ! input arguments
     type(t_state), intent(in)  :: state
     integer, intent(in)        :: ji,jk,jl
-    type(t_config), intent(in) :: config
     
     ! output
     real(wp)                   :: gas_constant_diagnostics
@@ -140,12 +137,12 @@ module derived_quantities
     rho_g = 0._wp
     no_of_relevant_constituents = 0
     
-    if (.not. config%lassume_lte) then
+    if (.not. lassume_lte) then
       no_of_relevant_constituents = no_of_gaseous_constituents
       rho_g = density_gas(state,ji,jk,jl)
     endif
     
-    if (config%lassume_lte) then
+    if (lassume_lte) then
       no_of_relevant_constituents = 1
       rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
     endif

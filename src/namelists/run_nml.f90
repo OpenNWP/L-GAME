@@ -10,7 +10,6 @@ module run_nml
   integer           :: nlins               ! number of lines
   integer           :: ncols               ! number of columns
   integer           :: nlays               ! number of layers
-  integer           :: nsoillays           ! number of soil layers
   integer           :: nlays_oro           ! number of levels following the orography
   real(wp)          :: dy                  ! mesh size in y direction at sea level
   real(wp)          :: dx                  ! mesh size in x direction at sea level at the equator
@@ -59,7 +58,6 @@ module run_nml
     nlins               = 51
     ncols               = 51
     nlays               = 40
-    nsoillays           = 5
     nlays_oro           = 30
     dy                  = 48000._wp
     dx                  = 52000._wp

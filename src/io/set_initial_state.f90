@@ -24,21 +24,21 @@ module set_initial_state
   
   subroutine ideal(state,diag,grid)
   
-    ! sets the initial state of the model calculation i terms if analytic functions
+    ! sets the initial state of the model calculation in terms of analytic functions
     
     type(t_state), intent(inout) :: state ! state to write the initial state to
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    integer                      :: ji,jk,jl                           ! loop indices
-    real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
-    real(wp)                     :: n_squared                          ! Brunt-Väisälä frequency for the Schär test case
-    real(wp)                     :: gravity                            ! gravity acceleration
-    real(wp)                     :: delta_z                            ! delta z
-    real(wp)                     :: T_0                                ! MSLP temperature variable
-    real(wp)                     :: r_d                                ! specific gas constant of dry air
-    real(wp)                     :: c_p                                ! specific heat capacity at const. pressure of dry air
+    integer                      :: ji,jk,jl                       ! loop indices
+    real(wp)                     :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
+    real(wp)                     :: n_squared                      ! Brunt-Väisälä frequency for the Schär test case
+    real(wp)                     :: gravity                        ! gravity acceleration
+    real(wp)                     :: delta_z                        ! delta z
+    real(wp)                     :: T_0                            ! MSLP temperature variable
+    real(wp)                     :: r_d                            ! specific gas constant of dry air
+    real(wp)                     :: c_p                            ! specific heat capacity at const. pressure of dry air
     
     r_d = specific_gas_constants(0)
     c_p = spec_heat_capacities_p_gas(0)
@@ -49,13 +49,14 @@ module set_initial_state
       
         ! This test case is the standard atmosphere.
       
+        ! There is no horizontal wind in this case.
         state%wind_u(:,:,:) = 0._wp
         state%wind_v(:,:,:) = 0._wp
         
         !$OMP PARALLEL
         !$OMP DO PRIVATE(ji,jk,jl)
-        do ji=1,nlins+2
-          do jk=1,ncols+2
+        do ji=1,nlins
+          do jk=1,ncols
             do jl=1,nlays
               diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_geo_scal(ji,jk,jl))
             enddo
@@ -77,8 +78,8 @@ module set_initial_state
        
         !$OMP PARALLEL
         !$OMP DO PRIVATE(ji,jk,jl,delta_z,gravity)
-        do ji=1,nlins+2
-          do jk=1,ncols+2
+        do ji=1,nlins
+          do jk=1,ncols
             ! potential temperature in the lowest layer
             ! calculating delta_z
             delta_z = grid%z_geo_scal(ji,jk,nlays-1)-grid%z_geo_scal(ji,jk,nlays)
@@ -155,7 +156,7 @@ module set_initial_state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    real(wp)                     :: pres_lowest_layer(nlins+2,ncols+2) ! pressure in the lowest layer
+    real(wp)                     :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
     
     call unessential_init(state,diag,grid,pres_lowest_layer)
     
@@ -185,8 +186,8 @@ module set_initial_state
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,b,c,temperature,pressure)
-    do ji=1,nlins+2
-      do jk=1,ncols+2  
+    do ji=1,nlins
+      do jk=1,ncols  
         ! integrating from bottom to top
         do jl=nlays,1,-1
           temperature = diag%scalar_placeholder(ji,jk,jl)
@@ -221,12 +222,15 @@ module set_initial_state
     state%theta_pert(:,:,:) = state%theta_pert(:,:,:) - grid%theta_bg(:,:,:)
     state%exner_pert(:,:,:) = state%exner_pert(:,:,:) - grid%exner_bg(:,:,:)
     
-    ! vertical wind velocity
+    ! vertical wind velocity is always set to zero
     state%wind_w(:,:,:) = 0._wp
     
   end subroutine unessential_init
   
   subroutine nc_check(i_status)
+  
+    ! This checks wether a NetCDF function threw an error.
+  
     integer, intent(in) :: i_status
 
     if(i_status /= nf90_noerr) then 

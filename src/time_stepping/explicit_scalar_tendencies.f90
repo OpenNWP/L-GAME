@@ -5,7 +5,7 @@ module explicit_scalar_tendencies
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
-  use definitions,          only: wp,t_grid,t_state,t_diag,t_config,t_irrev,t_tend
+  use definitions,          only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
   use multiplications,      only: scalar_times_vector_h
   use divergence_operators, only: divv_h
   use run_nml,              only: nlins,ncols
@@ -22,14 +22,13 @@ module explicit_scalar_tendencies
   
   contains
   
-  subroutine expl_scalar_tend(grid,state,tend,diag,irrev,config,rk_step)
+  subroutine expl_scalar_tend(grid,state,tend,diag,irrev,rk_step)
   
     type(t_grid),   intent(in)    :: grid       ! model grid
     type(t_state),  intent(in)    :: state      ! state with which to calculate the divergence
     type(t_tend),   intent(inout) :: tend       ! state which will contain the tendencies
     type(t_diag),   intent(inout) :: diag       ! diagnostic quantities
     type(t_irrev),  intent(inout) :: irrev      ! irreversible quantities
-    type(t_config), intent(in)    :: config     ! configuration
     integer,        intent(in)    :: rk_step    ! RK substep index
     
     ! local variables
@@ -72,7 +71,7 @@ module explicit_scalar_tendencies
       
       ! explicit temperature density integration for condensates
       ! --------------------------------------------------------
-      if (j_constituent <= no_of_condensed_constituents .and. (.not. config%lassume_lte)) then
+      if (j_constituent <= no_of_condensed_constituents .and. (.not. lassume_lte)) then
         call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v, &
         diag%u_placeholder,diag%v_placeholder)
         call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
@@ -84,18 +83,19 @@ module explicit_scalar_tendencies
         
   end subroutine
   
-  subroutine moisturizer(state,irrev,dtime)
+  subroutine moisturizer(state,diag,irrev,grid)
   
     ! This subroutine manages the calculation of the phase transition rates.
     
     type(t_state), intent(inout) :: state
+    type(t_diag), intent(in)     :: diag
     type(t_irrev), intent(inout) :: irrev
-    real(wp),      intent(in)    :: dtime
+    type(t_grid), intent(in)     :: grid
       
     if (no_of_constituents > 1) then
     
       ! calculating the source rates
-      call calc_h2otracers_source_rates()
+      call calc_h2otracers_source_rates(state,diag,irrev,grid)
       
       ! condensates
       state%rho(:,:,:,1:no_of_condensed_constituents) = state%rho(:,:,:,1:no_of_condensed_constituents) &

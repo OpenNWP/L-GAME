@@ -3,7 +3,7 @@
 
 module constituents_nml
 
-  use definitions, only: wp,t_config
+  use definitions, only: wp
 
   implicit none
   
@@ -18,10 +18,7 @@ module constituents_nml
 
   contains
 
-  subroutine constituents_nml_setup(config)
-  
-    ! input variables
-    type(t_config) :: config
+  subroutine constituents_nml_setup()
   
     ! local variables
     integer        :: fileunit
@@ -38,9 +35,6 @@ module constituents_nml
     close(fileunit)
     
     no_of_constituents = no_of_condensed_constituents + no_of_gaseous_constituents
-    
-    ! copying the lassume_lte variable to the config type
-    config%lassume_lte = lassume_lte
     
   end subroutine constituents_nml_setup
   

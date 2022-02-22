@@ -15,7 +15,6 @@ module diff_nml
   real(wp) :: diff_h_smag_div  ! horizontal diffusion Smagorinsky factor acting on divergent movements
   real(wp) :: diff_h_smag_rot  ! horizontal diffusion Smagorinsky factor acting on vortical movements
   
-  
   namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v,diff_h_smag_div,diff_h_smag_rot
   
   contains

@@ -11,7 +11,8 @@ program control
   use io_nml,                    only: io_nml_setup,dt_write
   use constituents_nml,          only: constituents_nml_setup,no_of_condensed_constituents,no_of_constituents
   use diff_nml,                  only: diff_nml_setup
-  use definitions,               only: t_grid,t_state,wp,t_diag,t_config,t_tend,t_irrev
+  use surface_nml,               only: surface_nml_setup
+  use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_irrev
   use grid_generator,            only: grid_setup,bg_setup
   use set_initial_state,         only: restart,ideal
   use write_out,                 only: write_output
@@ -25,7 +26,6 @@ program control
   type(t_grid)   :: grid
   type(t_state)  :: state_old, state_new, state_write
   type(t_diag)   :: diag
-  type(t_config) :: config
   type(t_tend)   :: tend
   type(t_irrev)  :: irrev
 
@@ -40,22 +40,25 @@ program control
   call io_nml_setup
   write(*,*) "... I/O namelist read."
   write(*,*) "Reading in constituents namelist ..."
-  call constituents_nml_setup(config)
+  call constituents_nml_setup()
   write(*,*) "... constituents namelist read."
+  write(*,*) "Reading in surface namelist ..."
+  call surface_nml_setup()
+  write(*,*) "... surface namelist read."
   
   ! allocating memory
   write(*,*) "Allocating memory ..."
-  allocate(grid%lat_scalar(nlins+2))
-  allocate(grid%lon_scalar(ncols+2))
-  allocate(grid%z_geo_scal(nlins+2,ncols+2,nlays))
-  allocate(grid%dx(nlins+2,ncols+1,nlays))
-  allocate(grid%dy(nlins+1,ncols+2,nlays))
-  allocate(grid%dz(nlins+2,ncols+2,nlays+1))
-  allocate(grid%z_geo_u(nlins+2,ncols+1,nlays))
-  allocate(grid%z_geo_v(nlins+1,ncols+2,nlays))
-  allocate(grid%z_geo_w(nlins+2,ncols+2,nlays+1))
-  allocate(grid%slope_x(nlins+2,ncols+1,nlays))
-  allocate(grid%slope_y(nlins+1,ncols+2,nlays))
+  allocate(grid%lat_scalar(nlins))
+  allocate(grid%lon_scalar(ncols))
+  allocate(grid%z_geo_scal(nlins,ncols,nlays))
+  allocate(grid%dx(nlins,ncols+1,nlays))
+  allocate(grid%dy(nlins+1,ncols,nlays))
+  allocate(grid%dz(nlins,ncols,nlays+1))
+  allocate(grid%z_geo_u(nlins,ncols+1,nlays))
+  allocate(grid%z_geo_v(nlins+1,ncols,nlays))
+  allocate(grid%z_geo_w(nlins,ncols,nlays+1))
+  allocate(grid%slope_x(nlins,ncols+1,nlays))
+  allocate(grid%slope_y(nlins+1,ncols,nlays))
   allocate(grid%volume(nlins,ncols,nlays))
   allocate(grid%area_x(nlins,ncols+1,nlays))
   allocate(grid%area_y(nlins+1,ncols,nlays))
@@ -70,8 +73,8 @@ program control
   allocate(grid%fvec_z(nlins+1,ncols+1))
   allocate(grid%trsk_weights_u(nlins,ncols-1,6))
   allocate(grid%trsk_weights_v(nlins-1,ncols,4))
-  allocate(grid%theta_bg(nlins+2,ncols+2,nlays))
-  allocate(grid%exner_bg(nlins+2,ncols+2,nlays))
+  allocate(grid%theta_bg(nlins,ncols,nlays))
+  allocate(grid%exner_bg(nlins,ncols,nlays))
   allocate(grid%exner_bg_grad_u(nlins,ncols-1,nlays))
   allocate(grid%exner_bg_grad_v(nlins-1,ncols,nlays))
   allocate(grid%exner_bg_grad_w(nlins,ncols,nlays+1))
@@ -83,24 +86,24 @@ program control
   allocate(grid%z_soil_interface(nsoillays+1))
   allocate(grid%z_soil_center(nsoillays))
   ! state at the old time step
-  allocate(state_old%rho(nlins+2,ncols+2,nlays,no_of_constituents))
-  allocate(state_old%rhotheta(nlins+2,ncols+2,nlays))
-  allocate(state_old%theta_pert(nlins+2,ncols+2,nlays))
-  allocate(state_old%exner_pert(nlins+2,ncols+2,nlays))
-  allocate(state_old%condensed_rho_t(nlins+2,ncols+2,nlays,no_of_condensed_constituents))
-  allocate(state_old%wind_u(nlins+2,ncols+1,nlays))
-  allocate(state_old%wind_v(nlins+1,ncols+2,nlays))
-  allocate(state_old%wind_w(nlins+2,ncols+2,nlays+1))
+  allocate(state_old%rho(nlins,ncols,nlays,no_of_constituents))
+  allocate(state_old%rhotheta(nlins,ncols,nlays))
+  allocate(state_old%theta_pert(nlins,ncols,nlays))
+  allocate(state_old%exner_pert(nlins,ncols,nlays))
+  allocate(state_old%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
+  allocate(state_old%wind_u(nlins,ncols+1,nlays))
+  allocate(state_old%wind_v(nlins+1,ncols,nlays))
+  allocate(state_old%wind_w(nlins,ncols,nlays+1))
   allocate(state_old%temperature_soil(nlins,ncols,nsoillays))
   ! state at the new time step
-  allocate(state_new%rho(nlins+2,ncols+2,nlays,no_of_constituents))
-  allocate(state_new%rhotheta(nlins+2,ncols+2,nlays))
-  allocate(state_new%theta_pert(nlins+2,ncols+2,nlays))
-  allocate(state_new%exner_pert(nlins+2,ncols+2,nlays))
-  allocate(state_new%condensed_rho_t(nlins+2,ncols+2,nlays,no_of_condensed_constituents))
-  allocate(state_new%wind_u(nlins+2,ncols+1,nlays))
-  allocate(state_new%wind_v(nlins+1,ncols+2,nlays))
-  allocate(state_new%wind_w(nlins+2,ncols+2,nlays+1))
+  allocate(state_new%rho(nlins,ncols,nlays,no_of_constituents))
+  allocate(state_new%rhotheta(nlins,ncols,nlays))
+  allocate(state_new%theta_pert(nlins,ncols,nlays))
+  allocate(state_new%exner_pert(nlins,ncols,nlays))
+  allocate(state_new%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
+  allocate(state_new%wind_u(nlins,ncols+1,nlays))
+  allocate(state_new%wind_v(nlins+1,ncols,nlays))
+  allocate(state_new%wind_w(nlins,ncols,nlays+1))
   allocate(state_new%temperature_soil(nlins,ncols,nsoillays))
   ! state containing the tendency
   allocate(tend%rho(nlins,ncols,nlays,no_of_constituents))
@@ -110,14 +113,14 @@ program control
   allocate(tend%wind_w(nlins,ncols,nlays+1))
   allocate(tend%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
   ! state to be written out
-  allocate(state_write%rho(nlins+2,ncols+2,nlays,no_of_constituents))
-  allocate(state_write%rhotheta(nlins+2,ncols+2,nlays))
-  allocate(state_write%theta_pert(nlins+2,ncols+2,nlays))
-  allocate(state_write%exner_pert(nlins+2,ncols+2,nlays))
-  allocate(state_write%condensed_rho_t(nlins+2,ncols+2,nlays,no_of_condensed_constituents))
-  allocate(state_write%wind_u(nlins+2,ncols+1,nlays))
-  allocate(state_write%wind_v(nlins+1,ncols+2,nlays))
-  allocate(state_write%wind_w(nlins+2,ncols+2,nlays+1))
+  allocate(state_write%rho(nlins,ncols,nlays,no_of_constituents))
+  allocate(state_write%rhotheta(nlins,ncols,nlays))
+  allocate(state_write%theta_pert(nlins,ncols,nlays))
+  allocate(state_write%exner_pert(nlins,ncols,nlays))
+  allocate(state_write%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
+  allocate(state_write%wind_u(nlins,ncols+1,nlays))
+  allocate(state_write%wind_v(nlins+1,ncols,nlays))
+  allocate(state_write%wind_w(nlins,ncols,nlays+1))
   allocate(state_write%temperature_soil(nlins,ncols,nsoillays))
   ! type containing diagnostic quantities
   allocate(diag%e_kin(nlins,ncols,nlays))
@@ -136,24 +139,31 @@ program control
   allocate(diag%pot_vort_tend_x(nlins,ncols-1,nlays))
   allocate(diag%pot_vort_tend_y(nlins-1,ncols,nlays))
   allocate(diag%pot_vort_tend_z(nlins,ncols,nlays+1))
-  allocate(diag%scalar_placeholder(nlins+2,ncols+2,nlays))
-  allocate(diag%temperature_gas(nlins+2,ncols+2,nlays))
-  allocate(diag%u_placeholder(nlins+2,ncols+1,nlays))
-  allocate(diag%v_placeholder(nlins+1,ncols+2,nlays))
-  allocate(diag%w_placeholder(nlins+2,ncols+2,nlays+1))
+  allocate(diag%scalar_placeholder(nlins,ncols,nlays))
+  allocate(diag%temperature_gas(nlins,ncols,nlays))
+  allocate(diag%u_placeholder(nlins,ncols+1,nlays))
+  allocate(diag%v_placeholder(nlins+1,ncols,nlays))
+  allocate(diag%w_placeholder(nlins,ncols,nlays+1))
   allocate(diag%u_10(nlins,ncols))
   allocate(diag%v_10(nlins,ncols))
   allocate(diag%mslp(nlins,ncols))
   allocate(diag%t_2(nlins,ncols))
   allocate(diag%z_eta_x(nlins+1,ncols,nlays+1))
   allocate(diag%z_eta_y(nlins,ncols+1,nlays+1))
-  allocate(diag%z_eta_z(nlins+1,ncols+1,nlays))
+  allocate(diag%z_eta_z(nlins+1,ncols+1,nlays))monin_obukhov_length
+  allocate(diag%scalar_flux_resistance(nlins,ncols))
+  allocate(diag%monin_obukhov_length(nlins,ncols))
+  allocate(diag%power_flux_density_sensible(nlins,ncols))
+  allocate(diag%power_flux_density_latent(nlins,ncols))
+  allocate(diag%sfc_sw_in(nlins,ncols))
+  allocate(diag%sfc_lw_out(nlins,ncols))
+  allocate(grid%roughness_velocity(nlins,ncols))
   ! type containing irreversible quantities
   allocate(irrev%tke(nlins,ncols,nlays))
   allocate(irrev%mom_diff_tend_x(nlins,ncols-1,nlays))
   allocate(irrev%mom_diff_tend_y(nlins-1,ncols,nlays))
   allocate(irrev%mom_diff_tend_z(nlins,ncols,nlays+1))
-  allocate(irrev%heating_diss(nlins+2,ncols+2,nlays))
+  allocate(irrev%heating_diss(nlins,ncols,nlays))
   allocate(irrev%mass_source_rates(nlins,ncols,nlays,no_of_condensed_constituents+1))
   allocate(irrev%heat_source_rates(nlins,ncols,nlays,no_of_condensed_constituents))
   write(*,*) "... finished."
@@ -206,7 +216,7 @@ program control
     state_old = state_new
       
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,grid,diag,config,irrev,time_step_counter)
+    call rkhevi(state_old,state_new,tend,grid,diag,irrev,time_step_counter)
     
     ! managing the calls to the output routine
     if (t_0 + dtime >= t_write) then
@@ -329,6 +339,13 @@ program control
   deallocate(diag%z_eta_x)
   deallocate(diag%z_eta_y)
   deallocate(diag%z_eta_z)
+  deallocate(diag%scalar_flux_resistance)
+  deallocate(diag%monin_obukhov_length)
+  deallocate(diag%power_flux_density_sensible)
+  deallocate(diag%power_flux_density_latent)
+  deallocate(diag%sfc_sw_in)
+  deallocate(diag%sfc_lw_out)
+  deallocate(grid%roughness_velocity)
   ! type containing irreversible quantities
   deallocate(irrev%tke)
   deallocate(irrev%mom_diff_tend_x)
@@ -340,6 +357,9 @@ program control
   write(*,*) "... finished."
   
 end program control
+
+
+
 
 
 

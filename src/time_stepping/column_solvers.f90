@@ -6,7 +6,7 @@ module column_solvers
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
   use run_nml,          only: nlins,ncols,wp,nlays,dtime,p_0,toa,impl_weight,partial_impl_weight
-  use constituents_nml, only: no_of_condensed_constituents
+  use constituents_nml, only: no_of_condensed_constituents,no_of_constituents
   use definitions,      only: t_grid,t_state,t_tend
   use dictionary,       only: spec_heat_capacities_v_gas,spec_heat_capacities_p_gas,specific_gas_constants
   use diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
@@ -16,6 +16,7 @@ module column_solvers
   private
   
   public :: three_band_solver_ver
+  public :: three_band_solver_gen_densities
   
   contains
   
@@ -27,42 +28,80 @@ module column_solvers
     type(t_grid),  intent(in)    :: grid      ! model grid
     integer,       intent(in)    :: rk_step   ! Runge Kutta substep
 
+    ! soil switch: 0 if soil is off, 1 if soil is on
+    integer                  :: soil_switch = 0
+    if (lsoil) then
+      soil_switch = 1
+    endif
+
     ! local variables
-    real(wp)                 :: c_vector(nlays-2)       ! needed for the vertical solver
-    real(wp)                 :: d_vector(nlays-1)       ! needed for the vertical solver
-    real(wp)                 :: e_vector(nlays-2)       ! needed for the vertical solver
-    real(wp)                 :: r_vector(nlays-1)       ! needed for the vertical solver
-    real(wp)                 :: solution(nlays-1)       ! covariant mass flux density at the interfaces (solution)
-    real(wp)                 :: rho_expl(nlays)         ! explicit mass density
-    real(wp)                 :: rhotheta_expl(nlays)    ! explicit potential temperature density
-    real(wp)                 :: exner_pert_expl(nlays)  ! explicit Exner pressure perturbation
-    real(wp)                 :: theta_pert_expl(nlays)  ! explicit potential temperature perturbation
-    real(wp)                 :: rho_int_old(nlays-1)    ! old interface mass density
-    real(wp)                 :: rho_int_expl(nlays-1)   ! explicit interface mass density
-    real(wp)                 :: theta_int_new(nlays-1)  ! preliminary new potential temperature interface values
-    integer                  :: ji,jk,jl                ! loop variables
-    real(wp)                 :: rho_int_new             ! new density interface value
-    real(wp)                 :: alpha_old(nlays)        ! alpha at the old time step
-    real(wp)                 :: beta_old(nlays)         ! beta at the old time step
-    real(wp)                 :: gamma_old(nlays)        ! gamma at the old time step
-    real(wp)                 :: alpha_new(nlays)        ! alpha at the new time step
-    real(wp)                 :: beta_new(nlays)         ! beta at the new time step
-    real(wp)                 :: gamma_new(nlays)        ! gamma at the new time step
-    real(wp)                 :: alpha(nlays)            ! alpha
-    real(wp)                 :: beta(nlays)             ! beta
-    real(wp)                 :: gammaa(nlays)           ! gamma
-    real(wp)                 :: c_v                     ! specific heat capacity at constant volume
-    real(wp)                 :: c_p                     ! specific heat capacity at constant pressure
-    real(wp)                 :: r_d                     ! individual gas constant of dry air
-    real(wp)                 :: damping_start_height    ! lower boundary height of the Klemp layer
-    real(wp)                 :: damping_coeff           ! damping coefficient of the Klemp layer
-    real(wp)                 :: z_above_damping         ! height above the lower boundary of the damping height
+    real(wp)                 :: c_vector(nlays-2+soil_switch*nsoillays) ! needed do the vertical solver
+    real(wp)                 :: d_vector(nlays-1+soil_switch*nsoillays) ! needed do the vertical solver
+    real(wp)                 :: e_vector(nlays-2+soil_switch*nsoillays) ! needed do the vertical solver
+    real(wp)                 :: r_vector(nlays-1+soil_switch*nsoillays) ! needed do the vertical solver
+    real(wp)                 :: solution(nlays-1+soil_switch*nsoillays) ! covariant mass flux density at the interfaces (solution)
+    real(wp)                 :: rho_expl(nlays)                         ! explicit mass density
+    real(wp)                 :: rhotheta_expl(nlays)                    ! explicit potential temperature density
+    real(wp)                 :: exner_pert_expl(nlays)                  ! explicit Exner pressure perturbation
+    real(wp)                 :: theta_pert_expl(nlays)                  ! explicit potential temperature perturbation
+    real(wp)                 :: rho_int_old(nlays-1)                    ! old interface mass density
+    real(wp)                 :: rho_int_expl(nlays-1)                   ! explicit interface mass density
+    real(wp)                 :: theta_int_new(nlays-1)                  ! preliminary new potential temperature interface values
+    integer                  :: ji,jk,jl                                ! loop variables
+    real(wp)                 :: rho_int_new                             ! new density interface value
+    real(wp)                 :: alpha_old(nlays)                        ! alpha at the old time step
+    real(wp)                 :: beta_old(nlays)                         ! beta at the old time step
+    real(wp)                 :: gamma_old(nlays)                        ! gamma at the old time step
+    real(wp)                 :: alpha_new(nlays)                        ! alpha at the new time step
+    real(wp)                 :: beta_new(nlays)                         ! beta at the new time step
+    real(wp)                 :: gamma_new(nlays)                        ! gamma at the new time step
+    real(wp)                 :: alpha(nlays)                            ! alpha
+    real(wp)                 :: beta(nlays)                             ! beta
+    real(wp)                 :: gammaa(nlays)                           ! gamma
+    real(wp)                 :: c_v                                     ! specific heat capacity at constant volume
+    real(wp)                 :: c_p                                     ! specific heat capacity at constant pressure
+    real(wp)                 :: r_d                                     ! individual gas constant of dry air
+    real(wp)                 :: damping_start_height                    ! lower boundary height of the Klemp layer
+    real(wp)                 :: damping_coeff                           ! damping coefficient of the Klemp layer
+    real(wp)                 :: z_above_damping                         ! height above the lower boundary of the damping height
+    real(wp)                 :: t_gas_lowest_layer_old                  ! temperature of the gas in the lowest layer of the model atmosphere, old timestep
+    real(wp)                 :: t_gas_lowest_layer_new                  ! temperature of the gas in the lowest layer of the model atmosphere, new timestep
 
     c_v = spec_heat_capacities_v_gas(0)
     c_p = spec_heat_capacities_p_gas(0)
     r_d = specific_gas_constants(0)
     damping_start_height = klemp_begin_rel*toa
 
+    ! calculating the sensible power flux density
+    if (lsoil) then
+      !$OMP PARALLEL
+      !$OMP DO PRIVATE(ji,jk,t_gas_lowest_layer_old,t_gas_lowest_layer_new)
+      do ji=1,nlays
+        do jk=1,ncols
+
+          ! gas temperature in the lowest layer
+          t_gas_lowest_layer_old = (grid%exner_bg(ji,jk,nlays)+state_old%exner_pert(ji,jk,nlays))
+          *(grid%theta_bg(ji,jk,nlays)+state_old%theta_pert(ji,jk,nlays))
+          t_gas_lowest_layer_new = (grid%exner_bg(ji,jk,nlays)+state_new%exner_pert(ji,jk,nlays))
+          *(grid%theta_bg(ji,jk,nlays)+state_new%theta_pert(ji,jk,nlays))
+
+          ! the sensible power flux density
+          diag%power_flux_density_sensible(ji,jk) = 0.5_wp*c_v*(state_new%rho(ji,jk,nlays,no_of_condensed_constituents+1) &
+          *(t_gas_lowest_layer_old - state_old%temperature_soil(ji,jk)) &
+          + state_old%rho(ji,jk,nlays,no_of_condensed_constituents+1) &
+          *(t_gas_lowest_layer_new - state_new%temperature_soil(ji,jk)))/diag%scalar_flux_resistance(ji,jk)
+
+          ! contribution of sensible heat to rhotheta
+          state_new%rhotheta(ji,jk,jl) = state_new%rhotheta(ji,jk,jl) &
+          - dtime*grid%area_z(nlays*NO_OF_VECTORS_PER_LAYER+i)*diag%power_flux_density_sensible(ji,jk) &
+          /((grid%exner_bg(ji,jk,jl)+state_new%exner_pert(ji,jk,jl))*c_p)/grid%volume(ji,jk,jl)
+          
+        enddo
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+    endif
+	
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,c_vector,d_vector,e_vector,r_vector,solution, &
     !$OMP rho_expl,rhotheta_expl,exner_pert_expl,theta_pert_expl,rho_int_old, &
@@ -71,13 +110,19 @@ module column_solvers
     do ji=1,nlins
       do jk=1,ncols
       
+        ! determining wether soil needs to be calculated
+        soil_switch = 0
+        if (lsoil .and. grid%is_land(ji,jk)) then
+          soil_switch=1
+        endif
+      
         ! explicit quantities
         do jl=1,nlays
           ! explicit density
           rho_expl(jl) = state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) &
           +dtime*tend%rho(ji,jk,jl,no_of_condensed_constituents+1)
           ! explicit potential temperature density
-          rhotheta_expl(jl) = state_old%rhotheta(ji+1,jk+1,jl) + dtime*tend%rhotheta(ji,jk,jl)
+          rhotheta_expl(jl) = state_old%rhotheta(ji+1,jk+1,jl)+dtime*tend%rhotheta(ji,jk,jl)
           if (rk_Step == 1) then
             ! old time step partial derivatives of theta and Pi (divided by the volume)
             alpha(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)**2 &
@@ -97,16 +142,16 @@ module column_solvers
             gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
             *(grid%exner_bg(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
             ! interpolation of partial derivatives of theta and Pi (divided by the volume)
-            alpha (jl) = ((1._wp - partial_impl_weight)*alpha_old(jl) + partial_impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
-            beta  (jl) = ((1._wp - partial_impl_weight)*beta_old (jl) + partial_impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
-            gammaa(jl) = ((1._wp - partial_impl_weight)*gamma_old(jl) + partial_impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
+            alpha (jl) = ((1._wp - partial_impl_weight)*alpha_old(jl)+partial_impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
+            beta  (jl) = ((1._wp - partial_impl_weight)*beta_old (jl)+partial_impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
+            gammaa(jl) = ((1._wp - partial_impl_weight)*gamma_old(jl)+partial_impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
           endif
           ! explicit potential temperature perturbation
           theta_pert_expl(jl) = state_old%theta_pert(ji+1,jk+1,jl) &
-          + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl,no_of_condensed_constituents+1) &
-          + beta(jl)*tend%rhotheta(ji,jk,jl))
+         +dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl,no_of_condensed_constituents+1) &
+         +beta(jl)*tend%rhotheta(ji,jk,jl))
           ! explicit Exner pressure perturbation
-          exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl) + dtime*grid%volume(ji,jk,jl)*gammaa(jl)*tend%rhotheta(ji,jk,jl)
+          exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl)+dtime*grid%volume(ji,jk,jl)*gammaa(jl)*tend%rhotheta(ji,jk,jl)
         enddo
         
         ! interface values
@@ -115,14 +160,14 @@ module column_solvers
           +state_old%rho(ji+1,jk+1,jl+1,no_of_condensed_constituents+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
           theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) &
-          + state_new%rhotheta(ji+1,jk+1,jl+1)/state_new%rho(ji+1,jk+1,jl+1,no_of_condensed_constituents+1))
+         +state_new%rhotheta(ji+1,jk+1,jl+1)/state_new%rho(ji+1,jk+1,jl+1,no_of_condensed_constituents+1))
         enddo
       
         ! filling up the coefficient vectors
         do jl=1,nlays-1
           ! main diagonal
           d_vector(jl) = -theta_int_new(jl)**2*(gammaa(jl)+gammaa(jl+1)) &
-          + 0.5_wp*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
+         +0.5_wp*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
           *(alpha(jl+1)-alpha(jl)+theta_int_new(jl)*(beta(jl+1)-beta(jl))) &
           - (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
           *(2._wp/grid%area_z(ji,jk,jl+1)+dtime*state_old%wind_w(ji+1,jk+1,jl+1)*0.5_wp &
@@ -131,8 +176,8 @@ module column_solvers
           r_vector(jl) = -(state_old%wind_w(ji+1,jk+1,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
           (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1)) &
           /(impl_weight*dtime**2*c_p) &
-          + theta_int_new(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
-          + 0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
+         +theta_int_new(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
+         +0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
           - (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p) &
           *state_old%wind_w(ji+1,jk+1,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
         enddo
@@ -140,7 +185,7 @@ module column_solvers
         do jl=1,nlays-2
           ! lower diagonal
           c_vector(jl) = theta_int_new(jl+1)*gammaa(jl+1)*theta_int_new(jl) &
-          + 0.5_wp*(grid%exner_bg(ji+1,jk+1,jl+1)-grid%exner_bg(ji+1,jk+1,jl+2)) &
+         +0.5_wp*(grid%exner_bg(ji+1,jk+1,jl+1)-grid%exner_bg(ji+1,jk+1,jl+2)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl)) &
           - (grid%z_geo_scal(ji+1,jk+1,jl+1)-grid%z_geo_scal(ji+1,jk+1,jl+2))/(impl_weight*dtime*c_p)*0.5_wp &
           *state_old%wind_w(ji+1,jk+1,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))
@@ -148,10 +193,84 @@ module column_solvers
           e_vector(jl) = theta_int_new(jl)*gammaa(jl+1)*theta_int_new(jl+1) &
           - 0.5_wp*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl+1)) &
-          + (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
+         +(grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
           *state_old%wind_w(ji+1,jk+1,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
         enddo
-    
+	
+        ! soil components of the matrix
+        if (soil_switch == 1) then
+          ! calculating the explicit part of the heat flux density
+          double heat_flux_density_expl(nsoillays)
+          do jl=1,nsoillays-1
+            heat_flux_density_expl(jl)
+            = -grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)*(state_old%temperature_soil(i+j*NO_OF_SCALARS_H)
+            - state_old%temperature_soil(ji,jk,jl+1))
+            /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
+          enddo
+          heat_flux_density_expl(nsoillays - 1)
+          = -grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)*(state_old%temperature_soil(i+(nsoillays - 1)*NO_OF_SCALARS_H)
+          - grid%t_const_soil(ji,jk))
+          /(2*(grid%z_soil_center(nsoillays - 1) - grid%z_t_const))
+
+          ! calculating the explicit part of the temperature change
+          r_vector(nlays) &
+          ! old temperature
+          = state_old%temperature_soil(ji,jk,1) &
+          ! sensible heat flux
+          + (diag%power_flux_density_sensible(ji,jk) &
+          ! latent heat flux
+          + diag%power_flux_density_latent(ji,jk) &
+          ! shortwave inbound radiation
+          + diag%sfc_sw_in(ji,jk) &
+          ! longwave outbound radiation
+          - diag%sfc_lw_out(ji,jk) &
+          ! heat conduction from below
+          + 0.5_wp*heat_flux_density_expl(0)) &
+          /((grid%z_soil_interface(1) - grid%z_soil_interface(2))*grid%sfc_rho_c(ji,jk))*dtime
+
+          ! loop over all soil layers below the first layer
+          do j=1,nsoillays
+            r_vector(jl+nlays-1) &
+            ! old temperature
+            = state_old%temperature_soil(i+j*NO_OF_SCALARS_H) &
+            ! heat conduction from above
+            + 0.5_wp*(-heat_flux_density_expl(j-1) &
+            ! heat conduction from below
+            + heat_flux_density_expl(jl)) &
+            /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))*dtime
+          enddo
+  
+          ! the diagonal component
+          do jk=1,nsoillays
+            if (jk == 0) then
+              d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)
+              /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))
+              *1/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
+            elseif (jk == nsoillays - 1)
+              d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)
+              /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))
+              *1/(grid%z_soil_center(j-1) - grid%z_soil_center(jl))
+            else
+              d_vector(jl+nlays-1) = 1.0+0.5*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)
+              /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))
+              *(1/(grid%z_soil_center(j-1) - grid%z_soil_center(jl))
+              + 1/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1)))
+            endif
+          enddo
+          
+          ! the off-diagonal components
+          c_vector(nlays-2) = 0._wp
+          e_vector(nlays-2) = 0._wp
+          do j=1,nsoillays-1
+            c_vector(jl+nlays-1) = -0.5*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)
+            /((grid%z_soil_interface(jl+1) - grid%z_soil_interface(jl+2))*grid%sfc_rho_c(ji,jk))
+            /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
+            e_vector(jl+nlays-1) = -0.5*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)
+            /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))
+            /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
+          enddo
+        endif
+		
         call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution,nlays-1)
        
         ! Klemp swamp layer
@@ -162,22 +281,22 @@ module column_solvers
           else
             damping_coeff = klemp_damp_max*sin(0.5_wp*4*atan(1.d0)*z_above_damping/(toa-damping_start_height))**2
           endif
-          solution(jl) = solution(jl)/(1._wp + damping_coeff*dtime)
+          solution(jl) = solution(jl)/(1._wp+damping_coeff*dtime)
         enddo
         
         ! results
         ! density, potential temperature density
         do jl=2,nlays-1
           state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) = rho_expl(jl) &
-          + dtime*(-solution(jl-1)+solution(jl))/grid%volume(ji,jk,jl)
+         +dtime*(-solution(jl-1)+solution(jl))/grid%volume(ji,jk,jl)
           state_new%rhotheta(ji+1,jk+1,jl) = rhotheta_expl(jl) &
-          + dtime*(-theta_int_new(jl-1)*solution(jl-1)+theta_int_new(jl)*solution(jl))/grid%volume(ji,jk,jl)
+         +dtime*(-theta_int_new(jl-1)*solution(jl-1)+theta_int_new(jl)*solution(jl))/grid%volume(ji,jk,jl)
         enddo
         ! uppermost layer
-        state_new%rho(ji+1,jk+1,1,no_of_condensed_constituents+1) = rho_expl(1) + dtime*solution(1)/grid%volume(ji,jk,1)
+        state_new%rho(ji+1,jk+1,1,no_of_condensed_constituents+1) = rho_expl(1)+dtime*solution(1)/grid%volume(ji,jk,1)
         state_new%rhotheta(ji+1,jk+1,1) = rhotheta_expl(1)+dtime*theta_int_new(1)*solution(1)/grid%volume(ji,jk,1)
         ! lowest layer
-        state_new%rho(ji+1,jk+1,nlays,no_of_condensed_constituents+1) = rho_expl(nlays)&
+        state_new%rho(ji+1,jk+1,nlays,no_of_condensed_constituents+1) = rho_expl(nlays) &
         - dtime*solution(nlays-1)/grid%volume(ji,jk,nlays)
         state_new%rhotheta(ji+1,jk+1,nlays) = rhotheta_expl(nlays) &
         -dtime*theta_int_new(nlays-1)*solution(nlays-1)/grid%volume(ji,jk,nlays)
@@ -191,9 +310,16 @@ module column_solvers
         ! Exner pressure
         do jl=1,nlays
           state_new%exner_pert(ji+1,jk+1,jl) = state_old%exner_pert(ji+1,jk+1,jl) &
-          + grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji+1,jk+1,jl)-state_old%rhotheta(ji+1,jk+1,jl))
+         +grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji+1,jk+1,jl)-state_old%rhotheta(ji+1,jk+1,jl))
         enddo
         
+        ! soil temperature
+        if (lsoil) then
+          do jl=1,nsoillays
+            state_new%temperature_soil(ji,jk,jl) = solution_vector(nlays+jl)
+          enddo
+        endif
+		
       enddo
     enddo
     !$OMP END DO
@@ -204,6 +330,187 @@ module column_solvers
     - grid%theta_bg(:,:,:)
 
   end subroutine three_band_solver_ver
+  
+  subroutine three_band_solver_gen_densities(state_old,state_new,tend,diag,grid)
+  
+    ! Vertical advection of generalized densities (of tracers) with 3-band matrices.
+    ! mass densities, density x temperatures
+  
+    ! local variables
+    integer  :: no_of_relevant_constituents              ! number of relevant constituents for a certain quantity
+    real(wp) :: impl_weight,expl_weight                  ! time stepping weights
+    integer  :: quantity_id,j_constituents,ji,jk,jl      ! loop indices
+    real(wp) :: c_vector(nlays-1)                        ! vector for solving the system of linear equations
+    real(wp) :: d_vector(nlays)                          ! vector for solving the system of linear equations
+    real(wp) :: e_vector(nlays-1)                        ! vector for solving the system of linear equations
+    real(wp) :: r_vector(nlays)                          ! vector for solving the system of linear equations
+    real(wp) :: vertical_flux_vector_impl(nlays-1)       ! vertical flux at the new timestep
+    real(wp) :: vertical_flux_vector_rhs(nlays-1)        ! vertical flux at the old timestep
+    real(wp) :: solution_vector(nlays)                   ! solution of the system of linear equations
+    real(wp) :: density_old_at_interface,added_mass      ! abbreviations
+    
+    ! setting the time stepping weights
+    impl_weight = 0.5_wp
+    expl_weight = 1._wp - impl_weight
+    
+    do quantity_id=1,2
+      no_of_relevant_constituents = 0
+      ! mass densities
+      if (quantity_id == 1) then
+        ! all constituents have a mass density
+        no_of_relevant_constituents = no_of_constituents     ! the main gaseous constituent is excluded later
+      endif
+      ! density x temperature fields
+      if (quantity_id == 2) then
+        ! in this case, all the condensed constituents have a density x temperature field
+      if (lassume_lte) then
+        no_of_relevant_constituents = no_of_condensed_constituents
+      ! in this case, no density x temperature fields are taken into account
+      else
+        no_of_relevant_constituents = 0
+      endif
+
+      ! loop over all relevant constituents
+      do j_constituents=1,no_of_relevant_constituents
+        ! This is done do all tracers apart from the main gaseous constituent.
+        if (quantity_id /= 1 .or. k /= no_of_condensed_constituents+1) then
+          ! loop over all columns
+          !$OMP PARALLEL
+          !$OMP DO PRIVATE(jk,jk)
+          do ji=1,nlins
+            do jk=1,ncols
+
+            ! diagnozing the vertical fluxes
+            do jl=1,nlays-1
+              vertical_flux_vector_impl(jl) = state_old%wind(ji,jk,jl+1)
+              vertical_flux_vector_rhs(jl) = state_new%wind(ji,jk,jl+1)
+              
+              ! for condensed constituents, a sink velocity must be added.
+              ! precipitation
+              ! snow
+              if (j_constituents < no_of_condensed_constituents/4)
+                vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - snow_velocity
+                vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - snow_velocity
+              ! rain
+              elseif (j_constituents < no_of_condensed_constituents/2)
+                vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - rain_velocity
+                vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - rain_velocity
+              ! clouds
+              elseif (j_constituents < no_of_condensed_constituents)
+                vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - cloud_droplets_velocity
+                vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - cloud_droplets_velocity
+              endif
+              ! multiplying the vertical velocity by the area
+              vertical_flux_vector_impl(jl) = grid%area_z(ji,jk,jl+1)*vertical_flux_vector_impl(jl)
+              vertical_flux_vector_rhs(jl) = grid%area_z(ji,jk,jl+1)*vertical_flux_vector_rhs(jl)
+              ! old density at the interface
+              density_old_at_interface
+              = 0.5_wp*(state_old%rho(ji,jk,jl,j_constituents) + state_old%rho(ji,jk,jl+1,j_constituents)) &
+              vertical_flux_vector_rhs(jl) = density_old_at_interface*vertical_flux_vector_rhs(jl)
+            enddo
+
+
+            ! Now we proceed to solving the vertical tridiagonal problems.
+
+            ! filling up the original vectors
+            do jk=1,nlays-1
+              c_vector(jl) = impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl+1)*vertical_flux_vector_impl(jl)
+              e_vector(jl) = -impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl)
+            enddo
+            do jk=1,nlays
+              if (jk == 1) then
+                d_vector(jl) = 1._wp
+                - impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(1)
+              elseif (jk == nlays) then
+                d_vector(jl) = 1._wp
+                +impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(j-1)
+              else
+                d_vector(jl) = 1._wp
+                +impl_weight*dtime/grid%volume(ji,jk,jl)
+                *0.5_wp*(vertical_flux_vector_impl(jk-1) - vertical_flux_vector_impl(jl))
+              endif
+              ! the explicit component
+              ! mass densities
+              if (quantity_id == 1) then
+                r_vector(jl) = state_old%rho(ji,jk,jl,j_constituent) &
+                +dtime*state_tendency%rho(ji,jk,jl,j_constituent)
+              endif
+              ! density x temperatures
+              if (quantity_id == 2) then
+                r_vector(jl) = state_old%condensed_rho_t(ji,jk,jl,j_constituent) &
+                +dtime*state_tendency%condensed_rho_t(ji,jk,jl,j_constituent)
+              endif
+              ! adding the explicit part of the vertical flux divergence
+              if (j == 0) then
+                r_vector(jl) = r_vector(jl) + expl_weight*dtime*vertical_flux_vector_rhs(jl)/grid%volume(ji,jk,jl)
+              elseif (jl == nlays-1) then
+                r_vector(jl) = r_vector(jl) - expl_weight*dtime*vertical_flux_vector_rhs(jl-1)/grid%volume(ji,jk,jl)
+                ! precipitation
+                ! snow
+              if (k < no_of_condensed_constituents/4) then
+                r_vector(jl) = r_vector(jl) - snow_velocity*dtime*state_old%rho(ji,jk,jl-1,j_constituent)
+                *grid%area_z(ji,jk,jl-1)/grid%volume(ji,jk,jl)
+              ! rain
+              elseif (k < no_of_condensed_constituents/2) then
+                r_vector(jl) = r_vector(jl) - rain_velocity*dtime*state_old%rho(ji,jk,jl-1,j_constituent)
+                *grid%area_z(ji,jk,jl-1)/grid%volume(ji,jk,jl)
+              ! clouds
+              elseif (k < no_of_condensed_constituents)
+                r_vector(jl) = r_vector(jl) - cloud_droplets_velocity*dtime*state_old%rho(ji,jk,jl-1,j_constituent)
+                *grid%area_z(ji,jk,jl-1)/grid%volume(ji,jk,jl)
+              else
+                r_vector(jl) = r_vector(jl) + expl_weight*dtime*(-vertical_flux_vector_rhs(jl-1)+vertical_flux_vector_rhs(jl))/grid%volume(ji,jk,jl)
+              endif
+
+            ! calling the algorithm to solve the system of linear equations
+            call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,nlays)
+
+
+            ! limiter: none of the densities may be negative
+            do jl=1,nlays
+              if (solution_vector(jl) < 0._wp) then
+                added_mass = added_mass - solution_vector(jl)*grid%volume(ji,jk,jl)
+                solution_vector(jl) = 0
+              if (j == 0) then
+                solution_vector(jl+1) = solution_vector(jl+1) -  added_mass/grid%volume(ji,jk,jl+1)
+              elseif (j == nlays-1)
+                if (k >= no_of_condensed_constituents) then
+                  solution_vector(jl-1) = solution_vector(j-1) - added_mass/grid%volume(ji,jk,jl-1)
+                endif
+              else
+                solution_vector(jl-1) = solution_vector(jl-1) - 0.5_wp*added_mass/grid%volume(ji,jk,jl-1)
+                solution_vector(jl+1) = solution_vector(jl+1) - 0.5_wp*added_mass/grid%volume(ji,jk,jl+1)
+              endif
+            enddo
+      
+            ! the final brute-force limiter
+            do jl=1,nlays
+              if (solution_vector(jl) < 0._wp) then
+                solution_vector(jl) = 0._wp
+              endif
+            enddo
+
+            ! writing the result into the new state
+            do jl=1,nlays
+              ! mass densities
+              if (quantity_id == 1) then
+                state_new%rho(ji,jk,jl,j_constituent) = solution_vector(jl)
+              endif
+
+              ! density x temperature fields
+              if (quantity_id == 2) then
+                state_new%condensed_rho_t(ji,jk,jl,j_constituent) = solution_vector(jl)
+              endif
+            enddo
+            
+          enddo ! column index
+        enddo ! line index
+        !$OMP END DO
+        !$OMP END PARALLEL
+      enddo ! constituent
+    enddo ! quantity
+  
+  end subroutine three_band_solver_gen_densities
   
   subroutine thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,solution_length)
 
@@ -217,8 +524,8 @@ module column_solvers
     integer,  intent(in)    :: solution_length    ! length of the solution vector
     
     ! local variables
-    real(wp) :: e_prime_vector(solution_length-1) ! help vector for solving the matrix equation
-    real(wp) :: r_prime_vector(solution_length)   ! help vector for solving the matrix equation
+    real(wp) :: e_prime_vector(solution_length-1) ! help vector do solving the matrix equation
+    real(wp) :: r_prime_vector(solution_length)   ! help vector do solving the matrix equation
     integer  :: jl                                ! loop index
     
     ! downward sweep (matrix)

@@ -19,6 +19,7 @@ module dictionary
   public :: spec_heat_capacities_p_gas
   public :: specific_gas_constants
   public :: mean_particle_masses_gas
+  public :: phase_trans_heat
   
   contains
 
@@ -80,9 +81,10 @@ module dictionary
   
   function specific_gas_constants(j_constituent)
     
+    ! specific gas constants
+    
     integer, intent(in) :: j_constituent
     
-    ! specific gas constants
     real(wp) :: specific_gas_constants
     
     if (j_constituent == 0) then
@@ -94,6 +96,33 @@ module dictionary
     endif
     
   end function specific_gas_constants
+
+  function phase_trans_heat(direction,temperature)
+    
+    ! This function calculates the phase transition heat.
+
+    ! input arguments
+    integer  :: direction
+    real(wp) :: temperature
+
+    real(wp) :: phase_trans_heat
+    
+    ! directions:
+    ! 0:  gas to liquid
+    ! 1:  gas to solid
+    ! 2: liquid to solid
+
+    if (direction == 0) then
+      phase_trans_heat = 2257000._wp
+    endif
+    if (direction == 1) then
+      phase_trans_heat = 2257000._wp + 333500._wp
+    endif
+    if (direction == 2) then
+      phase_trans_heat = 333500._wp
+    endif
+    
+  end function phase_trans_heat
 
 end module dictionary
 
