@@ -512,6 +512,27 @@ module grid_generator
   
   end function geopot
   
+  function vegetation_height_ideal(latitude,oro)
+  
+    ! calculating a latitude- and height-dependant idealized vegetation height
+
+    ! input arguments
+    real(wp) :: latitude
+    real(wp) :: oro
+
+    ! output
+    real(wp) :: vegetation_height_ideal
+    
+    ! local variables
+    real(wp) :: vegetation_height_equator
+
+    vegetation_height_equator = 20.0_wp
+
+    vegetation_height_ideal = vegetation_height_equator*cos(latitude)*exp(-oro/1500.0)
+
+  end function vegetation_height_ideal
+
+  
 end module grid_generator
 
 

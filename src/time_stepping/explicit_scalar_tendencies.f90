@@ -51,9 +51,9 @@ module explicit_scalar_tendencies
       ! calculating the mass density flux
       call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
       ! calculating the divergence of the mass density flux
-      call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
+      call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(:,:,:),grid)
       tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
-      + new_weight(j_constituent)*(-diag%scalar_placeholder(2:nlins+1,2:ncols+1,:))
+      + new_weight(j_constituent)*(-diag%scalar_placeholder(:,:,:))
     
       ! explicit potential temperature density integration
       ! --------------------------------------------------
@@ -63,8 +63,8 @@ module explicit_scalar_tendencies
         call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder, &
         diag%u_placeholder,diag%v_placeholder)
         ! calculating the divergence of the potential temperature density flux
-        call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
-        tend%rhotheta(:,:,:) = -diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) &
+        call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(:,:,:),grid)
+        tend%rhotheta(:,:,:) = -diag%scalar_placeholder(:,:,:) &
         ! dissipative heating
         + irrev%heating_diss(:,:,:)/(spec_heat_capacities_p_gas(0)*(grid%exner_bg(:,:,:)+state%exner_pert(:,:,:)))
       endif
@@ -74,9 +74,9 @@ module explicit_scalar_tendencies
       if (j_constituent <= no_of_condensed_constituents .and. (.not. lassume_lte)) then
         call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v, &
         diag%u_placeholder,diag%v_placeholder)
-        call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
+        call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder(:,:,:),grid)
         tend%condensed_rho_t(:,:,:,j_constituent) = old_weight(j_constituent)*tend%condensed_rho_t(:,:,:,j_constituent) &
-        + new_weight(j_constituent)*(-diag%scalar_placeholder(2:nlins+1,2:ncols+1,:))
+        + new_weight(j_constituent)*(-diag%scalar_placeholder(:,:,:))
       endif
       
     enddo
