@@ -106,57 +106,57 @@ module write_out
     ! ending the definition section
     call nc_check(nf90_enddef(ncid))
     ! latitude coordinates of the grid points
-    call nc_check(nf90_put_var(ncid,varid_lat,grid%lat_scalar(2:nlins+1)))
+    call nc_check(nf90_put_var(ncid,varid_lat,grid%lat_scalar(:)))
     ! longitude coordinates of the grid points
-    call nc_check(nf90_put_var(ncid,varid_lon,grid%lon_scalar(2:ncols+1)))
+    call nc_check(nf90_put_var(ncid,varid_lon,grid%lon_scalar(:)))
     ! z coordinates of the grid points
-    call nc_check(nf90_put_var(ncid,varid_z,grid%z_geo_scal(2:nlins+1,2:ncols+1,:)))
+    call nc_check(nf90_put_var(ncid,varid_z,grid%z_geo_scal))
     
     ! 3D temperature
-    diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) =  (grid%theta_bg(2:nlins+1,2:ncols+1,:) &
-    + state%theta_pert(2:nlins+1,2:ncols+1,:)) &
-    *(grid%exner_bg(2:nlins+1,2:ncols+1,:) + state%exner_pert(2:nlins+1,2:ncols+1,:))
-    call nc_check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
+    diag%scalar_placeholder =  (grid%theta_bg &
+    + state%theta_pert) &
+    *(grid%exner_bg + state%exner_pert)
+    call nc_check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder))
     
     ! writing the data to the output file
     ! 3D pressure
-    diag%scalar_placeholder(2:nlins+1,2:ncols+1,:) = state%rho(2:nlins+1,2:ncols+1,:,no_of_condensed_constituents+1) &
-    *specific_gas_constants(0)*diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)
-    call nc_check(nf90_put_var(ncid,varid_p,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
+    diag%scalar_placeholder = state%rho(:,:,:,no_of_condensed_constituents+1) &
+    *specific_gas_constants(0)*diag%scalar_placeholder
+    call nc_check(nf90_put_var(ncid,varid_p,diag%scalar_placeholder))
     
     ! 3D u wind
     !$OMP PARALLEL
     !$OMP DO PRIVATE(jk)
     do jk=1,ncols
-      diag%scalar_placeholder(2:nlins+1,jk+1,:) = 0.5_wp*(state%wind_u(2:nlins+1,jk,:)+state%wind_u(2:nlins+1,jk+1,:))
+      diag%scalar_placeholder(:,jk+1,:) = 0.5_wp*(state%wind_u(:,jk,:)+state%wind_u(:,jk+1,:))
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-    call nc_check(nf90_put_var(ncid,varid_u,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
+    call nc_check(nf90_put_var(ncid,varid_u,diag%scalar_placeholder))
     
     ! 3D v wind
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji)
     do ji=1,nlins
-      diag%scalar_placeholder(ji+1,2:ncols+1,:) = 0.5_wp*(state%wind_v(ji,2:ncols+1,:)+state%wind_v(ji+1,2:ncols+1,:))
+      diag%scalar_placeholder(ji+1,:,:) = 0.5_wp*(state%wind_v(ji,:,:)+state%wind_v(ji+1,:,:))
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-    call nc_check(nf90_put_var(ncid,varid_v,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
+    call nc_check(nf90_put_var(ncid,varid_v,diag%scalar_placeholder))
     
     ! 3D w wind
     !$OMP PARALLEL
     !$OMP DO PRIVATE(jl,upper_weight)
     do jl=1,nlays
-      upper_weight(:,:) = (grid%z_geo_scal(2:nlins+1,2:ncols+1,jl) -&
-      grid%z_geo_w(2:nlins+1,2:ncols+1,jl+1))/(grid%z_geo_w(2:nlins+1,2:ncols+1,jl)  &
-      - grid%z_geo_w(2:nlins+1,2:ncols+1,jl+1))
-      diag%scalar_placeholder(2:nlins+1,2:ncols+1,jl) = &
-      upper_weight(:,:)*state%wind_w(2:nlins+1,2:ncols+1,jl)+(1._wp-upper_weight(:,:))*state%wind_w(2:nlins+1,2:ncols+1,jl+1)
+      upper_weight = (grid%z_geo_scal(:,:,jl) -&
+      grid%z_geo_w(:,:,jl+1))/(grid%z_geo_w(:,:,jl)  &
+      - grid%z_geo_w(:,:,jl+1))
+      diag%scalar_placeholder(:,:,jl) = &
+      upper_weight*state%wind_w(:,:,jl)+(1._wp-upper_weight)*state%wind_w(:,:,jl+1)
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-    call nc_check(nf90_put_var(ncid,varid_w,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:)))
+    call nc_check(nf90_put_var(ncid,varid_w,diag%scalar_placeholder))
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
