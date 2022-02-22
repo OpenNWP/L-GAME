@@ -37,7 +37,6 @@ module run_nml
   logical           :: llinear             ! switch to turn momentum advection on or off
   real(wp)          :: impl_weight         ! implicit weight of the pressure gradient
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
-  real(wp)          :: EPSILON_SECURITY    ! small security constant
   real(wp)          :: PRANDTL_HEIGHT      ! height of the Prandtl layer
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr,sigma, &
@@ -77,7 +76,6 @@ module run_nml
     lcorio              = .true.
     impl_weight         = 0.75_wp
     partial_impl_weight = 0.5_wp
-    EPSILON_SECURITY    = 1e-10_wp
     PRANDTL_HEIGHT      = 100._wp
     
     ! open and read Namelist file
