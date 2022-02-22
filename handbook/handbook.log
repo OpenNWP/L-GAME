@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  6 FEB 2022 19:01
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  22 FEB 2022 22:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1052,15 +1052,15 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 128.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 128.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 128.
 Package rerunfilecheck Info: File `handbook.out' has not changed.
-(rerunfilecheck)             Checksum: 0CAD4D310727887F28C6E841C68C66C8;1040.
+(rerunfilecheck)             Checksum: 21D0C70AAE51A1BC5E38A7A7B593EA83;1053.
 Package logreq Info: Writing requests to 'handbook.run.xml'.
 \openout1 = `handbook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
  16464 strings out of 482480
- 273769 string characters out of 5946190
- 933619 words of memory out of 5000000
+ 273782 string characters out of 5946190
+ 933632 words of memory out of 5000000
  31252 multiletter control sequences out of 15000+600000
  579875 words of font info for 87 fonts, out of 8000000 for 9000
  395 hyphenation exceptions out of 8191
@@ -1073,7 +1073,7 @@ e2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/max/.texlive
 xmf-dist/fonts/type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fon
 ts/type1/urw/ncntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw
 /ncntrsbk/uncri8a.pfb>
-Output written on handbook.pdf (9 pages, 88434 bytes).
+Output written on handbook.pdf (9 pages, 88262 bytes).
 PDF statistics:
  316 PDF objects out of 1000 (max. 8388607)
  201 compressed objects within 3 object streams

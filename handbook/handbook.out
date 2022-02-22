@@ -6,7 +6,7 @@
 \BOOKMARK [1][-]{section.3.1}{Dependencies}{chapter.3}% 6
 \BOOKMARK [1][-]{section.3.2}{Building}{chapter.3}% 7
 \BOOKMARK [0][-]{chapter.4}{Running the model}{}% 8
-\BOOKMARK [1][-]{section.4.1}{Grid generation}{chapter.4}% 9
+\BOOKMARK [1][-]{section.4.1}{Configuring the model domain}{chapter.4}% 9
 \BOOKMARK [2][-]{subsection.4.1.1}{Vertical grid structure}{section.4.1}% 10
 \BOOKMARK [1][-]{section.4.2}{Dynamics configuration}{chapter.4}% 11
 \BOOKMARK [1][-]{section.4.3}{Physics configuration}{chapter.4}% 12

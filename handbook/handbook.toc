@@ -16,7 +16,7 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {4}Running the model}{5}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.1}Grid generation}{5}{section.4.1}%
+\contentsline {section}{\numberline {4.1}Configuring the model domain}{5}{section.4.1}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {4.1.1}Vertical grid structure}{5}{subsection.4.1.1}%
 \defcounter {refsection}{0}\relax 
