@@ -35,6 +35,9 @@ module explicit_scalar_tendencies
     integer                       :: j_constituent                   ! loop variable
     real(wp)                      :: old_weight(no_of_constituents)  ! time stepping weight
     real(wp)                      :: new_weight(no_of_constituents)  ! time stepping weight
+    real(wp)                      :: c_p                             ! as usual
+    
+    c_p = spec_heat_capacities_p_gas(0)
     
     ! setting the time stepping weights
     do j_constituent=1,no_of_constituents
@@ -54,8 +57,12 @@ module explicit_scalar_tendencies
       call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
       ! calculating the divergence of the mass flux density
       call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
       + new_weight(j_constituent)*(-diag%scalar_placeholder)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
     
       ! explicit potential temperature density integration
       ! --------------------------------------------------
@@ -66,9 +73,13 @@ module explicit_scalar_tendencies
         diag%u_placeholder,diag%v_placeholder)
         ! calculating the divergence of the potential temperature flux density
         call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+        !$OMP PARALLEL
+        !$OMP WORKSHARE
         tend%rhotheta = -diag%scalar_placeholder &
         ! dissipative heating
-        + irrev%heating_diss/(spec_heat_capacities_p_gas(0)*(grid%exner_bg+state%exner_pert))
+        + irrev%heating_diss/(c_p*(grid%exner_bg+state%exner_pert))
+        !$OMP END WORKSHARE
+        !$OMP END PARALLEL
       endif
       
       ! explicit temperature density integration for condensates
@@ -77,8 +88,12 @@ module explicit_scalar_tendencies
         call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v, &
         diag%u_placeholder,diag%v_placeholder)
         call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+        !$OMP PARALLEL
+        !$OMP WORKSHARE
         tend%condensed_rho_t(:,:,:,j_constituent) = old_weight(j_constituent)*tend%condensed_rho_t(:,:,:,j_constituent) &
         + new_weight(j_constituent)*(-diag%scalar_placeholder)
+        !$OMP END WORKSHARE
+        !$OMP END PARALLEL
       endif
       
     enddo
@@ -100,11 +115,19 @@ module explicit_scalar_tendencies
       call calc_h2otracers_source_rates(state,diag,irrev,grid)
       
       ! condensates
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       state%rho(:,:,:,1:no_of_condensed_constituents) = state%rho(:,:,:,1:no_of_condensed_constituents) &
       + dtime*irrev%mass_source_rates(:,:,:,1:no_of_condensed_constituents)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
       ! water vapour
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       state%rho(:,:,:,no_of_constituents) = state%rho(:,:,:,no_of_constituents) &
       + dtime*irrev%mass_source_rates(:,:,:,no_of_constituents-1)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
       
     endif
   
