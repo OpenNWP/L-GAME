@@ -18,22 +18,11 @@ module run_nml
   real(wp)          :: sigma               ! vertical grid stretching parameter
   integer           :: run_span_hr         ! run span in hours
   real              :: t_init              ! epoch time stamp of the initialization
-  real(wp)          :: semimajor           ! large halfaxis of the Earth
-  real(wp)          :: semiminor           ! small halfaxis of the Earth
   logical           :: lrestart            ! switch for restart runs
   logical           :: lcorio              ! switch for the Coriolis force
   logical           :: lideal              ! switch for analytic test cases
   character(len=64) :: scenario            ! scenario for ideal runs
   character(len=64) :: run_id              ! ID of the model run
-  real(wp)          :: p_0                 ! reference pressure
-  real(wp)          :: omega               ! angular frequency of Earth rotation
-  real(wp)          :: lapse_rate          ! lapse_rate within the troposphere
-  real(wp)          :: surface_temp        ! the temperature at the surface
-  real(wp)          :: tropo_height        ! the tropopause height
-  real(wp)          :: inv_height          ! height where the temperature inversion begins
-  real(wp)          :: t_grad_inv          ! temperature gradient above the inversion
-  real(wp)          :: p_0_standard        ! reference pressure of the standard atmosphere
-  real(wp)          :: gravity             ! average surface gravity value
   logical           :: llinear             ! switch to turn momentum advection on or off
   real(wp)          :: impl_weight         ! implicit weight of the pressure gradient
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
@@ -63,15 +52,6 @@ module run_nml
     lideal              = .true.
     scenario            = "standard"
     run_id              = "ideal"
-    p_0                 = 100000._wp
-    omega               = 7.292115e-5_wp
-    lapse_rate          = 0.0065_wp
-    surface_temp        = 288.15_wp
-    tropo_height        = 12000._wp
-    inv_height          = 20000._wp
-    t_grad_inv          = 0.001_wp
-    p_0_standard        = 101325._wp
-    gravity             = 9.80616_wp
     llinear             = .false.
     lcorio              = .true.
     impl_weight         = 0.75_wp
