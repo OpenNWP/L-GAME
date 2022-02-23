@@ -74,7 +74,7 @@ module column_solvers
     c_p = spec_heat_capacities_p_gas(0)
     r_d = specific_gas_constants(0)
     damping_start_height = klemp_begin_rel*toa
-
+    
     ! calculating the sensible power flux density
     if (lsoil) then
       !$OMP PARALLEL

@@ -9,7 +9,8 @@ program control
                                        t_init,nlins,ncols,nlays,lrestart, &
                                        lideal
   use io_nml,                    only: io_nml_setup,dt_write
-  use constituents_nml,          only: constituents_nml_setup,no_of_condensed_constituents,no_of_constituents
+  use constituents_nml,          only: constituents_nml_setup,no_of_condensed_constituents,no_of_constituents, &
+                                       snow_velocity,rain_velocity,cloud_droplets_velocity
   use diff_nml,                  only: diff_nml_setup
   use surface_nml,               only: surface_nml_setup,nsoillays
   use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_irrev
@@ -22,6 +23,7 @@ program control
   
   implicit none
 
+  ! local variables
   integer        :: time_step_counter
   real(wp)       :: t_0,run_span,t_write
   type(t_grid)   :: grid
@@ -29,6 +31,7 @@ program control
   type(t_diag)   :: diag
   type(t_tend)   :: tend
   type(t_irrev)  :: irrev
+  real(wp)       :: normal_dist_min_vert ! minimum vertical gridpoint distance
 
   ! reading in all namelists so that we know what we have to do
   write(*,*) "Reading in run namelist ..."
@@ -177,6 +180,13 @@ program control
   write(*,*) "Setting up the grid ..."
   call grid_setup(grid)
   write(*,*) "... grid set up."
+  
+  ! limitting the hydrometeor sedimentation velocities for stability reasons
+  normal_dist_min_vert = minval(grid%dz(:,:,nlays+1))
+  rain_velocity = min(0.8_wp*normal_dist_min_vert/dtime, rain_velocity)
+  snow_velocity = min(0.8_wp*normal_dist_min_vert/dtime, snow_velocity)
+  write(*,*) "Snow falling velocity set to", rain_velocity, "m/s."
+  write(*,*) "Rain falling velocity set to", snow_velocity, "m/s."
 
   ! setting up the background state
   call bg_setup(grid)
