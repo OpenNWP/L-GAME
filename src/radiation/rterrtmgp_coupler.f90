@@ -5,6 +5,7 @@
 
 module radiation
   
+  use iso_c_binding,
   use mo_rte_kind,          only: wp
   use mo_rrtmgp_util_string,only: lower_case
   use mo_gas_optics_rrtmgp, only: ty_gas_optics_rrtmgp
@@ -23,17 +24,16 @@ module radiation
   use dictionary,           only: specific_gas_constants
   use rad_nml,              only: rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
                                   cloud_coefficients_file_sw,cloud_coefficients_file_lw
-  use dictionary,           only: calc_o3_vmr,molar_fraction_in_dry_air
   
   implicit none
   
   ! the number of bands in the short wave region
-  integer,parameter                        :: no_of_sw_bands=14
+  integer,parameter                        :: no_of_sw_bands = 14
   ! the number of bands in the long wave region
-  integer,parameter                        :: no_of_lw_bands=16
+  integer,parameter                        :: no_of_lw_bands = 16
   ! used for C interoperability
   integer                                  :: zero = 0
-  integer                                  :: one=1
+  integer                                  :: one = 1
   ! the gas concentrations (object holding all information on the composition
   ! of the gas phase)
   type(ty_gas_concs)                       :: gas_concentrations_sw
@@ -54,7 +54,82 @@ module radiation
   
   contains
   
-  subroutine radiation_init()
+  real(wp) function molar_fraction_in_dry_air(gas_number)
+    
+    ! This function returns the molar fraction of certain gases in dry air.
+    
+    integer                           :: gas_number
+  
+    ! 0: dry air
+    ! 1: H2O
+    ! 2: N2
+    ! 3: O2
+    ! 4: Ar
+    ! 5: CO2
+    ! 6: Ne
+    ! 7: He
+    ! 8: CH4
+    ! 9: CO
+    ! 10: O3
+    ! 11: N2O
+  
+    if (gas_number == 2) then
+      molar_fraction_in_dry_air = 0.7809_wp
+    endif
+    if (gas_number == 3) then
+      molar_fraction_in_dry_air = 0.2095_wp
+    endif
+    if (gas_number == 4) then
+      molar_fraction_in_dry_air = 0.0093_wp
+    endif
+    if (gas_number == 5) then
+      molar_fraction_in_dry_air = 0.0003_wp
+    endif
+    if (gas_number == 6) then
+      molar_fraction_in_dry_air = 1.8e-5_wp
+    endif
+    if (gas_number == 7) then
+      molar_fraction_in_dry_air = 5.2e-6_wp
+    endif
+    if (gas_number == 8) then
+      molar_fraction_in_dry_air = 1.5e-6_wp
+    endif
+    if (gas_number == 9) then
+      molar_fraction_in_dry_air = 1.0e-7_wp
+    endif
+    if (gas_number == 10) then
+      molar_fraction_in_dry_air = 1e-6_wp
+    endif
+    if (gas_number == 11) then
+	  ! https://www.epa.gov/climate-indicators/climate-change-indicators-atmospheric-concentrations-greenhouse-gases
+      molar_fraction_in_dry_air = 0.3e-6_wp
+    endif
+  
+  end function molar_fraction_in_dry_air
+  
+  real(wp) function calc_o3_vmr(z_height)
+
+    ! This function calculates the ozone VMR as a function of height.
+    ! assumes a Gaussian distribution
+    
+    real(wp)                          :: z_height            ! height above MSL
+    
+    ! local variables
+    real(wp)                          :: fwhm = 20e3_wp      ! full width at half maximum
+    real(wp)                          :: z_max = 34e3_wp     ! height of the maximum of the distribution
+    real(wp)                          :: max_vmr = 8.5e-6_wp ! maximum volume mixing ratio
+    real(wp)                          :: sigma               ! standard deviation
+    real(wp)                          :: distance            ! distance from the maximum
+    
+    ! calculation of the result
+    sigma = fwhm/(8*log(2._wp))**0.5_wp
+    distance = z_height - z_max
+    calc_o3_vmr = max_vmr*exp(-distance**2/(2*sigma**2))
+    
+  end function calc_o3_vmr
+  
+  subroutine radiation_init() &
+  bind(c,name = "radiation_init")
     
     ! This is called only once, in the beginning.
     
@@ -63,7 +138,7 @@ module radiation
     integer                          :: ji
     
     ! formatting the gas names
-    do ji=1,size(active_gases)
+    do ji = 1,size(active_gases)
       gases_lowercase(ji) = trim(lower_case(active_gases(ji)))
     end do
     ! here,the names of the gases are written to the gas_concentrations object
@@ -87,17 +162,19 @@ module radiation
   z_scalar,z_vector,&
   mass_densities,temperature_gas,radiation_tendency,&
   temp_sfc,sfc_sw_in,sfc_lw_out,&
-  nlins,ncols,nlays,no_of_constituents,no_of_condensed_constituents,&
-  time_coord)
+  no_of_scalars,no_of_layers,no_of_constituents,no_of_condensed_constituents,&
+  time_coord) &
   
     ! This is the function that is called by the dynamical core. The dycore hands over
     ! the thermodynamic state as well as meta data (time stamp,coordinates) and gets
     ! back radiative fux convergences in W/m^3.
+  
+    bind(c,name =  "calc_radiative_flux_convergence")
     
-    ! the dimensions of the model grid
-    integer,intent(in)                ::                    nlins,ncols,nlays
+    ! the number of scalar points of the model grid
+    integer,intent(in)                ::                    no_of_scalars
     ! the number of layers of the model grid
-    integer,intent(in)                ::                    
+    integer,intent(in)                ::                    no_of_layers
     ! the number of constituents of the model atmosphere
     integer,intent(in)                ::                    no_of_constituents
     ! the numer of condensed constituents of the model atmosphere
@@ -105,38 +182,38 @@ module radiation
     ! the time coordinate (UTC time stamp)
     real(wp)                          :: time_coord
     ! the latitude coordinates of the scalar data points
-    real(wp),intent(in)               :: latitude_scalar    (nlins,ncols)
+    real(wp),intent(in)               :: latitude_scalar    (no_of_scalars/no_of_layers)
     ! the longitude coordinates of the scalar data points
-    real(wp),intent(in)               :: longitude_scalar   (nlins,ncols)
+    real(wp),intent(in)               :: longitude_scalar   (no_of_scalars/no_of_layers)
     ! the vertical positions of the scalar data points
-    real(wp),intent(in)               :: z_scalar           (nlins,ncols,nlays)
+    real(wp),intent(in)               :: z_scalar           (no_of_scalars)
     ! the vertical positions of the vector data points
-    real(wp),intent(in)               :: z_vector           (nlins,ncols,nlays+1)
+    real(wp),intent(in)               :: z_vector           (no_of_scalars+no_of_scalars/no_of_layers)
     ! the mass densities of the model atmosphere
     real(wp),intent(in)               :: mass_densities    &
-    (no_of_constituents*nlins,ncols,nlays)
+    (no_of_constituents*no_of_scalars)
     ! the temperature of the model atmosphere
-    real(wp),intent(in)               :: temperature_gas   (nlins,ncols,nlays)
+    real(wp),intent(in)               :: temperature_gas   (no_of_scalars)
     ! the result (in W/m^3)
-    real(wp),intent(inout)            :: radiation_tendency(nlins,ncols,nlays)
+    real(wp),intent(inout)            :: radiation_tendency(no_of_scalars)
     ! surface temperature
-    real(wp),intent(in)               :: temp_sfc          (nlins,ncols)
+    real(wp),intent(in)               :: temp_sfc          (no_of_scalars/no_of_layers)
     ! surface shortwave in
-    real(wp),intent(inout)            :: sfc_sw_in         (nlins,ncols)
+    real(wp),intent(inout)            :: sfc_sw_in         (no_of_scalars/no_of_layers)
     ! surface longwave out
-    real(wp),intent(inout)            :: sfc_lw_out        (nlins,ncols)
+    real(wp),intent(inout)            :: sfc_lw_out        (no_of_scalars/no_of_layers)
     
     ! local variables
     ! solar zenith angle
-    real(wp)                          :: mu_0(nlins,ncols)
+    real(wp)                          :: mu_0(no_of_scalars/no_of_layers)
     ! number of points where it is day
     integer                           :: no_of_day_points
     ! loop indices
-    integer                           :: ji,jk,j_day,jl
+    integer                           :: ji,j_day,jk
     ! the indices of columns where it is day
-    integer                           :: day_indices(nlins,ncols)
+    integer                           :: day_indices(no_of_scalars/no_of_layers)
     ! number of scalars per layer (number of columns)
-    integer                           :: nlins,ncols,nlays_h
+    integer                           :: no_of_scalars_h
     ! the resulting fluxes
     type(ty_fluxes_broadband)         :: fluxes,fluxes_day
     ! short wave optical properties
@@ -148,49 +225,49 @@ module radiation
     ! long wave source function
     type(ty_source_func_lw)           :: sources_lw
     ! the surface emissivity
-    real(wp)                          :: surface_emissivity(no_of_lw_bands,nlins,ncols)
+    real(wp)                          :: surface_emissivity(no_of_lw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation
-    real(wp)                          :: albedo_dir                (no_of_sw_bands,nlins,ncols)
+    real(wp)                          :: albedo_dir                (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for diffusive radiation
-    real(wp)                          :: albedo_dif                (no_of_sw_bands,nlins,ncols)
+    real(wp)                          :: albedo_dif                (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation (day points only)
-    real(wp)                          :: albedo_dir_day            (no_of_sw_bands,nlins,ncols)
+    real(wp)                          :: albedo_dir_day            (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for diffusive radiation (day points only)
-    real(wp)                          :: albedo_dif_day            (no_of_sw_bands,nlins,ncols)
+    real(wp)                          :: albedo_dif_day            (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! solar zenith angle (day points only)
-    real(wp)                          :: mu_0_day                  (nlins,ncols)
+    real(wp)                          :: mu_0_day                  (no_of_scalars/no_of_layers)
     ! temperature at the surface (day points only)
-    real(wp)                          :: temp_sfc_day              (nlins,ncols)
+    real(wp)                          :: temp_sfc_day              (no_of_scalars/no_of_layers)
     ! reformatted temperature field
-    real(wp)                          :: temperature_rad           (nlins,ncols,nlays)
+    real(wp)                          :: temperature_rad           (no_of_scalars/no_of_layers,no_of_layers)
     ! reformatted pressure field
-    real(wp)                          :: pressure_rad              (nlins,ncols,nlays)
+    real(wp)                          :: pressure_rad              (no_of_scalars/no_of_layers,no_of_layers)
     ! pressure at cell interfaces
-    real(wp)                          :: pressure_interface_rad    (nlins,ncols,nlays+1)
+    real(wp)                          :: pressure_interface_rad    (no_of_scalars/no_of_layers,no_of_layers+1)
     ! temperature at cell interfaces
-    real(wp)                          :: temperature_interface_rad (nlins,ncols,nlays+1)
+    real(wp)                          :: temperature_interface_rad (no_of_scalars/no_of_layers,no_of_layers+1)
     ! temperature at cells restricted to day points
-    real(wp)                          :: temperature_rad_day       (nlins,ncols,nlays)
+    real(wp)                          :: temperature_rad_day       (no_of_scalars/no_of_layers,no_of_layers)
     ! pressure at cells restricted to day points
-    real(wp)                          :: pressure_rad_day          (nlins,ncols,nlays)
+    real(wp)                          :: pressure_rad_day          (no_of_scalars/no_of_layers,no_of_layers)
     ! pressure at cell interfaces restricted to day points
-    real(wp)                          :: pressure_interface_rad_day(nlins,ncols,nlays+1)
+    real(wp)                          :: pressure_interface_rad_day(no_of_scalars/no_of_layers,no_of_layers+1)
     ! liquid water path in g/m^2
-    real(wp)                          :: liquid_water_path      (nlins,ncols,nlays)
+    real(wp)                          :: liquid_water_path      (no_of_scalars/no_of_layers,no_of_layers)
     ! ice water path g/m^2
-    real(wp)                          :: ice_water_path         (nlins,ncols,nlays)
+    real(wp)                          :: ice_water_path         (no_of_scalars/no_of_layers,no_of_layers)
     ! liquid particles effective radius in micro meters 
-    real(wp)                          :: liquid_eff_radius         (nlins,ncols,nlays)
+    real(wp)                          :: liquid_eff_radius         (no_of_scalars/no_of_layers,no_of_layers)
     ! ice particles effective radius in micro meters 
-    real(wp)                          :: ice_eff_radius            (nlins,ncols,nlays)
+    real(wp)                          :: ice_eff_radius            (no_of_scalars/no_of_layers,no_of_layers)
     ! liquid water path in g/m^2 restricted to the day points
-    real(wp)                          :: liquid_water_path_day  (nlins,ncols,nlays)
+    real(wp)                          :: liquid_water_path_day  (no_of_scalars/no_of_layers,no_of_layers)
     ! ice water path in g/m^2 restricted to the day points
-    real(wp)                          :: ice_water_path_day     (nlins,ncols,nlays)
+    real(wp)                          :: ice_water_path_day     (no_of_scalars/no_of_layers,no_of_layers)
     ! liquid particles effective radius in micro meters restricted to the day points
-    real(wp)                          :: liquid_eff_radius_day     (nlins,ncols,nlays)
+    real(wp)                          :: liquid_eff_radius_day     (no_of_scalars/no_of_layers,no_of_layers)
     ! ice particles effective radius in micro meters restricted to the day points
-    real(wp)                          :: ice_eff_radius_day        (nlins,ncols,nlays)
+    real(wp)                          :: ice_eff_radius_day        (no_of_scalars/no_of_layers,no_of_layers)
     ! scale height of the atmosphere
     real(wp)                          :: scale_height = 8.e3_wp
     ! representative value of liquid particle radius
@@ -201,7 +278,7 @@ module radiation
     real(wp)                          :: thickness
     
     ! calculation of the number of columns
-    nlins,ncols,nlays_h =  nlins,ncols,nlays/
+    no_of_scalars_h =  no_of_scalars/no_of_layers
     
     ! set the surface emissivity (a longwave property) to a standard value
     surface_emissivity(:,:) =  0.98_wp
@@ -212,15 +289,13 @@ module radiation
     albedo_dif        (:,:) =  0.12_wp
     
     ! reformatting the thermodynamical state of the gas phase for RTE+RRTMGP
-    do ji=1,nlins
-      do jk=1,ncols
-        do jl=1,nlays
-          temperature_rad(ji,jk,jl) = temperature_gas((jl-1)*nlins,ncols,nlays_h+ji)
-          ! the pressure is diagnozed here,using the equation of state for ideal gases
-          pressure_rad(ji,jk,jl) = specific_gas_constants(0) &
-          *mass_densities(no_of_condensed_constituents*nlins,ncols,nlays &
-          + (jl-1)*nlins,ncols,nlays_h+ji)*temperature_rad(ji,jk,jl)
-        enddo
+    do ji = 1,no_of_scalars_h
+      do jk = 1,no_of_layers
+        temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
+        ! the pressure is diagnozed here,using the equation of state for ideal gases
+        pressure_rad(ji,jk) = specific_gas_constants(0) &
+        *mass_densities(no_of_condensed_constituents*no_of_scalars &
+        + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
       enddo
     enddo
     
@@ -228,13 +303,13 @@ module radiation
     if (no_of_condensed_constituents > 1) then
       liquid_eff_radius_value = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
       ice_eff_radius_value    = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
-      do ji=1,nlins,ncols,nlays_h
-        do jl=1,
-          thickness = z_vector(ji+(jl-1)*nlins,ncols,nlays_h)-z_vector(ji+jl*nlins,ncols,nlays_h)
-          liquid_water_path(ji,jk,jl) = thickness*1000._wp*mass_densities(nlins,ncols,nlays+(jl-1)*nlins,ncols,nlays_h+ji)
-          ice_water_path(ji,jk,jl) = thickness*1000._wp*mass_densities((jl-1)*nlins,ncols,nlays_h+ji)
-          liquid_eff_radius(ji,jk,jl) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jk,jl) > 0._wp)
-          ice_eff_radius(ji,jk,jl) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk,jl) > 0._wp)
+      do ji = 1,no_of_scalars_h
+        do jk = 1,no_of_layers
+          thickness = z_vector(ji+(jk-1)*no_of_scalars_h)-z_vector(ji+jk*no_of_scalars_h)
+          liquid_water_path(ji,jk) = thickness*1000._wp*mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji)
+          ice_water_path(ji,jk) = thickness*1000._wp*mass_densities((jk-1)*no_of_scalars_h+ji)
+          liquid_eff_radius(ji,jk) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jk) > 0._wp)
+          ice_eff_radius(ji,jk) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk) > 0._wp)
         enddo
       enddo
     else
@@ -245,65 +320,61 @@ module radiation
     endif
     
     ! moving the temperature into the allowed area
-    do ji=1,nlins
-      do jk=1,ncols
-        do jl=1,nlays
-          if (temperature_rad(ji,jk,jl) > k_dist_sw%get_temp_max()) then
-            temperature_rad(ji,jk,jl) = k_dist_sw%get_temp_max()
-          endif
-          if (temperature_rad(ji,jk,jl) < k_dist_sw%get_temp_min()) then
-            temperature_rad(ji,jk,jl) = k_dist_sw%get_temp_min()
-          endif
-          if (temperature_rad(ji,jk,jl) > k_dist_lw%get_temp_max()) then
-            temperature_rad(ji,jk,jl) = k_dist_lw%get_temp_max()
-          endif
-          if (temperature_rad(ji,jk,jl) < k_dist_lw%get_temp_min()) then
-            temperature_rad(ji,jk,jl) = k_dist_lw%get_temp_min()
-          endif
-        enddo
+    do ji = 1,no_of_scalars_h
+      do jk = 1,no_of_layers
+        if (temperature_rad(ji,jk) > k_dist_sw%get_temp_max()) then
+          temperature_rad(ji,jk) = k_dist_sw%get_temp_max()
+        endif
+        if (temperature_rad(ji,jk) < k_dist_sw%get_temp_min()) then
+          temperature_rad(ji,jk) = k_dist_sw%get_temp_min()
+        endif
+        if (temperature_rad(ji,jk) > k_dist_lw%get_temp_max()) then
+          temperature_rad(ji,jk) = k_dist_lw%get_temp_max()
+        endif
+        if (temperature_rad(ji,jk) < k_dist_lw%get_temp_min()) then
+          temperature_rad(ji,jk) = k_dist_lw%get_temp_min()
+        endif
       enddo
     enddo
     
     ! the properties at cell interfaces
-    do ji=1,nlins
-      do jk=1,ncols
-        do jl=1,nlays+1
-          ! values at TOA
-          if (jl==1) then
-            ! temperature at TOA (linear extrapolation)
-            ! the value in the highest layer
-            temperature_interface_rad(ji,jk,jl) = temperature_rad(ji,jk,jl) &
-            ! the gradient
-            ! delta T
-            + (temperature_rad(ji,jk,jl) - temperature_rad(ji,jl+1))/     &
-            ! delta z
-            (z_scalar(ji+(jl-1)*nlins,ncols,nlays_h)-z_scalar(ji+jl*nlins,ncols,nlays_h)) &
-            ! times delta_z
-            *(z_vector(ji)-z_scalar(ji+(jl-1)*nlins,ncols,nlays_h))
-            ! pressure at TOA
-            ! here,the barometric height formula is used
-            pressure_interface_rad   (ji,jk,jl) =  pressure_rad   (ji,jk,jl) &
-            *EXP(-(z_vector(ji)-z_scalar(ji+(jl-1)*nlins,ncols,nlays_h))/scale_height)
-          ! values at the surface
-          elseif (jl==nlays+1) then
-            ! temperature at the surface
-            ! the value in the lowest layer
-            temperature_interface_rad(ji,jk,jl) = temp_sfc(ji)
-            ! surface pressure
-            pressure_interface_rad   (ji,jk,jl) =  pressure_rad   (ji,jl-1) &
-            *EXP(-(z_vector(*nlins,ncols,nlays_h+ji) &
-            -z_scalar(ji+(jl-2)*nlins,ncols,nlays_h))/scale_height)
-          else
-            ! just the arithmetic mean
-             temperature_interface_rad(ji,jk,jl) =  0.5_wp*(temperature_rad(ji,jl-1)+temperature_rad(ji,jk,jl))
-             pressure_interface_rad   (ji,jk,jl) =  0.5_wp*(pressure_rad   (ji,jl-1)+pressure_rad   (ji,jk,jl))
-          endif
-        enddo
+    do ji = 1,no_of_scalars_h
+      do jk = 1,no_of_layers+1
+        ! values at TOA
+        if (jk == 1) then
+          ! temperature at TOA (linear extrapolation)
+          ! the value in the highest layer
+          temperature_interface_rad(ji,jk) = temperature_rad(ji,jk) &
+          ! the gradient
+          ! delta T
+          + (temperature_rad(ji,jk) - temperature_rad(ji,jk+1))/     &
+          ! delta z
+          (z_scalar(ji+(jk-1)*no_of_scalars_h)-z_scalar(ji+jk*no_of_scalars_h)) &
+          ! times delta_z
+          *(z_vector(ji)-z_scalar(ji+(jk-1)*no_of_scalars_h))
+          ! pressure at TOA
+          ! here,the barometric height formula is used
+          pressure_interface_rad   (ji,jk) =  pressure_rad   (ji,jk) &
+          *EXP(-(z_vector(ji)-z_scalar(ji+(jk-1)*no_of_scalars_h))/scale_height)
+        ! values at the surface
+        elseif (jk == no_of_layers+1) then
+          ! temperature at the surface
+          ! the value in the lowest layer
+          temperature_interface_rad(ji,jk) = temp_sfc(ji)
+          ! surface pressure
+          pressure_interface_rad   (ji,jk) =  pressure_rad   (ji,jk-1) &
+          *EXP(-(z_vector(no_of_layers*no_of_scalars_h+ji) &
+          -z_scalar(ji+(jk-2)*no_of_scalars_h))/scale_height)
+        else
+          ! just the arithmetic mean
+          temperature_interface_rad(ji,jk) =  0.5_wp*(temperature_rad(ji,jk-1)+temperature_rad(ji,jk))
+          pressure_interface_rad   (ji,jk) =  0.5_wp*(pressure_rad   (ji,jk-1)+pressure_rad   (ji,jk))
+        endif
       enddo
     enddo
     
     ! moving the interface temperature into the allowed area
-    do ji=1,nlins,ncols,nlays_h
+    do ji = 1,no_of_scalars_h
       if (temperature_interface_rad(ji,1) > k_dist_sw%get_temp_max()) then
          temperature_interface_rad(ji,1) = k_dist_sw%get_temp_max()
       endif
@@ -316,23 +387,23 @@ module radiation
       if (temperature_interface_rad(ji,1) < k_dist_lw%get_temp_min()) then
         temperature_interface_rad(ji,1) = k_dist_lw%get_temp_min()
       endif
-      if (temperature_interface_rad(ji,+1) > k_dist_sw%get_temp_max()) then
-         temperature_interface_rad(ji,+1) = k_dist_sw%get_temp_max()
+      if (temperature_interface_rad(ji,no_of_layers+1) > k_dist_sw%get_temp_max()) then
+         temperature_interface_rad(ji,no_of_layers+1) = k_dist_sw%get_temp_max()
       endif
-      if (temperature_interface_rad(ji,+1) < k_dist_sw%get_temp_min()) then
-        temperature_interface_rad(ji,+1) = k_dist_sw%get_temp_min()
+      if (temperature_interface_rad(ji,no_of_layers+1) < k_dist_sw%get_temp_min()) then
+        temperature_interface_rad(ji,no_of_layers+1) = k_dist_sw%get_temp_min()
       endif
-      if (temperature_interface_rad(ji,+1) > k_dist_lw%get_temp_max()) then
-        temperature_interface_rad(ji,+1) = k_dist_lw%get_temp_max()
+      if (temperature_interface_rad(ji,no_of_layers+1) > k_dist_lw%get_temp_max()) then
+        temperature_interface_rad(ji,no_of_layers+1) = k_dist_lw%get_temp_max()
       endif
-      if (temperature_interface_rad(ji,+1) < k_dist_lw%get_temp_min()) then
-        temperature_interface_rad(ji,+1) = k_dist_lw%get_temp_min()
+      if (temperature_interface_rad(ji,no_of_layers+1) < k_dist_lw%get_temp_min()) then
+        temperature_interface_rad(ji,no_of_layers+1) = k_dist_lw%get_temp_min()
       endif
     enddo
     
     ! calculating the zenith angle,and counting day and night points
     j_day =  0
-    do ji=1,nlins,ncols,nlays_h
+    do ji = 1,no_of_scalars_h
       mu_0(ji) =  coszenith(latitude_scalar(ji),longitude_scalar(ji),time_coord)
       ! it should be > 0,but this would lead to problems with the slicing procedure
       if (mu_0(ji) >= 0) then
@@ -346,13 +417,13 @@ module radiation
     ! now we start the actual radiation calculation
     ! clearing the radiation tendency (it still contains the results of the previous call
     ! from the dycore)
-    do ji=1,nlins,ncols,nlays
+    do ji = 1,no_of_scalars
       radiation_tendency(ji) = 0._wp
     enddo
     
     ! short wave first
     ! filling up the arrays restricted to day points
-    do j_day=1,no_of_day_points
+    do j_day = 1,no_of_day_points
       temperature_rad_day(j_day,:)       = temperature_rad(day_indices(j_day),:)
       pressure_rad_day(j_day,:)          = pressure_rad(day_indices(j_day),:)
       pressure_interface_rad_day(j_day,:)= pressure_interface_rad(day_indices(j_day),:)
@@ -367,20 +438,20 @@ module radiation
     end do
     
     ! setting the volume mixing ratios of the gases for the short wave calculation
-    call set_vol_mix_ratios(mass_densities,.true.,no_of_day_points,nlins,ncols,nlays_h,&
-    ,nlins,ncols,nlays,no_of_condensed_constituents,day_indices,z_scalar)
+    call set_vol_mix_ratios(mass_densities,.true.,no_of_day_points,no_of_scalars_h,&
+    no_of_layers,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar)
     
     ! initializing the short wave fluxes
-    call init_fluxes(fluxes_day,no_of_day_points,+1)
+    call init_fluxes(fluxes_day,no_of_day_points,no_of_layers+1)
     
     ! setting the bands for the SW cloud properties
     call handle_error(cloud_props_sw%init(k_dist_sw%get_band_lims_wavenumber()))
     
     ! allocating the short wave optical properties
-    call handle_error(atmos_props_sw%alloc_2str(no_of_day_points,k_dist_sw))
+    call handle_error(atmos_props_sw%alloc_2str(no_of_day_points,no_of_layers,k_dist_sw))
     
     ! allocating the short wave optical properties of the clouds
-    call handle_error(cloud_props_sw%alloc_2str(no_of_day_points,))
+    call handle_error(cloud_props_sw%alloc_2str(no_of_day_points,no_of_layers))
     
     ! allocating the TOA flux
     allocate(toa_flux(no_of_day_points,k_dist_sw%get_ngpt()))
@@ -417,14 +488,14 @@ module radiation
                              fluxes_day))
     
     ! short wave result (in Wm^-3)
-    call calc_power_density(.true.,nlins,ncols,nlays,&
-    ,nlins,ncols,nlays_h,no_of_day_points,day_indices,&
+    call calc_power_density(.true.,no_of_scalars,&
+    no_of_layers,no_of_scalars_h,no_of_day_points,day_indices,&
     fluxes_day,z_vector,radiation_tendency)
     
     ! saving the surface shortwave inward radiative flux density
-    do ji=1,no_of_day_points
-      sfc_sw_in(day_indices(ji)) = fluxes_day%flux_dn(ji,+1) &
-                                 - fluxes_day%flux_up(ji,+1)
+    do ji = 1,no_of_day_points
+      sfc_sw_in(day_indices(ji)) = fluxes_day%flux_dn(ji,no_of_layers+1) &
+                                 - fluxes_day%flux_up(ji,no_of_layers+1)
     enddo
     
     ! freeing the short wave fluxes
@@ -432,23 +503,23 @@ module radiation
     
     ! now long wave
     ! setting the volume mixing ratios of the gases for the long wave calculation
-    call set_vol_mix_ratios(mass_densities,.false.,no_of_day_points,nlins,ncols,nlays_h,&
-    ,nlins,ncols,nlays,no_of_condensed_constituents,day_indices,z_scalar)
+    call set_vol_mix_ratios(mass_densities,.false.,no_of_day_points,no_of_scalars_h,&
+    no_of_layers,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar)
     
     ! initializing the long wave fluxes
-    call init_fluxes(fluxes,nlins,ncols,nlays_h,+1)
+    call init_fluxes(fluxes,no_of_scalars_h,no_of_layers+1)
     
     ! setting the bands for the LW cloud properties
     call handle_error(cloud_props_lw%init(k_dist_lw%get_band_lims_wavenumber()))
     
     ! allocating the long wave optical properties of the gas phase
-    call handle_error(atmos_props_lw%alloc_1scl(nlins,ncols,nlays_h,k_dist_lw))
+    call handle_error(atmos_props_lw%alloc_1scl(no_of_scalars_h,no_of_layers,k_dist_lw))
     
     ! allocating the long wave optical properties of the clouds
-    call handle_error(cloud_props_lw%alloc_1scl(nlins,ncols,nlays_h,))
+    call handle_error(cloud_props_lw%alloc_1scl(no_of_scalars_h,no_of_layers))
     
     ! allocating the long wave source function
-    call handle_error(sources_lw%alloc(nlins,ncols,nlays_h,k_dist_lw))
+    call handle_error(sources_lw%alloc(no_of_scalars_h,no_of_layers,k_dist_lw))
     
     ! setting the long wave optical properties of the gas phase
     call handle_error(k_dist_lw%gas_optics(pressure_rad,                     &
@@ -478,14 +549,14 @@ module radiation
                              fluxes))
    
     ! add long wave result (in Wm^-3)
-    call calc_power_density(.false.,nlins,ncols,nlays,              &
-    ,nlins,ncols,nlays_h,no_of_day_points,day_indices,&
+    call calc_power_density(.false.,no_of_scalars,              &
+    no_of_layers,no_of_scalars_h,no_of_day_points,day_indices,&
     fluxes,z_vector,radiation_tendency)
     
     ! saving the surface longwave outward radiative flux density
-    do ji=1,nlins,ncols,nlays_h
-      sfc_lw_out(ji) = fluxes%flux_up(ji,+1) &
-                     - fluxes%flux_dn(ji,+1)
+    do ji = 1,no_of_scalars_h
+      sfc_lw_out(ji) = fluxes%flux_up(ji,no_of_layers+1) &
+                     - fluxes%flux_dn(ji,no_of_layers+1)
     enddo
     
     ! freeing the long wave fluxes
@@ -493,8 +564,8 @@ module radiation
     
   end subroutine calc_radiative_flux_convergence
     
-  subroutine calc_power_density(day_only,nlins,ncols,nlays,       &
-  ,nlins,ncols,nlays_h,no_of_day_points,day_indices,&
+  subroutine calc_power_density(day_only,no_of_scalars,       &
+  no_of_layers,no_of_scalars_h,no_of_day_points,day_indices,&
   fluxes,z_vector,radiation_tendency)
   
     ! this is essentially the negative vertical divergence operator
@@ -502,20 +573,20 @@ module radiation
     ! true for short wave calculations (for efficiency)
     logical,intent(in)              :: day_only
     ! as usual
-    integer,intent(in)              :: nlins,ncols,nlays
+    integer,intent(in)              :: no_of_scalars
     ! as usual
-    integer,intent(in)              :: 
+    integer,intent(in)              :: no_of_layers
     ! as usual
-    integer,intent(in)              :: nlins,ncols,nlays_h
+    integer,intent(in)              :: no_of_scalars_h
     ! as usual
     integer,intent(in)              :: no_of_day_points
     ! the indices of the columns where it is day
-    integer,intent(in)              :: day_indices(nlins,ncols,nlays_h)
+    integer,intent(in)              :: day_indices(no_of_scalars_h)
     type(ty_fluxes_broadband),intent(in):: fluxes
     ! as usual
-    real(wp),intent(in)              :: z_vector(nlins,ncols,nlays + nlins,ncols,nlays_h)
+    real(wp),intent(in)              :: z_vector(no_of_scalars + no_of_scalars_h)
     ! the result (in W/m^3)
-    real(wp),intent(inout)           :: radiation_tendency(nlins,ncols,nlays)
+    real(wp),intent(inout)           :: radiation_tendency(no_of_scalars)
   
     ! local variables
     ! the layer index
@@ -523,30 +594,30 @@ module radiation
     ! the index of the relevant column
     integer                          :: j_column
     ! the horizontal index
-    integer                          :: jl
+    integer                          :: jk
     ! the number of columns taken into account
     integer                          :: no_of_relevant_columns
     
     if (day_only) then
       no_of_relevant_columns = no_of_day_points
     else
-      no_of_relevant_columns = nlins,ncols,nlays_h
+      no_of_relevant_columns = no_of_scalars_h
     endif
   
     ! loop over all columns
-    do j_column=1,no_of_relevant_columns
+    do j_column = 1,no_of_relevant_columns
       ! loop over all layers
-      do ji=1,
+      do ji = 1,no_of_layers
         ! finding the relevant horizontal index
         if (day_only) then
-          jl = day_indices(j_column)
+          jk = day_indices(j_column)
         else
-          jl = j_column
+          jk = j_column
         endif
-        radiation_tendency((ji-1)*nlins,ncols,nlays_h+jl) = &
+        radiation_tendency((ji-1)*no_of_scalars_h+jk) = &
         ! this function is called four times, therefore we need to
         ! add up the tendencies
-        radiation_tendency((ji-1)*nlins,ncols,nlays_h+jl) + &
+        radiation_tendency((ji-1)*no_of_scalars_h+jk) + &
         ! this is a sum of four fluxes
         ( &
         ! upward flux (going in)
@@ -559,7 +630,7 @@ module radiation
         - fluxes%flux_dn(j_column,ji+1))                &
         ! dividing by the column thickness (the shallow atmosphere
         ! approximation is made at this point)
-        /(z_vector((ji-1)*nlins,ncols,nlays_h+jl) - z_vector(ji*nlins,ncols,nlays_h+jl))
+        /(z_vector((ji-1)*no_of_scalars_h+jk) - z_vector(ji*no_of_scalars_h+jk))
       enddo
     enddo
   
@@ -599,12 +670,12 @@ module radiation
     real(wp)                          :: trans_earth2sun         (3,3)
     
     omega                 = 7.292115e-5_wp
-    omega_rev            =1.99099e-7_wp
+    omega_rev             = 1.99099e-7_wp
     obliquity             = 0.409092592843564_wp
     
     ! refer to https://www.esrl.noaa.gov/gmd/grad/solcalc/azel.html
     ! Unix time coordinate of 2019-Dec-20,12:00 UTC
-    t_0                  =1576843200.0_wp
+    t_0                   = 1576843200.0_wp
     ! this is a winter solstice
     phi_0_earth_around_sun = 0._wp
     phi_0_earth_rotation  = 0._wp
@@ -649,8 +720,8 @@ module radiation
   
   end function coszenith
   
-  subroutine set_vol_mix_ratios(mass_densities,sw_bool,no_of_day_points,nlins,ncols,nlays_h,&
-  ,nlins,ncols,nlays,no_of_condensed_constituents,day_indices,z_scalar)
+  subroutine set_vol_mix_ratios(mass_densities,sw_bool,no_of_day_points,no_of_scalars_h,&
+  no_of_layers,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar)
     
     ! computes volume mixing ratios out of the model variables
     
@@ -661,25 +732,25 @@ module radiation
     ! as usual
     integer,intent(in)              :: no_of_day_points
     ! as usual
-    integer,intent(in)              :: nlins,ncols,nlays_h
+    integer,intent(in)              :: no_of_scalars_h
     ! as usual
-    integer,intent(in)              :: 
+    integer,intent(in)              :: no_of_layers
     ! as usual
-    integer,intent(in)              :: nlins,ncols,nlays
+    integer,intent(in)              :: no_of_scalars
     ! as usual
     integer,intent(in)              :: no_of_condensed_constituents
     ! the indices of the points where it is day
-    integer,intent(in)              :: day_indices(nlins,ncols)
+    integer,intent(in)              :: day_indices(no_of_scalars/no_of_layers)
     ! z coordinates of scalar data points
-    real(wp),intent(in)              :: z_scalar(nlins,ncols,nlays)
+    real(wp),intent(in)              :: z_scalar(no_of_scalars)
     
     ! the volume mixing ratio of a gas
-    real(wp)                          :: vol_mix_ratio(nlins,ncols,nlays_h,)
+    real(wp)                          :: vol_mix_ratio(no_of_scalars_h,no_of_layers)
     ! loop indices
-    integer                          :: ji,jl,jl
+    integer                          :: ji,jk,jl
     
     ! setting the volume mixing ratios of the gases
-    do ji=1,size(active_gases)
+    do ji = 1,size(active_gases)
       ! the default
       vol_mix_ratio(:,:) = 0.0_wp
       select case (gases_lowercase(ji))
@@ -692,15 +763,15 @@ module radiation
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(wp)
         case("o3")
           if (sw_bool) then
-            do jl=1,no_of_day_points
-              do jl=1,
-                vol_mix_ratio(jl,jl) = calc_o3_vmr(z_scalar(day_indices(jl)+(jl-1)*nlins,ncols,nlays_h))
+            do jk=1,no_of_day_points
+              do jl=1,no_of_layers
+                vol_mix_ratio(jk,jl) = calc_o3_vmr(z_scalar(day_indices(jk)+(jl-1)*no_of_scalars_h))
               enddo
             enddo
           else
-            do jl=1,nlins,ncols,nlays_h
-              do jl=1,
-                vol_mix_ratio(jl,jl) = calc_o3_vmr(z_scalar(jl+(jl-1)*nlins,ncols,nlays_h))
+            do jk=1,no_of_scalars_h
+              do jl=1,no_of_layers
+                vol_mix_ratio(jk,jl) = calc_o3_vmr(z_scalar(jk+(jl-1)*no_of_scalars_h))
               enddo
             enddo
           endif
@@ -714,23 +785,23 @@ module radiation
           ! no_of_condensed_constituents > 0 is equivalent to the presence of water in the model atmosphere
           ! in the short wave case,only the day points matter
           if (sw_bool .and. no_of_condensed_constituents > 0) then
-            do jl=1,no_of_day_points
-              do jl=1,
-                vol_mix_ratio(jl,jl) = & 
-                mass_densities((no_of_condensed_constituents+1)*nlins,ncols,nlays+day_indices(jl)+(jl-1)*nlins,ncols,nlays_h) &
+            do jk=1,no_of_day_points
+              do jl=1,no_of_layers
+                vol_mix_ratio(jk,jl) = & 
+                mass_densities((no_of_condensed_constituents+1)*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h) &
                 *specific_gas_constants(1)/ &
-                (mass_densities(no_of_condensed_constituents*nlins,ncols,nlays+day_indices(jl)+(jl-1)*nlins,ncols,nlays_h) &
+                (mass_densities(no_of_condensed_constituents*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h) &
                 *specific_gas_constants(0))
               enddo
             enddo
           ! in the long wave case,all points matter
           elseif (no_of_condensed_constituents > 0) then
-            do jl=1,nlins,ncols,nlays_h
-              do jl=1,
-                vol_mix_ratio(jl,jl) = & 
-                mass_densities((no_of_condensed_constituents+1)*nlins,ncols,nlays+jl+(jl-1)*nlins,ncols,nlays_h) &
+            do jk=1,no_of_scalars_h
+              do jl=1,no_of_layers
+                vol_mix_ratio(jk,jl) = & 
+                mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
                 *specific_gas_constants(1)/ &
-                (mass_densities(no_of_condensed_constituents*nlins,ncols,nlays+jl+(jl-1)*nlins,ncols,nlays_h) &
+                (mass_densities(no_of_condensed_constituents*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
                 *specific_gas_constants(0))
               enddo
             enddo
@@ -804,6 +875,7 @@ module radiation
   end subroutine handle_error
   
 end module radiation
+
 
 
 
