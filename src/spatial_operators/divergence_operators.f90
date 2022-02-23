@@ -39,7 +39,7 @@ module divergence_operators
           ! the horizontal component
           comp_h = &
           vector_field_x(ji,jk+1,jl)*grid%area_x(ji,jk+1,jl) &
-          + vector_field_y(ji,jk+1,jl)*grid%area_y(ji,jk+1,jl) &
+          + vector_field_y(ji+1,jk,jl)*grid%area_y(ji+1,jk,jl) &
           - vector_field_x(ji,jk,jl)*grid%area_x(ji,jk,jl) &
           - vector_field_y(ji,jk,jl)*grid%area_y(ji,jk,jl)
           

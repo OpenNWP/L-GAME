@@ -5,19 +5,24 @@ module boundaries
 
   ! This module handles everything dealing with boundary conditions.
 
+  use definitions, only: t_tend
+
   implicit none
   
   private
   
-  public :: bc
+  public :: update_boundaries
   
   contains
   
-  subroutine bc()
+  subroutine update_boundaries(tend_bc)
   
-    ! sets the boundary conditions
+    ! updates the boundary conditions
     
-  end subroutine bc
+    ! input arguments and output
+    type(t_tend) :: tend_bc
+    
+  end subroutine update_boundaries
 
 end module boundaries
 

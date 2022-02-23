@@ -30,7 +30,7 @@ program control
   type(t_grid)   :: grid
   type(t_state)  :: state_old, state_new, state_write
   type(t_diag)   :: diag
-  type(t_tend)   :: tend
+  type(t_tend)   :: tend,tend_bc
   type(t_irrev)  :: irrev
   real(wp)       :: normal_dist_min_vert ! minimum vertical gridpoint distance
 
@@ -130,6 +130,13 @@ program control
   allocate(tend%wind_v(nlins+1,ncols,nlays))
   allocate(tend%wind_w(nlins,ncols,nlays+1))
   allocate(tend%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
+  ! state containing the tendency of the boundary conditions
+  allocate(tend_bc%rho(nlins,ncols,nlays,no_of_constituents))
+  allocate(tend_bc%rhotheta(nlins,ncols,nlays))
+  allocate(tend_bc%wind_u(nlins,ncols+1,nlays))
+  allocate(tend_bc%wind_v(nlins+1,ncols,nlays))
+  allocate(tend_bc%wind_w(nlins,ncols,nlays+1))
+  allocate(tend_bc%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
   ! state to be written out
   allocate(state_write%rho(nlins,ncols,nlays,no_of_constituents))
   allocate(state_write%rhotheta(nlins,ncols,nlays))
@@ -244,7 +251,7 @@ program control
     call lin_combination(state_new,state_new,state_old,0._wp,1._wp,grid)
       
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,grid,diag,irrev,time_step_counter)
+    call rkhevi(state_old,state_new,tend,tend_bc,grid,diag,irrev,time_step_counter)
     
     ! managing the calls to the output routine
     if (t_0 + dtime >= t_write) then
@@ -335,6 +342,13 @@ program control
   deallocate(tend%wind_v)
   deallocate(tend%wind_w)
   deallocate(tend%condensed_rho_t)
+  ! state containing the tendency of the boundary conditions
+  deallocate(tend_bc%rho)
+  deallocate(tend_bc%rhotheta)
+  deallocate(tend_bc%wind_u)
+  deallocate(tend_bc%wind_v)
+  deallocate(tend_bc%wind_w)
+  deallocate(tend_bc%condensed_rho_t)
   ! state to be written out
   deallocate(state_write%rho)
   deallocate(state_write%rhotheta)

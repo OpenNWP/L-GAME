@@ -12,12 +12,13 @@ module manage_rkhevi
   use explicit_vector_tendencies, only: expl_vector_tend
   use explicit_scalar_tendencies, only: expl_scalar_tend,moisturizer
   use column_solvers,             only: three_band_solver_ver,three_band_solver_gen_densities
-  use boundaries,                 only: bc
+  use boundaries,                 only: update_boundaries
   use derived_quantities,         only: temperature_diagnostics
   use constituents_nml,           only: no_of_constituents
   use diff_nml,                   only: lmom_diff_v
   use surface_nml,                only: lsoil
   use planetary_boundary_layer,   only: update_sfc_turb_quantities
+  use bc_nml,                     only: lperiodic
 
   implicit none
   
@@ -27,11 +28,12 @@ module manage_rkhevi
 
   contains
   
-  subroutine rkhevi(state_old,state_new,tend,grid,diag,irrev,total_step_counter)
+  subroutine rkhevi(state_old,state_new,tend,tend_bc,grid,diag,irrev,total_step_counter)
     
     type(t_state),  intent(inout) :: state_old          ! the state at the old timestep
     type(t_state),  intent(inout) :: state_new          ! the state at the new timestep
     type(t_tend),   intent(inout) :: tend               ! the tendency
+    type(t_tend),   intent(inout) :: tend_bc            ! the tendency of the boundary conditions
     type(t_grid),   intent(inout) :: grid               ! the grid of the model
     type(t_diag),   intent(inout) :: diag               ! diagnostic quantities
     type(t_irrev),  intent(inout) :: irrev              ! irreversible quantities
@@ -90,8 +92,10 @@ module manage_rkhevi
     ! saturation adjustment, calculation of latent heating rates, evaporation at the surface
     call moisturizer(state_new,diag,irrev,grid)
     
-    ! calling the boundary conditions subroutine
-    call bc()
+    ! calling the boundary conditions subroutine for real-data simulation
+    if (.not. lperiodic) then
+      call update_boundaries(tend_bc)
+    endif
     
   end subroutine rkhevi
 
