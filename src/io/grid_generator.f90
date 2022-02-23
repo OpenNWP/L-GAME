@@ -441,7 +441,7 @@ module grid_generator
     
     ! writing the costly grid properties to a file if required by the user
     if (lwrite_grid) then
-      call write_grid()
+      call write_grid(grid)
     endif
   
   end subroutine grid_setup

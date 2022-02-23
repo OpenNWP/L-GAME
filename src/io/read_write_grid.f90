@@ -5,6 +5,9 @@ module read_write_grid
 
   ! This module reads the grid from a file or writes the grid to a file. This is useful for efficiency.
 
+  use definitions,       only: t_grid
+  use set_initial_state, only: nc_check
+  
   implicit none
   
   private
@@ -14,13 +17,13 @@ module read_write_grid
   
   contains
   
-  subroutine write_grid
+  subroutine write_grid(grid)
   
-    ! This subroutine writes important grid properties to a file.
+    type(t_grid), intent(in) :: grid
   
   end subroutine write_grid
   
-  subroutine read_grid
+  subroutine read_grid()
   
     ! This subroutine reads important grid properties from a file.
   
