@@ -51,8 +51,8 @@ module read_write_grid
     ! defining the dimensions
     call nc_check(nf90_def_dim(ncid,"lon_model",ncols,x_dimid))
     call nc_check(nf90_def_dim(ncid,"lat_model",nlins,y_dimid))
-    call nc_check(nf90_def_dim(ncid,"lon_modelp1",ncols+1,x_dimidp1))
-    call nc_check(nf90_def_dim(ncid,"lat_modelp1",nlins+1,y_dimidp1))
+    call nc_check(nf90_def_dim(ncid,"lon_model_plus1",ncols+1,x_dimidp1))
+    call nc_check(nf90_def_dim(ncid,"lat_model_plus1",nlins+1,y_dimidp1))
 
     ! setting the dimension ID arrays
     ! 2D
