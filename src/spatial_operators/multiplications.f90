@@ -33,6 +33,8 @@ module multiplications
     ! local variables
     integer                     :: ji,jk ! loop indices
     
+    ! inner domain
+    ! x
     !$OMP PARALLEL
     !$OMP DO PRIVATE(jk)
     do jk=2,ncols
@@ -41,6 +43,7 @@ module multiplications
     !$OMP END DO
     !$OMP END PARALLEL
     
+    ! y
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji)
     do ji=2,nlins
@@ -48,6 +51,8 @@ module multiplications
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
+  
+    ! boundaries
   
   end subroutine scalar_times_vector_h
   

@@ -10,7 +10,7 @@ module grid_generator
   use constants,          only: re,density_water,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv
   use surface_nml,        only: nsoillays
-  use gradient_operators, only: grad_hor_cov_extended,grad
+  use gradient_operators, only: grad,grad_hor_cov
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
 
   implicit none
@@ -187,7 +187,7 @@ module grid_generator
     enddo
     
     ! calculating the coordinate slopes
-    call grad_hor_cov_extended(grid%z_geo_scal,grid%slope_x,grid%slope_y,grid)
+    call grad_hor_cov(grid%z_geo_scal,grid%slope_x,grid%slope_y,grid)
     
     ! setting the z coordinates of the vertical vector points
     do ji=1,nlins

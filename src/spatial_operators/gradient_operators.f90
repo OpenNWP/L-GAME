@@ -14,7 +14,6 @@ module gradient_operators
   private
   
   public :: grad_hor_cov
-  public :: grad_hor_cov_extended
   public :: grad
   public :: grad_hor
   
@@ -29,43 +28,9 @@ module gradient_operators
     real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     ! local variables
-    integer                     :: ji,jk                  ! loop variables
+    integer                     :: ji,jk                 ! loop variables
 
-    ! calculating the x-component of the gradient
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
-    do ji=1,nlins
-      do jk=1,ncols-1
-        result_field_x(ji,jk,:) = (scalar_field(ji,jk+1,:) - scalar_field(ji,jk,:))/grid%dx(ji+1,jk+1,:)
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-
-    ! calculating the y-component of the gradient
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
-    do ji=1,nlins-1
-      do jk=1,ncols
-        result_field_y(ji,jk,:) = (scalar_field(ji+1,jk,:) - scalar_field(ji,jk,:))/grid%dy(ji+1,jk+1,:)
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-
-  end subroutine grad_hor_cov
-  
-  subroutine grad_hor_cov_extended(scalar_field,result_field_x,result_field_y,grid)
-
-    ! This subroutine computes the horizontal covariant gradient of a scalar field including the boundary domain.
-    
-    real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
-    real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
-    real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
-    ! local variables
-    integer                     :: ji,jk                  ! loop variables
-
+    ! inner domain
     ! calculating the x-component of the gradient
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk)
@@ -88,7 +53,9 @@ module gradient_operators
     !$OMP END DO
     !$OMP END PARALLEL
 
-  end subroutine grad_hor_cov_extended
+    ! boundaries
+
+  end subroutine grad_hor_cov
   
   subroutine grad_vert_cov(scalar_field,result_field,grid)
 
