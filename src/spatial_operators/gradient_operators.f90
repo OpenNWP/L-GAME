@@ -34,29 +34,44 @@ module gradient_operators
     ! inner domain
     ! calculating the x-component of the gradient
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
-    do ji=1,nlins
-      do jk=2,ncols
-        result_field_x(ji,jk,:) = (scalar_field(ji,jk,:) - scalar_field(ji,jk-1,:))/grid%dx(ji,jk,:)
-      enddo
+    !$OMP DO PRIVATE(jk)
+    do jk=2,ncols
+      result_field_x(:,jk,:) = (scalar_field(:,jk,:) - scalar_field(:,jk-1,:))/grid%dx(:,jk,:)
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
 
     ! calculating the y-component of the gradient
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$OMP DO PRIVATE(ji)
     do ji=2,nlins
-      do jk=1,ncols
-        result_field_y(ji,jk,:) = (scalar_field(ji,jk,:) - scalar_field(ji-1,jk,:))/grid%dy(ji,jk,:)
-      enddo
+      result_field_y(ji,:,:) = (scalar_field(ji,:,:) - scalar_field(ji-1,:,:))/grid%dy(ji,:,:)
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
 
-    ! boundaries
+    ! periodic boundary conditions
     if (lperiodic) then
-      
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      result_field_x(:,1,:) = (scalar_field(:,1,:) - scalar_field(:,ncols,:))/grid%dx(:,1,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      result_field_y(1,:,:) = (scalar_field(1,:,:) - scalar_field(nlins,:,:))/grid%dy(1,:,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
     endif
 
   end subroutine grad_hor_cov
@@ -78,8 +93,12 @@ module gradient_operators
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     result_field(:,:,1) = 0._wp
     result_field(:,:,nlays+1) = 0._wp
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
 
   end subroutine grad_vert_cov
   
@@ -125,7 +144,11 @@ module gradient_operators
     ! calling the gradient
     call grad(scalar_field,result_field_x,result_field_y,result_field_z,grid)
     ! setting the vertical component to zero
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     result_field_z(:,:,:) = 0._wp
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
   
   end subroutine grad_hor
 
