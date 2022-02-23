@@ -41,6 +41,7 @@ lperiodic=.true.
 /
 
 &io
+lwrite_grid=.true.
 dt_write_min=1
 /
 
