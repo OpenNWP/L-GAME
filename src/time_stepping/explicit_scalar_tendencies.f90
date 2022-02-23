@@ -77,7 +77,7 @@ module explicit_scalar_tendencies
         !$OMP WORKSHARE
         tend%rhotheta = -diag%scalar_placeholder &
         ! dissipative heating
-        + irrev%heating_diss/(c_p*(grid%exner_bg+state%exner_pert))
+        + (irrev%heating_diss + diag%radiation_tendency)/(c_p*(grid%exner_bg+state%exner_pert))
         !$OMP END WORKSHARE
         !$OMP END PARALLEL
       endif

@@ -140,6 +140,7 @@ module definitions
     real(wp), allocatable :: z_eta_x(:,:,:)                   ! relative vorticity in x-direction
     real(wp), allocatable :: z_eta_y(:,:,:)                   ! relative vorticity in y-direction
     real(wp), allocatable :: z_eta_z(:,:,:)                   ! relative vorticity in z-direction
+    real(wp), allocatable :: radiation_tendency(:,:,:)        ! power density due to radiation
     real(wp), allocatable :: scalar_flux_resistance(:,:)      ! surface flux resistance acting on scalar quantities
     real(wp), allocatable :: monin_obukhov_length(:,:)        ! Monin-Obukhov length
     real(wp), allocatable :: power_flux_density_sensible(:,:) ! power flux density acting on the surface due to sensible heat
