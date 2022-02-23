@@ -194,8 +194,8 @@ program control
   
   ! limitting the hydrometeor sedimentation velocities for stability reasons
   normal_dist_min_vert = minval(grid%dz(:,:,nlays+1))
-  rain_velocity = min(0.8_wp*normal_dist_min_vert/dtime, rain_velocity)
-  snow_velocity = min(0.8_wp*normal_dist_min_vert/dtime, snow_velocity)
+  rain_velocity = min(0.8_wp*normal_dist_min_vert/dtime,rain_velocity)
+  snow_velocity = min(0.8_wp*normal_dist_min_vert/dtime,snow_velocity)
   write(*,*) "Snow falling velocity set to", rain_velocity, "m/s."
   write(*,*) "Rain falling velocity set to", snow_velocity, "m/s."
 
@@ -238,7 +238,7 @@ program control
   run_span = 3600._wp*run_span_hr
   time_step_counter = 0
   
-  do while (t_0 < t_init + run_span + 300._wp)
+  do while (t_0 < t_init+run_span+300._wp)
     
     ! writing the new state into the old state
     call lin_combination(state_new,state_new,state_old,0._wp,1._wp,grid)
@@ -252,12 +252,12 @@ program control
       call interpolation_t(state_old,state_new,state_write,t_0,t_0+dtime,t_write,grid)
       call write_output(state_write,diag,int((t_write-t_init)/60._wp),grid)
     
-      t_write = t_write + dt_write
+      t_write = t_write+dt_write
     
     endif
     
     t_0 = t_0 + dtime
-    time_step_counter = time_step_counter + 1
+    time_step_counter = time_step_counter+1
     write(*,*) "Step ", time_step_counter, " completed."
     
   enddo
