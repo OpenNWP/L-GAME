@@ -12,6 +12,7 @@ module grid_generator
   use surface_nml,        only: nsoillays
   use gradient_operators, only: grad,grad_hor_cov
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
+  use io_nml,             only: lread_grid
 
   implicit none
   
@@ -389,48 +390,51 @@ module grid_generator
     
     write(*,*) "Thickness of the uppermost soil layer: ", -grid%z_soil_interface(2), "m."
     
-    density_soil = 1442._wp
-    c_p_soil = 830._wp
-    c_p_water = 4184._wp
+    ! idealized soil properties are being set here if no grid file shall be read in
+    if (.not. lread_grid) then
+      density_soil = 1442._wp
+      c_p_soil = 830._wp
+      c_p_water = 4184._wp
     
-    do ji=1,nlays
-      do jk=1,ncols
+      do ji=1,nlays
+        do jk=1,ncols
 		
-        grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_scalar(ji))
+          grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_scalar(ji))
 		
-		! albedo of water
-        grid%sfc_albedo(ji,jk) = 0.06_wp
+		  ! albedo of water
+          grid%sfc_albedo(ji,jk) = 0.06_wp
 		
-		! for water, the roughness_length is set to some sea-typical value, will not be used anyway
-        grid%roughness_length(ji,jk) = 0.08_wp
+		  ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
+          grid%roughness_length(ji,jk) = 0.08_wp
 		
-		! will also not be used
-        grid%sfc_rho_c(ji,jk) = density_water*c_p_water
+	      ! will also not be used
+          grid%sfc_rho_c(ji,jk) = density_water*c_p_water
 		
-		! land
-        if (grid%is_land(ji,jk)) then
+		  ! land
+          if (grid%is_land(ji,jk)) then
         
-          grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
-          grid%sfc_albedo(ji,jk) = 0.12_wp
-          
-          ! setting the surface albedo of land depending on the latitude
-          ! ice
-          if (abs(360._wp/(2._wp*M_PI)*grid%lat_scalar(ji)) > 70._wp) then
-            grid%sfc_albedo(ji,jk) = 0.8_wp
-          ! normal soil
-          else
+            grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
             grid%sfc_albedo(ji,jk) = 0.12_wp
+          
+            ! setting the surface albedo of land depending on the latitude
+            ! ice
+            if (abs(360._wp/(2._wp*M_PI)*grid%lat_scalar(ji)) > 70._wp) then
+              grid%sfc_albedo(ji,jk) = 0.8_wp
+            ! normal soil
+            else
+              grid%sfc_albedo(ji,jk) = 0.12_wp
+            endif
+          
+            grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_scalar(ji),grid%z_geo_w(ji,jk,nlays+1))/8._wp
+          
           endif
-          
-          grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_scalar(ji),grid%z_geo_w(ji,jk,nlays+1))/8._wp
-          
-        endif
 		
-		! restricting the roughness length to a minimum
-        grid%roughness_length(ji,jk) = max(0.0001_wp, grid%roughness_length(ji,jk))
+		  ! restricting the roughness length to a minimum
+          grid%roughness_length(ji,jk) = max(0.0001_wp, grid%roughness_length(ji,jk))
       
+        enddo
       enddo
-    enddo
+    endif
   
   end subroutine grid_setup
   
