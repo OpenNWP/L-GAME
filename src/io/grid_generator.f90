@@ -24,6 +24,7 @@ module grid_generator
   public :: geopot
   
   interface
+    ! interface to the geos95 library
     real(C_DOUBLE) function calculate_distance_h(latitude_a,longitude_a,latitude_b,longitude_b,radius) &
     bind(c, name = "calculate_distance_h")
       use, intrinsic::iso_c_binding
