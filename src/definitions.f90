@@ -35,6 +35,12 @@ module definitions
     ! type containing information on the model grid
     real(wp), allocatable :: lat_scalar(:)                    ! latitudes of the scalar gridpoints
     real(wp), allocatable :: lon_scalar(:)                    ! longitudes of the scalar gridpoints
+    real(wp), allocatable :: lat_geo_scalar(:,:)              ! geographic latitudes of the scalar gridpoints
+    real(wp), allocatable :: lon_geo_scalar(:,:)              ! geographic longitudes of the scalar gridpoints
+    real(wp), allocatable :: lat_geo_u(:,:)                   ! geographic latitudes of the u-vector gridpoints
+    real(wp), allocatable :: lon_geo_u(:,:)                   ! geographic longitudes of the u-vector gridpoints
+    real(wp), allocatable :: lat_geo_v(:,:)                   ! geographic latitudes of the v-vector gridpoints
+    real(wp), allocatable :: lon_geo_v(:,:)                   ! geographic longitudes of the v-vector gridpoints
     real(wp), allocatable :: z_geo_scal(:,:,:)                ! geometric heights of the scalar gridpoints
     real(wp), allocatable :: dx(:,:,:)                        ! grid point distance in x-direction
     real(wp), allocatable :: dy(:,:,:)                        ! grid point distance in y-direction
@@ -128,6 +134,7 @@ module definitions
     real(wp), allocatable :: w_placeholder(:,:,:)             ! placeholder for vector fields in z-direction
     real(wp), allocatable :: u_10(:,:)                        ! 10 m wind in x direction
     real(wp), allocatable :: v_10(:,:)                        ! 10 m wind in y direction
+    real(wp), allocatable :: gust(:,:)                        ! gusts speed 10 m AGL
     real(wp), allocatable :: mslp(:,:)                        ! mean sea level pressure
     real(wp), allocatable :: t_2(:,:)                         ! 2 m temperature
     real(wp), allocatable :: z_eta_x(:,:,:)                   ! relative vorticity in x-direction

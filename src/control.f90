@@ -36,13 +36,13 @@ program control
 
   ! reading in all namelists so that we know what we have to do
   write(*,*) "Reading in run namelist ..."
-  call run_nml_setup
+  call run_nml_setup()
   write(*,*) "... run namelist read."
   write(*,*) "Reading in diff namelist ..."
-  call diff_nml_setup
+  call diff_nml_setup()
   write(*,*) "... diff namelist read."
   write(*,*) "Reading in I/O namelist ..."
-  call io_nml_setup
+  call io_nml_setup()
   write(*,*) "... I/O namelist read."
   write(*,*) "Reading in constituents namelist ..."
   call constituents_nml_setup()
