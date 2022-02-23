@@ -13,6 +13,7 @@ module grid_generator
   use gradient_operators, only: grad,grad_hor_cov
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
   use io_nml,             only: lread_grid
+  use read_write_grid,    only: write_grid,read_grid
 
   implicit none
   
@@ -390,8 +391,10 @@ module grid_generator
     
     write(*,*) "Thickness of the uppermost soil layer: ", -grid%z_soil_interface(2), "m."
     
+    if (lread_grid) then
+      call read_grid()
     ! idealized soil properties are being set here if no grid file shall be read in
-    if (.not. lread_grid) then
+    else
       density_soil = 1442._wp
       c_p_soil = 830._wp
       c_p_water = 4184._wp

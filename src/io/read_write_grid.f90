@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module set_grid
+module read_write_grid
 
   ! This module reads the grid from a file or writes the grid to a file. This is useful for efficiency.
 
@@ -26,7 +26,7 @@ module set_grid
   
   end subroutine read_grid
 
-end module set_grid
+end module read_write_grid
 
 
 
