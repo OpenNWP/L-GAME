@@ -20,7 +20,7 @@ program control
   use manage_rkhevi,             only: rkhevi
   use linear_combine_two_states, only: lin_combination,interpolation_t
   use bc_nml,                    only: bc_nml_setup
-  use rad_nml,                   only: rad_nml_setup
+  use rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
   
   implicit none
 
@@ -33,6 +33,8 @@ program control
   type(t_tend)   :: tend,tend_bc
   type(t_irrev)  :: irrev
   real(wp)       :: normal_dist_min_vert ! minimum vertical gridpoint distance
+  logical        :: lrad_update          ! radiation update switch
+  real(wp)       :: t_rad_update         ! radiation update time
 
   ! reading in all namelists so that we know what we have to do
   write(*,*) "Reading in run namelist ..."
@@ -246,13 +248,23 @@ program control
   run_span = 3600._wp*run_span_hr
   time_step_counter = 0
   
+  ! setting the next time for the radiation update
+  t_rad_update = t_0
+  
   do while (t_0 < t_init+run_span+300._wp)
     
     ! writing the new state into the old state
     call lin_combination(state_new,state_new,state_old,0._wp,1._wp,grid)
-      
+
+    if (t_0 <= t_rad_update .and. t_0+dtime >= t_rad_update) then
+      lrad_update = .true.
+      t_rad_update = t_rad_update+dtime_rad
+    else
+      lrad_update = .false.
+    endif
+
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,tend_bc,grid,diag,irrev,time_step_counter,.true.)
+    call rkhevi(state_old,state_new,tend,tend_bc,grid,diag,irrev,time_step_counter,lrad_update)
     
     ! managing the calls to the output routine
     if (t_0 + dtime >= t_write) then
@@ -264,7 +276,7 @@ program control
     
     endif
     
-    t_0 = t_0 + dtime
+    t_0 = t_0+dtime
     time_step_counter = time_step_counter+1
     write(*,*) "Step ", time_step_counter, " completed."
     
