@@ -8,6 +8,7 @@ module gradient_operators
   use definitions, only: t_grid,wp
   use run_nml,     only: nlins,ncols,nlays,toa
   use averaging,   only: hor_cov_to_con
+  use bc_nml,      only: lperiodic
     
   implicit none
   
@@ -54,6 +55,9 @@ module gradient_operators
     !$OMP END PARALLEL
 
     ! boundaries
+    if (lperiodic) then
+      
+    endif
 
   end subroutine grad_hor_cov
   

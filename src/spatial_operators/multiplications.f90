@@ -50,8 +50,11 @@ module multiplications
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-  
+
     ! boundaries
+    if (lperiodic) then
+      
+    endif
   
   end subroutine scalar_times_vector_h
   
