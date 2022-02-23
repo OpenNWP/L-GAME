@@ -8,9 +8,9 @@ then
 mkdir output
 fi
 
-if [ ! -d bc ]
+if [ ! -d real_weather ]
 then
-mkdir bc
+mkdir real_weather
 fi
 
 if [ ! -d figs ]
