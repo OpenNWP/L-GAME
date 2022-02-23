@@ -20,6 +20,7 @@ program control
   use manage_rkhevi,             only: rkhevi
   use linear_combine_two_states, only: lin_combination,interpolation_t
   use bc_nml,                    only: bc_nml_setup
+  use rad_nml,                   only: rad_nml_setup
   
   implicit none
 
@@ -52,6 +53,9 @@ program control
   write(*,*) "Reading in boundary conditions namelist ..."
   call bc_nml_setup()
   write(*,*) "... boundary conditions namelist read."
+  write(*,*) "Reading in radiation namelist ..."
+  call rad_nml_setup()
+  write(*,*) "... radiation namelist read."
   
   ! allocating memory
   write(*,*) "Allocating memory ..."
@@ -228,6 +232,8 @@ program control
   time_step_counter = 0
   
   do while (t_0 < t_init + run_span + 300._wp)
+    
+    ! writing the new state into the old state
     call lin_combination(state_new,state_new,state_old,0._wp,1._wp,grid)
       
     ! this is the RKHEVI routine performing the time stepping

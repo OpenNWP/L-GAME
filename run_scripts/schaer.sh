@@ -42,6 +42,10 @@ lsoil=.false.
 &bc
 /
 
+&rad
+lrad=.false.
+/
+
 &io
 dt_write_min=1
 /

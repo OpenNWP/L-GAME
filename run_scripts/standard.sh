@@ -36,6 +36,9 @@ lmom_diff_v=.false.
 &bc
 /
 
+&rad
+/
+
 &io
 dt_write_min=1
 /
