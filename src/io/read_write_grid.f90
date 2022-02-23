@@ -30,6 +30,8 @@ module read_write_grid
     integer                   :: x_dimid                   ! ID of the x dimension
     integer                   :: y_dimid                   ! ID of the y dimension
     integer                   :: dimids(2)                 ! dimensions of horizontal fields
+    integer                   :: varid_lat                 ! variable ID of the latitudes
+    integer                   :: varid_lon                 ! variable ID of the longitudes
     
     filename = "../../grids/" // trim(grid_filename)
     
@@ -46,6 +48,20 @@ module read_write_grid
     ! 2D
     dimids(1) = y_dimid
     dimids(2) = x_dimid
+    
+    call nc_check(nf90_def_var(ncid,"lat_geo",NF90_REAL,dimids,varid_lat))
+    call nc_check(nf90_put_att(ncid,varid_lat,"Description","latitude"))
+    call nc_check(nf90_put_att(ncid,varid_lat,"Unit","radians"))
+    call nc_check(nf90_def_var(ncid,"lon_geo",NF90_REAL,dimids,varid_lon))
+    call nc_check(nf90_put_att(ncid,varid_lon,"Description","longitude"))
+    call nc_check(nf90_put_att(ncid,varid_lon,"Unit","radians"))
+    
+    ! ending the definition section
+    call nc_check(nf90_enddef(ncid))
+    
+    ! writing the data to the NetCDF file
+    call nc_check(nf90_put_var(ncid,varid_lat,grid%lat_geo_scalar))
+    call nc_check(nf90_put_var(ncid,varid_lon,grid%lon_geo_scalar))
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
