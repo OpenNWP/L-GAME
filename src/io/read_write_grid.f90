@@ -9,6 +9,7 @@ module read_write_grid
   use definitions,       only: t_grid
   use set_initial_state, only: nc_check
   use io_nml,            only: grid_filename
+  use run_nml,           only: nlins,ncols
   
   implicit none
   
@@ -26,11 +27,26 @@ module read_write_grid
     ! local variables
     integer                   :: ncid                      ! ID of the NetCDF file
     character(len=64)         :: filename                  ! output filename
+    integer                   :: x_dimid                   ! ID of the x dimension
+    integer                   :: y_dimid                   ! ID of the y dimension
+    integer                   :: dimids(2)                 ! dimensions of horizontal fields
     
     filename = "../../grids/" // trim(grid_filename)
     
     ! creating the NetCDF file
     call nc_check(nf90_create(trim(filename),NF90_CLOBBER,ncid))
+    
+    call nc_check(nf90_put_att(ncid,NF90_GLOBAL,"Description","This is a grid of L-GAME."))
+    
+    ! defining the dimensions
+    call nc_check(nf90_def_dim(ncid,"lon_model",ncols,x_dimid))
+    call nc_check(nf90_def_dim(ncid,"lat_model",nlins,y_dimid))
+
+    ! setting the dimension ID arrays
+    ! 2D
+    dimids(1) = y_dimid
+    dimids(2) = x_dimid
+    
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
   
