@@ -35,16 +35,16 @@ module multiplications
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(jk)
-    do jk=1,ncols+1
-      result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk,:) + scalar_field(:,jk+1,:))*in_vector_x(:,jk,:)
+    do jk=2,ncols
+      result_vector_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk-1,:) + scalar_field(:,jk,:))*in_vector_x(:,jk,:)
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji)
-    do ji=1,nlins+1
-      result_vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji,:,:) + scalar_field(ji+1,:,:))*in_vector_y(ji,:,:)
+    do ji=2,nlins
+      result_vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji-1,:,:) + scalar_field(ji,:,:))*in_vector_y(ji,:,:)
     enddo
     !$OMP END DO
     !$OMP END PARALLEL

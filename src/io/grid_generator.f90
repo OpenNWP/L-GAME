@@ -74,10 +74,10 @@ module grid_generator
     lat_left_lower = -(nlins-1)/2*dlat
     lon_left_lower = -(ncols-1)/2*dlon
     do ji=1,nlins
-      grid%lat_scalar(ji) = lat_left_lower + dlat*(ji - 1)
+      grid%lat_scalar(ji) = lat_left_lower + dlat*(ji-1)
     enddo
     do ji=1,ncols
-      grid%lon_scalar(ji) = lon_left_lower + dlon*(ji - 1)
+      grid%lon_scalar(ji) = lon_left_lower + dlon*(ji-1)
     enddo
     
     ! setting the Coriolis vector at the grid points
