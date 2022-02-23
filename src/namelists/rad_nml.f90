@@ -9,8 +9,12 @@ module rad_nml
   
   implicit none
   
-  logical  :: lrad      ! thickness of the horizontal swamp layer
-  real(wp) :: dtime_rad ! radiation timestep
+  logical            :: lrad                        ! thickness of the horizontal swamp layer
+  real(wp)           :: dtime_rad                   ! radiation timestep
+  character(len=128) :: rrtmgp_coefficients_file_sw ! name of the short wave data file
+  character(len=128) :: rrtmgp_coefficients_file_lw ! name of the long wave data file
+  character(len=128) :: cloud_coefficients_file_sw  ! name of the short wave cloud optics file
+  character(len=128) :: cloud_coefficients_file_lw  ! name of the long wave cloud optics file
   
   namelist /rad/lrad,dtime_rad
   
@@ -24,6 +28,10 @@ module rad_nml
     ! default values
     lrad = .true.
     dtime_rad = 3600._wp
+    rrtmgp_coefficients_file_sw = "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g112-2018-12-04.nc"
+    rrtmgp_coefficients_file_lw = "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g128-2018-12-04.nc"
+    cloud_coefficients_file_sw = "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-sw.nc"
+    cloud_coefficients_file_lw = "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-lw.nc"
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
