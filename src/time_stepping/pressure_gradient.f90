@@ -8,7 +8,7 @@ module pressure_gradient
   use gradient_operators, only: grad
   use run_nml,            only: nlins,ncols
   use definitions,        only: t_state,t_diag,t_grid
-  use multiplications,    only: scalar_times_vector_for_gradient
+  use multiplications,    only: scalar_times_vector
 
   implicit none
 
@@ -39,12 +39,12 @@ module pressure_gradient
     ! calculating the full potential temperature
     diag%scalar_placeholder = grid%theta_bg + state%theta_pert
     ! multiplying the perturbed Exner pressure gradient by the full potential temperature
-    call scalar_times_vector_for_gradient(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
+    call scalar_times_vector(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
     diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w)
     
     ! the linear pressure gradient term
     ! multiplying the background Exner pressure gradient by the perturbed potential temperature
-    call scalar_times_vector_for_gradient(state%theta_pert,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
+    call scalar_times_vector(state%theta_pert,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
     grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v,diag%p_grad_acc_neg_l_w)
     
     ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
