@@ -68,7 +68,7 @@ module gradient_operators
 
     ! calculating the vertical gradient in the inner levels
     do jl=2,nlays
-      result_field(:,:,jl) = (scalar_field(:,:,jl-1) - scalar_field(:,:,jl))/grid%dz(2:nlins+1,2:ncols+1,jl)
+      result_field(:,:,jl) = (scalar_field(:,:,jl-1) - scalar_field(:,:,jl))/grid%dz(:,:,jl)
     enddo
     result_field(:,:,1) = 0._wp
     result_field(:,:,nlays+1) = 0._wp
