@@ -7,6 +7,7 @@ module multiplications
   
   use definitions, only: wp
   use run_nml,     only: nlins,ncols,nlays
+  use bc_nml,      only: lperiodic
   
   implicit none
   

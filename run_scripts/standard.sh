@@ -34,6 +34,7 @@ lmom_diff_v=.false.
 /
 
 &bc
+lperiodic=.true.
 /
 
 &rad

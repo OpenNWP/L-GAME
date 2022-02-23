@@ -10,9 +10,10 @@ module bc_nml
   
   implicit none
   
-  integer :: n_swamp ! thickness of the swamp layer
+  integer :: n_swamp   ! thickness of the swamp layer
+  logical :: lperiodic ! periodic boundary conditions switch
   
-  namelist /bc/n_swamp
+  namelist /bc/n_swamp,lperiodic
   
   contains
   
@@ -23,11 +24,12 @@ module bc_nml
     
     ! default values
     n_swamp = 5
+    lperiodic = .false.
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
     read(nml=bc, unit=fileunit)
-        
+    
     close(fileunit)
   
   end subroutine bc_nml_setup

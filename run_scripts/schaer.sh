@@ -40,6 +40,7 @@ lsoil=.false.
 /
 
 &bc
+lperiodic=.true.
 /
 
 &rad
