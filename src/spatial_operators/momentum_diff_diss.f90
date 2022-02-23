@@ -29,10 +29,9 @@ module momentum_diff_diss
     type(t_grid),  intent(in)    :: grid
     
     ! calculating the divergence of the horizontal wind field
-    call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),grid)
+    call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
     ! calculating the gradient of the divergence
-    call grad_hor(diag%scalar_placeholder(2:nlins+1,2:ncols+1,:),irrev%mom_diff_tend_x, &
-    irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
+    call grad_hor(diag%scalar_placeholder,irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
   
   end subroutine mom_diff_h
 
