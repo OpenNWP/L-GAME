@@ -24,6 +24,7 @@ module radiation
   use dictionary,           only: specific_gas_constants
   use rad_nml,              only: rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
                                   cloud_coefficients_file_sw,cloud_coefficients_file_lw
+  use dictionary,           only: calc_o3_vmr
   
   implicit none
   
@@ -106,27 +107,6 @@ module radiation
     endif
   
   end function molar_fraction_in_dry_air
-  
-  real(wp) function calc_o3_vmr(z_height)
-
-    ! This function calculates the ozone VMR as a function of height.
-    ! assumes a Gaussian distribution
-    
-    real(wp)                          :: z_height            ! height above MSL
-    
-    ! local variables
-    real(wp)                          :: fwhm = 20e3_wp      ! full width at half maximum
-    real(wp)                          :: z_max = 34e3_wp     ! height of the maximum of the distribution
-    real(wp)                          :: max_vmr = 8.5e-6_wp ! maximum volume mixing ratio
-    real(wp)                          :: sigma               ! standard deviation
-    real(wp)                          :: distance            ! distance from the maximum
-    
-    ! calculation of the result
-    sigma = fwhm/(8*log(2._wp))**0.5_wp
-    distance = z_height - z_max
-    calc_o3_vmr = max_vmr*exp(-distance**2/(2*sigma**2))
-    
-  end function calc_o3_vmr
   
   subroutine radiation_init() &
   bind(c,name = "radiation_init")
