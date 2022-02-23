@@ -38,24 +38,24 @@ module divergence_operators
         do jl=1,nlays
           ! the horizontal component
           comp_h = &
-          vector_field_x(ji+1,jk+1,jl)*grid%area_x(ji  ,jk+1,jl) &
-          + vector_field_y(ji+1,jk+1,jl)*grid%area_y(ji+1,jk  ,jl) &
-          - vector_field_x(ji+1,jk  ,jl)*grid%area_x(ji  ,jk  ,jl) &
-          - vector_field_y(ji  ,jk+1,jl)*grid%area_y(ji  ,jk  ,jl)
+          vector_field_x(ji,jk+1,jl)*grid%area_x(ji,jk+1,jl) &
+          + vector_field_y(ji,jk,jl)*grid%area_y(ji,jk,jl) &
+          - vector_field_x(ji,jk,jl)*grid%area_x(ji,jk,jl) &
+          - vector_field_y(ji+1,jk,jl)*grid%area_y(ji+1,jk,jl)
           
           ! the vertical component
           comp_v = 0._wp
-          if (jl == nlays - nlays_oro) then
+          if (jl == nlays-nlays_oro) then
             contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
             comp_v = -contra_lower*grid%area_z(ji,jk,jl+1)
           elseif (jl == nlays) then
-            contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl  , grid)
-            comp_v = contra_upper*grid%area_z(ji,jk,jl  )
-          elseif (jl > nlays - nlays_oro - 1) then
-            contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl  ,grid)
+            contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
+            comp_v = contra_upper*grid%area_z(ji,jk,jl)
+          elseif (jl > nlays-nlays_oro-1) then
+            contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
             contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
             comp_v &
-            = contra_upper*grid%area_z(ji,jk,jl  ) &
+            = contra_upper*grid%area_z(ji,jk,jl) &
             - contra_lower*grid%area_z(ji,jk,jl+1)
           endif
           
