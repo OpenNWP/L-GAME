@@ -67,9 +67,13 @@ module gradient_operators
     integer                     :: jl                    ! loop variables
 
     ! calculating the vertical gradient in the inner levels
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
     do jl=2,nlays
       result_field(:,:,jl) = (scalar_field(:,:,jl-1) - scalar_field(:,:,jl))/grid%dz(:,:,jl)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     result_field(:,:,1) = 0._wp
     result_field(:,:,nlays+1) = 0._wp
 
