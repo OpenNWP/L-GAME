@@ -23,17 +23,17 @@ module radiation
   use dictionary,           only: specific_gas_constants
   use rad_nml,              only: rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
                                   cloud_coefficients_file_sw,cloud_coefficients_file_lw
-  use dictionary,           only: calc_o3_vmr
+  use dictionary,           only: calc_o3_vmr,molar_fraction_in_dry_air
   
   implicit none
   
   ! the number of bands in the short wave region
-  integer,parameter                        :: no_of_sw_bands = 14
+  integer,parameter                        :: no_of_sw_bands=14
   ! the number of bands in the long wave region
-  integer,parameter                        :: no_of_lw_bands = 16
+  integer,parameter                        :: no_of_lw_bands=16
   ! used for C interoperability
   integer                                  :: zero = 0
-  integer                                  :: one = 1
+  integer                                  :: one=1
   ! the gas concentrations (object holding all information on the composition
   ! of the gas phase)
   type(ty_gas_concs)                       :: gas_concentrations_sw
@@ -54,59 +54,6 @@ module radiation
   
   contains
   
-  real(wp) function molar_fraction_in_dry_air(gas_number)
-    
-    ! This function returns the molar fraction of certain gases in dry air.
-    
-    integer                           :: gas_number
-  
-    ! 0: dry air
-    ! 1: H2O
-    ! 2: N2
-    ! 3: O2
-    ! 4: Ar
-    ! 5: CO2
-    ! 6: Ne
-    ! 7: He
-    ! 8: CH4
-    ! 9: CO
-    ! 10: O3
-    ! 11: N2O
-  
-    if (gas_number == 2) then
-      molar_fraction_in_dry_air = 0.7809_wp
-    endif
-    if (gas_number == 3) then
-      molar_fraction_in_dry_air = 0.2095_wp
-    endif
-    if (gas_number == 4) then
-      molar_fraction_in_dry_air = 0.0093_wp
-    endif
-    if (gas_number == 5) then
-      molar_fraction_in_dry_air = 0.0003_wp
-    endif
-    if (gas_number == 6) then
-      molar_fraction_in_dry_air = 1.8e-5_wp
-    endif
-    if (gas_number == 7) then
-      molar_fraction_in_dry_air = 5.2e-6_wp
-    endif
-    if (gas_number == 8) then
-      molar_fraction_in_dry_air = 1.5e-6_wp
-    endif
-    if (gas_number == 9) then
-      molar_fraction_in_dry_air = 1.0e-7_wp
-    endif
-    if (gas_number == 10) then
-      molar_fraction_in_dry_air = 1e-6_wp
-    endif
-    if (gas_number == 11) then
-	  ! https://www.epa.gov/climate-indicators/climate-change-indicators-atmospheric-concentrations-greenhouse-gases
-      molar_fraction_in_dry_air = 0.3e-6_wp
-    endif
-  
-  end function molar_fraction_in_dry_air
-  
   subroutine radiation_init()
     
     ! This is called only once, in the beginning.
@@ -116,7 +63,7 @@ module radiation
     integer                          :: ji
     
     ! formatting the gas names
-    do ji = 1,size(active_gases)
+    do ji=1,size(active_gases)
       gases_lowercase(ji) = trim(lower_case(active_gases(ji)))
     end do
     ! here,the names of the gases are written to the gas_concentrations object
@@ -164,7 +111,7 @@ module radiation
     ! the vertical positions of the scalar data points
     real(wp),intent(in)               :: z_scalar           (nlins,ncols,nlays)
     ! the vertical positions of the vector data points
-    real(wp),intent(in)               :: z_vector           (nlins,ncols,nlays+nlins,ncols)
+    real(wp),intent(in)               :: z_vector           (nlins,ncols,nlays+1)
     ! the mass densities of the model atmosphere
     real(wp),intent(in)               :: mass_densities    &
     (no_of_constituents*nlins,ncols,nlays)
@@ -185,7 +132,7 @@ module radiation
     ! number of points where it is day
     integer                           :: no_of_day_points
     ! loop indices
-    integer                           :: ji,j_day,jl
+    integer                           :: ji,jk,j_day,jl
     ! the indices of columns where it is day
     integer                           :: day_indices(nlins,ncols)
     ! number of scalars per layer (number of columns)
@@ -265,13 +212,15 @@ module radiation
     albedo_dif        (:,:) =  0.12_wp
     
     ! reformatting the thermodynamical state of the gas phase for RTE+RRTMGP
-    do ji = 1,nlins,ncols,nlays_h
-      do jl = 1,
-        temperature_rad(ji,jl) = temperature_gas((jl-1)*nlins,ncols,nlays_h+ji)
-        ! the pressure is diagnozed here,using the equation of state for ideal gases
-        pressure_rad(ji,jl) = specific_gas_constants(0) &
-        *mass_densities(no_of_condensed_constituents*nlins,ncols,nlays &
-        + (jl-1)*nlins,ncols,nlays_h+ji)*temperature_rad(ji,jl)
+    do ji=1,nlins
+      do jk=1,ncols
+        do jl=1,nlays
+          temperature_rad(ji,jk,jl) = temperature_gas((jl-1)*nlins,ncols,nlays_h+ji)
+          ! the pressure is diagnozed here,using the equation of state for ideal gases
+          pressure_rad(ji,jk,jl) = specific_gas_constants(0) &
+          *mass_densities(no_of_condensed_constituents*nlins,ncols,nlays &
+          + (jl-1)*nlins,ncols,nlays_h+ji)*temperature_rad(ji,jk,jl)
+        enddo
       enddo
     enddo
     
@@ -279,13 +228,13 @@ module radiation
     if (no_of_condensed_constituents > 1) then
       liquid_eff_radius_value = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
       ice_eff_radius_value    = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
-      do ji = 1,nlins,ncols,nlays_h
-        do jl = 1,
+      do ji=1,nlins,ncols,nlays_h
+        do jl=1,
           thickness = z_vector(ji+(jl-1)*nlins,ncols,nlays_h)-z_vector(ji+jl*nlins,ncols,nlays_h)
-          liquid_water_path(ji,jl) = thickness*1000._wp*mass_densities(nlins,ncols,nlays+(jl-1)*nlins,ncols,nlays_h+ji)
-          ice_water_path(ji,jl) = thickness*1000._wp*mass_densities((jl-1)*nlins,ncols,nlays_h+ji)
-          liquid_eff_radius(ji,jl) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jl) > 0._wp)
-          ice_eff_radius(ji,jl) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jl) > 0._wp)
+          liquid_water_path(ji,jk,jl) = thickness*1000._wp*mass_densities(nlins,ncols,nlays+(jl-1)*nlins,ncols,nlays_h+ji)
+          ice_water_path(ji,jk,jl) = thickness*1000._wp*mass_densities((jl-1)*nlins,ncols,nlays_h+ji)
+          liquid_eff_radius(ji,jk,jl) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jk,jl) > 0._wp)
+          ice_eff_radius(ji,jk,jl) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk,jl) > 0._wp)
         enddo
       enddo
     else
@@ -296,61 +245,65 @@ module radiation
     endif
     
     ! moving the temperature into the allowed area
-    do ji = 1,nlins,ncols,nlays_h
-      do jl = 1,
-        if (temperature_rad(ji,jl) > k_dist_sw%get_temp_max()) then
-          temperature_rad(ji,jl) = k_dist_sw%get_temp_max()
-        endif
-        if (temperature_rad(ji,jl) < k_dist_sw%get_temp_min()) then
-          temperature_rad(ji,jl) = k_dist_sw%get_temp_min()
-        endif
-        if (temperature_rad(ji,jl) > k_dist_lw%get_temp_max()) then
-          temperature_rad(ji,jl) = k_dist_lw%get_temp_max()
-        endif
-        if (temperature_rad(ji,jl) < k_dist_lw%get_temp_min()) then
-          temperature_rad(ji,jl) = k_dist_lw%get_temp_min()
-        endif
+    do ji=1,nlins
+      do jk=1,ncols
+        do jl=1,nlays
+          if (temperature_rad(ji,jk,jl) > k_dist_sw%get_temp_max()) then
+            temperature_rad(ji,jk,jl) = k_dist_sw%get_temp_max()
+          endif
+          if (temperature_rad(ji,jk,jl) < k_dist_sw%get_temp_min()) then
+            temperature_rad(ji,jk,jl) = k_dist_sw%get_temp_min()
+          endif
+          if (temperature_rad(ji,jk,jl) > k_dist_lw%get_temp_max()) then
+            temperature_rad(ji,jk,jl) = k_dist_lw%get_temp_max()
+          endif
+          if (temperature_rad(ji,jk,jl) < k_dist_lw%get_temp_min()) then
+            temperature_rad(ji,jk,jl) = k_dist_lw%get_temp_min()
+          endif
+        enddo
       enddo
     enddo
     
     ! the properties at cell interfaces
-    do ji = 1,nlins,ncols,nlays_h
-      do jl = 1,+1
-        ! values at TOA
-        if (jl == 1) then
-          ! temperature at TOA (linear extrapolation)
-          ! the value in the highest layer
-          temperature_interface_rad(ji,jl) = temperature_rad(ji,jl) &
-          ! the gradient
-          ! delta T
-          + (temperature_rad(ji,jl) - temperature_rad(ji,jl+1))/     &
-          ! delta z
-          (z_scalar(ji+(jl-1)*nlins,ncols,nlays_h)-z_scalar(ji+jl*nlins,ncols,nlays_h)) &
-          ! times delta_z
-          *(z_vector(ji)-z_scalar(ji+(jl-1)*nlins,ncols,nlays_h))
-          ! pressure at TOA
-          ! here,the barometric height formula is used
-          pressure_interface_rad   (ji,jl) =  pressure_rad   (ji,jl) &
-          *EXP(-(z_vector(ji)-z_scalar(ji+(jl-1)*nlins,ncols,nlays_h))/scale_height)
-        ! values at the surface
-        elseif (jl == +1) then
-          ! temperature at the surface
-          ! the value in the lowest layer
-          temperature_interface_rad(ji,jl) = temp_sfc(ji)
-          ! surface pressure
-          pressure_interface_rad   (ji,jl) =  pressure_rad   (ji,jl-1) &
-          *EXP(-(z_vector(*nlins,ncols,nlays_h+ji) &
-          -z_scalar(ji+(jl-2)*nlins,ncols,nlays_h))/scale_height)
-        else
-          ! just the arithmetic mean
-          temperature_interface_rad(ji,jl) =  0.5_wp*(temperature_rad(ji,jl-1)+temperature_rad(ji,jl))
-          pressure_interface_rad   (ji,jl) =  0.5_wp*(pressure_rad   (ji,jl-1)+pressure_rad   (ji,jl))
-        endif
+    do ji=1,nlins
+      do jk=1,ncols
+        do jl=1,nlays+1
+          ! values at TOA
+          if (jl==1) then
+            ! temperature at TOA (linear extrapolation)
+            ! the value in the highest layer
+            temperature_interface_rad(ji,jk,jl) = temperature_rad(ji,jk,jl) &
+            ! the gradient
+            ! delta T
+            + (temperature_rad(ji,jk,jl) - temperature_rad(ji,jl+1))/     &
+            ! delta z
+            (z_scalar(ji+(jl-1)*nlins,ncols,nlays_h)-z_scalar(ji+jl*nlins,ncols,nlays_h)) &
+            ! times delta_z
+            *(z_vector(ji)-z_scalar(ji+(jl-1)*nlins,ncols,nlays_h))
+            ! pressure at TOA
+            ! here,the barometric height formula is used
+            pressure_interface_rad   (ji,jk,jl) =  pressure_rad   (ji,jk,jl) &
+            *EXP(-(z_vector(ji)-z_scalar(ji+(jl-1)*nlins,ncols,nlays_h))/scale_height)
+          ! values at the surface
+          elseif (jl==nlays+1) then
+            ! temperature at the surface
+            ! the value in the lowest layer
+            temperature_interface_rad(ji,jk,jl) = temp_sfc(ji)
+            ! surface pressure
+            pressure_interface_rad   (ji,jk,jl) =  pressure_rad   (ji,jl-1) &
+            *EXP(-(z_vector(*nlins,ncols,nlays_h+ji) &
+            -z_scalar(ji+(jl-2)*nlins,ncols,nlays_h))/scale_height)
+          else
+            ! just the arithmetic mean
+             temperature_interface_rad(ji,jk,jl) =  0.5_wp*(temperature_rad(ji,jl-1)+temperature_rad(ji,jk,jl))
+             pressure_interface_rad   (ji,jk,jl) =  0.5_wp*(pressure_rad   (ji,jl-1)+pressure_rad   (ji,jk,jl))
+          endif
+        enddo
       enddo
     enddo
     
     ! moving the interface temperature into the allowed area
-    do ji = 1,nlins,ncols,nlays_h
+    do ji=1,nlins,ncols,nlays_h
       if (temperature_interface_rad(ji,1) > k_dist_sw%get_temp_max()) then
          temperature_interface_rad(ji,1) = k_dist_sw%get_temp_max()
       endif
@@ -379,7 +332,7 @@ module radiation
     
     ! calculating the zenith angle,and counting day and night points
     j_day =  0
-    do ji = 1,nlins,ncols,nlays_h
+    do ji=1,nlins,ncols,nlays_h
       mu_0(ji) =  coszenith(latitude_scalar(ji),longitude_scalar(ji),time_coord)
       ! it should be > 0,but this would lead to problems with the slicing procedure
       if (mu_0(ji) >= 0) then
@@ -393,13 +346,13 @@ module radiation
     ! now we start the actual radiation calculation
     ! clearing the radiation tendency (it still contains the results of the previous call
     ! from the dycore)
-    do ji = 1,nlins,ncols,nlays
+    do ji=1,nlins,ncols,nlays
       radiation_tendency(ji) = 0._wp
     enddo
     
     ! short wave first
     ! filling up the arrays restricted to day points
-    do j_day = 1,no_of_day_points
+    do j_day=1,no_of_day_points
       temperature_rad_day(j_day,:)       = temperature_rad(day_indices(j_day),:)
       pressure_rad_day(j_day,:)          = pressure_rad(day_indices(j_day),:)
       pressure_interface_rad_day(j_day,:)= pressure_interface_rad(day_indices(j_day),:)
@@ -469,7 +422,7 @@ module radiation
     fluxes_day,z_vector,radiation_tendency)
     
     ! saving the surface shortwave inward radiative flux density
-    do ji = 1,no_of_day_points
+    do ji=1,no_of_day_points
       sfc_sw_in(day_indices(ji)) = fluxes_day%flux_dn(ji,+1) &
                                  - fluxes_day%flux_up(ji,+1)
     enddo
@@ -530,7 +483,7 @@ module radiation
     fluxes,z_vector,radiation_tendency)
     
     ! saving the surface longwave outward radiative flux density
-    do ji = 1,nlins,ncols,nlays_h
+    do ji=1,nlins,ncols,nlays_h
       sfc_lw_out(ji) = fluxes%flux_up(ji,+1) &
                      - fluxes%flux_dn(ji,+1)
     enddo
@@ -581,9 +534,9 @@ module radiation
     endif
   
     ! loop over all columns
-    do j_column = 1,no_of_relevant_columns
+    do j_column=1,no_of_relevant_columns
       ! loop over all layers
-      do ji = 1,
+      do ji=1,
         ! finding the relevant horizontal index
         if (day_only) then
           jl = day_indices(j_column)
@@ -646,12 +599,12 @@ module radiation
     real(wp)                          :: trans_earth2sun         (3,3)
     
     omega                 = 7.292115e-5_wp
-    omega_rev             = 1.99099e-7_wp
+    omega_rev            =1.99099e-7_wp
     obliquity             = 0.409092592843564_wp
     
     ! refer to https://www.esrl.noaa.gov/gmd/grad/solcalc/azel.html
     ! Unix time coordinate of 2019-Dec-20,12:00 UTC
-    t_0                   = 1576843200.0_wp
+    t_0                  =1576843200.0_wp
     ! this is a winter solstice
     phi_0_earth_around_sun = 0._wp
     phi_0_earth_rotation  = 0._wp
@@ -726,7 +679,7 @@ module radiation
     integer                          :: ji,jl,jl
     
     ! setting the volume mixing ratios of the gases
-    do ji = 1,size(active_gases)
+    do ji=1,size(active_gases)
       ! the default
       vol_mix_ratio(:,:) = 0.0_wp
       select case (gases_lowercase(ji))

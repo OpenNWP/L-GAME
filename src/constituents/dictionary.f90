@@ -21,6 +21,7 @@ module dictionary
   public :: mean_particle_masses_gas
   public :: phase_trans_heat
   public :: calc_o3_vmr
+  public :: molar_fraction_in_dry_air
   
   contains
 
@@ -145,6 +146,59 @@ module dictionary
     calc_o3_vmr = max_vmr*exp(-distance**2/(2*sigma**2))
     
   end function calc_o3_vmr
+
+  real(wp) function molar_fraction_in_dry_air(gas_number)
+    
+    ! This function returns the molar fraction of certain gases in dry air.
+    
+    integer                           :: gas_number
+  
+    ! 0: dry air
+    ! 1: H2O
+    ! 2: N2
+    ! 3: O2
+    ! 4: Ar
+    ! 5: CO2
+    ! 6: Ne
+    ! 7: He
+    ! 8: CH4
+    ! 9: CO
+    ! 10: O3
+    ! 11: N2O
+  
+    if (gas_number==2) then
+      molar_fraction_in_dry_air = 0.7809_wp
+    endif
+    if (gas_number==3) then
+      molar_fraction_in_dry_air = 0.2095_wp
+    endif
+    if (gas_number==4) then
+      molar_fraction_in_dry_air = 0.0093_wp
+    endif
+    if (gas_number==5) then
+      molar_fraction_in_dry_air = 0.0003_wp
+    endif
+    if (gas_number==6) then
+      molar_fraction_in_dry_air=1.8e-5_wp
+    endif
+    if (gas_number==7) then
+      molar_fraction_in_dry_air = 5.2e-6_wp
+    endif
+    if (gas_number==8) then
+      molar_fraction_in_dry_air=1.5e-6_wp
+    endif
+    if (gas_number==9) then
+      molar_fraction_in_dry_air=1.0e-7_wp
+    endif
+    if (gas_number==10) then
+      molar_fraction_in_dry_air=1e-6_wp
+    endif
+    if (gas_number==11) then
+	  ! https://www.epa.gov/climate-indicators/climate-change-indicators-atmospheric-concentrations-greenhouse-gases
+      molar_fraction_in_dry_air = 0.3e-6_wp
+    endif
+  
+  end function molar_fraction_in_dry_air
 
 end module dictionary
 
