@@ -43,7 +43,6 @@ src/radiation/rterrtmgp_coupler.f90
 src/namelists/bc_nml.f90
 src/namelists/diff_nml.f90
 src/namelists/constituents_nml.f90
-src/namelists/init_nml.f90
 src/namelists/rad_nml.f90
 src/namelists/run_nml.f90
 src/namelists/io_nml.f90
