@@ -19,6 +19,7 @@ module manage_rkhevi
   use surface_nml,                only: lsoil
   use planetary_boundary_layer,   only: update_sfc_turb_quantities
   use bc_nml,                     only: lperiodic
+  use manage_radiation_calls,     only: call_radiation
 
   implicit none
   
@@ -28,7 +29,7 @@ module manage_rkhevi
 
   contains
   
-  subroutine rkhevi(state_old,state_new,tend,tend_bc,grid,diag,irrev,total_step_counter)
+  subroutine rkhevi(state_old,state_new,tend,tend_bc,grid,diag,irrev,total_step_counter,lrad_update)
     
     type(t_state),  intent(inout) :: state_old          ! the state at the old timestep
     type(t_state),  intent(inout) :: state_new          ! the state at the new timestep
@@ -38,12 +39,18 @@ module manage_rkhevi
     type(t_diag),   intent(inout) :: diag               ! diagnostic quantities
     type(t_irrev),  intent(inout) :: irrev              ! irreversible quantities
     integer,        intent(in)    :: total_step_counter ! time step counter
+    logical,        intent(in)    :: lrad_update        ! radiation update switch
     
     ! local variables
     integer  :: rk_step          ! index of the Runge-Kutta step
     
     ! diagnosing the temperature
     call temperature_diagnostics(state_old,diag,grid)
+    
+    ! upating radiation if necessary
+    if (lrad_update) then
+      call call_radiation(state_old,grid,diag,irrev)
+    endif
     
     ! updating surface-related turbulence quantities if it is necessary
     if (lsoil .or. lmom_diff_v) then

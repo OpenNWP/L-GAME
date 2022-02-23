@@ -251,7 +251,7 @@ program control
     call lin_combination(state_new,state_new,state_old,0._wp,1._wp,grid)
       
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,tend_bc,grid,diag,irrev,time_step_counter)
+    call rkhevi(state_old,state_new,tend,tend_bc,grid,diag,irrev,time_step_counter,.true.)
     
     ! managing the calls to the output routine
     if (t_0 + dtime >= t_write) then
