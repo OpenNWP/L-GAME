@@ -12,7 +12,7 @@ module grid_generator
   use surface_nml,        only: nsoillays
   use gradient_operators, only: grad,grad_hor_cov
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
-  use io_nml,             only: lread_grid
+  use io_nml,             only: lwrite_grid,lread_grid
   use read_write_grid,    only: write_grid,read_grid
 
   implicit none
@@ -437,6 +437,11 @@ module grid_generator
       
         enddo
       enddo
+    endif
+    
+    ! writing the costly grid properties to a file if required by the user
+    if (lwrite_grid) then
+      call write_grid()
     endif
   
   end subroutine grid_setup
