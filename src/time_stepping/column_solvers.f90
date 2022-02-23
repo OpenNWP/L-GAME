@@ -109,7 +109,7 @@ module column_solvers
     !$OMP DO PRIVATE(ji,jk,jl,c_vector,d_vector,e_vector,r_vector,solution, &
     !$OMP rho_expl,rhotheta_expl,exner_pert_expl,theta_pert_expl,rho_int_old, &
     !$OMP rho_int_expl,theta_int_new,rho_int_new,alpha_old,beta_old,gamma_old,alpha_new, &
-    !$OMP beta_new,gamma_new,alpha,beta,gammaa,damping_coeff,z_above_damping)
+    !$OMP beta_new,gamma_new,alpha,beta,gammaa,damping_coeff,z_above_damping,soil_switch)
     do ji=1,nlins
       do jk=1,ncols
       
@@ -122,82 +122,82 @@ module column_solvers
         ! explicit quantities
         do jl=1,nlays
           ! explicit density
-          rho_expl(jl) = state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) &
+          rho_expl(jl) = state_old%rho(ji,jk,jl,no_of_condensed_constituents+1) &
           +dtime*tend%rho(ji,jk,jl,no_of_condensed_constituents+1)
           ! explicit potential temperature density
-          rhotheta_expl(jl) = state_old%rhotheta(ji+1,jk+1,jl)+dtime*tend%rhotheta(ji,jk,jl)
+          rhotheta_expl(jl) = state_old%rhotheta(ji,jk,jl)+dtime*tend%rhotheta(ji,jk,jl)
           if (rk_Step == 1) then
             ! old time step partial derivatives of theta and Pi (divided by the volume)
-            alpha(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)**2 &
+            alpha(jl) = -state_old%rhotheta(ji,jk,jl)/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)**2 &
             /grid%volume(ji,jk,jl)
-            beta(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)/grid%volume(ji,jk,jl)
-            gammaa(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
-            (grid%exner_bg(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))/grid%volume(ji,jk,jl)
+            beta(jl)  = 1._wp/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)/grid%volume(ji,jk,jl)
+            gammaa(jl) = r_d/(c_v*state_old%rhotheta(ji,jk,jl))* &
+            (grid%exner_bg(ji,jk,jl)+state_old%exner_pert(ji,jk,jl))/grid%volume(ji,jk,jl)
           else
             ! old time step partial derivatives of theta and Pi
-            alpha_old(jl) = -state_old%rhotheta(ji+1,jk+1,jl)/state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)**2
-            beta_old(jl)  = 1._wp/state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)
-            gamma_old(jl) = r_d/(c_v*state_old%rhotheta(ji+1,jk+1,jl))* &
-            (grid%exner_bg(ji+1,jk+1,jl)+state_old%exner_pert(ji+1,jk+1,jl))
+            alpha_old(jl) = -state_old%rhotheta(ji,jk,jl)/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)**2
+            beta_old(jl)  = 1._wp/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)
+            gamma_old(jl) = r_d/(c_v*state_old%rhotheta(ji,jk,jl))* &
+            (grid%exner_bg(ji,jk,jl)+state_old%exner_pert(ji,jk,jl))
             ! new time step partial derivatives of theta and Pi
-            alpha_new(jl) = -state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)**2
-            beta_new(jl)  = 1._wp/state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1)
-            gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji+1,jk+1,jl)) &
-            *(grid%exner_bg(ji+1,jk+1,jl)+state_new%exner_pert(ji+1,jk+1,jl))
+            alpha_new(jl) = -state_new%rhotheta(ji,jk,jl)/state_new%rho(ji,jk,jl,no_of_condensed_constituents+1)**2
+            beta_new(jl)  = 1._wp/state_new%rho(ji,jk,jl,no_of_condensed_constituents+1)
+            gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji,jk,jl)) &
+            *(grid%exner_bg(ji,jk,jl)+state_new%exner_pert(ji,jk,jl))
             ! interpolation of partial derivatives of theta and Pi (divided by the volume)
             alpha (jl) = ((1._wp - partial_impl_weight)*alpha_old(jl)+partial_impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
             beta  (jl) = ((1._wp - partial_impl_weight)*beta_old (jl)+partial_impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
             gammaa(jl) = ((1._wp - partial_impl_weight)*gamma_old(jl)+partial_impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
           endif
           ! explicit potential temperature perturbation
-          theta_pert_expl(jl) = state_old%theta_pert(ji+1,jk+1,jl) &
+          theta_pert_expl(jl) = state_old%theta_pert(ji,jk,jl) &
          +dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl,no_of_condensed_constituents+1) &
          +beta(jl)*tend%rhotheta(ji,jk,jl))
           ! explicit Exner pressure perturbation
-          exner_pert_expl(jl) = state_old%exner_pert(ji+1,jk+1,jl)+dtime*grid%volume(ji,jk,jl)*gammaa(jl)*tend%rhotheta(ji,jk,jl)
+          exner_pert_expl(jl) = state_old%exner_pert(ji,jk,jl)+dtime*grid%volume(ji,jk,jl)*gammaa(jl)*tend%rhotheta(ji,jk,jl)
         enddo
         
         ! interface values
         do jl=1,nlays-1
-          rho_int_old(jl) = 0.5_wp*(state_old%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) &
-          +state_old%rho(ji+1,jk+1,jl+1,no_of_condensed_constituents+1))
+          rho_int_old(jl) = 0.5_wp*(state_old%rho(ji,jk,jl,no_of_condensed_constituents+1) &
+          +state_old%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
-          theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji+1,jk+1,jl)/state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) &
-         +state_new%rhotheta(ji+1,jk+1,jl+1)/state_new%rho(ji+1,jk+1,jl+1,no_of_condensed_constituents+1))
+          theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji,jk,jl)/state_new%rho(ji,jk,jl,no_of_condensed_constituents+1) &
+         +state_new%rhotheta(ji,jk,jl+1)/state_new%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
         enddo
       
         ! filling up the coefficient vectors
         do jl=1,nlays-1
           ! main diagonal
           d_vector(jl) = -theta_int_new(jl)**2*(gammaa(jl)+gammaa(jl+1)) &
-         +0.5_wp*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
+         +0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)-alpha(jl)+theta_int_new(jl)*(beta(jl+1)-beta(jl))) &
-          - (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
-          *(2._wp/grid%area_z(ji,jk,jl+1)+dtime*state_old%wind_w(ji+1,jk+1,jl+1)*0.5_wp &
+          - (grid%z_geo_scal(ji,jk,jl)-grid%z_geo_scal(ji,jk,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
+          *(2._wp/grid%area_z(ji,jk,jl+1)+dtime*state_old%wind_w(ji,jk,jl+1)*0.5_wp &
           *(-1._wp/grid%volume(ji,jk,jl)+1._wp/grid%volume(ji,jk,jl+1)))
           ! right hand side
-          r_vector(jl) = -(state_old%wind_w(ji+1,jk+1,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
-          (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1)) &
+          r_vector(jl) = -(state_old%wind_w(ji,jk,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
+          (grid%z_geo_scal(ji,jk,jl)-grid%z_geo_scal(ji,jk,jl+1)) &
           /(impl_weight*dtime**2*c_p) &
          +theta_int_new(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
-         +0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
-          - (grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime**2*c_p) &
-          *state_old%wind_w(ji+1,jk+1,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
+         +0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
+          - (grid%z_geo_scal(ji,jk,jl)-grid%z_geo_scal(ji,jk,jl+1))/(impl_weight*dtime**2*c_p) &
+          *state_old%wind_w(ji,jk,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
         enddo
         
         do jl=1,nlays-2
           ! lower diagonal
           c_vector(jl) = theta_int_new(jl+1)*gammaa(jl+1)*theta_int_new(jl) &
-         +0.5_wp*(grid%exner_bg(ji+1,jk+1,jl+1)-grid%exner_bg(ji+1,jk+1,jl+2)) &
+         +0.5_wp*(grid%exner_bg(ji,jk,jl+1)-grid%exner_bg(ji,jk,jl+2)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl)) &
-          - (grid%z_geo_scal(ji+1,jk+1,jl+1)-grid%z_geo_scal(ji+1,jk+1,jl+2))/(impl_weight*dtime*c_p)*0.5_wp &
-          *state_old%wind_w(ji+1,jk+1,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))
+          - (grid%z_geo_scal(ji,jk,jl+1)-grid%z_geo_scal(ji,jk,jl+2))/(impl_weight*dtime*c_p)*0.5_wp &
+          *state_old%wind_w(ji,jk,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))
           ! upper diagonal
           e_vector(jl) = theta_int_new(jl)*gammaa(jl+1)*theta_int_new(jl+1) &
-          - 0.5_wp*(grid%exner_bg(ji+1,jk+1,jl)-grid%exner_bg(ji+1,jk+1,jl+1)) &
+          - 0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl+1)) &
-         +(grid%z_geo_scal(ji+1,jk+1,jl)-grid%z_geo_scal(ji+1,jk+1,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
-          *state_old%wind_w(ji+1,jk+1,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
+         +(grid%z_geo_scal(ji,jk,jl)-grid%z_geo_scal(ji,jk,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
+          *state_old%wind_w(ji,jk,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
         enddo
 	
         ! soil components of the matrix
@@ -273,11 +273,11 @@ module column_solvers
           enddo
         endif
 		
-        call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution,nlays-1)
+        call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution,nlays-1+soil_switch*nsoillays)
        
         ! Klemp swamp layer
         do jl=1,nlays-1
-          z_above_damping = grid%z_geo_w(ji+1,jk+1,jl+1)-damping_start_height
+          z_above_damping = grid%z_geo_w(ji,jk,jl+1)-damping_start_height
           if (z_above_damping < 0._wp .or. .not. lklemp) then
             damping_coeff = 0._wp
           else
@@ -289,30 +289,30 @@ module column_solvers
         ! results
         ! density, potential temperature density
         do jl=2,nlays-1
-          state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1) = rho_expl(jl) &
+          state_new%rho(ji,jk,jl,no_of_condensed_constituents+1) = rho_expl(jl) &
          +dtime*(-solution(jl-1)+solution(jl))/grid%volume(ji,jk,jl)
-          state_new%rhotheta(ji+1,jk+1,jl) = rhotheta_expl(jl) &
+          state_new%rhotheta(ji,jk,jl) = rhotheta_expl(jl) &
          +dtime*(-theta_int_new(jl-1)*solution(jl-1)+theta_int_new(jl)*solution(jl))/grid%volume(ji,jk,jl)
         enddo
         ! uppermost layer
-        state_new%rho(ji+1,jk+1,1,no_of_condensed_constituents+1) = rho_expl(1)+dtime*solution(1)/grid%volume(ji,jk,1)
-        state_new%rhotheta(ji+1,jk+1,1) = rhotheta_expl(1)+dtime*theta_int_new(1)*solution(1)/grid%volume(ji,jk,1)
+        state_new%rho(ji,jk,1,no_of_condensed_constituents+1) = rho_expl(1)+dtime*solution(1)/grid%volume(ji,jk,1)
+        state_new%rhotheta(ji,jk,1) = rhotheta_expl(1)+dtime*theta_int_new(1)*solution(1)/grid%volume(ji,jk,1)
         ! lowest layer
-        state_new%rho(ji+1,jk+1,nlays,no_of_condensed_constituents+1) = rho_expl(nlays) &
+        state_new%rho(ji,jk,nlays,no_of_condensed_constituents+1) = rho_expl(nlays) &
         - dtime*solution(nlays-1)/grid%volume(ji,jk,nlays)
-        state_new%rhotheta(ji+1,jk+1,nlays) = rhotheta_expl(nlays) &
+        state_new%rhotheta(ji,jk,nlays) = rhotheta_expl(nlays) &
         -dtime*theta_int_new(nlays-1)*solution(nlays-1)/grid%volume(ji,jk,nlays)
         ! vertical velocity
         do jl=2,nlays
-          rho_int_new = 0.5_wp*(state_new%rho(ji+1,jk+1,jl-1,no_of_condensed_constituents+1) &
-          +state_new%rho(ji+1,jk+1,jl,no_of_condensed_constituents+1))
-          state_new%wind_w(ji+1,jk+1,jl) = (2._wp*solution(jl-1)/grid%area_z(ji,jk,jl) &
-          - rho_int_new*state_old%wind_w(ji+1,jk+1,jl))/rho_int_old(jl-1)
+          rho_int_new = 0.5_wp*(state_new%rho(ji,jk,jl-1,no_of_condensed_constituents+1) &
+          +state_new%rho(ji,jk,jl,no_of_condensed_constituents+1))
+          state_new%wind_w(ji,jk,jl) = (2._wp*solution(jl-1)/grid%area_z(ji,jk,jl) &
+          - rho_int_new*state_old%wind_w(ji,jk,jl))/rho_int_old(jl-1)
         enddo
         ! Exner pressure
         do jl=1,nlays
-          state_new%exner_pert(ji+1,jk+1,jl) = state_old%exner_pert(ji+1,jk+1,jl) &
-         +grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji+1,jk+1,jl)-state_old%rhotheta(ji+1,jk+1,jl))
+          state_new%exner_pert(ji,jk,jl) = state_old%exner_pert(ji,jk,jl) &
+         +grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji,jk,jl)-state_old%rhotheta(ji,jk,jl))
         enddo
         
         ! soil temperature
