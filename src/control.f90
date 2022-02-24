@@ -13,7 +13,7 @@ program control
                                        snow_velocity,rain_velocity,cloud_droplets_velocity
   use diff_nml,                  only: diff_nml_setup
   use surface_nml,               only: surface_nml_setup,nsoillays
-  use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_irrev
+  use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_bc,t_irrev
   use grid_generator,            only: grid_setup,bg_setup
   use set_initial_state,         only: restart,ideal
   use write_out,                 only: write_output
@@ -31,7 +31,8 @@ program control
   type(t_grid)   :: grid
   type(t_state)  :: state_old, state_new, state_write
   type(t_diag)   :: diag
-  type(t_tend)   :: tend,tend_bc
+  type(t_tend)   :: tend
+  type(t_bc)     :: bc
   type(t_irrev)  :: irrev
   real(wp)       :: normal_dist_min_vert ! minimum vertical gridpoint distance
   logical        :: lrad_update          ! radiation update switch
@@ -72,6 +73,7 @@ program control
   allocate(grid%lat_geo_v(nlins+1,ncols))
   allocate(grid%lon_geo_v(nlins+1,ncols))
   allocate(grid%dir_geo_v(nlins+1,ncols))
+  allocate(grid%dir_geo_u_scalar(nlins,ncols))
   allocate(grid%z_geo_scal(nlins,ncols,nlays))
   allocate(grid%dx(nlins,ncols+1,nlays))
   allocate(grid%dy(nlins+1,ncols,nlays))
@@ -136,12 +138,21 @@ program control
   allocate(tend%wind_w(nlins,ncols,nlays+1))
   allocate(tend%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
   ! state containing the tendency of the boundary conditions
-  allocate(tend_bc%rho(nlins,ncols,nlays,no_of_constituents))
-  allocate(tend_bc%rhotheta(nlins,ncols,nlays))
-  allocate(tend_bc%wind_u(nlins,ncols+1,nlays))
-  allocate(tend_bc%wind_v(nlins+1,ncols,nlays))
-  allocate(tend_bc%wind_w(nlins,ncols,nlays+1))
-  allocate(tend_bc%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
+  allocate(bc%rho_old(nlins,ncols,nlays,no_of_constituents))
+  allocate(bc%rhotheta_old(nlins,ncols,nlays))
+  allocate(bc%wind_u_old(nlins,ncols+1,nlays))
+  allocate(bc%wind_v_old(nlins+1,ncols,nlays))
+  allocate(bc%wind_w_old(nlins,ncols,nlays+1))
+  allocate(bc%condensed_rho_t_old(nlins,ncols,nlays,no_of_condensed_constituents))
+  allocate(bc%rho_new(nlins,ncols,nlays,no_of_constituents))
+  allocate(bc%rhotheta_new(nlins,ncols,nlays))
+  allocate(bc%wind_u_new(nlins,ncols+1,nlays))
+  allocate(bc%wind_v_new(nlins+1,ncols,nlays))
+  allocate(bc%wind_w_new(nlins,ncols,nlays+1))
+  allocate(bc%condensed_rho_t_new(nlins,ncols,nlays,no_of_condensed_constituents))
+  allocate(bc%scalar_bc_factor(nlins,ncols))
+  allocate(bc%u_bc_factor(nlins,ncols+1))
+  allocate(bc%v_bc_factor(nlins+1,ncols))
   ! state to be written out
   allocate(state_write%rho(nlins,ncols,nlays,no_of_constituents))
   allocate(state_write%rhotheta(nlins,ncols,nlays))
@@ -190,9 +201,6 @@ program control
   allocate(diag%sfc_sw_in(nlins,ncols))
   allocate(diag%sfc_lw_out(nlins,ncols))
   allocate(diag%roughness_velocity(nlins,ncols))
-  allocate(diag%scalar_bc_factor(nlins,ncols))
-  allocate(diag%u_bc_factor(nlins,ncols+1))
-  allocate(diag%v_bc_factor(nlins+1,ncols))
   ! type containing irreversible quantities
   allocate(irrev%tke(nlins,ncols,nlays))
   allocate(irrev%mom_diff_tend_x(nlins,ncols,nlays))
@@ -275,7 +283,7 @@ program control
     endif
 
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,tend_bc,grid,diag,irrev,time_step_counter,lrad_update)
+    call rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,time_step_counter,lrad_update)
     
     ! managing the calls to the output routine
     if (t_0 + dtime >= t_write) then
@@ -305,6 +313,7 @@ program control
   deallocate(grid%lat_geo_v)
   deallocate(grid%lon_geo_v)
   deallocate(grid%dir_geo_v)
+  deallocate(grid%dir_geo_u_scalar)
   deallocate(grid%z_geo_scal)
   deallocate(grid%dy)
   deallocate(grid%dx)
@@ -369,12 +378,21 @@ program control
   deallocate(tend%wind_w)
   deallocate(tend%condensed_rho_t)
   ! state containing the tendency of the boundary conditions
-  deallocate(tend_bc%rho)
-  deallocate(tend_bc%rhotheta)
-  deallocate(tend_bc%wind_u)
-  deallocate(tend_bc%wind_v)
-  deallocate(tend_bc%wind_w)
-  deallocate(tend_bc%condensed_rho_t)
+  deallocate(bc%rho_old)
+  deallocate(bc%rhotheta_old)
+  deallocate(bc%wind_u_old)
+  deallocate(bc%wind_v_old)
+  deallocate(bc%wind_w_old)
+  deallocate(bc%condensed_rho_t_old)
+  deallocate(bc%rho_new)
+  deallocate(bc%rhotheta_new)
+  deallocate(bc%wind_u_new)
+  deallocate(bc%wind_v_new)
+  deallocate(bc%wind_w_new)
+  deallocate(bc%condensed_rho_t_new)
+  deallocate(bc%scalar_bc_factor)
+  deallocate(bc%u_bc_factor)
+  deallocate(bc%v_bc_factor)
   ! state to be written out
   deallocate(state_write%rho)
   deallocate(state_write%rhotheta)
@@ -423,9 +441,6 @@ program control
   deallocate(diag%sfc_sw_in)
   deallocate(diag%sfc_lw_out)
   deallocate(diag%roughness_velocity)
-  deallocate(diag%scalar_bc_factor)
-  deallocate(diag%u_bc_factor)
-  deallocate(diag%v_bc_factor)
   ! type containing irreversible quantities
   deallocate(irrev%tke)
   deallocate(irrev%mom_diff_tend_x)

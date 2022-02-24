@@ -14,6 +14,7 @@ module definitions
   public :: t_state
   public :: t_diag
   public :: t_tend
+  public :: t_bc
   public :: t_irrev
   
     ! setting the floating point precision
@@ -39,10 +40,11 @@ module definitions
     real(wp), allocatable :: lon_geo_scalar(:,:)              ! geographic longitudes of the scalar gridpoints
     real(wp), allocatable :: lat_geo_u(:,:)                   ! geographic latitudes of the u-vector gridpoints
     real(wp), allocatable :: lon_geo_u(:,:)                   ! geographic longitudes of the u-vector gridpoints
-    real(wp), allocatable :: dir_geo_u(:,:)                   ! geographic direction of the u-vector gridpoints
+    real(wp), allocatable :: dir_geo_u(:,:)                   ! geographic directions of the u-vectors
     real(wp), allocatable :: lat_geo_v(:,:)                   ! geographic latitudes of the v-vector gridpoints
     real(wp), allocatable :: lon_geo_v(:,:)                   ! geographic longitudes of the v-vector gridpoints
-    real(wp), allocatable :: dir_geo_v(:,:)                   ! geographic direction of the v-vector gridpoints
+    real(wp), allocatable :: dir_geo_v(:,:)                   ! geographic directions of the v-vectors
+    real(wp), allocatable :: dir_geo_u_scalar(:,:)            ! geographic directions of the u-vectors at the scalar points
     real(wp), allocatable :: z_geo_scal(:,:,:)                ! geometric heights of the scalar gridpoints
     real(wp), allocatable :: dx(:,:,:)                        ! grid point distance in x-direction
     real(wp), allocatable :: dy(:,:,:)                        ! grid point distance in y-direction
@@ -110,6 +112,27 @@ module definitions
   
   end type t_tend
   
+  type t_bc
+  
+    ! type containing information on boundary conditions
+    real(wp), allocatable :: rho_old(:,:,:,:)                 ! mass densities at the old timestep
+    real(wp), allocatable :: rhotheta_old(:,:,:)              ! potential temperature densities at the old timestep
+    real(wp), allocatable :: wind_u_old(:,:,:)                ! x-component of the wind at the old timestep
+    real(wp), allocatable :: wind_v_old(:,:,:)                ! y-component of the wind at the old timestep
+    real(wp), allocatable :: wind_w_old(:,:,:)                ! vertical wind at the old timestep
+    real(wp), allocatable :: condensed_rho_t_old(:,:,:,:)     ! temperature densities of the constituents at the old timestep
+    real(wp), allocatable :: rho_new(:,:,:,:)                 ! mass densities at the new timestep
+    real(wp), allocatable :: rhotheta_new(:,:,:)              ! potential temperature densities at the new timestep
+    real(wp), allocatable :: wind_u_new(:,:,:)                ! x-component of the wind at the new timestep
+    real(wp), allocatable :: wind_v_new(:,:,:)                ! y-component of the wind at the new timestep
+    real(wp), allocatable :: wind_w_new(:,:,:)                ! vertical wind at the new timestep
+    real(wp), allocatable :: condensed_rho_t_new(:,:,:,:)     ! temperature densities of the constituents at the new timestep
+    real(wp), allocatable :: scalar_bc_factor(:,:)            ! boundary conditions factor for scalar fields
+    real(wp), allocatable :: u_bc_factor(:,:)                 ! boundary conditions factor for u-vector fields
+    real(wp), allocatable :: v_bc_factor(:,:)                 ! boundary conditions factor for v-vector fields
+    
+  end type t_bc
+  
   type t_diag
   
     ! type containing diagnostic quantities
@@ -150,9 +173,6 @@ module definitions
     real(wp), allocatable :: sfc_sw_in(:,:)                   ! shortwave radiation in the surface
     real(wp), allocatable :: sfc_lw_out(:,:)                  ! longwave radiation out of the surface
     real(wp), allocatable :: roughness_velocity(:,:)          ! roughness velocity
-    real(wp), allocatable :: scalar_bc_factor(:,:)            ! boundary conditions factor for scalar fields
-    real(wp), allocatable :: u_bc_factor(:,:)                 ! boundary conditions factor for u-vector fields
-    real(wp), allocatable :: v_bc_factor(:,:)                 ! boundary conditions factor for v-vector fields
   
   
   end type t_diag

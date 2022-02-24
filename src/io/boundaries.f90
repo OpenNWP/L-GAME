@@ -5,7 +5,7 @@ module boundaries
 
   ! This module handles everything dealing with boundary conditions.
 
-  use definitions, only: t_tend
+  use definitions, only: t_bc
 
   implicit none
   
@@ -16,12 +16,12 @@ module boundaries
   
   contains
   
-  subroutine update_boundaries(tend_bc)
+  subroutine update_boundaries(bc)
   
     ! updates the boundary conditions
     
     ! input arguments and output
-    type(t_tend) :: tend_bc
+    type(t_bc) :: bc
     
   end subroutine update_boundaries
   

@@ -5,7 +5,7 @@ module manage_rkhevi
 
   ! In this module, the RKHEVI time stepping is managed.
 
-  use definitions,                only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
+  use definitions,                only: t_grid,t_state,t_diag,t_irrev,t_tend,t_bc,wp
   use linear_combine_two_states,  only: lin_combination
   use run_nml,                    only: dtime,nlins,ncols
   use pressure_gradient,          only: manage_pressure_gradient
@@ -29,12 +29,12 @@ module manage_rkhevi
 
   contains
   
-  subroutine rkhevi(state_old,state_new,tend,tend_bc,grid,diag,irrev,total_step_counter,lrad_update)
+  subroutine rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,total_step_counter,lrad_update)
     
     type(t_state),  intent(inout) :: state_old          ! the state at the old timestep
     type(t_state),  intent(inout) :: state_new          ! the state at the new timestep
     type(t_tend),   intent(inout) :: tend               ! the tendency
-    type(t_tend),   intent(inout) :: tend_bc            ! the tendency of the boundary conditions
+    type(t_bc),     intent(inout) :: bc                 ! boundary conditions
     type(t_grid),   intent(inout) :: grid               ! the grid of the model
     type(t_diag),   intent(inout) :: diag               ! diagnostic quantities
     type(t_irrev),  intent(inout) :: irrev              ! irreversible quantities
@@ -101,7 +101,7 @@ module manage_rkhevi
     
     ! calling the boundary conditions subroutine for real-data simulation
     if (.not. lperiodic) then
-      call update_boundaries(tend_bc)
+      call update_boundaries(bc)
     endif
     
   end subroutine rkhevi
