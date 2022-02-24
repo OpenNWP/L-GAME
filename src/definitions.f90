@@ -39,8 +39,10 @@ module definitions
     real(wp), allocatable :: lon_geo_scalar(:,:)              ! geographic longitudes of the scalar gridpoints
     real(wp), allocatable :: lat_geo_u(:,:)                   ! geographic latitudes of the u-vector gridpoints
     real(wp), allocatable :: lon_geo_u(:,:)                   ! geographic longitudes of the u-vector gridpoints
+    real(wp), allocatable :: dir_geo_u(:,:)                   ! geographic direction of the u-vector gridpoints
     real(wp), allocatable :: lat_geo_v(:,:)                   ! geographic latitudes of the v-vector gridpoints
     real(wp), allocatable :: lon_geo_v(:,:)                   ! geographic longitudes of the v-vector gridpoints
+    real(wp), allocatable :: dir_geo_v(:,:)                   ! geographic direction of the v-vector gridpoints
     real(wp), allocatable :: z_geo_scal(:,:,:)                ! geometric heights of the scalar gridpoints
     real(wp), allocatable :: dx(:,:,:)                        ! grid point distance in x-direction
     real(wp), allocatable :: dy(:,:,:)                        ! grid point distance in y-direction
