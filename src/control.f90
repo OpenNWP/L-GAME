@@ -21,6 +21,7 @@ program control
   use linear_combine_two_states, only: lin_combination,interpolation_t
   use bc_nml,                    only: bc_nml_setup
   use rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
+  use manage_radiation_calls,    only: call_radiation
   
   implicit none
 
@@ -221,6 +222,14 @@ program control
   endif
   write(*,*) "... initial state set."
   
+  ! updating radiation for the first time if nescessary
+  t_rad_update = t_0
+  if (lrad) then
+    call call_radiation(state_old,grid,diag,irrev)
+  endif
+  ! setting the next time for the radiation update
+  t_rad_update = t_rad_update+dtime_rad
+  
   ! writing out the initial state
   call write_output(state_old,diag,0,grid)
   
@@ -247,9 +256,6 @@ program control
   t_write = t_0 + dt_write
   run_span = 3600._wp*run_span_hr
   time_step_counter = 0
-  
-  ! setting the next time for the radiation update
-  t_rad_update = t_0
   
   do while (t_0 < t_init+run_span+300._wp)
     
