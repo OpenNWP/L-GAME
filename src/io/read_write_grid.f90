@@ -103,7 +103,7 @@ module read_write_grid
     
     call nc_check(nf90_def_var(ncid,"t_conduc_soil",NF90_REAL,dimids,varid_t_conduc_soil))
     call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Description","temperature conductivity of the soil"))
-    call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Unit","J/(Km^3)"))
+    call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Unit","m^2/s"))
     
     call nc_check(nf90_def_var(ncid,"u_dir",NF90_REAL,dimids_u,varid_dir_geo_u))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Description","direction of u-vectors"))
