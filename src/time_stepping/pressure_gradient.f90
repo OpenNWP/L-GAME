@@ -34,8 +34,7 @@ module pressure_gradient
     
     ! the nonlinear pressure gradient term
     ! calculating the gradient of the perturbed Exner pressure
-    call grad(state%exner_pert(2:nlins+1,2:ncols+1,:), &
-    diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
+    call grad(state%exner_pert,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
     ! calculating the full potential temperature
     diag%scalar_placeholder = grid%theta_bg + state%theta_pert
     ! multiplying the perturbed Exner pressure gradient by the full potential temperature
