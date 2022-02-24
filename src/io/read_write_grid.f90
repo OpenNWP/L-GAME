@@ -93,19 +93,19 @@ module read_write_grid
     call nc_check(nf90_put_att(ncid,varid_lon_v,"Description","longitude of v-vectors"))
     call nc_check(nf90_put_att(ncid,varid_lon_v,"Unit","radians"))
     
-    call nc_check(nf90_def_var(ncid,"oro",NF90_REAL,dimids_v,varid_z_geo_w))
+    call nc_check(nf90_def_var(ncid,"oro",NF90_REAL,dimids,varid_z_geo_w))
     call nc_check(nf90_put_att(ncid,varid_z_geo_w,"Description","orography"))
     call nc_check(nf90_put_att(ncid,varid_z_geo_w,"Unit","m"))
     
-    call nc_check(nf90_def_var(ncid,"sfc_rho_c",NF90_REAL,dimids_v,varid_sfc_rho_c))
+    call nc_check(nf90_def_var(ncid,"sfc_rho_c",NF90_REAL,dimids,varid_sfc_rho_c))
     call nc_check(nf90_put_att(ncid,varid_sfc_rho_c,"Description","volumetric specific heat conductivity of the soil"))
     call nc_check(nf90_put_att(ncid,varid_sfc_rho_c,"Unit","J/(Km^3)"))
     
-    call nc_check(nf90_def_var(ncid,"t_conduc_soil",NF90_REAL,dimids_v,varid_t_conduc_soil))
+    call nc_check(nf90_def_var(ncid,"t_conduc_soil",NF90_REAL,dimids,varid_t_conduc_soil))
     call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Description","temperature conductivity of the soil"))
     call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Unit","J/(Km^3)"))
     
-    call nc_check(nf90_def_var(ncid,"u_dir",NF90_REAL,dimids_v,varid_dir_geo_u))
+    call nc_check(nf90_def_var(ncid,"u_dir",NF90_REAL,dimids_u,varid_dir_geo_u))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Description","direction of u-vectors"))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Unit","radians"))
     
@@ -113,7 +113,7 @@ module read_write_grid
     call nc_check(nf90_put_att(ncid,varid_dir_geo_v,"Description","direction of v-vectors"))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_v,"Unit","radians"))
     
-    call nc_check(nf90_def_var(ncid,"u_dir_center",NF90_REAL,dimids_v,varid_dir_geo_u_scalar))
+    call nc_check(nf90_def_var(ncid,"u_dir_center",NF90_REAL,dimids,varid_dir_geo_u_scalar))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u_scalar,"Description","direction of u-vectors at the scalar data points"))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u_scalar,"Unit","radians"))
     
