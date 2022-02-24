@@ -36,10 +36,14 @@ module write_out
     integer                   :: x_dimid                   ! ID of the x dimension
     integer                   :: y_dimid                   ! ID of the y dimension
     integer                   :: z_dimid                   ! ID of the z dimension
+    integer                   :: single_double_dimid       ! ID of the dimension cotaining one double
     integer                   :: dimids_2d(2)              ! dimensions of horizontal fields
     integer                   :: dimids_3d(3)              ! dimensions of 3D fields
     integer                   :: varid_lat                 ! variable ID of the lat coordinates
     integer                   :: varid_lon                 ! variable ID of the lon coordinates
+    integer                   :: varid_lat_center          ! variable ID of the latitude of the center
+    integer                   :: varid_lon_center          ! variable ID of the longitude of the center
+    integer                   :: varid_x_dir               ! variable ID of the x-direction in the center
     integer                   :: varid_z                   ! variable ID of the z coordinates
     integer                   :: varid_p                   ! variable ID of the 3D pressure field
     integer                   :: varid_t                   ! variable ID of the 3D temperature field
@@ -62,6 +66,7 @@ module write_out
     call nc_check(nf90_put_att(ncid,NF90_GLOBAL,"Time_since_initialization_in_minutes",trim(time_since_init_min_str)))
     
     ! defining the dimensions
+    call nc_check(nf90_def_dim(ncid,"single_double",1,single_double_dimid))
     call nc_check(nf90_def_dim(ncid,"lon_model",ncols,x_dimid))
     call nc_check(nf90_def_dim(ncid,"lat_model",nlins,y_dimid))
     call nc_check(nf90_def_dim(ncid,"z",nlays,z_dimid))
@@ -77,35 +82,63 @@ module write_out
 
     ! Define the variable. The type of the variable in this case is
     ! NF90_INT (4-byte integer).
+    call nc_check(nf90_def_var(ncid,"lat_center",NF90_REAL,single_double_dimid,varid_lat_center))
+    call nc_check(nf90_put_att(ncid,varid_lat_center, &
+    "Description","latitude of the center of the model grid"))
+    call nc_check(nf90_put_att(ncid,varid_lat_center,"Unit","rad"))
+    
+    call nc_check(nf90_def_var(ncid,"lon_center",NF90_REAL,single_double_dimid,varid_lon_center))
+    call nc_check(nf90_put_att(ncid,varid_lon_center, &
+    "Description","longitude of the model grid"))
+    call nc_check(nf90_put_att(ncid,varid_lon_center,"Unit","rad"))
+    
+    call nc_check(nf90_def_var(ncid,"x_dir",NF90_REAL,single_double_dimid,varid_x_dir))
+    call nc_check(nf90_put_att(ncid,varid_x_dir,"Unit","rad"))
+    call nc_check(nf90_put_att(ncid,varid_x_dir, &
+    "Description","direction of the x-axis in the center of the model grid"))
+    
     call nc_check(nf90_def_var(ncid,"lat_model",NF90_REAL,y_dimid,varid_lat))
+    call nc_check(nf90_put_att(ncid,varid_lat,"Unit","rad"))
     call nc_check(nf90_put_att(ncid,varid_lat, &
     "Description","latitudes of the grid points (in the frame of reference of the model)"))
-    call nc_check(nf90_put_att(ncid,varid_lat,"Unit","rad"))
+    
     call nc_check(nf90_def_var(ncid,"lon_model",NF90_REAL,x_dimid,varid_lon))
     call nc_check(nf90_put_att(ncid,varid_lon, &
     "Description","longitudes of the grid points (in the frame of reference of the model)"))
     call nc_check(nf90_put_att(ncid,varid_lon,"Unit","rad"))
+    
     call nc_check(nf90_def_var(ncid,"z",NF90_REAL,dimids_3d,varid_z))
     call nc_check(nf90_put_att(ncid,varid_z,"Description","z coordinates of the grid points (MSL)"))
     call nc_check(nf90_put_att(ncid,varid_z,"Unit","m"))
+    
     call nc_check(nf90_def_var(ncid,"T",NF90_REAL,dimids_3d,varid_t))
     call nc_check(nf90_put_att(ncid,varid_t,"Description","air temperature"))
     call nc_check(nf90_put_att(ncid,varid_t,"Unit","K"))
+    
     call nc_check(nf90_def_var(ncid,"p",NF90_REAL,dimids_3d,varid_p))
     call nc_check(nf90_put_att(ncid,varid_p,"Description","air pressure"))
     call nc_check(nf90_put_att(ncid,varid_p,"Unit","Pa"))
+    
     call nc_check(nf90_def_var(ncid,"u",NF90_REAL,dimids_3d,varid_u))
     call nc_check(nf90_put_att(ncid,varid_u,"Description","zonal wind (in the frame of reference of the model)"))
     call nc_check(nf90_put_att(ncid,varid_u,"Unit","m/s"))
+    
     call nc_check(nf90_def_var(ncid,"v",NF90_REAL,dimids_3d,varid_v))
     call nc_check(nf90_put_att(ncid,varid_v,"Description","meridional wind (in the frame of reference of the model)"))
     call nc_check(nf90_put_att(ncid,varid_v,"Unit","m/s"))
+    
     call nc_check(nf90_def_var(ncid,"w",NF90_REAL,dimids_3d,varid_w))
     call nc_check(nf90_put_att(ncid,varid_w,"Description","vertical wind"))
     call nc_check(nf90_put_att(ncid,varid_w,"Unit","m/s"))
     
     ! ending the definition section
     call nc_check(nf90_enddef(ncid))
+    ! latitude of the center
+    call nc_check(nf90_put_var(ncid,varid_lat_center,grid%lat_center))
+    ! longitude of the center
+    call nc_check(nf90_put_var(ncid,varid_lon_center,grid%lon_center))
+    ! x-direction in the center
+    call nc_check(nf90_put_var(ncid,varid_x_dir,grid%x_dir_center))
     ! latitude coordinates of the grid points
     call nc_check(nf90_put_var(ncid,varid_lat,grid%lat_scalar(:)))
     ! longitude coordinates of the grid points

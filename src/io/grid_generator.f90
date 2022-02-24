@@ -71,7 +71,7 @@ module grid_generator
     ! setting the center and direction of the grid
     grid%lat_center = 2._wp*M_PI*lat_center_deg/360._wp
     grid%lon_center = 2._wp*M_PI*lon_center_deg/360._wp
-    grid%x_dir = 2._wp*M_PI*x_dir_deg/360._wp
+    grid%x_dir_center = 2._wp*M_PI*x_dir_deg/360._wp
     
     ! setting the latitude and longitude coordinates of the scalar grid points
     ! setting the dy of the model grid
