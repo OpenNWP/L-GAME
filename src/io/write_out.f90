@@ -10,7 +10,7 @@ module write_out
   use run_nml,           only: nlins,ncols,nlays,scenario,run_id
   use constituents_nml,  only: no_of_condensed_constituents
   use dictionary,        only: specific_gas_constants,spec_heat_capacities_p_gas
-  use grid_generator,    only: bg_temp,bg_pres,geopot
+  use set_initial_state, only: bg_temp,bg_pres,geopot
   use set_initial_state, only: nc_check
 
   implicit none

@@ -10,14 +10,17 @@ module set_initial_state
   use run_nml,          only: nlins,ncols,nlays,scenario,run_id
   use constituents_nml, only: no_of_condensed_constituents,no_of_constituents
   use dictionary,       only: specific_gas_constants,spec_heat_capacities_p_gas
-  use grid_generator,   only: bg_temp,bg_pres,geopot
-  use constants,        only: p_0
+  use constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
+                              gravity,p_0_standard,re,t_grad_inv
 
   implicit none
   
   private
   
   public :: ideal
+  public :: bg_temp
+  public :: bg_pres
+  public :: geopot
   public :: restart
   public :: nc_check
   
@@ -227,6 +230,60 @@ module set_initial_state
     state%wind_w = 0._wp
     
   end subroutine unessential_init
+  
+  function bg_temp(z_height)
+  
+    ! This function returns the temperature of the background state.
+    
+    real(wp), intent(in) :: z_height
+    ! output
+    real(wp)             :: bg_temp
+
+    ! troposphere
+    if (z_height < tropo_height) then  
+      bg_temp = surface_temp - lapse_rate*z_height
+    ! constant temperature layer
+    elseif (z_height < inv_height) then
+      bg_temp = surface_temp - lapse_rate*tropo_height
+    ! inversion
+    else
+      bg_temp = surface_temp - lapse_rate*tropo_height + t_grad_inv*(z_height - inv_height)
+    endif
+  
+  end function bg_temp
+
+  function bg_pres(z_height)
+  
+    ! This function returns the pressure of the background state (only used in the lowest layer during the initialization).
+    
+    real(wp), intent(in) :: z_height
+    ! output
+    real(wp)             :: bg_pres
+
+    if (z_height < inv_height) then  
+      bg_pres = p_0_standard*(1 - lapse_rate*z_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate))
+    elseif (z_height < tropo_height) then
+      bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate)) &
+      *exp(-gravity*(z_height - tropo_height)/(specific_gas_constants(0)*(surface_temp - lapse_rate*tropo_height)))
+    else
+      write(*,*) "Argument of bg_pres is above the inversion height. This is unrealistic in the lowest layer."
+      write(*,*) "Aborting."
+      call exit(1)
+    endif
+  
+  end function bg_pres
+  
+  function geopot(z_height)
+  
+    ! This function returns the geopotential as a function of the geometrical height.
+  
+    real(wp), intent(in) :: z_height
+    ! output
+    real(wp)             :: geopot
+    
+    geopot = -gravity*re**2/(re+z_height)+gravity*re
+  
+  end function geopot
   
   subroutine nc_check(i_status)
   
