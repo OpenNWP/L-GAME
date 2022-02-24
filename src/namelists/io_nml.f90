@@ -23,8 +23,8 @@ module io_nml
     integer :: fileunit
     
     dt_write_min    = 60
-    lread_grid       = .false.
-    lwrite_grid      = .false.
+    lread_grid      = .false.
+    lwrite_grid     = .false.
     grid_filename   = "grid.nc"
     
     ! Open and read Namelist file.

@@ -95,8 +95,12 @@ module multiplications
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     result_field_z(:,:,1) = 0._wp
     result_field_z(:,:,nlays+1) = 0._wp
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
   
   end subroutine scalar_times_vector_v
   
