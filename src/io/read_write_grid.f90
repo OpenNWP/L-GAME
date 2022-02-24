@@ -9,7 +9,7 @@ module read_write_grid
   use definitions,       only: t_grid
   use set_initial_state, only: nc_check
   use io_nml,            only: grid_filename
-  use run_nml,           only: nlins,ncols
+  use run_nml,           only: nlins,ncols,nlays
   
   implicit none
   
@@ -40,6 +40,11 @@ module read_write_grid
     integer                   :: varid_lon_u               ! variable ID of the longitudes of the u-vectors
     integer                   :: varid_lat_v               ! variable ID of the latitudes of the v-vectors
     integer                   :: varid_lon_v               ! variable ID of the longitudes of the v-vectors
+    integer                   :: varid_z_geo_w             ! variable ID of the longitudes of the v-vectors
+    integer                   :: varid_sfc_rho_c           ! variable ID of the longitudes of the v-vectors
+    integer                   :: varid_dir_geo_u           ! variable ID of the longitudes of the v-vectors
+    integer                   :: varid_dir_geo_v           ! variable ID of the longitudes of the v-vectors
+    integer                   :: varid_dir_geo_u_scalar    ! variable ID of the longitudes of the v-vectors
     
     filename = "../../grids/" // trim(grid_filename)
     
@@ -66,21 +71,46 @@ module read_write_grid
     call nc_check(nf90_def_var(ncid,"lat_geo",NF90_REAL,dimids,varid_lat))
     call nc_check(nf90_put_att(ncid,varid_lat,"Description","latitude"))
     call nc_check(nf90_put_att(ncid,varid_lat,"Unit","radians"))
+    
     call nc_check(nf90_def_var(ncid,"lon_geo",NF90_REAL,dimids,varid_lon))
     call nc_check(nf90_put_att(ncid,varid_lon,"Description","longitude"))
     call nc_check(nf90_put_att(ncid,varid_lon,"Unit","radians"))
+    
     call nc_check(nf90_def_var(ncid,"lat_geo_u",NF90_REAL,dimids_u,varid_lat_u))
     call nc_check(nf90_put_att(ncid,varid_lat_u,"Description","latitude of u-vectors"))
     call nc_check(nf90_put_att(ncid,varid_lat_u,"Unit","radians"))
+    
     call nc_check(nf90_def_var(ncid,"lon_geo_u",NF90_REAL,dimids_u,varid_lon_u))
     call nc_check(nf90_put_att(ncid,varid_lon_u,"Description","longitude of u-vectors"))
     call nc_check(nf90_put_att(ncid,varid_lon_u,"Unit","radians"))
+    
     call nc_check(nf90_def_var(ncid,"lat_geo_v",NF90_REAL,dimids_v,varid_lat_v))
     call nc_check(nf90_put_att(ncid,varid_lat_v,"Description","latitude of v-vectors"))
     call nc_check(nf90_put_att(ncid,varid_lat_v,"Unit","radians"))
+    
     call nc_check(nf90_def_var(ncid,"lon_geo_v",NF90_REAL,dimids_v,varid_lon_v))
     call nc_check(nf90_put_att(ncid,varid_lon_v,"Description","longitude of v-vectors"))
     call nc_check(nf90_put_att(ncid,varid_lon_v,"Unit","radians"))
+    
+    call nc_check(nf90_def_var(ncid,"oro",NF90_REAL,dimids_v,varid_z_geo_w))
+    call nc_check(nf90_put_att(ncid,varid_z_geo_w,"Description","longitude of v-vectors"))
+    call nc_check(nf90_put_att(ncid,varid_z_geo_w,"Unit","radians"))
+    
+    call nc_check(nf90_def_var(ncid,"sfc_rho_c",NF90_REAL,dimids_v,varid_sfc_rho_c))
+    call nc_check(nf90_put_att(ncid,varid_sfc_rho_c,"Description","longitude of v-vectors"))
+    call nc_check(nf90_put_att(ncid,varid_sfc_rho_c,"Unit","radians"))
+    
+    call nc_check(nf90_def_var(ncid,"u_dir",NF90_REAL,dimids_v,varid_dir_geo_u))
+    call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Description","longitude of v-vectors"))
+    call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Unit","radians"))
+    
+    call nc_check(nf90_def_var(ncid,"v_dir",NF90_REAL,dimids_v,varid_dir_geo_v))
+    call nc_check(nf90_put_att(ncid,varid_dir_geo_v,"Description","longitude of v-vectors"))
+    call nc_check(nf90_put_att(ncid,varid_dir_geo_v,"Unit","radians"))
+    
+    call nc_check(nf90_def_var(ncid,"u_dir_center",NF90_REAL,dimids_v,varid_dir_geo_u_scalar))
+    call nc_check(nf90_put_att(ncid,varid_dir_geo_u_scalar,"Description","longitude of v-vectors"))
+    call nc_check(nf90_put_att(ncid,varid_dir_geo_u_scalar,"Unit","radians"))
     
     ! ending the definition section
     call nc_check(nf90_enddef(ncid))
@@ -92,6 +122,11 @@ module read_write_grid
     call nc_check(nf90_put_var(ncid,varid_lon_u,grid%lon_geo_u))
     call nc_check(nf90_put_var(ncid,varid_lat_v,grid%lat_geo_v))
     call nc_check(nf90_put_var(ncid,varid_lon_v,grid%lon_geo_v))
+    call nc_check(nf90_put_var(ncid,varid_z_geo_w,grid%z_geo_w(:,:,nlays+1)))
+    call nc_check(nf90_put_var(ncid,varid_sfc_rho_c,grid%sfc_rho_c))
+    call nc_check(nf90_put_var(ncid,varid_dir_geo_u,grid%dir_geo_u))
+    call nc_check(nf90_put_var(ncid,varid_dir_geo_v,grid%dir_geo_v))
+    call nc_check(nf90_put_var(ncid,varid_dir_geo_u_scalar,grid%dir_geo_u_scalar))
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
