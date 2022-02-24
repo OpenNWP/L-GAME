@@ -42,6 +42,7 @@ module read_write_grid
     integer                   :: varid_lon_v               ! variable ID of the longitudes of the v-vectors
     integer                   :: varid_z_geo_w             ! variable ID of the orography
     integer                   :: varid_sfc_rho_c           ! variable ID of the volumetric specific heat conductivity of the soil
+    integer                   :: varid_t_conduc_soil       ! variable ID of the temperature conductivity of the soil
     integer                   :: varid_dir_geo_u           ! variable ID of the direction of u-vectors
     integer                   :: varid_dir_geo_v           ! variable ID of the direction of v-vectors
     integer                   :: varid_dir_geo_u_scalar    ! variable ID of the direction of u-vectors at the scalar data points
@@ -100,6 +101,10 @@ module read_write_grid
     call nc_check(nf90_put_att(ncid,varid_sfc_rho_c,"Description","volumetric specific heat conductivity of the soil"))
     call nc_check(nf90_put_att(ncid,varid_sfc_rho_c,"Unit","J/(Km^3)"))
     
+    call nc_check(nf90_def_var(ncid,"t_conduc_soil",NF90_REAL,dimids_v,varid_t_conduc_soil))
+    call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Description","temperature conductivity of the soil"))
+    call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Unit","J/(Km^3)"))
+    
     call nc_check(nf90_def_var(ncid,"u_dir",NF90_REAL,dimids_v,varid_dir_geo_u))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Description","direction of u-vectors"))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Unit","radians"))
@@ -124,6 +129,7 @@ module read_write_grid
     call nc_check(nf90_put_var(ncid,varid_lon_v,grid%lon_geo_v))
     call nc_check(nf90_put_var(ncid,varid_z_geo_w,grid%z_geo_w(:,:,nlays+1)))
     call nc_check(nf90_put_var(ncid,varid_sfc_rho_c,grid%sfc_rho_c))
+    call nc_check(nf90_put_var(ncid,varid_t_conduc_soil,grid%t_conduc_soil))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u,grid%dir_geo_u))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_v,grid%dir_geo_v))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u_scalar,grid%dir_geo_u_scalar))
