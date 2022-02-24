@@ -12,6 +12,7 @@ module boundaries
   private
   
   public :: update_boundaries
+  public :: rescale_tend
   
   contains
   
@@ -23,6 +24,12 @@ module boundaries
     type(t_tend) :: tend_bc
     
   end subroutine update_boundaries
+  
+  subroutine rescale_tend
+  
+    ! rescales the tendencies to account for boundary conditions
+  
+  end subroutine rescale_tend
 
 end module boundaries
 
