@@ -226,7 +226,7 @@ module grid_generator
     ! setting the horizontal areas at the surface
     do ji=1,nlins
       do jk=1,ncols
-        grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(re + grid%z_geo_w(ji+1,jk+1,nlays+1))**2 &
+        grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(re + grid%z_geo_w(ji,jk,nlays+1))**2 &
           /re**2
       enddo
     enddo
@@ -235,8 +235,8 @@ module grid_generator
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          grid%area_z(ji,jk,jl) = grid%area_z(ji,jk,nlays+1)*(re + grid%z_geo_w(ji+1,jk+1,jl))**2 &
-          /(re + grid%z_geo_w(ji+1,jk+1,nlays+1))**2
+          grid%area_z(ji,jk,jl) = grid%area_z(ji,jk,nlays+1)*(re + grid%z_geo_w(ji,jk,jl))**2 &
+          /(re + grid%z_geo_w(ji,jk,nlays+1))**2
         enddo
       enddo
     enddo
@@ -325,8 +325,8 @@ module grid_generator
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          grid%volume(ji,jk,jl) = 1._wp/3._wp*((re + grid%z_geo_w(ji+1,jk+1,jl))**3 - (re + grid%z_geo_w(ji+1,jk+1,jl+1))**3) &
-          /(re + grid%z_geo_w(ji+1,jk+1,jl+1))**2*grid%area_z(ji,jk,jl+1)
+          grid%volume(ji,jk,jl) = 1._wp/3._wp*((re + grid%z_geo_w(ji,jk,jl))**3 - (re + grid%z_geo_w(ji,jk,jl+1))**3) &
+          /(re + grid%z_geo_w(ji,jk,jl+1))**2*grid%area_z(ji,jk,jl+1)
         enddo
       enddo
     enddo
@@ -421,7 +421,6 @@ module grid_generator
           if (grid%is_land(ji,jk)) then
         
             grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
-            grid%sfc_albedo(ji,jk) = 0.12_wp
           
             ! setting the surface albedo of land depending on the latitude
             ! ice
