@@ -3,9 +3,9 @@
 
 module constants
 
-  use definitions, only: wp
-
   ! This is a collection of some quantities that are hardly ever changed.
+  
+  use definitions, only: wp
   
   implicit none
   

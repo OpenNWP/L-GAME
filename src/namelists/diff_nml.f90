@@ -9,13 +9,13 @@ module diff_nml
   
   implicit none
   
-  logical  :: lklemp           ! turns the Klemp damping layer on or off
-  real(wp) :: klemp_damp_max   ! the maximum Klemp damping coefficient
-  real(wp) :: klemp_begin_rel  ! lower boundary of the Klemp damping layer in relation to the TOA
-  logical  :: lmom_diff_h      ! switch for horizontal momentum diffusion
-  logical  :: lmom_diff_v      ! switch for vertical momentum diffusion
-  real(wp) :: diff_h_smag_div  ! horizontal diffusion Smagorinsky factor acting on divergent movements
-  real(wp) :: diff_h_smag_rot  ! horizontal diffusion Smagorinsky factor acting on vortical movements
+  logical  :: lklemp          ! turns the Klemp damping layer on or off
+  real(wp) :: klemp_damp_max  ! the maximum Klemp damping coefficient
+  real(wp) :: klemp_begin_rel ! lower boundary of the Klemp damping layer in relation to the TOA
+  logical  :: lmom_diff_h     ! switch for horizontal momentum diffusion
+  logical  :: lmom_diff_v     ! switch for vertical momentum diffusion
+  real(wp) :: diff_h_smag_div ! horizontal diffusion Smagorinsky factor acting on divergent movements
+  real(wp) :: diff_h_smag_rot ! horizontal diffusion Smagorinsky factor acting on vortical movements
   
   namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v,diff_h_smag_div,diff_h_smag_rot
   

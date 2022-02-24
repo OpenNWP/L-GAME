@@ -3,12 +3,14 @@
 
 module surface_nml
 
+  ! This namelist defines the surface properties.
+
   use definitions, only: wp
   
   implicit none
   
-  logical  :: lsoil                   ! soil switch
-  integer  :: nsoillays               ! number of soil layers
+  logical  :: lsoil     ! soil switch
+  integer  :: nsoillays ! number of soil layers
   
   
   namelist /surface/lsoil,nsoillays

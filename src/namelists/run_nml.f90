@@ -3,6 +3,8 @@
 
 module run_nml
 
+  ! This is the namelists the configures the basic run properties of a model integration.
+
   use definitions, only: wp
   
   implicit none

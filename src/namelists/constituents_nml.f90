@@ -3,6 +3,8 @@
 
 module constituents_nml
 
+  ! This namelist defines the constituents of the model atmosphere.
+
   use definitions, only: wp
 
   implicit none

@@ -1,9 +1,9 @@
-  ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
-  ! Github repository: https://github.com/OpenNWP/L-GAME
-
-  ! This file contains some definitions.
+! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
+! Github repository: https://github.com/OpenNWP/L-GAME
 
 module definitions
+
+  ! This file contains some definitions.
                             
   implicit none
   
