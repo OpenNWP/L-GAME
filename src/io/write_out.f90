@@ -22,8 +22,9 @@ module write_out
   contains
   
   subroutine write_output(state,diag,time_since_init_min,grid)
-    ! reads out the state of the model atmosphere
-    ! at a single timestep to a NetCDF file
+    
+    ! This subroutine writes the state of the model atmosphere
+    ! at a single timestep to a NetCDF file.
     
     type(t_state), intent(in)    :: state               ! state to write out
     type(t_diag),  intent(inout) :: diag                ! diagnostic quantities
