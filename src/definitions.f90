@@ -80,8 +80,11 @@ module definitions
     logical,  allocatable :: is_land(:,:)                     ! land-sea-mask
     real(wp), allocatable :: z_soil_interface(:)              ! heights of the interfaces of the soil layers
     real(wp), allocatable :: z_soil_center(:)                 ! heights of the centers of the soil layers
-    real(wp)              :: z_t_const                        ! depth where the soil temperature is constant
     real(wp), allocatable :: t_const_soil(:,:)                ! temperature of the soil below the depth where it is constant
+    real(wp)              :: z_t_const                        ! depth where the soil temperature is constant
+    real(wp)              :: lat_center                       ! latitude of the center of the model domain
+    real(wp)              :: lon_center                       ! longitude of the center of the model domain
+    real(wp)              :: x_dir                            ! direction of the x-axis of the model
   
   end type t_grid
   
