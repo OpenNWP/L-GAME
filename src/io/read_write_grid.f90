@@ -22,6 +22,8 @@ module read_write_grid
   
   subroutine write_grid(grid)
   
+    ! This subroutine writes costly grid properties to a file so they can be reused elsewhere.
+  
     type(t_grid), intent(in) :: grid
     
     ! local variables
