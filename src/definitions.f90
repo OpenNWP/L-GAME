@@ -148,6 +148,10 @@ module definitions
     real(wp), allocatable :: sfc_sw_in(:,:)                   ! shortwave radiation in the surface
     real(wp), allocatable :: sfc_lw_out(:,:)                  ! longwave radiation out of the surface
     real(wp), allocatable :: roughness_velocity(:,:)          ! roughness velocity
+    real(wp), allocatable :: scalar_bc_factor(:,:)            ! boundary conditions factor for scalar fields
+    real(wp), allocatable :: u_bc_factor(:,:)                 ! boundary conditions factor for u-vector fields
+    real(wp), allocatable :: v_bc_factor(:,:)                 ! boundary conditions factor for v-vector fields
+  
   
   end type t_diag
   

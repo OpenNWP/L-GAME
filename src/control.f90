@@ -188,6 +188,9 @@ program control
   allocate(diag%sfc_sw_in(nlins,ncols))
   allocate(diag%sfc_lw_out(nlins,ncols))
   allocate(diag%roughness_velocity(nlins,ncols))
+  allocate(diag%scalar_bc_factor(nlins,ncols))
+  allocate(diag%u_bc_factor(nlins,ncols+1))
+  allocate(diag%v_bc_factor(nlins+1,ncols))
   ! type containing irreversible quantities
   allocate(irrev%tke(nlins,ncols,nlays))
   allocate(irrev%mom_diff_tend_x(nlins,ncols,nlays))
@@ -416,6 +419,9 @@ program control
   deallocate(diag%sfc_sw_in)
   deallocate(diag%sfc_lw_out)
   deallocate(diag%roughness_velocity)
+  deallocate(diag%scalar_bc_factor)
+  deallocate(diag%u_bc_factor)
+  deallocate(diag%v_bc_factor)
   ! type containing irreversible quantities
   deallocate(irrev%tke)
   deallocate(irrev%mom_diff_tend_x)
