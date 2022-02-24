@@ -33,7 +33,7 @@ module tke
         do jl=1,nlays
           irrev%tke(ji,jk,jl) = irrev%tke(ji,jk,jl) + dtime*( &
           ! production of TKE through generation of resolved energy
-          irrev%heating_diss(ji+1,jk+1,jl)/density_gas(state,ji,jk,jl) &
+          irrev%heating_diss(ji,jk,jl)/density_gas(state,ji,jk,jl) &
           )
           
           ! clipping negative values
