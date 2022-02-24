@@ -24,7 +24,9 @@ module manage_radiation_calls
     type(t_diag),   intent(inout) :: diag               ! diagnostic quantities
     type(t_irrev),  intent(inout) :: irrev              ! irreversible quantities
     
+    write(*,*) "Starting update of radiative fluxes ..."
     
+    write(*,*) "Update of radiative fluxes completed."
     
   end subroutine call_radiation
 
