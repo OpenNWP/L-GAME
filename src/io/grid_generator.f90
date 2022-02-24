@@ -6,7 +6,8 @@
 module grid_generator
 
   use definitions,        only: wp,t_grid
-  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,scenario
+  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center_deg, &
+                                lon_center_deg,x_dir_deg
   use constants,          only: re,density_water,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv
   use surface_nml,        only: nsoillays
@@ -66,6 +67,11 @@ module grid_generator
     real(wp) :: density_soil    ! typical density of soil
     real(wp) :: c_p_soil        ! typical c_p of soil
     real(wp) :: c_p_water       ! typical c_p of water
+    
+    ! setting the center and direction of the grid
+    grid%lat_center = 2._wp*M_PI*lat_center_deg/360._wp
+    grid%lon_center = 2._wp*M_PI*lon_center_deg/360._wp
+    grid%x_dir = 2._wp*M_PI*x_dir_deg/360._wp
     
     ! setting the latitude and longitude coordinates of the scalar grid points
     ! setting the dy of the model grid
