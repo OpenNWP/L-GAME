@@ -143,7 +143,7 @@ module set_initial_state
     
     do ji=1,nlins
       do jk=1,ncols
-        state%temperature_soil(ji,jk,:)=280._wp
+        state%temperature_soil(ji,jk,:) = 280._wp
       enddo
     enddo
     
