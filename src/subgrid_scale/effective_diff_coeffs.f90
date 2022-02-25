@@ -37,7 +37,7 @@ module effective_diff_coeffs
     integer :: ji,jk,jl ! loop indices
     
     ! computing the Eddy viscosity
-    irrev%viscosity_coeff = diff_h_smag_div*grid%mean_velocity_area*divergence_h
+    irrev%viscosity_coeff = diff_h_smag_div*grid%mean_velocity_area*abs(divergence_h)
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
