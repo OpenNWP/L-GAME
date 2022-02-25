@@ -241,6 +241,9 @@ module grid_generator
       enddo
     enddo
     
+    ! the mean velocity area can be set now
+    grid%mean_velocity_area = 2._wp*sum(grid%area_z(:,:,nlays+1))/size(grid%area_z(:,:,nlays+1))
+    
     ! setting the vertical areas in x-direction
     do ji=1,nlins
       do jk=1,ncols+1

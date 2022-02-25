@@ -9,11 +9,11 @@ module surface_nml
   
   implicit none
   
-  logical  :: lsoil     ! soil switch
-  integer  :: nsoillays ! number of soil layers
+  character(len=32) :: orography_name ! identifies which orography to use
+  logical           :: lsoil          ! soil switch
+  integer           :: nsoillays      ! number of soil layers
   
-  
-  namelist /surface/lsoil,nsoillays
+  namelist /surface/orography_name,lsoil,nsoillays
   
   contains
   
@@ -23,6 +23,7 @@ module surface_nml
     integer :: fileunit
     
     ! default values
+    orography_name          = "real"
     lsoil                   = .true.
     nsoillays               = 5
     
