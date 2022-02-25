@@ -42,7 +42,7 @@ module manage_rkhevi
     logical,        intent(in)    :: lrad_update        ! radiation update switch
     
     ! local variables
-    integer  :: rk_step          ! index of the Runge-Kutta step
+    integer  :: rk_step ! index of the Runge-Kutta step
     
     ! diagnosing the temperature
     call temperature_diagnostics(state_old,diag,grid)

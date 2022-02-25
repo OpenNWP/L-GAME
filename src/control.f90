@@ -26,17 +26,26 @@ program control
   implicit none
 
   ! local variables
-  integer        :: time_step_counter
-  real(wp)       :: t_0,run_span,t_write
-  type(t_grid)   :: grid
-  type(t_state)  :: state_old, state_new, state_write
-  type(t_diag)   :: diag
-  type(t_tend)   :: tend
-  type(t_bc)     :: bc
-  type(t_irrev)  :: irrev
-  real(wp)       :: normal_dist_min_vert ! minimum vertical gridpoint distance
-  logical        :: lrad_update          ! radiation update switch
-  real(wp)       :: t_rad_update         ! radiation update time
+  integer            :: timestep_counter                ! counter of the timestep
+  real(wp)           :: t_0,run_span,t_write            ! time information
+  type(t_grid)       :: grid                            ! grid properties
+  type(t_state)      :: state_old,state_new,state_write ! states at different time steps
+  type(t_diag)       :: diag                            ! diagnostic quantities
+  type(t_tend)       :: tend                            ! state containing the tendency
+  type(t_bc)         :: bc                              ! boundary conditions
+  type(t_irrev)      :: irrev                           ! irreversible quantities
+  real(wp)           :: normal_dist_min_vert            ! minimum vertical gridpoint distance
+  logical            :: lrad_update                     ! radiation update switch
+  real(wp)           :: t_rad_update                    ! radiation update time
+  character(len=82)  :: stars                           ! character containing stars
+
+  stars = "**********************************************************************************"
+  write(*,*) stars
+  write(*,*) "*                                                                                *"
+  write(*,*) "*                                 This is L-GAME                                 *"
+  write(*,*) "*                   Local Geophysical Fluids Modeling Framework                  *"
+  write(*,*) "*                                                                                *"
+  write(*,*) stars
 
   ! reading in all namelists so that we know what we have to do
   write(*,*) "Reading in run namelist ..."
@@ -268,7 +277,7 @@ program control
   t_0 = t_init
   t_write = t_0 + dt_write
   run_span = 3600._wp*run_span_hr
-  time_step_counter = 0
+  timestep_counter = 0
   
   do while (t_0 < t_init+run_span+300._wp)
     
@@ -283,7 +292,7 @@ program control
     endif
 
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,time_step_counter,lrad_update)
+    call rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,timestep_counter,lrad_update)
     
     ! managing the calls to the output routine
     if (t_0 + dtime >= t_write) then
@@ -296,8 +305,8 @@ program control
     endif
     
     t_0 = t_0+dtime
-    time_step_counter = time_step_counter+1
-    write(*,*) "Step ", time_step_counter, " completed."
+    timestep_counter = timestep_counter+1
+    write(*,*) "Step ", timestep_counter, " completed."
     
   enddo
   
@@ -450,6 +459,7 @@ program control
   deallocate(irrev%mass_source_rates)
   deallocate(irrev%heat_source_rates)
   write(*,*) "... finished."
+  write(*,*) "L-GAME over."
   
 end program control
 

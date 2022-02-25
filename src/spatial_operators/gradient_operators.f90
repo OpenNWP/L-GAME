@@ -1,9 +1,9 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-! This file is a collection of gradient operators.
-
 module gradient_operators
+
+  ! This module is a collection of gradient operators.
 
   use definitions, only: t_grid,wp
   use run_nml,     only: nlins,ncols,nlays,toa
@@ -28,6 +28,7 @@ module gradient_operators
     real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
     real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
     type(t_grid), intent(in)    :: grid                  ! the grid properties
+    
     ! local variables
     integer                     :: ji,jk                 ! loop variables
 

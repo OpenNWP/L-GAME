@@ -24,18 +24,18 @@ module explicit_scalar_tendencies
   
   subroutine expl_scalar_tend(grid,state,tend,diag,irrev,rk_step)
   
-    type(t_grid),   intent(in)    :: grid       ! model grid
-    type(t_state),  intent(in)    :: state      ! state with which to calculate the divergence
-    type(t_tend),   intent(inout) :: tend       ! state which will contain the tendencies
-    type(t_diag),   intent(inout) :: diag       ! diagnostic quantities
-    type(t_irrev),  intent(inout) :: irrev      ! irreversible quantities
-    integer,        intent(in)    :: rk_step    ! RK substep index
+    type(t_grid),   intent(in)    :: grid    ! model grid
+    type(t_state),  intent(in)    :: state   ! state with which to calculate the divergence
+    type(t_tend),   intent(inout) :: tend    ! state which will contain the tendencies
+    type(t_diag),   intent(inout) :: diag    ! diagnostic quantities
+    type(t_irrev),  intent(inout) :: irrev   ! irreversible quantities
+    integer,        intent(in)    :: rk_step ! RK substep index
     
     ! local variables
-    integer                       :: j_constituent                   ! loop variable
-    real(wp)                      :: old_weight(no_of_constituents)  ! time stepping weight
-    real(wp)                      :: new_weight(no_of_constituents)  ! time stepping weight
-    real(wp)                      :: c_p                             ! as usual
+    integer                       :: j_constituent                  ! loop variable
+    real(wp)                      :: old_weight(no_of_constituents) ! time stepping weight
+    real(wp)                      :: new_weight(no_of_constituents) ! time stepping weight
+    real(wp)                      :: c_p                            ! as usual
     
     c_p = spec_heat_capacities_p_gas(0)
     
@@ -105,10 +105,10 @@ module explicit_scalar_tendencies
   
     ! This subroutine manages the calculation of the phase transition rates.
     
-    type(t_state), intent(inout) :: state
-    type(t_diag), intent(inout)  :: diag
-    type(t_irrev), intent(inout) :: irrev
-    type(t_grid), intent(in)     :: grid
+    type(t_state), intent(inout) :: state ! the state with which to calculate the phase transition rates
+    type(t_diag), intent(inout)  :: diag  ! diagnostic quantities
+    type(t_irrev), intent(inout) :: irrev ! irreversible quantities (phase transitions are irreversible)
+    type(t_grid), intent(in)     :: grid  ! grid properties
       
     if (no_of_constituents > 1) then
     
