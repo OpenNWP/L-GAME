@@ -27,27 +27,29 @@ module read_write_grid
     type(t_grid), intent(in) :: grid
     
     ! local variables
-    integer                   :: ncid                      ! ID of the NetCDF file
-    character(len=64)         :: filename                  ! output filename
-    integer                   :: x_dimid                   ! ID of the x dimension
-    integer                   :: y_dimid                   ! ID of the y dimension
-    integer                   :: x_dimidp1                 ! ID of the x dimension + one point
-    integer                   :: y_dimidp1                 ! ID of the y dimension + one point
-    integer                   :: dimids(2)                 ! dimensions of horizontal fields
-    integer                   :: dimids_u(2)               ! dimensions of horizontal u-vector fields
-    integer                   :: dimids_v(2)               ! dimensions of horizontal v-vector fields
-    integer                   :: varid_lat                 ! variable ID of the latitudes
-    integer                   :: varid_lon                 ! variable ID of the longitudes
-    integer                   :: varid_lat_u               ! variable ID of the latitudes of the u-vectors
-    integer                   :: varid_lon_u               ! variable ID of the longitudes of the u-vectors
-    integer                   :: varid_lat_v               ! variable ID of the latitudes of the v-vectors
-    integer                   :: varid_lon_v               ! variable ID of the longitudes of the v-vectors
-    integer                   :: varid_z_geo_w             ! variable ID of the orography
-    integer                   :: varid_sfc_rho_c           ! variable ID of the volumetric specific heat conductivity of the soil
-    integer                   :: varid_t_conduc_soil       ! variable ID of the temperature conductivity of the soil
-    integer                   :: varid_dir_geo_u           ! variable ID of the direction of u-vectors
-    integer                   :: varid_dir_geo_v           ! variable ID of the direction of v-vectors
-    integer                   :: varid_dir_geo_u_scalar    ! variable ID of the direction of u-vectors at the scalar data points
+    integer           :: ncid                   ! ID of the NetCDF file
+    character(len=64) :: filename               ! output filename
+    integer           :: x_dimid                ! ID of the x dimension
+    integer           :: y_dimid                ! ID of the y dimension
+    integer           :: x_dimidp1              ! ID of the x dimension + one point
+    integer           :: y_dimidp1              ! ID of the y dimension + one point
+    integer           :: dimids(2)              ! dimensions of horizontal fields
+    integer           :: dimids_u(2)            ! dimensions of horizontal u-vector fields
+    integer           :: dimids_v(2)            ! dimensions of horizontal v-vector fields
+    integer           :: varid_lat              ! variable ID of the latitudes
+    integer           :: varid_lon              ! variable ID of the longitudes
+    integer           :: varid_lat_u            ! variable ID of the latitudes of the u-vectors
+    integer           :: varid_lon_u            ! variable ID of the longitudes of the u-vectors
+    integer           :: varid_lat_v            ! variable ID of the latitudes of the v-vectors
+    integer           :: varid_lon_v            ! variable ID of the longitudes of the v-vectors
+    integer           :: varid_z_geo_w          ! variable ID of the orography
+    integer           :: varid_sfc_rho_c        ! variable ID of the volumetric specific heat conductivity of the soil
+    integer           :: varid_t_conduc_soil    ! variable ID of the temperature conductivity of the soil
+    integer           :: varid_is_land          ! variable ID of the land-sea-mask
+    integer           :: varid_sfc_albedo       ! variable ID of the albedo of the surface
+    integer           :: varid_dir_geo_u        ! variable ID of the direction of u-vectors
+    integer           :: varid_dir_geo_v        ! variable ID of the direction of v-vectors
+    integer           :: varid_dir_geo_u_scalar ! variable ID of the direction of u-vectors at the scalar data points
     
     filename = "../../grids/" // trim(grid_filename)
     
@@ -107,6 +109,14 @@ module read_write_grid
     call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Description","temperature conductivity of the soil"))
     call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Unit","m^2/s"))
     
+    call nc_check(nf90_def_var(ncid,"is_land",NF90_INT,dimids,varid_is_land))
+    call nc_check(nf90_put_att(ncid,varid_is_land,"Description","0 = water, 1 = land"))
+    call nc_check(nf90_put_att(ncid,varid_is_land,"Unit","1"))
+    
+    call nc_check(nf90_def_var(ncid,"sfc_albedo",NF90_REAL,dimids,varid_sfc_albedo))
+    call nc_check(nf90_put_att(ncid,varid_sfc_albedo,"Description","albedo of the surface"))
+    call nc_check(nf90_put_att(ncid,varid_sfc_albedo,"Unit","1"))
+    
     call nc_check(nf90_def_var(ncid,"u_dir",NF90_REAL,dimids_u,varid_dir_geo_u))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Description","direction of u-vectors"))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Unit","radians"))
@@ -132,6 +142,8 @@ module read_write_grid
     call nc_check(nf90_put_var(ncid,varid_z_geo_w,grid%z_geo_w(:,:,nlays+1)))
     call nc_check(nf90_put_var(ncid,varid_sfc_rho_c,grid%sfc_rho_c))
     call nc_check(nf90_put_var(ncid,varid_t_conduc_soil,grid%t_conduc_soil))
+    call nc_check(nf90_put_var(ncid,varid_is_land,grid%is_land))
+    call nc_check(nf90_put_var(ncid,varid_sfc_albedo,grid%sfc_albedo))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u,grid%dir_geo_u))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_v,grid%dir_geo_v))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u_scalar,grid%dir_geo_u_scalar))
@@ -148,11 +160,13 @@ module read_write_grid
     type(t_grid), intent(inout) :: grid
     
     ! local variables
-    integer           :: ncid                ! ID of the NetCDF file
+    integer   :: ncid                ! ID of the NetCDF file
     character(len=64) :: filename            ! output filename
-    integer           :: varid_z_geo_w       ! variable ID of the orography
-    integer           :: varid_sfc_rho_c     ! variable ID of the volumetric specific heat conductivity of the soil
-    integer           :: varid_t_conduc_soil ! variable ID of the temperature conductivity of the soil
+    integer   :: varid_z_geo_w       ! variable ID of the orography
+    integer   :: varid_sfc_rho_c     ! variable ID of the volumetric specific heat conductivity of the soil
+    integer   :: varid_t_conduc_soil ! variable ID of the temperature conductivity of the soil
+    integer   :: varid_is_land       ! variable ID of the land-sea-mask
+    integer   :: varid_sfc_albedo    ! variable ID of the albedo of the surface
     
     filename = "../../grids/" // trim(grid_filename)
     
@@ -163,11 +177,15 @@ module read_write_grid
     call nc_check(nf90_inq_varid(ncid,"oro",varid_z_geo_w))
     call nc_check(nf90_inq_varid(ncid,"sfc_rho_c",varid_sfc_rho_c))
     call nc_check(nf90_inq_varid(ncid,"t_conduc_soil",varid_t_conduc_soil))
+    call nc_check(nf90_inq_varid(ncid,"is_land",varid_is_land))
+    call nc_check(nf90_inq_varid(ncid,"sfc_albedo",varid_sfc_albedo))
     
     ! reading the NetCDF fields
     call nc_check(nf90_get_var(ncid,varid_z_geo_w,grid%z_geo_w(:,:,nlays+1)))
     call nc_check(nf90_get_var(ncid,varid_sfc_rho_c,grid%sfc_rho_c))
     call nc_check(nf90_get_var(ncid,varid_t_conduc_soil,grid%t_conduc_soil))
+    call nc_check(nf90_get_var(ncid,varid_is_land,grid%is_land))
+    call nc_check(nf90_get_var(ncid,varid_sfc_albedo,grid%sfc_albedo))
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))

@@ -216,7 +216,7 @@ module phase_trans
         ! surface effects
 
         ! evaporation and latent heat rates
-        if (grid%is_land(ji,jk)) then
+        if (grid%is_land(ji,jk)==1) then
           ! saturation pressure at surface temperature
           if (state%temperature_soil(ji,jk,1) >= T_0) then
             saturation_pressure_sfc = saturation_pressure_over_water(state%temperature_soil(ji,jk,1))

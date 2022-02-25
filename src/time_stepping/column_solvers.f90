@@ -115,7 +115,7 @@ module column_solvers
       
         ! determining wether soil needs to be calculated
         soil_switch = 0
-        if (lsoil .and. grid%is_land(ji,jk)) then
+        if (lsoil .and. grid%is_land(ji,jk)==1) then
           soil_switch=1
         endif
       

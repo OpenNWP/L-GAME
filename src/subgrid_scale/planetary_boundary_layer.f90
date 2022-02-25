@@ -60,7 +60,7 @@ module planetary_boundary_layer
         u10 = u_lowest_layer*log(10._wp/grid%roughness_length(ji,jk))/log(z_agl/grid%roughness_length(ji,jk))
 
         ! only over the sea the roughness length is time-dependant (because of the waves)
-        if (.not. grid%is_land(ji,jk)) then
+        if (grid%is_land(ji,jk)==0) then
           ! calculating the roughness length fom the wind velocity
           grid%roughness_length(ji,jk) = roughness_length_from_u10_sea(u10)
         endif

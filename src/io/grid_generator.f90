@@ -142,7 +142,7 @@ module grid_generator
               grid%sfc_rho_c(ji,jk) = density_water*c_p_water
 		
 		      ! land
-              if (grid%is_land(ji,jk)) then
+              if (grid%is_land(ji,jk)==1) then
         
                 grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
           
