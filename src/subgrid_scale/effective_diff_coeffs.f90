@@ -5,8 +5,11 @@ module effective_diff_coeffs
   
   ! This module computes the effective diffusion coefficients.
   
-  use definitions, only: wp,t_grid,t_irrev
-  use diff_nml,    only: diff_h_smag_div
+  use run_nml,            only: nlins,ncols,nlays
+  use definitions,        only: wp,t_state,t_diag,t_irrev,t_grid
+  use diff_nml,           only: diff_h_smag_div
+  use derived_quantities, only: calc_diffusion_coeff
+  use constituents_nml,   only: no_of_condensed_constituents
   
   implicit none
   
@@ -21,15 +24,33 @@ module effective_diff_coeffs
   
   contains
   
-  subroutine hori_div_viscosity(divergence_h,irrev,grid)
+  subroutine hori_div_viscosity(state,diag,divergence_h,irrev,grid)
   
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
+    type(t_state), intent(in)    :: state               ! the state variables of the model atmosphere
+    type(t_diag), intent(in)     :: diag                ! diagnostic quantities
     real(wp), intent(in)         :: divergence_h(:,:,:) ! divergence of the horizontal wind field
     type(t_irrev), intent(inout) :: irrev               ! irreversible quantities
     type(t_grid), intent(in)     :: grid                ! grid quantities
     
-    ! computing the result
+    ! local variables
+    integer :: ji,jk,jl ! loop indices
+    
+    ! computing the Eddy viscosity
     irrev%viscosity_coeff = diff_h_smag_div*grid%mean_velocity_area*divergence_h
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do ji=1,nlins
+      do jk=1,ncols
+        do jl=1,nlays
+          irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature_gas(ji,jk,jl), &
+          state%rho(ji,jk,jl,no_of_condensed_constituents+1))
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! adding the molecular diffusion coefficient
     irrev%viscosity_coeff = irrev%viscosity_molecular + irrev%viscosity_coeff

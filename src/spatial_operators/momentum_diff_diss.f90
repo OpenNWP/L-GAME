@@ -37,7 +37,7 @@ module momentum_diff_diss
     call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
     
     ! computing the relevant diffusion coefficient
-    call hori_div_viscosity(diag%scalar_placeholder,irrev,grid)
+    call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
     
     ! multiplying the divergence by the diffusion coefficient acting on divergent movements
     call scalar_times_scalar(irrev%viscosity_coeff,diag%scalar_placeholder,diag%scalar_placeholder)
