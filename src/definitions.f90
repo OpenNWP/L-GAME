@@ -192,6 +192,7 @@ module definitions
     real(wp), allocatable :: heating_diss(:,:,:)              ! dissipative heating power density
     real(wp), allocatable :: mass_source_rates(:,:,:,:)       ! mass source rates due to phase transitions and cloud physics
     real(wp), allocatable :: heat_source_rates(:,:,:,:)       ! heat source rates due to phase transitions and cloud physics
+    real(wp)              :: max_diff_h_coeff_turb            ! maximum horizontal diffusion coefficient
   
   end type t_irrev
   

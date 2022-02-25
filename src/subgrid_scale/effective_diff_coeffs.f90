@@ -30,6 +30,9 @@ module effective_diff_coeffs
     
     ! computing the result
     irrev%viscosity_coeff = diff_h_smag_div*grid%mean_velocity_area*divergence_h
+    
+    ! restricting the values to a maximum to ensure stability
+    irrev%viscosity_coeff = min(irrev%viscosity_coeff,irrev%max_diff_h_coeff_turb)
   
   end subroutine hori_div_viscosity
   
