@@ -6,15 +6,15 @@ module explicit_vector_tendencies
   ! this module manages the calculation of the explicit part of the wind tendencies
 
   use definitions,        only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
-  use inner_product,      only: kinetic_energy
+  use inner_product,      only: inner
   use gradient_operators, only: grad
   use run_nml,            only: nlins,ncols,nlays,impl_weight,llinear,lcorio
   use constituents_nml,   only: no_of_condensed_constituents
   use vorticities,        only: calc_pot_vort
   use multiplications,    only: scalar_times_vector
   use vorticity_flux,     only: calc_vorticity_flux_term
-  use diff_nml,           only: lmom_diff_h
-  use momentum_diff_diss, only: mom_diff_h
+  use diff_nml,           only: lmom_diff_h,lmom_diff_v
+  use momentum_diff_diss, only: mom_diff_h,simple_dissipation_rate
 
   implicit none
   
@@ -30,14 +30,14 @@ module explicit_vector_tendencies
     type(t_tend),  intent(inout) :: tend               ! the tendency
     type(t_diag),  intent(inout) :: diag               ! diagnostic properties
     type(t_irrev), intent(inout) :: irrev              ! irreversible quantities
-    type(t_grid),  intent(in)    :: grid               ! grid propertiesgrid)
+    type(t_grid),  intent(in)    :: grid               ! grid properties
     integer,       intent(in)    :: rk_step            ! Runge-Kutta step
     integer,       intent(in)    :: total_step_counter ! time step counter of the model integration
     
     ! local variables
-    real(wp)                     :: old_hor_pgrad_weight ! old time step pressure gradient weight
-    real(wp)                     :: new_hor_pgrad_weight ! new time step pressure gradient weight
-    real(wp)                     :: old_weight, new_weight     ! Runge-Kutta weights
+    real(wp)                     :: old_hor_pgrad_weight  ! old time step pressure gradient weight
+    real(wp)                     :: new_hor_pgrad_weight  ! new time step pressure gradient weight
+    real(wp)                     :: old_weight,new_weight ! Runge-Kutta weights
     
     new_hor_pgrad_weight = 0.5_wp + impl_weight
     old_hor_pgrad_weight = 1._wp - new_hor_pgrad_weight
@@ -54,9 +54,9 @@ module explicit_vector_tendencies
       
       if (.not. llinear) then
         ! Kinetic energy is prepared for the gradient term of the Lamb transformation.
-        call kinetic_energy(state,diag,grid)
+        call inner(state%wind_u,state%wind_v,state%wind_w,state%wind_u,state%wind_v,state%wind_w,diag%v_squared,grid)
         ! taking the gradient of the kinetic energy
-        call grad(diag%e_kin,diag%e_kin_grad_x,diag%e_kin_grad_y,diag%e_kin_grad_z,grid)
+        call grad(diag%v_squared,diag%v_squared_grad_x,diag%v_squared_grad_y,diag%v_squared_grad_z,grid)
       endif
     endif
     
@@ -65,6 +65,11 @@ module explicit_vector_tendencies
       ! horizontal momentum diffusion
       if (lmom_diff_h) then
         call mom_diff_h(state,diag,irrev,grid)
+      endif
+      
+      ! dissipation
+      if (lmom_diff_h .or. lmom_diff_v) then
+        call simple_dissipation_rate(state,irrev,grid)
       endif
     endif
     
@@ -83,7 +88,7 @@ module explicit_vector_tendencies
     ! new time step pressure gradient component
     - new_hor_pgrad_weight*(diag%p_grad_acc_neg_nl_u + diag%p_grad_acc_neg_l_u) &
     ! momentum advection
-    - diag%e_kin_grad_x + diag%pot_vort_tend_x & 
+    - 0.5_wp*diag%v_squared_grad_x + diag%pot_vort_tend_x & 
     ! momentum diffusion
     + irrev%mom_diff_tend_x)
     ! y-direction
@@ -94,7 +99,7 @@ module explicit_vector_tendencies
     ! new time step pressure gradient component
     - new_hor_pgrad_weight*(diag%p_grad_acc_neg_nl_v + diag%p_grad_acc_neg_l_v) &
     ! momentum advection
-    - diag%e_kin_grad_y + diag%pot_vort_tend_y &
+    - 0.5_wp*diag%v_squared_grad_y + diag%pot_vort_tend_y &
     ! momentum diffusion
     + irrev%mom_diff_tend_y)
     ! z-direction
@@ -104,7 +109,7 @@ module explicit_vector_tendencies
     -(1._wp - impl_weight) &
     *(diag%p_grad_acc_neg_nl_w + diag%p_grad_acc_neg_l_w) &
     ! momentum advection
-    - diag%e_kin_grad_z + diag%pot_vort_tend_z &
+    - 0.5_wp*diag%v_squared_grad_z + diag%pot_vort_tend_z &
     ! momentum diffusion
     + irrev%mom_diff_tend_z)
   

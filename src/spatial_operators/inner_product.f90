@@ -4,23 +4,29 @@
 module inner_product
 
   use run_nml,     only: nlins,ncols,nlays
-  use definitions, only: t_state,t_diag,t_grid,wp
+  use definitions, only: t_grid,wp
   
   implicit none
   
   private
   
-  public :: kinetic_energy
+  public :: inner
   
   contains
 
-  subroutine kinetic_energy(state,diag,grid)
+  subroutine inner(u_vector_1,v_vector_1,w_vector_1,u_vector_2,v_vector_2,w_vector_2,output_scalar,grid)
   
     ! This subroutine calculates the specific kinetic energy.
     
-    type(t_state), intent(in)    :: state ! state to use for calculating e_kin
-    type(t_diag),  intent(inout) :: diag  ! diagnostic properties (e_kin is a diagnostic property)
-    type(t_grid),  intent(in)    :: grid  ! grid properties
+    real(wp), intent(in)      :: u_vector_1(:,:,:)    ! vectorfield 1 in x-direction
+    real(wp), intent(in)      :: v_vector_1(:,:,:)    ! vectorfield 1 in y-direction
+    real(wp), intent(in)      :: w_vector_1(:,:,:)    ! vectorfield 1 in z-direction
+    real(wp), intent(in)      :: u_vector_2(:,:,:)    ! vectorfield 2 in x-direction
+    real(wp), intent(in)      :: v_vector_2(:,:,:)    ! vectorfield 2 in y-direction
+    real(wp), intent(in)      :: w_vector_2(:,:,:)    ! vectorfield 2 in z-direction
+    real(wp), intent(inout)   :: output_scalar(:,:,:) ! result
+    type(t_grid),  intent(in) :: grid                 ! grid properties
+    
     ! local variables
     integer :: ji,jk,jl                   ! loop indices
     
@@ -29,20 +35,25 @@ module inner_product
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          diag%e_kin(ji,jk,jl) = &
-          grid%inner_product_weights(ji,jk,jl,1)*state%wind_u(ji+1,jk+1,jl  )**2 &
-          + grid%inner_product_weights(ji,jk,jl,2)*state%wind_v(ji+1,jk+1,jl  )**2 &
-          + grid%inner_product_weights(ji,jk,jl,3)*state%wind_u(ji+1,jk  ,jl  )**2 &
-          + grid%inner_product_weights(ji,jk,jl,4)*state%wind_v(ji  ,jk+1,jl  )**2 &
-          + grid%inner_product_weights(ji,jk,jl,5)*state%wind_w(ji+1,jk+1,jl  )**2 &
-          + grid%inner_product_weights(ji,jk,jl,6)*state%wind_w(ji+1,jk+1,jl+1)**2
-          diag%e_kin(ji,jk,jl) = 0.5_wp*diag%e_kin(ji,jk,jl)
+          output_scalar(ji,jk,jl) = &
+          grid%inner_product_weights(ji,jk,jl,1)*u_vector_1(ji+1,jk+1,jl)*u_vector_2(ji+1,jk+1,jl) &
+          + grid%inner_product_weights(ji,jk,jl,2)*v_vector_1(ji+1,jk+1,jl)*v_vector_2(ji+1,jk+1,jl) &
+          + grid%inner_product_weights(ji,jk,jl,3)*u_vector_1(ji+1,jk,jl)*u_vector_2(ji+1,jk,jl) &
+          + grid%inner_product_weights(ji,jk,jl,4)*v_vector_1(ji,jk+1,jl)*v_vector_2(ji,jk+1,jl) &
+          + grid%inner_product_weights(ji,jk,jl,5)*w_vector_1(ji+1,jk+1,jl)*w_vector_2(ji+1,jk+1,jl) &
+          + grid%inner_product_weights(ji,jk,jl,6)*w_vector_1(ji+1,jk+1,jl+1)*w_vector_2(ji+1,jk+1,jl+1)
         enddo
       enddo
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
   
-  end subroutine kinetic_energy
+  end subroutine inner
 
 end module inner_product
+
+
+
+
+
+

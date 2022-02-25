@@ -139,7 +139,7 @@ module definitions
   type t_diag
   
     ! type containing diagnostic quantities
-    real(wp), allocatable :: e_kin(:,:,:)                     ! specific kinetic energy
+    real(wp), allocatable :: v_squared(:,:,:)                 ! specific kinetic energy
     real(wp), allocatable :: p_grad_acc_neg_l_u(:,:,:)        ! x-component of linear pressure gradient acceleration
     real(wp), allocatable :: p_grad_acc_neg_l_v(:,:,:)        ! y-component of linear pressure gradient acceleration
     real(wp), allocatable :: p_grad_acc_neg_l_w(:,:,:)        ! z-component of linear pressure gradient accelerationpgrad_acc_old
@@ -149,9 +149,9 @@ module definitions
     real(wp), allocatable :: p_grad_acc_old_u(:,:,:)          ! x-component of pressure gradient at old time step
     real(wp), allocatable :: p_grad_acc_old_v(:,:,:)          ! y-component of pressure gradient at old time step
     real(wp), allocatable :: p_grad_acc_old_w(:,:,:)          ! z-component of pressure gradient at old time step
-    real(wp), allocatable :: e_kin_grad_x(:,:,:)              ! x-gradient of specific kinetic energy
-    real(wp), allocatable :: e_kin_grad_y(:,:,:)              ! y-gradient of specific kinetic energy
-    real(wp), allocatable :: e_kin_grad_z(:,:,:)              ! z-gradient of specific kinetic energy
+    real(wp), allocatable :: v_squared_grad_x(:,:,:)          ! x-gradient of specific kinetic energy
+    real(wp), allocatable :: v_squared_grad_y(:,:,:)          ! y-gradient of specific kinetic energy
+    real(wp), allocatable :: v_squared_grad_z(:,:,:)          ! z-gradient of specific kinetic energy
     real(wp), allocatable :: pot_vort_tend_x(:,:,:)           ! tendency due to the vorticity flux term in x-direction
     real(wp), allocatable :: pot_vort_tend_y(:,:,:)           ! tendency due to the vorticity flux term in y-direction
     real(wp), allocatable :: pot_vort_tend_z(:,:,:)           ! tendency due to the vorticity flux term in z-direction

@@ -164,10 +164,10 @@ program control
   allocate(state_write%wind_w(nlins,ncols,nlays+1))
   allocate(state_write%temperature_soil(nlins,ncols,nsoillays))
   ! type containing diagnostic quantities
-  allocate(diag%e_kin(nlins,ncols,nlays))
-  allocate(diag%e_kin_grad_x(nlins,ncols,nlays))
-  allocate(diag%e_kin_grad_y(nlins,ncols,nlays))
-  allocate(diag%e_kin_grad_z(nlins,ncols,nlays+1))
+  allocate(diag%v_squared(nlins,ncols,nlays))
+  allocate(diag%v_squared_grad_x(nlins,ncols,nlays))
+  allocate(diag%v_squared_grad_y(nlins,ncols,nlays))
+  allocate(diag%v_squared_grad_z(nlins,ncols,nlays+1))
   allocate(diag%p_grad_acc_neg_l_u(nlins,ncols,nlays))
   allocate(diag%p_grad_acc_neg_l_v(nlins,ncols,nlays))
   allocate(diag%p_grad_acc_neg_l_w(nlins,ncols,nlays+1))
@@ -247,9 +247,9 @@ program control
   call write_output(state_old,diag,0,grid)
   
   ! initializing the wind tendencies with zero
-  diag%e_kin_grad_x = 0._wp
-  diag%e_kin_grad_y = 0._wp
-  diag%e_kin_grad_z = 0._wp
+  diag%v_squared_grad_x = 0._wp
+  diag%v_squared_grad_y = 0._wp
+  diag%v_squared_grad_z = 0._wp
   diag%pot_vort_tend_x = 0._wp
   diag%pot_vort_tend_y = 0._wp
   diag%pot_vort_tend_z = 0._wp
@@ -404,7 +404,7 @@ program control
   deallocate(state_write%wind_w)
   deallocate(state_write%temperature_soil)
   ! type containing diagnostic quantities
-  deallocate(diag%e_kin)
+  deallocate(diag%v_squared)
   deallocate(diag%p_grad_acc_neg_l_u)
   deallocate(diag%p_grad_acc_neg_l_v)
   deallocate(diag%p_grad_acc_neg_l_w)
@@ -414,9 +414,9 @@ program control
   deallocate(diag%p_grad_acc_old_u)
   deallocate(diag%p_grad_acc_old_v)
   deallocate(diag%p_grad_acc_old_w)
-  deallocate(diag%e_kin_grad_x)
-  deallocate(diag%e_kin_grad_y)
-  deallocate(diag%e_kin_grad_z)
+  deallocate(diag%v_squared_grad_x)
+  deallocate(diag%v_squared_grad_y)
+  deallocate(diag%v_squared_grad_z)
   deallocate(diag%pot_vort_tend_x)
   deallocate(diag%pot_vort_tend_y)
   deallocate(diag%pot_vort_tend_z)
