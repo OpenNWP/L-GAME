@@ -138,7 +138,7 @@ module set_initial_state
     
     ! condensates
     state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
-    state%condensed_rho_t(:,:,:,:) = 0._wp
+    state%condensed_rho_t = 0._wp
     
     
     do ji=1,nlins
@@ -177,12 +177,12 @@ module set_initial_state
     real(wp),      intent(in)    :: pres_lowest_layer(:,:) ! pressure in the lowest layer
     
     ! local variables
-    integer                      :: ji,jk,jl          ! loop indices
-    real(wp)                     :: b,c               ! abbreviations needed for the hydrostatic initialization routine
-    real(wp)                     :: temperature       ! single temperature value
-    real(wp)                     :: pressure          ! single pressure value
-    real(wp)                     :: r_d               ! specific gas constant of dry air
-    real(wp)                     :: c_p               ! specific heat capacity at const. pressure of dry air
+    integer                      :: ji,jk,jl    ! loop indices
+    real(wp)                     :: b,c         ! abbreviations needed for the hydrostatic initialization routine
+    real(wp)                     :: temperature ! single temperature value
+    real(wp)                     :: pressure    ! single pressure value
+    real(wp)                     :: r_d         ! specific gas constant of dry air
+    real(wp)                     :: c_p         ! specific heat capacity at const. pressure of dry air
     
     r_d = specific_gas_constants(0)
     c_p = spec_heat_capacities_p_gas(0)
@@ -197,7 +197,7 @@ module set_initial_state
           temperature = diag%scalar_placeholder(ji,jk,jl)
           ! lowest layer
           if (jl == nlays) then
-            pressure    = pres_lowest_layer(ji,jk)
+            pressure = pres_lowest_layer(ji,jk)
             state%exner_pert(ji,jk,jl) = (pressure/p_0)**(r_d/c_p)
             state%theta_pert(ji,jk,jl) = temperature/state%exner_pert(ji,jk,jl)
           ! other layers
