@@ -31,6 +31,7 @@ lmom_diff_v=.false.
 /
 
 &surface
+orography_id=1
 /
 
 &bc

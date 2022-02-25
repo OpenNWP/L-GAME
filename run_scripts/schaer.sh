@@ -36,6 +36,7 @@ no_of_condensed_constituents=0
 /
 
 &surface
+orography_id=2
 lsoil=.false.
 /
 

@@ -10,7 +10,7 @@ module grid_generator
                                 lon_center_deg,x_dir_deg
   use constants,          only: re,density_water,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv
-  use surface_nml,        only: nsoillays
+  use surface_nml,        only: nsoillays,orography_id
   use gradient_operators, only: grad,grad_hor_cov
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
   use io_nml,             only: lwrite_grid,lread_grid
@@ -104,27 +104,70 @@ module grid_generator
       enddo
     enddo
     
-    ! setting up the orography of the grid
-    select case (trim(scenario))
+    ! setting the physical surface properties, including orography
+    select case (orography_id)
     
-      case("standard")
-        do ji=1,nlins
-          do jk=1,ncols
-            grid%z_geo_w(ji,jk,nlays+1) = 0._wp
-          enddo
-        enddo
-
-      case("resting_mountain")
-        height_mountain = 1000._wp
-        sigma_mountain = 7000._wp
-        do ji=1,nlins
-          do jk=1,ncols
-            x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
-            grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))
-          enddo
-        enddo
+      ! no orography
+      case(0)
+        grid%z_geo_w(:,:,nlays+1) = 0._wp
+      
+      ! real orography
+      case(1)
+        ! reading the grid
+        if (lread_grid) then
+          call read_grid(grid)
+        ! interpolation from raw data
+        else
         
-      case("schaer")
+          ! real orography is not yet implemented
+          grid%z_geo_w(:,:,nlays+1) = 0._wp
+        
+          ! idealized soil properties are being set here if no grid file shall be read in
+          density_soil = 1442._wp
+          c_p_soil = 830._wp
+          c_p_water = 4184._wp
+    
+          do ji=1,nlays
+            do jk=1,ncols
+		
+              grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_scalar(ji))
+            
+              ! albedo of water
+              grid%sfc_albedo(ji,jk) = 0.06_wp
+
+              ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
+              grid%roughness_length(ji,jk) = 0.08_wp
+		
+              ! will also not be used
+              grid%sfc_rho_c(ji,jk) = density_water*c_p_water
+		
+		      ! land
+              if (grid%is_land(ji,jk)) then
+        
+                grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
+          
+                ! setting the surface albedo of land depending on the latitude
+                ! ice
+                if (abs(360._wp/(2._wp*M_PI)*grid%lat_scalar(ji)) > 70._wp) then
+                  grid%sfc_albedo(ji,jk) = 0.8_wp
+                ! normal soil
+                else
+                  grid%sfc_albedo(ji,jk) = 0.12_wp
+                endif
+          
+                grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_scalar(ji),grid%z_geo_w(ji,jk,nlays+1))/8._wp
+          
+              endif
+		
+		      ! restricting the roughness length to a minimum
+              grid%roughness_length(ji,jk) = max(0.0001_wp, grid%roughness_length(ji,jk))
+      
+            enddo
+          enddo
+        endif
+      
+      ! Schaer orography
+      case(2)
         height_mountain = 250._wp
         sigma_mountain = 5000._wp/sqrt(2._wp)
         do ji=1,nlins
@@ -397,53 +440,6 @@ module grid_generator
     enddo
     
     write(*,*) "Thickness of the uppermost soil layer: ", -grid%z_soil_interface(2), "m."
-    
-    if (lread_grid) then
-      call read_grid()
-    ! idealized soil properties are being set here if no grid file shall be read in
-    else
-      density_soil = 1442._wp
-      c_p_soil = 830._wp
-      c_p_water = 4184._wp
-    
-      do ji=1,nlays
-        do jk=1,ncols
-		
-          grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_scalar(ji))
-		
-		  ! albedo of water
-          grid%sfc_albedo(ji,jk) = 0.06_wp
-		
-		  ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
-          grid%roughness_length(ji,jk) = 0.08_wp
-		
-	      ! will also not be used
-          grid%sfc_rho_c(ji,jk) = density_water*c_p_water
-		
-		  ! land
-          if (grid%is_land(ji,jk)) then
-        
-            grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
-          
-            ! setting the surface albedo of land depending on the latitude
-            ! ice
-            if (abs(360._wp/(2._wp*M_PI)*grid%lat_scalar(ji)) > 70._wp) then
-              grid%sfc_albedo(ji,jk) = 0.8_wp
-            ! normal soil
-            else
-              grid%sfc_albedo(ji,jk) = 0.12_wp
-            endif
-          
-            grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_scalar(ji),grid%z_geo_w(ji,jk,nlays+1))/8._wp
-          
-          endif
-		
-		  ! restricting the roughness length to a minimum
-          grid%roughness_length(ji,jk) = max(0.0001_wp, grid%roughness_length(ji,jk))
-      
-        enddo
-      enddo
-    endif
 	
     ! writing the costly grid properties to a file if required by the user
     if (lwrite_grid) then

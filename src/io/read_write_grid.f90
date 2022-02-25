@@ -141,9 +141,12 @@ module read_write_grid
   
   end subroutine write_grid
   
-  subroutine read_grid()
+  subroutine read_grid(grid)
   
     ! This subroutine reads important grid properties from a file.
+  
+    type(t_grid), intent(inout) :: grid
+    
   
   end subroutine read_grid
 
