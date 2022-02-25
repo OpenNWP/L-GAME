@@ -5,7 +5,8 @@ module effective_diff_coeffs
   
   ! This module computes the effective diffusion coefficients.
   
-  use definitions, only: wp
+  use definitions, only: wp,t_grid,t_irrev
+  use diff_nml,    only: diff_h_smag_div
   
   implicit none
   
@@ -20,9 +21,15 @@ module effective_diff_coeffs
   
   contains
   
-  subroutine hori_div_viscosity()
+  subroutine hori_div_viscosity(divergence_h,irrev,grid)
   
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
+    real(wp), intent(in)         :: divergence_h(:,:,:) ! divergence of the horizontal wind field
+    type(t_irrev), intent(inout) :: irrev               ! irreversible quantities
+    type(t_grid), intent(in)     :: grid                ! grid quantities
+    
+    ! computing the result
+    irrev%viscosity_coeff = diff_h_smag_div*grid%mean_velocity_area*divergence_h
   
   end subroutine hori_div_viscosity
   

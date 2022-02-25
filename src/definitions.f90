@@ -185,6 +185,7 @@ module definitions
     
     ! type cotaining irreversible quantities
     real(wp), allocatable :: tke(:,:,:)                       ! specific turbulent kinetic energy
+    real(wp), allocatable :: viscosity_coeff(:,:,:)           ! Eddy viscosity acting on divergent movements
     real(wp), allocatable :: mom_diff_tend_x(:,:,:)           ! tendency due to momentum diffusion in x-direction
     real(wp), allocatable :: mom_diff_tend_y(:,:,:)           ! tendency due to momentum diffusion in y-direction
     real(wp), allocatable :: mom_diff_tend_z(:,:,:)           ! tendency due to momentum diffusion in z-direction

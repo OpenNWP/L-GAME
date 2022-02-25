@@ -13,10 +13,29 @@ module multiplications
   
   private
   
+  public :: scalar_times_scalar
   public :: scalar_times_vector_h
   public :: scalar_times_vector
   
   contains
+
+  subroutine scalar_times_scalar(scalar_field_1,scalar_field_2,scalar_field_out)
+  
+    ! Multiplication of a scalar with another scalar field.
+    
+    ! input arguments and the result
+    real(wp),     intent(in)    :: scalar_field_1(:,:,:)   ! input field 1
+    real(wp),     intent(in)    :: scalar_field_2(:,:,:)   ! input field 2
+    real(wp),     intent(inout) :: scalar_field_out(:,:,:) ! the result
+    
+    ! actual calculation
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    scalar_field_out = scalar_field_1*scalar_field_2
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
+  
+  end subroutine scalar_times_scalar
 
   subroutine scalar_times_vector_h(scalar_field,in_vector_x,in_vector_y, &
                    result_field_x,result_field_y)
