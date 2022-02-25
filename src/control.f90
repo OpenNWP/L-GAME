@@ -212,6 +212,7 @@ program control
   allocate(diag%roughness_velocity(nlins,ncols))
   ! type containing irreversible quantities
   allocate(irrev%tke(nlins,ncols,nlays))
+  allocate(irrev%viscosity_molecular(nlins,ncols,nlays))
   allocate(irrev%viscosity_coeff(nlins,ncols,nlays))
   allocate(irrev%mom_diff_tend_x(nlins,ncols,nlays))
   allocate(irrev%mom_diff_tend_y(nlins,ncols,nlays))
@@ -456,6 +457,7 @@ program control
   deallocate(diag%roughness_velocity)
   ! type containing irreversible quantities
   deallocate(irrev%tke)
+  deallocate(irrev%viscosity_molecular)
   deallocate(irrev%viscosity_coeff)
   deallocate(irrev%mom_diff_tend_x)
   deallocate(irrev%mom_diff_tend_y)
