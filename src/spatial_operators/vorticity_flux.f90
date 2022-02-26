@@ -20,6 +20,7 @@ module vorticity_flux
   
     ! This module computes the voriticity flux.
 
+    ! input arguments and output
     type(t_diag), intent(inout) :: diag ! diagnostic quantities
     type(t_grid), intent(in)    :: grid ! model grid
     
