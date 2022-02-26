@@ -9,13 +9,14 @@ module io_nml
   
   implicit none
   
-  integer           :: dt_write_min  ! output interval in minutes
-  logical           :: lread_grid    ! wether or not to read the grid from a file
-  logical           :: lwrite_grid   ! wether or not to write the grid to a file
-  character(len=64) :: grid_filename ! filename of the grid to read or write
-  real(wp)          :: dt_write      ! output interval in seconds
+  integer           :: dt_write_min     ! output interval in minutes
+  logical           :: lread_grid       ! wether or not to read the grid from a file
+  logical           :: lwrite_grid      ! wether or not to write the grid to a file
+  character(len=64) :: grid_filename    ! filename of the grid to read or write
+  real(wp)          :: dt_write         ! output interval in seconds
+  character(len=64) :: restart_filename ! filename from which to read the inital state in case restart mode is on
   
-  namelist /io/dt_write_min,lread_grid,lwrite_grid,grid_filename
+  namelist /io/dt_write_min,lread_grid,lwrite_grid,grid_filename,restart_filename
 
   contains
 
@@ -24,10 +25,11 @@ module io_nml
     ! local variables
     integer :: fileunit
     
-    dt_write_min    = 60
-    lread_grid      = .false.
-    lwrite_grid     = .false.
-    grid_filename   = "grid.nc"
+    dt_write_min     = 60
+    lread_grid       = .false.
+    lwrite_grid      = .false.
+    grid_filename    = "grid.nc"
+    restart_filename = "init.nc"
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)

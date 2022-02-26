@@ -8,7 +8,7 @@ module write_out
   use definitions,       only: t_state,wp,t_diag,t_grid
   use netcdf
   use run_nml,           only: nlins,ncols,nlays,scenario,run_id
-  use constituents_nml,  only: no_of_condensed_constituents
+  use constituents_nml,  only: no_of_condensed_constituents,no_of_constituents
   use dictionary,        only: specific_gas_constants,spec_heat_capacities_p_gas
   use set_initial_state, only: bg_temp,bg_pres,geopot
   use set_initial_state, only: nc_check
@@ -32,28 +32,30 @@ module write_out
     type(t_grid),  intent(in)    :: grid                ! model grid
     
     ! local variables
-    integer                   :: ncid                      ! ID of the NetCDF file
-    integer                   :: x_dimid                   ! ID of the x dimension
-    integer                   :: y_dimid                   ! ID of the y dimension
-    integer                   :: z_dimid                   ! ID of the z dimension
-    integer                   :: single_double_dimid       ! ID of the dimension cotaining one double
-    integer                   :: dimids_2d(2)              ! dimensions of horizontal fields
-    integer                   :: dimids_3d(3)              ! dimensions of 3D fields
-    integer                   :: varid_lat                 ! variable ID of the lat coordinates
-    integer                   :: varid_lon                 ! variable ID of the lon coordinates
-    integer                   :: varid_lat_center          ! variable ID of the latitude of the center
-    integer                   :: varid_lon_center          ! variable ID of the longitude of the center
-    integer                   :: varid_x_dir               ! variable ID of the x-direction in the center
-    integer                   :: varid_z                   ! variable ID of the z coordinates
-    integer                   :: varid_p                   ! variable ID of the 3D pressure field
-    integer                   :: varid_t                   ! variable ID of the 3D temperature field
-    integer                   :: varid_u                   ! variable ID of the 3D u wind field
-    integer                   :: varid_v                   ! variable ID of the 3D v wind field
-    integer                   :: varid_w                   ! variable ID of the 3D w wind field
-    character(len=64)         :: filename                  ! output filename
-    character(len=64)         :: time_since_init_min_str   ! time_since_init_min as string
-    integer                   :: ji,jk,jl                  ! line indices
-    real(wp)                  :: upper_weight(nlins,ncols) ! interpolation weights
+    integer           :: ncid                      ! ID of the NetCDF file
+    integer           :: x_dimid                   ! ID of the x dimension
+    integer           :: y_dimid                   ! ID of the y dimension
+    integer           :: z_dimid                   ! ID of the z dimension
+    integer           :: constituents_dimid        ! ID of the constituents dimension
+    integer           :: single_double_dimid       ! ID of the dimension cotaining one double
+    integer           :: dimids_2d(2)              ! dimensions of horizontal fields
+    integer           :: dimids_3d(3)              ! dimensions of 3D fields
+    integer           :: dimids_3d_rho(4)          ! dimensions of 3D mass density fields
+    integer           :: varid_lat                 ! variable ID of the lat coordinates
+    integer           :: varid_lon                 ! variable ID of the lon coordinates
+    integer           :: varid_lat_center          ! variable ID of the latitude of the center
+    integer           :: varid_lon_center          ! variable ID of the longitude of the center
+    integer           :: varid_x_dir               ! variable ID of the x-direction in the center
+    integer           :: varid_z                   ! variable ID of the z coordinates
+    integer           :: varid_rho                 ! variable ID of the 3D mass density fields
+    integer           :: varid_t                   ! variable ID of the 3D temperature field
+    integer           :: varid_u                   ! variable ID of the 3D u wind field
+    integer           :: varid_v                   ! variable ID of the 3D v wind field
+    integer           :: varid_w                   ! variable ID of the 3D w wind field
+    character(len=64) :: filename                  ! output filename
+    character(len=64) :: time_since_init_min_str   ! time_since_init_min as string
+    integer           :: ji,jk,jl                  ! line indices
+    real(wp)          :: upper_weight(nlins,ncols) ! interpolation weights
     
     ! creating the NetCDF file
     write(time_since_init_min_str,*) time_since_init_min
@@ -70,6 +72,7 @@ module write_out
     call nc_check(nf90_def_dim(ncid,"lon_model",ncols,x_dimid))
     call nc_check(nf90_def_dim(ncid,"lat_model",nlins,y_dimid))
     call nc_check(nf90_def_dim(ncid,"z",nlays,z_dimid))
+    call nc_check(nf90_def_dim(ncid,"j_constituent",no_of_constituents,constituents_dimid))
 
     ! setting the dimension ID arrays
     ! 2D
@@ -79,6 +82,11 @@ module write_out
     dimids_3d(1) = y_dimid
     dimids_3d(2) = x_dimid
     dimids_3d(3) = z_dimid
+    ! 3D mass density fields
+    dimids_3d_rho(1) = y_dimid
+    dimids_3d_rho(2) = x_dimid
+    dimids_3d_rho(3) = z_dimid
+    dimids_3d_rho(4) = constituents_dimid
 
     ! Define the variable. The type of the variable in this case is
     ! NF90_INT (4-byte integer).
@@ -111,13 +119,13 @@ module write_out
     call nc_check(nf90_put_att(ncid,varid_z,"Description","z coordinates of the grid points (MSL)"))
     call nc_check(nf90_put_att(ncid,varid_z,"Unit","m"))
     
+    call nc_check(nf90_def_var(ncid,"rho",NF90_REAL,dimids_3d_rho,varid_rho))
+    call nc_check(nf90_put_att(ncid,varid_rho,"Description","mass densities"))
+    call nc_check(nf90_put_att(ncid,varid_rho,"Unit","kg/m^3"))
+    
     call nc_check(nf90_def_var(ncid,"T",NF90_REAL,dimids_3d,varid_t))
     call nc_check(nf90_put_att(ncid,varid_t,"Description","air temperature"))
     call nc_check(nf90_put_att(ncid,varid_t,"Unit","K"))
-    
-    call nc_check(nf90_def_var(ncid,"p",NF90_REAL,dimids_3d,varid_p))
-    call nc_check(nf90_put_att(ncid,varid_p,"Description","air pressure"))
-    call nc_check(nf90_put_att(ncid,varid_p,"Unit","Pa"))
     
     call nc_check(nf90_def_var(ncid,"u",NF90_REAL,dimids_3d,varid_u))
     call nc_check(nf90_put_att(ncid,varid_u,"Description","zonal wind (in the frame of reference of the model)"))
@@ -146,17 +154,14 @@ module write_out
     ! z coordinates of the grid points
     call nc_check(nf90_put_var(ncid,varid_z,grid%z_geo_scal))
     
+    ! writing the data to the output file
+    ! 3D mass densities
+    call nc_check(nf90_put_var(ncid,varid_rho,state%rho))
+    
     ! 3D temperature
-    diag%scalar_placeholder =  (grid%theta_bg &
-    + state%theta_pert) &
+    diag%scalar_placeholder = (grid%theta_bg + state%theta_pert) &
     *(grid%exner_bg + state%exner_pert)
     call nc_check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder))
-    
-    ! writing the data to the output file
-    ! 3D pressure
-    diag%scalar_placeholder = state%rho(:,:,:,no_of_condensed_constituents+1) &
-    *specific_gas_constants(0)*diag%scalar_placeholder
-    call nc_check(nf90_put_var(ncid,varid_p,diag%scalar_placeholder))
     
     ! 3D u wind
     !$OMP PARALLEL

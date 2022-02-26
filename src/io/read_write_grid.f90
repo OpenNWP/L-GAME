@@ -160,13 +160,13 @@ module read_write_grid
     type(t_grid), intent(inout) :: grid
     
     ! local variables
-    integer   :: ncid                ! ID of the NetCDF file
+    integer           :: ncid                ! ID of the NetCDF file
     character(len=64) :: filename            ! output filename
-    integer   :: varid_z_geo_w       ! variable ID of the orography
-    integer   :: varid_sfc_rho_c     ! variable ID of the volumetric specific heat conductivity of the soil
-    integer   :: varid_t_conduc_soil ! variable ID of the temperature conductivity of the soil
-    integer   :: varid_is_land       ! variable ID of the land-sea-mask
-    integer   :: varid_sfc_albedo    ! variable ID of the albedo of the surface
+    integer           :: varid_z_geo_w       ! variable ID of the orography
+    integer           :: varid_sfc_rho_c     ! variable ID of the volumetric specific heat conductivity of the soil
+    integer           :: varid_t_conduc_soil ! variable ID of the temperature conductivity of the soil
+    integer           :: varid_is_land       ! variable ID of the land-sea-mask
+    integer           :: varid_sfc_albedo    ! variable ID of the albedo of the surface
     
     filename = "../../grids/" // trim(grid_filename)
     

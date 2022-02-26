@@ -12,6 +12,7 @@ module set_initial_state
   use dictionary,       only: specific_gas_constants,spec_heat_capacities_p_gas
   use constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
                               gravity,p_0_standard,re,t_grad_inv
+  use io_nml,           only: restart_filename
 
   implicit none
   
@@ -160,7 +161,48 @@ module set_initial_state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    real(wp)                     :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
+    integer   :: ncid                           ! ID of the NetCDF file
+    character(len=64) :: filename               ! filename containing the initial state
+    integer   :: varid_rho                      ! variable ID of the densities
+    integer   :: varid_t                        ! variable ID of the temperature
+    integer   :: varid_u                        ! variable ID of the u-wind
+    integer   :: varid_v                        ! variable ID of the v-wind
+    integer   :: varid_w                        ! variable ID of the vertical wind
+    real(wp)  :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
+    
+    filename = "../../real_weather/" // trim(restart_filename)
+    
+    ! creating the NetCDF file
+    call nc_check(nf90_open(trim(restart_filename),NF90_CLOBBER,ncid))
+    
+    ! reading the variable IDs
+    call nc_check(nf90_inq_varid(ncid,"rho",varid_rho))
+    call nc_check(nf90_inq_varid(ncid,"T",varid_t))
+    call nc_check(nf90_inq_varid(ncid,"u",varid_u))
+    call nc_check(nf90_inq_varid(ncid,"v",varid_v))
+    call nc_check(nf90_inq_varid(ncid,"w",varid_w))
+    
+    ! reading the NetCDF fields
+    call nc_check(nf90_get_var(ncid,varid_w,state%rho))
+    call nc_check(nf90_get_var(ncid,varid_t,diag%scalar_placeholder))
+    call nc_check(nf90_get_var(ncid,varid_u,state%wind_u))
+    call nc_check(nf90_get_var(ncid,varid_v,state%wind_v))
+    call nc_check(nf90_get_var(ncid,varid_w,state%wind_w))
+    
+    ! closing the NetCDF file
+    call nc_check(nf90_close(ncid))
+    
+    ! setting the pressure in the lowest layer
+    ! moist case
+    if (no_of_constituents>1) then
+      pres_lowest_layer &
+      = state%rho(:,:,nlays,no_of_condensed_constituents+1)*specific_gas_constants(0)*diag%scalar_placeholder(:,:,nlays) &
+      + state%rho(:,:,nlays,no_of_condensed_constituents+2)*specific_gas_constants(1)*diag%scalar_placeholder(:,:,nlays)
+    ! dry case
+    else
+      pres_lowest_layer &
+      = state%rho(:,:,nlays,no_of_condensed_constituents+1)*specific_gas_constants(0)*diag%scalar_placeholder(:,:,nlays)
+    endif
     
     call unessential_init(state,diag,grid,pres_lowest_layer)
     
