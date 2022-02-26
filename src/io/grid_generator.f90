@@ -213,25 +213,26 @@ module grid_generator
       enddo
     enddo
     
-    ! setting dx
+    ! setting the height of the u-vector points
+    ! inner domain
     do ji=1,nlins
-      do jk=1,ncols+1
-        do jl=1,nlays
-          grid%z_geo_u(ji,jk,jl) = 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji,jk+1,jl))
-          grid%dx(ji,jk,jl) = dx*(re + grid%z_geo_u(ji,jk,jl))/re
-        enddo
+      do jk=2,ncols
+        grid%z_geo_u(ji,jk,:) = 0.5_wp*(grid%z_geo_scal(ji,jk-1,:) + grid%z_geo_scal(ji,jk,:))
       enddo
     enddo
     
-    ! setting dy
+    ! setting the height of the v-vector points
+    ! inner domain
     do ji=1,nlins+1
       do jk=1,ncols
-        do jl=1,nlays
-          grid%z_geo_v(ji,jk,jl) = 0.5_wp*(grid%z_geo_scal(ji,jk,jl) + grid%z_geo_scal(ji+1,jk,jl))
-          grid%dy(ji,jk,jl) = dy*(re + grid%z_geo_v(ji,jk,jl))/re
-        enddo
+        grid%z_geo_v(ji,jk,:) = 0.5_wp*(grid%z_geo_scal(ji,jk,:) + grid%z_geo_scal(ji+1,jk,:))
       enddo
     enddo
+    
+    ! setting dx
+    grid%dx = dx*(re + grid%z_geo_u)/re
+    ! setting dy
+    grid%dy = dy*(re + grid%z_geo_v)/re
     
     ! calculating the coordinate slopes
     call grad_hor_cov(grid%z_geo_scal,grid%slope_x,grid%slope_y,grid)
