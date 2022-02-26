@@ -3,6 +3,8 @@
 
 module divergence_operators
 
+  ! The calculation of the horizontal divergence operator is executed in this module.
+
   use definitions, only: wp,t_grid
   use run_nml,     only: nlins,ncols,nlays,nlays_oro
   use averaging,   only: vertical_contravariant_corr
@@ -18,18 +20,21 @@ module divergence_operators
   subroutine divv_h(vector_field_x,vector_field_y,result_field,grid)
 
     ! This subroutine computes the gradient of a scalar field.
+    
+    ! input arguments and output
     real(wp),     intent(in)    :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
     real(wp),     intent(in)    :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
     real(wp),     intent(inout) :: result_field(:,:,:)   ! resulting scalar field
     type(t_grid), intent(in)    :: grid                  ! the grid properties
+    
     ! local variables
-    integer                     :: ji,jk,jl              ! loop variables
-    real(wp)                    :: comp_h                ! horizontal component of divergence
-    real(wp)                    :: comp_v                ! horizontal component of divergence
-    real(wp)                    :: contra_upper          ! contravariant mass flux density resulting 
-                                                         ! from the horizontal vector components through the upper area
-    real(wp)                    :: contra_lower          ! contravariant mass flux density resulting
-                                                         ! from the horizontal vector components through the lower area
+    integer                     :: ji,jk,jl     ! loop variables
+    real(wp)                    :: comp_h       ! horizontal component of divergence
+    real(wp)                    :: comp_v       ! horizontal component of divergence
+    real(wp)                    :: contra_upper ! contravariant mass flux density resulting 
+                                                ! from the horizontal vector components through the upper area
+    real(wp)                    :: contra_lower ! contravariant mass flux density resulting
+                                                ! from the horizontal vector components through the lower area
 
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,comp_h,comp_v)
@@ -45,13 +50,13 @@ module divergence_operators
           
           ! the vertical component
           comp_v = 0._wp
-          if (jl == nlays-nlays_oro) then
+          if (jl==nlays-nlays_oro) then
             contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
             comp_v = -contra_lower*grid%area_z(ji,jk,jl+1)
-          elseif (jl == nlays) then
+          elseif (jl==nlays) then
             contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
             comp_v = contra_upper*grid%area_z(ji,jk,jl)
-          elseif (jl > nlays-nlays_oro-1) then
+          elseif (jl>nlays-nlays_oro-1) then
             contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
             contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
             comp_v &

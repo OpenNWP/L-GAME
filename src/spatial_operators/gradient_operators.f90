@@ -24,13 +24,14 @@ module gradient_operators
 
     ! This subroutine computes the horizontal covariant gradient of a scalar field.
     
+    ! input arguments and output
     real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
     real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
     real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
-    integer                     :: ji,jk                 ! loop variables
+    integer  :: ji,jk ! loop variables
 
     ! inner domain
     ! calculating the x-component of the gradient
@@ -82,11 +83,14 @@ module gradient_operators
   subroutine grad_vert_cov(scalar_field,result_field,grid)
 
     ! This subroutine computes the vertical covariant gradient of a scalar field.
+    
+    ! input arguments and output
     real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
     real(wp),     intent(inout) :: result_field(:,:,:)   ! z-component of resulting vector field
     type(t_grid), intent(in)    :: grid                  ! the grid properties
+    
     ! local variables
-    integer                     :: jl                    ! loop variables
+    integer :: jl ! loop variables
 
     ! calculating the vertical gradient in the inner levels
     !$OMP PARALLEL
@@ -109,6 +113,8 @@ module gradient_operators
   subroutine grad_cov(scalar_field,result_field_x,result_field_y,result_field_z,grid)
   
     ! This subroutine computes the covariant gradient of a scalar field.
+    
+    ! input arguments and output
     real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
     real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
     real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
@@ -123,6 +129,8 @@ module gradient_operators
   subroutine grad(scalar_field,result_field_x,result_field_y,result_field_z,grid)
   
     ! This subroutine computes the covariant gradient of a scalar field.
+    
+    ! input arguments and output
     real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
     real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
     real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
@@ -139,6 +147,8 @@ module gradient_operators
   subroutine grad_hor(scalar_field,result_field_x,result_field_y,result_field_z,grid)
   
     ! This subroutine computes the covariant gradient of a scalar field.
+    
+    ! input arguments and output
     real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
     real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
     real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
@@ -150,7 +160,7 @@ module gradient_operators
     ! setting the vertical component to zero
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    result_field_z(:,:,:) = 0._wp
+    result_field_z = 0._wp
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
   
