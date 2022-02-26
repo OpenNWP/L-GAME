@@ -115,7 +115,6 @@ module grid_generator
         ! reading the grid
         if (lread_grid) then
           call read_grid(grid)
-        ! interpolation from raw data
         else
         
           ! real orography is not yet implemented
@@ -129,7 +128,7 @@ module grid_generator
           do ji=1,nlays
             do jk=1,ncols
 		
-              grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_scalar(ji))
+              grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
             
               ! albedo of water
               grid%sfc_albedo(ji,jk) = 0.06_wp
@@ -137,7 +136,7 @@ module grid_generator
               ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
               grid%roughness_length(ji,jk) = 0.08_wp
 		
-              ! will also not be used
+              ! will also not be used for water
               grid%sfc_rho_c(ji,jk) = density_water*c_p_water
 		
 		      ! land
@@ -147,19 +146,20 @@ module grid_generator
           
                 ! setting the surface albedo of land depending on the latitude
                 ! ice
-                if (abs(360._wp/(2._wp*M_PI)*grid%lat_scalar(ji)) > 70._wp) then
+                if (abs(360._wp/(2._wp*M_PI)*grid%lat_geo_scalar(ji,jk)) > 70._wp) then
                   grid%sfc_albedo(ji,jk) = 0.8_wp
                 ! normal soil
                 else
                   grid%sfc_albedo(ji,jk) = 0.12_wp
                 endif
           
-                grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_scalar(ji),grid%z_geo_w(ji,jk,nlays+1))/8._wp
+                ! calculating a roughness length depending on the vegetation height
+                grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_geo_scalar(ji,jk),grid%z_geo_w(ji,jk,nlays+1))/8._wp
           
               endif
 		
 		      ! restricting the roughness length to a minimum
-              grid%roughness_length(ji,jk) = max(0.0001_wp, grid%roughness_length(ji,jk))
+              grid%roughness_length(ji,jk) = max(0.0001_wp,grid%roughness_length(ji,jk))
       
             enddo
           enddo
@@ -172,8 +172,7 @@ module grid_generator
         do ji=1,nlins
           do jk=1,ncols
             x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
-            grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2)) &
-            *cos(M_PI*x_coord/4000._wp)**2
+            grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))*cos(M_PI*x_coord/4000._wp)**2
           enddo
         enddo
     

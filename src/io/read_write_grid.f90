@@ -24,7 +24,8 @@ module read_write_grid
   
     ! This subroutine writes costly grid properties to a file so they can be reused elsewhere.
   
-    type(t_grid), intent(in) :: grid
+    ! input arguments
+    type(t_grid), intent(in) :: grid ! grid properties
     
     ! local variables
     integer           :: ncid                   ! ID of the NetCDF file
@@ -157,7 +158,8 @@ module read_write_grid
   
     ! This subroutine reads important grid properties from a file.
   
-    type(t_grid), intent(inout) :: grid
+    ! input arguments
+    type(t_grid), intent(inout) :: grid ! grid properties
     
     ! local variables
     integer           :: ncid                ! ID of the NetCDF file
@@ -168,6 +170,7 @@ module read_write_grid
     integer           :: varid_is_land       ! variable ID of the land-sea-mask
     integer           :: varid_sfc_albedo    ! variable ID of the albedo of the surface
     
+    ! the filename of the grid file including the relative path
     filename = "../../grids/" // trim(grid_filename)
     
     ! creating the NetCDF file
@@ -180,7 +183,7 @@ module read_write_grid
     call nc_check(nf90_inq_varid(ncid,"is_land",varid_is_land))
     call nc_check(nf90_inq_varid(ncid,"sfc_albedo",varid_sfc_albedo))
     
-    ! reading the NetCDF fields
+    ! reading the arrays
     call nc_check(nf90_get_var(ncid,varid_z_geo_w,grid%z_geo_w(:,:,nlays+1)))
     call nc_check(nf90_get_var(ncid,varid_sfc_rho_c,grid%sfc_rho_c))
     call nc_check(nf90_get_var(ncid,varid_t_conduc_soil,grid%t_conduc_soil))
