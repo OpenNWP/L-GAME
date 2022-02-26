@@ -24,9 +24,9 @@ module multiplications
     ! Multiplication of a scalar with another scalar field.
     
     ! input arguments and the result
-    real(wp),     intent(in)    :: scalar_field_1(:,:,:)   ! input field 1
-    real(wp),     intent(in)    :: scalar_field_2(:,:,:)   ! input field 2
-    real(wp),     intent(inout) :: scalar_field_out(:,:,:) ! the result
+    real(wp), intent(in)    :: scalar_field_1(:,:,:)   ! input field 1
+    real(wp), intent(in)    :: scalar_field_2(:,:,:)   ! input field 2
+    real(wp), intent(inout) :: scalar_field_out(:,:,:) ! the result
     
     ! actual calculation
     !$OMP PARALLEL
@@ -42,14 +42,14 @@ module multiplications
   
     ! Multiplication of a scalar with a vector field at horizontal points.
     
-    real(wp),     intent(in)    :: scalar_field(:,:,:)
-    real(wp),     intent(in)    :: in_vector_x(:,:,:)
-    real(wp),     intent(in)    :: in_vector_y(:,:,:)
-    real(wp),     intent(inout) :: result_field_x(:,:,:)
-    real(wp),     intent(inout) :: result_field_y(:,:,:)
+    real(wp), intent(in)    :: scalar_field(:,:,:)
+    real(wp), intent(in)    :: in_vector_x(:,:,:)
+    real(wp), intent(in)    :: in_vector_y(:,:,:)
+    real(wp), intent(inout) :: result_field_x(:,:,:)
+    real(wp), intent(inout) :: result_field_y(:,:,:)
   
     ! local variables
-    integer                     :: ji,jk ! loop indices
+    integer :: ji,jk ! loop indices
     
     ! inner domain
     ! x
@@ -77,16 +77,19 @@ module multiplications
       result_field_x(:,1,:) = 0.5_wp*(scalar_field(:,1,:) + scalar_field(:,ncols,:))
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
+      
       !$OMP PARALLEL
       !$OMP WORKSHARE
       result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
+      
       !$OMP PARALLEL
       !$OMP WORKSHARE
       result_field_y(1,:,:) = 0.5_wp*(scalar_field(1,:,:) + scalar_field(nlins,:,:))
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
+      
       !$OMP PARALLEL
       !$OMP WORKSHARE
       result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
@@ -114,6 +117,7 @@ module multiplications
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
+    
     !$OMP PARALLEL
     !$OMP WORKSHARE
     result_field_z(:,:,1) = 0._wp

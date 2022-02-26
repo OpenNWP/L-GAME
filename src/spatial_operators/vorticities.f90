@@ -23,16 +23,16 @@ module vorticities
   
     ! This subroutine calculates the relative vorticity.
     
-    type(t_state), intent(in)    :: state     ! state to work with
-    type(t_diag),  intent(inout) :: diag      ! diagnostic quantities
-    type(t_grid),  intent(in)    :: grid      ! model grid
+    type(t_state), intent(in)    :: state ! state to work with
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    integer                      :: ji,jk,jl          ! loop indices
-    real(wp)                     :: l_rescale         ! length rescale factor in orography
-    real(wp)                     :: delta_z           ! needed for handling terrain
-    real(wp)                     :: vertical_gradient ! needed for handling terrain
-    integer                      :: ind_shift         ! needed for handling terrain
+    integer  :: ji,jk,jl          ! loop indices
+    real(wp) :: l_rescale         ! length rescale factor in orography
+    real(wp) :: delta_z           ! needed for handling terrain
+    real(wp) :: vertical_gradient ! needed for handling terrain
+    integer  :: ind_shift         ! needed for handling terrain
     
     ! calculating the relative vorticity in x-direction
     !$OMP PARALLEL
@@ -41,10 +41,10 @@ module vorticities
       do jk=1,ncols
         do jl=2,nlays
           diag%z_eta_x(ji,jk,jl) = &
-          + grid%dz(ji+1,jk+1,jl  )*state%wind_w(ji+1,jk+1,jl  )                                         &
-          - grid%dy(ji  ,jk+1,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,jl-1)  &
-          - grid%dz(ji  ,jk+1,jl  )*state%wind_w(ji  ,jk+1,jl  )                                         &
-          + grid%dy(ji  ,jk+1,jl  )*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,jl  )
+          + grid%dz(ji+1,jk+1,jl)*state%wind_w(ji+1,jk+1,jl)                                         &
+          - grid%dy(ji,jk+1,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,jl-1)  &
+          - grid%dz(ji,jk+1,jl)*state%wind_w(ji,jk+1,jl)                                         &
+          + grid%dy(ji,jk+1,jl)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,jl)
         enddo
         ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
         diag%z_eta_x(ji,jk,nlays+1) = -grid%dy(ji,jk+1,nlays)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk+1,nlays)
@@ -55,7 +55,7 @@ module vorticities
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
     diag%z_eta_x(:,:,1) = diag%z_eta_x(:,:,2)
     ! dividing by the area
-    diag%z_eta_x(:,:,:) = diag%z_eta_x(:,:,:)/grid%area_dual_x(:,:,:)
+    diag%z_eta_x = diag%z_eta_x/grid%area_dual_x
     
     ! calculating the relative vorticity in y-direction
     !$OMP PARALLEL
@@ -64,10 +64,10 @@ module vorticities
       do jk=1,ncols+1
         do jl=2,nlays
           diag%z_eta_y(ji,jk,jl) = &
-          + grid%dz(ji+1,jk  ,jl  )*state%wind_w(ji+1,jk  ,jl  )                                         &
-          + grid%dx(ji+1,jk  ,jl-1)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,jl-1)  &
-          - grid%dz(ji+1,jk+1,jl  )*state%wind_w(ji+1,jk+1,jl  )                                         &
-          - grid%dx(ji+1,jk  ,jl  )*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,jl  )
+          + grid%dz(ji+1,jk,jl)*state%wind_w(ji+1,jk,jl)                                              &
+          + grid%dx(ji+1,jk,jl-1)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,jl-1) &
+          - grid%dz(ji+1,jk+1,jl)*state%wind_w(ji+1,jk+1,jl)                                          &
+          - grid%dx(ji+1,jk,jl)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,jl)
         enddo
         ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
         diag%z_eta_y(ji,jk,nlays+1) = grid%dx(ji+1,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji+1,jk,nlays)
@@ -78,7 +78,7 @@ module vorticities
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
     diag%z_eta_y(:,:,1) = diag%z_eta_y(:,:,2)
     ! dividing by the area
-    diag%z_eta_y(:,:,:) = diag%z_eta_y(:,:,:)/grid%area_dual_y(:,:,:)
+    diag%z_eta_y = diag%z_eta_y/grid%area_dual_y
       
     ! calculating the relative vorticity in z-direction
     !$OMP PARALLEL
@@ -114,7 +114,7 @@ module vorticities
             ind_shift = -1
           endif
           vertical_gradient = (state%wind_u(ji+1,jk,jl) - state%wind_u(ji+1,jk,jl+ind_shift))/ &
-          (grid%z_geo_u(ji+1,jk  ,jl) - grid%z_geo_u(ji+1,jk,jl+ind_shift))
+          (grid%z_geo_u(ji+1,jk,jl) - grid%z_geo_u(ji+1,jk,jl+ind_shift))
           diag%z_eta_z(ji,jk,jl) = diag%z_eta_z(ji,jk,jl) - l_rescale*grid%dx(ji+1,jk,jl)* &
           (state%wind_u(ji+1,jk,jl) + delta_z*vertical_gradient)
           ! third
@@ -145,7 +145,7 @@ module vorticities
     !$OMP END DO
     !$OMP END PARALLEL
     ! dividing by the area
-    diag%z_eta_z(:,:,:) = diag%z_eta_z(:,:,:)/grid%area_dual_z(:,:,:)
+    diag%z_eta_z = diag%z_eta_z/grid%area_dual_z
       
   end subroutine rel_vort
   
@@ -153,20 +153,20 @@ module vorticities
   
     ! This subroutine calculates the potential vorticity.
     
-    type(t_state), intent(in)    :: state    ! state to work with
-    type(t_diag),  intent(inout) :: diag     ! diagnostic quantities
-    type(t_grid),  intent(in)    :: grid     ! model grid
+    type(t_state), intent(in)    :: state ! state to work with
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_grid),  intent(in)    :: grid  ! model grid
   
     ! local variables
-    integer                      :: ji,jk,jl ! loop index
+    integer :: ji,jk,jl ! loop index
   
     ! calculating the relative vorticity
     if (.not. llinear) then
       call rel_vort(state,diag,grid)
     else
-      diag%z_eta_x(:,:,:) = 0._wp
-      diag%z_eta_y(:,:,:) = 0._wp
-      diag%z_eta_z(:,:,:) = 0._wp
+      diag%z_eta_x = 0._wp
+      diag%z_eta_y = 0._wp
+      diag%z_eta_z = 0._wp
     endif
     
     ! adding the Coriolis vector to the relative vorticity to obtain the absolute vorticity

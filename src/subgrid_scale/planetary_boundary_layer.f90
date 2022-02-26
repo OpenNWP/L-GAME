@@ -26,23 +26,23 @@ module planetary_boundary_layer
     ! This subroutine updates surface-related turbulence quantities.
     
     ! input arguments and output
-    type(t_state),intent(in)    :: state
-    type(t_diag), intent(inout) :: diag
-    type(t_grid), intent(inout) :: grid
+    type(t_state), intent(in)    :: state ! state with which to calculate the turbulence quantities
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_grid),  intent(inout) :: grid  ! grid properties
 
     ! local variables
-    real(wp)                    :: u_lowest_layer        ! wind speed in the lowest model layer
-    real(wp)                    :: u10                   ! wind speed in 10 m height
-    real(wp)                    :: z_agl                 ! height above ground f the lowest model layer
-    real(wp)                    :: theta_lowest_layer    ! potential temperature in the lowest layer
-    real(wp)                    :: theta_second_layer    ! potential temperature in the second-lowest layer
-    real(wp)                    :: dz                    ! vertical grid point distance
-    real(wp)                    :: dtheta_dz             ! vertical gradient of the potential temperature
-    real(wp)                    :: w_pert                ! vertical velocity peturbation near the surface
-    real(wp)                    :: theta_pert            ! potential temperature peturbation near the surface
-    real(wp)                    :: w_pert_theta_pert_avg ! correlation between vertical velocity and potential temperature peturbations
-    real(wp)                    :: prop_coeff            ! semi-empirical coefficient for computing w_pert_theta_pert_avg
-    integer                     :: ji,jk                 ! loop variables
+    real(wp) :: u_lowest_layer        ! wind speed in the lowest model layer
+    real(wp) :: u10                   ! wind speed in 10 m height
+    real(wp) :: z_agl                 ! height above ground f the lowest model layer
+    real(wp) :: theta_lowest_layer    ! potential temperature in the lowest layer
+    real(wp) :: theta_second_layer    ! potential temperature in the second-lowest layer
+    real(wp) :: dz                    ! vertical grid point distance
+    real(wp) :: dtheta_dz             ! vertical gradient of the potential temperature
+    real(wp) :: w_pert                ! vertical velocity peturbation near the surface
+    real(wp) :: theta_pert            ! potential temperature peturbation near the surface
+    real(wp) :: w_pert_theta_pert_avg ! correlation between vertical velocity and potential temperature peturbations
+    real(wp) :: prop_coeff            ! semi-empirical coefficient for computing w_pert_theta_pert_avg
+    integer  :: ji,jk                 ! loop variables
 
     prop_coeff = 0.2_wp
     
@@ -86,12 +86,12 @@ module planetary_boundary_layer
         w_pert_theta_pert_avg = prop_coeff*w_pert*theta_pert
 
         ! security
-        if (abs(w_pert_theta_pert_avg) < EPSILON_SECURITY) then
+        if (abs(w_pert_theta_pert_avg)<EPSILON_SECURITY) then
           w_pert_theta_pert_avg = EPSILON_SECURITY
         endif
 
         ! computing the Monin-Obukhov length
-        diag%monin_obukhov_length(ji,jk) = -theta_lowest_layer*diag%roughness_velocity(ji,jk)**3._wp &
+        diag%monin_obukhov_length(ji,jk) = -theta_lowest_layer*diag%roughness_velocity(ji,jk)**3 &
         /(KARMAN*gravity*w_pert_theta_pert_avg)
       
       enddo
@@ -131,13 +131,13 @@ module planetary_boundary_layer
     ! refer to Stensrud,Parameterization schemes (2007),p.130
 
     ! empirically determined formula for the SWH
-    swh = 0.0248_wp*u10**2._wp
+    swh = 0.0248_wp*u10**2
 
     ! empirically determined period of the waves
     period = 0.729_wp*u10
 
     ! deep-water gravity waves
-    wavelength = gravity*period**2._wp/(2._wp*M_PI)
+    wavelength = gravity*period**2/(2._wp*M_PI)
 
     ! final result
     roughness_length_from_u10_sea = 1200._wp*swh*swh/max(wavelength,EPSILON_SECURITY)**4.5_wp
@@ -182,7 +182,7 @@ module planetary_boundary_layer
     ! This function returns the surface flux resistance for momentum.
 
     ! input variable
-    real(wp),intent(in) :: wind_h_lowest_layer,z_agl,roughness_length_value,monin_obukhov_length_value
+    real(wp), intent(in) :: wind_h_lowest_layer,z_agl,roughness_length_value,monin_obukhov_length_value
     ! output variable
     real(wp)             :: momentum_flux_resistance
 
@@ -210,7 +210,7 @@ module planetary_boundary_layer
     ! This function returns the roughness velocity.
 
     ! input variable
-    real(wp),intent(in) :: wind_speed,z_agl,roughness_length_value
+    real(wp), intent(in) :: wind_speed,z_agl,roughness_length_value
     ! output variable
     real(wp)             :: roughness_velocity
 
@@ -235,7 +235,7 @@ module planetary_boundary_layer
     !This is a helper function for the correction to the surface scalar flux resistance for non-neutral conditions.
 
     ! input variable
-    real(wp),intent(in) :: z_eff,l
+    real(wp), intent(in) :: z_eff,l
     ! output variable
     real(wp)             :: psi_h
 
@@ -255,7 +255,7 @@ module planetary_boundary_layer
     if (l_local < 0._wp) then
       ! helper variable
       x = (1._wp - 15._wp*z_eff/l_local)**0.25_wp
-      psi_h = 2._wp*log((1._wp + x**2._wp)/2._wp)     
+      psi_h = 2._wp*log((1._wp + x**2)/2._wp)     
     ! neutral and stable conditions
     else
       psi_h = -4._wp*z_eff/l_local
@@ -268,7 +268,7 @@ module planetary_boundary_layer
     ! This is a helper function for the correction to the surface momentum flux resistance for non-neutral conditions.
 
     ! input variable
-    real(wp),intent(in) :: z_eff,l
+    real(wp), intent(in) :: z_eff,l
     ! output variable
     real(wp)             :: psi_m
 
@@ -289,7 +289,7 @@ module planetary_boundary_layer
       ! helper variable
       x = (1._wp - 15._wp*z_eff/l_local)**0.25_wp
 
-      psi_m = 2.0_wp*log((1._wp + x)/2._wp) + log((1._wp + x**2._wp)/2._wp) - 2._wp*atan(x) + M_PI/2._wp
+      psi_m = 2.0_wp*log((1._wp + x)/2._wp) + log((1._wp + x**2)/2._wp) - 2._wp*atan(x) + M_PI/2._wp
     ! neutral and stable conditions
     else
       psi_m = -4.7_wp*z_eff/l_local

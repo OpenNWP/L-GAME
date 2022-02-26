@@ -17,12 +17,12 @@ module definitions
   public :: t_bc
   public :: t_irrev
   
-    ! setting the floating point precision
-    ! single precision
+  ! setting the floating point precision
+  ! single precision
   integer, parameter :: ps =  6
   integer, parameter :: rs = 37
   
-    ! double precision
+  ! double precision
   integer, parameter :: pd = 12
   integer, parameter :: rd = 37
   

@@ -24,18 +24,18 @@ module explicit_scalar_tendencies
   
   subroutine expl_scalar_tend(grid,state,tend,diag,irrev,rk_step)
   
-    type(t_grid),   intent(in)    :: grid    ! model grid
-    type(t_state),  intent(in)    :: state   ! state with which to calculate the divergence
-    type(t_tend),   intent(inout) :: tend    ! state which will contain the tendencies
-    type(t_diag),   intent(inout) :: diag    ! diagnostic quantities
-    type(t_irrev),  intent(inout) :: irrev   ! irreversible quantities
-    integer,        intent(in)    :: rk_step ! RK substep index
+    type(t_grid),  intent(in)    :: grid    ! model grid
+    type(t_state), intent(in)    :: state   ! state with which to calculate the divergence
+    type(t_tend),  intent(inout) :: tend    ! state which will contain the tendencies
+    type(t_diag),  intent(inout) :: diag    ! diagnostic quantities
+    type(t_irrev), intent(inout) :: irrev   ! irreversible quantities
+    integer,       intent(in)    :: rk_step ! RK substep index
     
     ! local variables
-    integer                       :: j_constituent                  ! loop variable
-    real(wp)                      :: old_weight(no_of_constituents) ! time stepping weight
-    real(wp)                      :: new_weight(no_of_constituents) ! time stepping weight
-    real(wp)                      :: c_p                            ! as usual
+    integer  :: j_constituent                  ! loop variable
+    real(wp) :: old_weight(no_of_constituents) ! time stepping weight
+    real(wp) :: new_weight(no_of_constituents) ! time stepping weight
+    real(wp) :: c_p                            ! as usual
     
     c_p = spec_heat_capacities_p_gas(0)
     
@@ -57,6 +57,7 @@ module explicit_scalar_tendencies
       call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
       ! calculating the divergence of the mass flux density
       call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+      
       !$OMP PARALLEL
       !$OMP WORKSHARE
       tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
@@ -73,6 +74,7 @@ module explicit_scalar_tendencies
         diag%u_placeholder,diag%v_placeholder)
         ! calculating the divergence of the potential temperature flux density
         call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+        
         !$OMP PARALLEL
         !$OMP WORKSHARE
         tend%rhotheta = -diag%scalar_placeholder &
@@ -81,6 +83,7 @@ module explicit_scalar_tendencies
         /(c_p*(grid%exner_bg+state%exner_pert))
         !$OMP END WORKSHARE
         !$OMP END PARALLEL
+        
       endif
       
       ! explicit temperature density integration for condensates
@@ -89,12 +92,14 @@ module explicit_scalar_tendencies
         call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v, &
         diag%u_placeholder,diag%v_placeholder)
         call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+        
         !$OMP PARALLEL
         !$OMP WORKSHARE
         tend%condensed_rho_t(:,:,:,j_constituent) = old_weight(j_constituent)*tend%condensed_rho_t(:,:,:,j_constituent) &
         + new_weight(j_constituent)*(-diag%scalar_placeholder)
         !$OMP END WORKSHARE
         !$OMP END PARALLEL
+        
       endif
       
     enddo
@@ -106,9 +111,9 @@ module explicit_scalar_tendencies
     ! This subroutine manages the calculation of the phase transition rates.
     
     type(t_state), intent(inout) :: state ! the state with which to calculate the phase transition rates
-    type(t_diag), intent(inout)  :: diag  ! diagnostic quantities
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_irrev), intent(inout) :: irrev ! irreversible quantities (phase transitions are irreversible)
-    type(t_grid), intent(in)     :: grid  ! grid properties
+    type(t_grid),  intent(in)    :: grid  ! grid properties
       
     if (no_of_constituents > 1) then
     
@@ -122,6 +127,7 @@ module explicit_scalar_tendencies
       + dtime*irrev%mass_source_rates(:,:,:,1:no_of_condensed_constituents)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
+      
       ! water vapour
       !$OMP PARALLEL
       !$OMP WORKSHARE

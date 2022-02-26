@@ -58,11 +58,13 @@ module gradient_operators
       result_field_x(:,1,:) = (scalar_field(:,1,:) - scalar_field(:,ncols,:))/grid%dx(:,1,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
+      
       !$OMP PARALLEL
       !$OMP WORKSHARE
       result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
+      
       !$OMP PARALLEL
       !$OMP WORKSHARE
       result_field_y(1,:,:) = (scalar_field(1,:,:) - scalar_field(nlins,:,:))/grid%dy(1,:,:)
@@ -94,6 +96,7 @@ module gradient_operators
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
+    
     !$OMP PARALLEL
     !$OMP WORKSHARE
     result_field(:,:,1) = 0._wp

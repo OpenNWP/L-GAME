@@ -28,10 +28,10 @@ module effective_diff_coeffs
   
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
     type(t_state), intent(in)    :: state               ! the state variables of the model atmosphere
-    type(t_diag), intent(in)     :: diag                ! diagnostic quantities
-    real(wp), intent(in)         :: divergence_h(:,:,:) ! divergence of the horizontal wind field
+    type(t_diag),  intent(in)    :: diag                ! diagnostic quantities
+    real(wp),      intent(in)    :: divergence_h(:,:,:) ! divergence of the horizontal wind field
     type(t_irrev), intent(inout) :: irrev               ! irreversible quantities
-    type(t_grid), intent(in)     :: grid                ! grid quantities
+    type(t_grid),  intent(in)    :: grid                ! grid quantities
     
     ! local variables
     integer :: ji,jk,jl ! loop indices
@@ -100,10 +100,10 @@ module effective_diff_coeffs
     real(wp), intent(in) :: tke
 	
     ! output
-    real(wp)             :: tke2vertical_diff_coeff
+    real(wp) :: tke2vertical_diff_coeff
     
     ! local variable
-    real(wp)             :: prop_constant
+    real(wp) :: prop_constant ! semi-empirical constant
 	
     prop_constant = 0.4_wp ! unit: m
     tke2vertical_diff_coeff = prop_constant*tke**0.5_wp
