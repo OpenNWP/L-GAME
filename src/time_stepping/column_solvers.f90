@@ -12,6 +12,7 @@ module column_solvers
   use dictionary,       only: spec_heat_capacities_v_gas,spec_heat_capacities_p_gas,specific_gas_constants
   use diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
   use surface_nml,      only: nsoillays,lsoil
+  use constants,        only: M_PI
 
   implicit none
   
@@ -23,6 +24,8 @@ module column_solvers
   contains
   
   subroutine three_band_solver_ver(state_old,state_new,diag,tend,grid,rk_step)
+  
+    ! This subroutine is the main implicit vertical solver.
 
     ! input arguments and output
     type(t_state), intent(in)    :: state_old ! state at the old timestep
@@ -73,7 +76,7 @@ module column_solvers
     r_d = specific_gas_constants(0)
     damping_start_height = klemp_begin_rel*toa
     
-    ! calculating the sensible power flux density
+    ! calculating the sensible power flux density if soil is switched on
     if (lsoil) then
       !$OMP PARALLEL
       !$OMP DO PRIVATE(ji,jk,t_gas_lowest_layer_old,t_gas_lowest_layer_new)
@@ -124,7 +127,7 @@ module column_solvers
           +dtime*tend%rho(ji,jk,jl,no_of_condensed_constituents+1)
           ! explicit potential temperature density
           rhotheta_expl(jl) = state_old%rhotheta(ji,jk,jl)+dtime*tend%rhotheta(ji,jk,jl)
-          if (rk_Step == 1) then
+          if (rk_Step==1) then
             ! old time step partial derivatives of theta and Pi (divided by the volume)
             alpha(jl) = -state_old%rhotheta(ji,jk,jl)/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)**2 &
             /grid%volume(ji,jk,jl)
@@ -161,14 +164,14 @@ module column_solvers
           +state_old%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
           theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji,jk,jl)/state_new%rho(ji,jk,jl,no_of_condensed_constituents+1) &
-         +state_new%rhotheta(ji,jk,jl+1)/state_new%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
+          +state_new%rhotheta(ji,jk,jl+1)/state_new%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
         enddo
       
         ! filling up the coefficient vectors
         do jl=1,nlays-1
           ! main diagonal
           d_vector(jl) = -theta_int_new(jl)**2*(gammaa(jl)+gammaa(jl+1)) &
-         +0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
+          +0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)-alpha(jl)+theta_int_new(jl)*(beta(jl+1)-beta(jl))) &
           - (grid%z_geo_scal(ji,jk,jl)-grid%z_geo_scal(ji,jk,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
           *(2._wp/grid%area_z(ji,jk,jl+1)+dtime*state_old%wind_w(ji,jk,jl+1)*0.5_wp &
@@ -177,8 +180,8 @@ module column_solvers
           r_vector(jl) = -(state_old%wind_w(ji,jk,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
           (grid%z_geo_scal(ji,jk,jl)-grid%z_geo_scal(ji,jk,jl+1)) &
           /(impl_weight*dtime**2*c_p) &
-         +theta_int_new(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
-         +0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
+          +theta_int_new(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
+          +0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           - (grid%z_geo_scal(ji,jk,jl)-grid%z_geo_scal(ji,jk,jl+1))/(impl_weight*dtime**2*c_p) &
           *state_old%wind_w(ji,jk,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
         enddo
@@ -186,7 +189,7 @@ module column_solvers
         do jl=1,nlays-2
           ! lower diagonal
           c_vector(jl) = theta_int_new(jl+1)*gammaa(jl+1)*theta_int_new(jl) &
-         +0.5_wp*(grid%exner_bg(ji,jk,jl+1)-grid%exner_bg(ji,jk,jl+2)) &
+          +0.5_wp*(grid%exner_bg(ji,jk,jl+1)-grid%exner_bg(ji,jk,jl+2)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl)) &
           - (grid%z_geo_scal(ji,jk,jl+1)-grid%z_geo_scal(ji,jk,jl+2))/(impl_weight*dtime*c_p)*0.5_wp &
           *state_old%wind_w(ji,jk,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))
@@ -199,7 +202,7 @@ module column_solvers
         enddo
 	
         ! soil components of the matrix
-        if (soil_switch == 1) then
+        if (soil_switch==1) then
           ! calculating the explicit part of the heat flux density
           do jl=1,nsoillays-1
             heat_flux_density_expl(jl) &
@@ -242,16 +245,16 @@ module column_solvers
   
           ! the diagonal component
           do jl=1,nsoillays
-            if (jl == 1) then
+            if (jl==1) then
               d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
               /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
               *1/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
-            elseif (jl == nsoillays) then
+            elseif (jl==nsoillays) then
               d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
               /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
               *1/(grid%z_soil_center(jl-1) - grid%z_soil_center(jl))
             else
-              d_vector(jl+nlays-1) = 1.0+0.5*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
+              d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
               /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
               *(1/(grid%z_soil_center(jl-1) - grid%z_soil_center(jl)) &
               + 1/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1)))
@@ -279,7 +282,7 @@ module column_solvers
           if (z_above_damping < 0._wp .or. .not. lklemp) then
             damping_coeff = 0._wp
           else
-            damping_coeff = klemp_damp_max*sin(0.5_wp*4*atan(1.d0)*z_above_damping/(toa-damping_start_height))**2
+            damping_coeff = klemp_damp_max*sin(0.5_wp*M_PI*z_above_damping/(toa-damping_start_height))**2
           endif
           solution(jl) = solution(jl)/(1._wp+damping_coeff*dtime)
         enddo
@@ -343,23 +346,26 @@ module column_solvers
     type(t_grid),  intent(in)    :: grid      ! model grid
     
     ! local variables
-    integer  :: no_of_relevant_constituents              ! number of relevant constituents for a certain quantity
-    real(wp) :: impl_weight,expl_weight                  ! time stepping weights
-    integer  :: quantity_id,j_constituent,ji,jk,jl      ! loop indices
-    real(wp) :: c_vector(nlays-1)                        ! vector for solving the system of linear equations
-    real(wp) :: d_vector(nlays)                          ! vector for solving the system of linear equations
-    real(wp) :: e_vector(nlays-1)                        ! vector for solving the system of linear equations
-    real(wp) :: r_vector(nlays)                          ! vector for solving the system of linear equations
-    real(wp) :: vertical_flux_vector_impl(nlays-1)       ! vertical flux at the new timestep
-    real(wp) :: vertical_flux_vector_rhs(nlays-1)        ! vertical flux at the old timestep
-    real(wp) :: solution_vector(nlays)                   ! solution of the system of linear equations
-    real(wp) :: density_old_at_interface,added_mass      ! abbreviations
+    integer  :: no_of_relevant_constituents         ! number of relevant constituents for a certain quantity
+    real(wp) :: impl_weight,expl_weight             ! time stepping weights
+    integer  :: quantity_id,j_constituent,ji,jk,jl  ! loop indices
+    real(wp) :: c_vector(nlays-1)                   ! vector for solving the system of linear equations
+    real(wp) :: d_vector(nlays)                     ! vector for solving the system of linear equations
+    real(wp) :: e_vector(nlays-1)                   ! vector for solving the system of linear equations
+    real(wp) :: r_vector(nlays)                     ! vector for solving the system of linear equations
+    real(wp) :: vertical_flux_vector_impl(nlays-1)  ! vertical flux at the new timestep
+    real(wp) :: vertical_flux_vector_rhs(nlays-1)   ! vertical flux at the old timestep
+    real(wp) :: solution_vector(nlays)              ! solution of the system of linear equations
+    real(wp) :: density_old_at_interface,added_mass ! abbreviations
     
     ! setting the time stepping weights
     impl_weight = 0.5_wp
     expl_weight = 1._wp - impl_weight
     
+    ! loop over the quantities, 1: mass density, 2: temperature density
     do quantity_id=1,2
+    
+      ! firstly the number of relevant constituents needs to be determined
       no_of_relevant_constituents = 0
       ! mass densities
       if (quantity_id == 1) then
@@ -381,6 +387,7 @@ module column_solvers
       do j_constituent=1,no_of_relevant_constituents
         ! This is done do all tracers apart from the main gaseous constituent.
         if (quantity_id /= 1 .or. j_constituent /= no_of_condensed_constituents+1) then
+        
           ! loop over all columns
           !$OMP PARALLEL
           !$OMP DO PRIVATE(ji,jk)
@@ -470,7 +477,6 @@ module column_solvers
               ! calling the algorithm to solve the system of linear equations
               call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,nlays)
 
-
               ! limiter: none of the densities may be negative
               do jl=1,nlays
                 if (solution_vector(jl) < 0._wp) then
@@ -499,12 +505,12 @@ module column_solvers
               ! writing the result into the new state
               do jl=1,nlays
                 ! mass densities
-                if (quantity_id == 1) then
+                if (quantity_id==1) then
                   state_new%rho(ji,jk,jl,j_constituent) = solution_vector(jl)
                 endif
 
                 ! density x temperature fields
-                if (quantity_id == 2) then
+                if (quantity_id==2) then
                   state_new%condensed_rho_t(ji,jk,jl,j_constituent) = solution_vector(jl)
                 endif
               enddo
@@ -523,10 +529,10 @@ module column_solvers
 
     ! This subroutine solves a system of linear equations with a three-band matrix.
     
-    real(wp), intent(in)    :: c_vector(:)
-    real(wp), intent(in)    :: d_vector(:)
-    real(wp), intent(in)    :: e_vector(:)
-    real(wp), intent(in)    :: r_vector(:)
+    real(wp), intent(in)    :: c_vector(:)        ! lower diagonal vector
+    real(wp), intent(in)    :: d_vector(:)        ! main diagonal vector
+    real(wp), intent(in)    :: e_vector(:)        ! upper diagonal vector
+    real(wp), intent(in)    :: r_vector(:)        ! right hand side vector
     real(wp), intent(inout) :: solution_vector(:) ! vector containing the solution
     integer,  intent(in)    :: solution_length    ! length of the solution vector
     

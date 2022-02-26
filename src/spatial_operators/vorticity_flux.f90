@@ -17,6 +17,8 @@ module vorticity_flux
   contains
   
   subroutine calc_vorticity_flux_term(diag,grid)
+  
+    ! This module computes the voriticity flux.
 
     type(t_diag), intent(inout) :: diag ! diagnostic quantities
     type(t_grid), intent(in)    :: grid ! model grid
