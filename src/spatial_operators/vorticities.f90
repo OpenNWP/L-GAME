@@ -196,7 +196,7 @@ module vorticities
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays+1
-          if (jl == 1) then
+          if (jl==1) then
             diag%z_eta_x(ji,jk,jl) = diag%z_eta_x(ji,jk,jl)/(0.5_wp*(state%rho(ji,jk+1,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
             +(toa-grid%z_geo_scal(ji,jk+1,jl))*(state%rho(ji,jk+1,jl,no_of_condensed_constituents+1) &
@@ -273,11 +273,11 @@ module vorticities
     ! vertical vorticity
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk)
-    do ji=1,nlins+1
-      do jk=1,ncols+1
-        diag%z_eta_z(ji,jk,:) = diag%z_eta_z(ji,jk,:)/(0.25_wp*(state%rho(ji,jk,:,no_of_condensed_constituents+1) &
-        +state%rho(ji+1,jk,:,no_of_condensed_constituents+1) &
-        +state%rho(ji+1,jk+1,:,no_of_condensed_constituents+1)+state%rho(ji,jk+1,:,no_of_condensed_constituents+1)))
+    do ji=2,nlins
+      do jk=2,ncols
+        diag%z_eta_z(ji,jk,:) = diag%z_eta_z(ji,jk,:)/(0.25_wp*(state%rho(ji-1,jk-1,:,no_of_condensed_constituents+1) &
+        +state%rho(ji-1,jk,:,no_of_condensed_constituents+1) &
+        +state%rho(ji,jk,:,no_of_condensed_constituents+1)+state%rho(ji,jk-1,:,no_of_condensed_constituents+1)))
       enddo
     enddo
     !$OMP END DO
