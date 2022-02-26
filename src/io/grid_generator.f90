@@ -44,29 +44,27 @@ module grid_generator
   
     type(t_grid), intent(inout) :: grid ! the model grid
     ! local variables
-    real(wp) :: lat_left_lower  ! latitude coordinate of lower left corner
-    real(wp) :: lon_left_lower  ! longitude coordinate of lower left corner
-    real(wp) :: dlat            ! mesh size in y direction as angle
-    real(wp) :: dlon            ! mesh size in x direction as angle
-    integer  :: ji,jk,jl        ! loop indices
-    real(wp) :: max_oro         ! variable for orography check
-    real(wp) :: A               ! variable for calculating the vertical grid
-    real(wp) :: B               ! variable for calculating the vertical grid
-    real(wp) :: sigma_z         ! variable for calculating the vertical grid
-    real(wp) :: z_rel           ! variable for calculating the vertical grid
-    real(wp) :: z_vertical_vector_pre(nlays+1)
-                                ! variable for calculating the vertical grid
-    real(wp) :: base_area       ! variable for calculating the vertical grid
-    real(wp) :: lower_z,upper_z,lower_length
-                                ! variables needed for area calculations
-    real(wp) :: height_mountain ! height of Gaussian mountain (needed for test case)
-    real(wp) :: sigma_mountain  ! standard deviation of Gaussian mountain (needed for test case)
-    real(wp) :: x_coord         ! help variable needed for the Schär test
-    real(wp) :: rescale_factor  ! soil grid rescaling factor
-    real(wp) :: sigma_soil      ! sigma of the soil grid
-    real(wp) :: density_soil    ! typical density of soil
-    real(wp) :: c_p_soil        ! typical c_p of soil
-    real(wp) :: c_p_water       ! typical c_p of water
+    real(wp) :: lat_left_lower                 ! latitude coordinate of lower left corner
+    real(wp) :: lon_left_lower                 ! longitude coordinate of lower left corner
+    real(wp) :: dlat                           ! mesh size in y direction as angle
+    real(wp) :: dlon                           ! mesh size in x direction as angle
+    integer  :: ji,jk,jl                       ! loop indices
+    real(wp) :: max_oro                        ! variable for orography check
+    real(wp) :: A                              ! variable for calculating the vertical grid
+    real(wp) :: B                              ! variable for calculating the vertical grid
+    real(wp) :: sigma_z                        ! variable for calculating the vertical grid
+    real(wp) :: z_rel                          ! variable for calculating the vertical grid
+    real(wp) :: z_vertical_vector_pre(nlays+1) ! variable for calculating the vertical grid
+    real(wp) :: base_area                      ! variable for calculating the vertical grid
+    real(wp) :: lower_z,upper_z,lower_length   ! variables needed for area calculations
+    real(wp) :: height_mountain                ! height of Gaussian mountain (needed for test case)
+    real(wp) :: sigma_mountain                 ! standard deviation of Gaussian mountain (needed for test case)
+    real(wp) :: x_coord                        ! help variable needed for the Schär test
+    real(wp) :: rescale_factor                 ! soil grid rescaling factor
+    real(wp) :: sigma_soil                     ! sigma of the soil grid
+    real(wp) :: density_soil                   ! typical density of soil
+    real(wp) :: c_p_soil                       ! typical c_p of soil
+    real(wp) :: c_p_water                      ! typical c_p of water
     
     ! setting the center and direction of the grid
     grid%lat_center = 2._wp*M_PI*lat_center_deg/360._wp
