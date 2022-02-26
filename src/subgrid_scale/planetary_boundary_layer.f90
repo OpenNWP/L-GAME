@@ -126,7 +126,7 @@ module planetary_boundary_layer
     real(wp)             :: roughness_length_from_u10_sea
 
     ! local variables
-    real(wp)             :: swh,period,wavelength
+    real(wp) :: swh,period,wavelength
 
     ! refer to Stensrud,Parameterization schemes (2007),p.130
 

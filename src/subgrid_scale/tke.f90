@@ -21,8 +21,10 @@ module tke
   
     ! This subroutine updates the specific turbulent kinetic energy (TKE), unit: J/kg.
   
+    ! input arguments and output
     type(t_state), intent(in)    :: state    ! state
     type(t_irrev), intent(inout) :: irrev    ! irreversible quantities
+    
     ! local variables
     integer                      :: ji,jk,jl ! loop variables
     

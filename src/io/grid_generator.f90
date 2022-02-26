@@ -296,7 +296,7 @@ module grid_generator
     
     ! setting the z coordinates of the vertical vector points
     do jl=1,nlays
-      if (jl == 1) then
+      if (jl==1) then
         grid%z_geo_w(:,:,jl) = toa
       else
         grid%z_geo_w(:,:,jl) = 0.5_wp*(grid%z_geo_scal(:,:,jl-1) + grid%z_geo_scal(:,:,jl))
@@ -304,36 +304,27 @@ module grid_generator
     enddo
     
     ! setting the vertical distances between the scalar data points
-    do ji=1,nlins
-      do jk=1,ncols
-        do jl=1,nlays+1
-          if (jl == 1) then
-            grid%dz(ji,jk,jl) = 2._wp*(toa - grid%z_geo_scal(ji,jk,jl))
-          elseif (jl == nlays+1) then
-            grid%dz(ji,jk,jl) = 2._wp*(grid%z_geo_scal(ji,jk,jl-1) - grid%z_geo_w(ji,jk,jl))
-          else
-            grid%dz(ji,jk,jl) = grid%z_geo_scal(ji,jk,jl-1) - grid%z_geo_scal(ji,jk,jl)
-          endif
-        enddo
-      enddo
+    do jl=1,nlays+1
+      if (jl==1) then
+        grid%dz(:,:,jl) = 2._wp*(toa - grid%z_geo_scal(:,:,jl))
+      elseif (jl==nlays+1) then
+        grid%dz(:,:,jl) = 2._wp*(grid%z_geo_scal(:,:,jl-1) - grid%z_geo_w(:,:,jl))
+      else
+        grid%dz(:,:,jl) = grid%z_geo_scal(:,:,jl-1) - grid%z_geo_scal(:,:,jl)
+      endif
     enddo
     
     ! setting the horizontal areas at the surface
     do ji=1,nlins
       do jk=1,ncols
-        grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(re + grid%z_geo_w(ji,jk,nlays+1))**2 &
-          /re**2
+        grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(re + grid%z_geo_w(ji,jk,nlays+1))**2/re**2
       enddo
     enddo
 
     ! setting the horizontal areas at the higher points (above the surface)
-    do ji=1,nlins
-      do jk=1,ncols
-        do jl=1,nlays
-          grid%area_z(ji,jk,jl) = grid%area_z(ji,jk,nlays+1)*(re + grid%z_geo_w(ji,jk,jl))**2 &
-          /(re + grid%z_geo_w(ji,jk,nlays+1))**2
-        enddo
-      enddo
+    do jl=1,nlays
+      grid%area_z(:,:,jl) = grid%area_z(:,:,nlays+1)*(re + grid%z_geo_w(:,:,jl))**2 &
+      /(re + grid%z_geo_w(:,:,nlays+1))**2
     enddo
     
     ! the mean velocity area can be set now

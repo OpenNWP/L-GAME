@@ -27,6 +27,8 @@ module effective_diff_coeffs
   subroutine hori_div_viscosity(state,diag,divergence_h,irrev,grid)
   
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
+    
+    ! input arguments and output
     type(t_state), intent(in)    :: state               ! the state variables of the model atmosphere
     type(t_diag),  intent(in)    :: diag                ! diagnostic quantities
     real(wp),      intent(in)    :: divergence_h(:,:,:) ! divergence of the horizontal wind field

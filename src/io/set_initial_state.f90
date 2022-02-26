@@ -156,6 +156,7 @@ module set_initial_state
   
     ! reads the initial state of the model calculation from a netcdf file
     
+    ! input arguments and output
     type(t_state), intent(inout) :: state ! state to write the initial state to
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! model grid
@@ -198,7 +199,7 @@ module set_initial_state
     ! dry case
     else
       pres_lowest_layer &
-      = state%rho(:,:,nlays,no_of_condensed_constituents+1)*specific_gas_constants(0)*diag%scalar_placeholder(:,:,nlays)
+      = state%rho(:,:,nlays,1)*specific_gas_constants(0)*diag%scalar_placeholder(:,:,nlays)
     endif
     
     call unessential_init(state,diag,grid,pres_lowest_layer)
@@ -216,12 +217,12 @@ module set_initial_state
     real(wp),      intent(in)    :: pres_lowest_layer(:,:) ! pressure in the lowest layer
     
     ! local variables
-    integer  :: ji,jk,jl    ! loop indices
     real(wp) :: b,c         ! abbreviations needed for the hydrostatic initialization routine
     real(wp) :: temperature ! single temperature value
     real(wp) :: pressure    ! single pressure value
     real(wp) :: r_d         ! specific gas constant of dry air
     real(wp) :: c_p         ! specific heat capacity at const. pressure of dry air
+    integer  :: ji,jk,jl    ! loop indices
     
     r_d = specific_gas_constants(0)
     c_p = spec_heat_capacities_p_gas(0)
