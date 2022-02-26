@@ -3,7 +3,7 @@
 
 module phase_trans
 
-  ! In this module,phase transition rates are being calculated.
+  ! In this module, phase transition rates are being calculated.
   
   use run_nml,          only: nlins,ncols,nlays,dtime,wp
   use constants,        only: T_0,EPSILON_SECURITY
@@ -25,16 +25,15 @@ module phase_trans
     ! This subroutine calculates the phase transition rates.
   
     ! input arguments, output
-    type(t_state),intent(in)    :: state
-    type(t_diag), intent(inout) :: diag
-    type(t_irrev),intent(inout) :: irrev
-    type(t_grid), intent(in)    :: grid
+    type(t_state),intent(in)    :: state ! the state with which to calculate the phase transition rates
+    type(t_diag), intent(inout) :: diag  ! diagnostic quantities
+    type(t_irrev),intent(inout) :: irrev ! irreversible quantities
+    type(t_grid), intent(in)    :: grid  ! grid properties
   
     ! local variables
-    integer  :: ji,jk,jl                ! loop variables
     real(wp) :: dtime_sat               ! time step for the saturation adjustment
     real(wp) :: solid_temperature       ! temperature of the cloud ice
-    real(wp) :: liquid_temperature       ! temperature of the cloud water
+    real(wp) :: liquid_temperature      ! temperature of the cloud water
     real(wp) :: max_cloud_water_content ! maximum cloud water content in (kg cloud)/(kg dry air).
     real(wp) :: diff_density            ! amount of water the air can still take
     real(wp) :: phase_trans_density     ! density of water that changes its phase
@@ -43,6 +42,7 @@ module phase_trans
     real(wp) :: layer_thickness         ! thickness of the lowest layer
     real(wp) :: diff_density_sfc        ! density of water the air can still take above water surfaces
     real(wp) :: saturation_pressure_sfc ! saturation pressure at the surface
+    integer  :: ji,jk,jl                ! loop variables
     
     max_cloud_water_content = 0.2e-3
   
@@ -52,12 +52,12 @@ module phase_trans
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,solid_temperature,liquid_temperature,diff_density,phase_trans_density, &
     !$OMP saturation_pressure,water_vapour_pressure,layer_thickness,diff_density_sfc,saturation_pressure_sfc)
-    do ji=1,nlays
+    do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
         
           ! determining the temperature of the cloud ice
-          if (state%rho(ji,jk,jl,3) < EPSILON_SECURITY) then
+          if (state%rho(ji,jk,jl,3)<EPSILON_SECURITY) then
             solid_temperature = T_0
           elseif (lassume_lte) then
             solid_temperature = diag%temperature_gas(ji,jk,jl)
@@ -66,7 +66,7 @@ module phase_trans
           endif
 
           ! determining the temperature of the liquid cloud water
-          if (state%rho(ji,jk,jl,4) < EPSILON_SECURITY) then
+          if (state%rho(ji,jk,jl,4)<EPSILON_SECURITY) then
             liquid_temperature = T_0
           else if (lassume_lte) then
             liquid_temperature = diag%temperature_gas(ji,jk,jl)
@@ -76,7 +76,7 @@ module phase_trans
 
           ! determining the saturation pressure
           ! "positive" temperatures (the saturation pressure is different over water compared to over ice)
-          if (diag%temperature_gas(ji,jk,jl) >= T_0) then
+          if (diag%temperature_gas(ji,jk,jl)>=T_0) then
             saturation_pressure = saturation_pressure_over_water(diag%temperature_gas(ji,jk,jl))
           ! "negative" temperatures
           else
@@ -90,9 +90,9 @@ module phase_trans
           diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diag%temperature_gas(ji,jk,jl))
 
           ! the case where the air is not over-saturated
-          if (diff_density >= 0._wp) then
+          if (diff_density>=0._wp) then
             ! temperature >= 0 °C
-            if (diag%temperature_gas(ji,jk,jl) >= T_0) then
+            if (diag%temperature_gas(ji,jk,jl)>=T_0) then
               ! It is assumed that the still present ice vanishes within one time step.
               irrev%mass_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)/dtime_sat
 
@@ -150,7 +150,7 @@ module phase_trans
             ! the vanishing of water vapour through the phase transition
             irrev%mass_source_rates(ji,jk,jl,5) = diff_density/dtime_sat
             ! temperature >= 0._wp °C
-            if (diag%temperature_gas(ji,jk,jl) >= T_0) then
+            if (diag%temperature_gas(ji,jk,jl)>=T_0) then
               ! It is assumed that the still present ice vanishes within one time step.
               irrev%mass_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)/dtime_sat
 
@@ -205,7 +205,7 @@ module phase_trans
           - irrev%mass_source_rates(ji,jk,jl,2)
 
           ! turning of snow to rain
-          if (diag%temperature_gas(ji,jk,jl) > T_0 .and. state%rho(ji,jk,jl,1) > 0._wp) then
+          if (diag%temperature_gas(ji,jk,jl)>T_0 .and. state%rho(ji,jk,jl,1)>0._wp) then
             irrev%mass_source_rates(ji,jk,jl,1) = -state%rho(ji,jk,jl,1)/dtime_sat
             irrev%mass_source_rates(ji,jk,jl,2) = irrev%mass_source_rates(ji,jk,jl,2) &
             - irrev%mass_source_rates(ji,jk,jl,1)
@@ -235,7 +235,7 @@ module phase_trans
           + max(0._wp,diff_density_sfc/diag%scalar_flux_resistance(ji,jk))/layer_thickness
 
           ! calculating the latent heat flux density affecting the surface
-          if (state%temperature_soil(ji,jk,1) >= T_0) then
+          if (state%temperature_soil(ji,jk,1)>=T_0) then
             diag%power_flux_density_latent(ji,jk) = -phase_trans_heat(0,state%temperature_soil(ji,jk,1)) &
             *max(0._wp,diff_density_sfc/diag%scalar_flux_resistance(ji,jk))
           else
