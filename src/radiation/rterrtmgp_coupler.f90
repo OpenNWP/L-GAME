@@ -5,7 +5,6 @@ module radiation
 
   ! This module is a coupler to RTE+RRTMGP.
   
-  use iso_c_binding,
   use mo_rte_kind,                only: wp
   use mo_rrtmgp_util_string,      only: lower_case
   use mo_gas_optics_rrtmgp,       only: ty_gas_optics_rrtmgp
@@ -53,8 +52,8 @@ module radiation
   
   contains
   
-  subroutine radiation_init() &
-  bind(c,name = "radiation_init")
+  subroutine radiation_init()
+  
     ! This is called only once, in the beginning.
     
     ! local variables
@@ -73,147 +72,144 @@ module radiation
   mass_densities,temperature_gas,radiation_tendency, &
   temp_sfc,sfc_sw_in,sfc_lw_out,sfc_albedo, &
   no_of_scalars,no_of_layers,no_of_constituents,no_of_condensed_constituents, &
-  time_coord) &
+  time_coord)
   
     ! This is the function that is called by the dynamical core. The dycore hands over
     ! the thermodynamic state as well as meta data (time stamp,coordinates) and gets
     ! back radiative fux convergences in W/m^3.
-  
-    bind(c,name = "calc_radiative_flux_convergence")
     
     ! the number of scalar points of the model grid
-    integer, intent(in)                :: no_of_scalars
+    integer, intent(in)     :: no_of_scalars
     ! the number of layers of the model grid
-    integer, intent(in)                :: no_of_layers
+    integer, intent(in)     :: no_of_layers
     ! the number of constituents of the model atmosphere
-    integer, intent(in)                :: no_of_constituents
+    integer, intent(in)     :: no_of_constituents
     ! the numer of condensed constituents of the model atmosphere
-    integer, intent(in)                :: no_of_condensed_constituents
+    integer, intent(in)     :: no_of_condensed_constituents
     ! the time coordinate (UTC time stamp)
-    real(wp)                          :: time_coord
+    real(wp)                :: time_coord
     ! the latitude coordinates of the scalar data points
-    real(wp), intent(in)               :: latitude_scalar(no_of_scalars/no_of_layers)
+    real(wp), intent(in)    :: latitude_scalar(no_of_scalars/no_of_layers)
     ! the longitude coordinates of the scalar data points
-    real(wp), intent(in)               :: longitude_scalar(no_of_scalars/no_of_layers)
+    real(wp), intent(in)    :: longitude_scalar(no_of_scalars/no_of_layers)
     ! the vertical positions of the scalar data points
-    real(wp), intent(in)               :: z_scalar(no_of_scalars)
+    real(wp), intent(in)    :: z_scalar(no_of_scalars)
     ! the vertical positions of the vector data points
-    real(wp), intent(in)               :: z_vector(no_of_scalars+no_of_scalars/no_of_layers)
+    real(wp), intent(in)    :: z_vector(no_of_scalars+no_of_scalars/no_of_layers)
     ! the mass densities of the model atmosphere
-    real(wp), intent(in)               :: mass_densities &
-    (no_of_constituents*no_of_scalars)
+    real(wp), intent(in)    :: mass_densities(no_of_constituents*no_of_scalars)
     ! the temperature of the model atmosphere
-    real(wp), intent(in)               :: temperature_gas(no_of_scalars)
+    real(wp), intent(in)    :: temperature_gas(no_of_scalars)
     ! the result (in W/m^3)
-    real(wp), intent(inout)            :: radiation_tendency(no_of_scalars)
+    real(wp), intent(inout) :: radiation_tendency(no_of_scalars)
     ! surface temperature
-    real(wp), intent(in)               :: temp_sfc(no_of_scalars/no_of_layers)
+    real(wp), intent(in)    :: temp_sfc(no_of_scalars/no_of_layers)
     ! surface shortwave in
-    real(wp), intent(inout)            :: sfc_sw_in(no_of_scalars/no_of_layers)
+    real(wp), intent(inout) :: sfc_sw_in(no_of_scalars/no_of_layers)
     ! surface longwave out
-    real(wp), intent(inout)            :: sfc_lw_out(no_of_scalars/no_of_layers)
+    real(wp), intent(inout) :: sfc_lw_out(no_of_scalars/no_of_layers)
     ! surface albedo for all bands
-    real(wp), intent(in)               :: sfc_albedo(no_of_scalars/no_of_layers)
+    real(wp), intent(in)    :: sfc_albedo(no_of_scalars/no_of_layers)
     
     ! local variables
     ! the gas concentrations (object holding all information on the composition
     ! of the gas phase)
-    type(ty_gas_concs)                :: gas_concentrations_sw
-    type(ty_gas_concs)                :: gas_concentrations_lw
+    type(ty_gas_concs)                    :: gas_concentrations_sw
+    type(ty_gas_concs)                    :: gas_concentrations_lw
     ! the spectral properties of the gas phase
-    type(ty_gas_optics_rrtmgp)        :: k_dist_sw,k_dist_lw
+    type(ty_gas_optics_rrtmgp)            :: k_dist_sw,k_dist_lw
     ! the spectral properties of the clouds
-    type(ty_cloud_optics)             :: cloud_optics_sw,cloud_optics_lw
+    type(ty_cloud_optics)                 :: cloud_optics_sw,cloud_optics_lw
     ! solar zenith angle
-    real(wp)                          :: mu_0(no_of_scalars/no_of_layers)
+    real(wp)                              :: mu_0(no_of_scalars/no_of_layers)
     ! number of points where it is day
-    integer                           :: no_of_day_points
+    integer                               :: no_of_day_points
     ! loop indices and helper variables
-    integer                           :: ji,j_day,jk,base_index
+    integer                               :: ji,j_day,jk,base_index
     ! the indices of columns where it is day
-    integer                           :: day_indices(no_of_scalars/no_of_layers)
+    integer                               :: day_indices(no_of_scalars/no_of_layers)
     ! number of scalars per layer (number of columns)
-    integer                           :: no_of_scalars_h
+    integer                               :: no_of_scalars_h
     ! the resulting fluxes
-    type(ty_fluxes_broadband)         :: fluxes,fluxes_day
+    type(ty_fluxes_broadband)             :: fluxes,fluxes_day
     ! short wave optical properties
-    type(ty_optical_props_2str)       :: atmos_props_sw,cloud_props_sw
+    type(ty_optical_props_2str)           :: atmos_props_sw,cloud_props_sw
     ! long wave optical properties
-    type(ty_optical_props_1scl)       :: atmos_props_lw,cloud_props_lw
+    type(ty_optical_props_1scl)           :: atmos_props_lw,cloud_props_lw
     ! top of atmosphere short wave flux
-    real(wp), dimension(:,:), allocatable          :: toa_flux ! no_of_day_points,no_of_sw_g_points
+    real(wp), dimension(:,:), allocatable :: toa_flux ! no_of_day_points,no_of_sw_g_points
     ! long wave source function
-    type(ty_source_func_lw)           :: sources_lw
+    type(ty_source_func_lw)               :: sources_lw
     ! the surface emissivity
-    real(wp)                          :: surface_emissivity(no_of_lw_bands,no_of_scalars/no_of_layers)
+    real(wp)                              :: surface_emissivity(no_of_lw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation
-    real(wp)                          :: albedo_dir(no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                              :: albedo_dir(no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for diffusive radiation
-    real(wp)                          :: albedo_dif(no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                              :: albedo_dif(no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation (day points only)
-    real(wp)                          :: albedo_dir_day(no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                              :: albedo_dir_day(no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for diffusive radiation (day points only)
-    real(wp)                          :: albedo_dif_day(no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                              :: albedo_dif_day(no_of_sw_bands,no_of_scalars/no_of_layers)
     ! solar zenith angle (day points only)
-    real(wp)                          :: mu_0_day(no_of_scalars/no_of_layers)
+    real(wp)                              :: mu_0_day(no_of_scalars/no_of_layers)
     ! temperature at the surface (day points only)
-    real(wp)                          :: temp_sfc_day(no_of_scalars/no_of_layers)
+    real(wp)                              :: temp_sfc_day(no_of_scalars/no_of_layers)
     ! reformatted temperature field
-    real(wp)                          :: temperature_rad(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: temperature_rad(no_of_scalars/no_of_layers,no_of_layers)
     ! reformatted pressure field
-    real(wp)                          :: pressure_rad(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: pressure_rad(no_of_scalars/no_of_layers,no_of_layers)
     ! pressure at cell interfaces
-    real(wp)                          :: pressure_interface_rad(no_of_scalars/no_of_layers,no_of_layers+1)
+    real(wp)                              :: pressure_interface_rad(no_of_scalars/no_of_layers,no_of_layers+1)
     ! temperature at cell interfaces
-    real(wp)                          :: temperature_interface_rad (no_of_scalars/no_of_layers,no_of_layers+1)
+    real(wp)                              :: temperature_interface_rad (no_of_scalars/no_of_layers,no_of_layers+1)
     ! temperature at cells restricted to day points
-    real(wp)                          :: temperature_rad_day(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: temperature_rad_day(no_of_scalars/no_of_layers,no_of_layers)
     ! pressure at cells restricted to day points
-    real(wp)                          :: pressure_rad_day(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: pressure_rad_day(no_of_scalars/no_of_layers,no_of_layers)
     ! pressure at cell interfaces restricted to day points
-    real(wp)                          :: pressure_interface_rad_day(no_of_scalars/no_of_layers,no_of_layers+1)
+    real(wp)                              :: pressure_interface_rad_day(no_of_scalars/no_of_layers,no_of_layers+1)
     ! liquid water path in g/m^2
-    real(wp)                          :: liquid_water_path(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: liquid_water_path(no_of_scalars/no_of_layers,no_of_layers)
     ! ice water path g/m^2
-    real(wp)                          :: ice_water_path(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: ice_water_path(no_of_scalars/no_of_layers,no_of_layers)
     ! liquid particles effective radius in micro meters 
-    real(wp)                          :: liquid_eff_radius(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: liquid_eff_radius(no_of_scalars/no_of_layers,no_of_layers)
     ! ice particles effective radius in micro meters 
-    real(wp)                          :: ice_eff_radius(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: ice_eff_radius(no_of_scalars/no_of_layers,no_of_layers)
     ! liquid water path in g/m^2 restricted to the day points
-    real(wp)                          :: liquid_water_path_day(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: liquid_water_path_day(no_of_scalars/no_of_layers,no_of_layers)
     ! ice water path in g/m^2 restricted to the day points
-    real(wp)                          :: ice_water_path_day(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: ice_water_path_day(no_of_scalars/no_of_layers,no_of_layers)
     ! liquid particles effective radius in micro meters restricted to the day points
-    real(wp)                          :: liquid_eff_radius_day(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: liquid_eff_radius_day(no_of_scalars/no_of_layers,no_of_layers)
     ! ice particles effective radius in micro meters restricted to the day points
-    real(wp)                          :: ice_eff_radius_day(no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                              :: ice_eff_radius_day(no_of_scalars/no_of_layers,no_of_layers)
     ! scale height of the atmosphere
-    real(wp)                          :: scale_height = 8.e3_wp
+    real(wp)                              :: scale_height = 8.e3_wp
     ! representative value of liquid particle radius
-    real(wp)                          :: liquid_eff_radius_value
+    real(wp)                              :: liquid_eff_radius_value
     ! representative value of ice particle radius
-    real(wp)                          :: ice_eff_radius_value
+    real(wp)                              :: ice_eff_radius_value
     ! layer thickness
-    real(wp)                          :: thickness
+    real(wp)                              :: thickness
     ! ice precipitation particles radius
-    real(wp)                          :: ice_precip_radius
+    real(wp)                              :: ice_precip_radius
     ! liquid precipitation particles radius
-    real(wp)                          :: liquid_precip_radius
+    real(wp)                              :: liquid_precip_radius
     ! ice cloud particles radius
-    real(wp)                          :: ice_cloud_radius
+    real(wp)                              :: ice_cloud_radius
     ! liquid cloud particles radius
-    real(wp)                          :: liquid_cloud_radius
+    real(wp)                              :: liquid_cloud_radius
     ! ice precipitation particles weight
-    real(wp)                          :: ice_precip_weight
+    real(wp)                              :: ice_precip_weight
     ! liquid precipitation particles weight
-    real(wp)                          :: liquid_precip_weight
+    real(wp)                              :: liquid_precip_weight
     ! ice cloud particles weight
-    real(wp)                          :: ice_cloud_weight
+    real(wp)                              :: ice_cloud_weight
     ! liquid cloud particles weight
-    real(wp)                          :: liquid_cloud_weight
+    real(wp)                              :: liquid_cloud_weight
     ! security margin
-    real(wp)                          :: security_margin = 1e-10
+    real(wp)                              :: security_margin = 1e-10
     
     ! some general preparations
     
@@ -635,26 +631,26 @@ module radiation
     real(wp), intent(in) :: t
     
     ! local variables
-    real(wp)                          :: normal_vector_rel2_earth(3)
-    real(wp)                          :: normal_vector_rel2_sun  (3)
-    real(wp)                          :: sun_2_earth             (3)
+    real(wp) :: normal_vector_rel2_earth(3)
+    real(wp) :: normal_vector_rel2_sun(3)
+    real(wp) :: sun_2_earth(3)
     ! obliquity of the earth's axis
-    real(wp)                          :: obliquity
+    real(wp) :: obliquity
     ! rotation speed of the earth
-    real(wp)                          :: omega
+    real(wp) :: omega
     ! revolution speed of the earth around the sun
-    real(wp)                          :: omega_rev
+    real(wp) :: omega_rev
     ! a reference time
-    real(wp)                          :: t_0
+    real(wp) :: t_0
     ! a transformed time
-    real(wp)                          :: t_transformed
+    real(wp) :: t_transformed
     ! the rotation angle of the earth
-    real(wp)                          :: rot_angle
+    real(wp) :: rot_angle
     ! At the time t_0,the earth has been at an angle phi_0_earth_rotation
     ! around itself and at an angle phi_0_earth_around_sun around the sun.
-    real(wp)                          :: phi_0_earth_around_sun
-    real(wp)                          :: phi_0_earth_rotation
-    real(wp)                          :: trans_earth2sun         (3,3)
+    real(wp) :: phi_0_earth_around_sun
+    real(wp) :: phi_0_earth_rotation
+    real(wp) :: trans_earth2sun(3,3)
     
     omega = 7.292115e-5_wp
     omega_rev = 1.99099e-7_wp
