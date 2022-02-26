@@ -36,21 +36,21 @@ module set_initial_state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    integer                      :: ji,jk,jl                       ! loop indices
-    real(wp)                     :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
-    real(wp)                     :: n_squared                      ! Brunt-Väisälä frequency for the Schär test case
-    real(wp)                     :: gravity                        ! gravity acceleration
-    real(wp)                     :: delta_z                        ! delta z
-    real(wp)                     :: T_0                            ! MSLP temperature variable
-    real(wp)                     :: r_d                            ! specific gas constant of dry air
-    real(wp)                     :: c_p                            ! specific heat capacity at const. pressure of dry air
+    integer  :: ji,jk,jl                       ! loop indices
+    real(wp) :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
+    real(wp) :: n_squared                      ! Brunt-Väisälä frequency for the Schär test case
+    real(wp) :: gravity                        ! gravity acceleration
+    real(wp) :: delta_z                        ! delta z
+    real(wp) :: T_0                            ! MSLP temperature variable
+    real(wp) :: r_d                            ! specific gas constant of dry air
+    real(wp) :: c_p                            ! specific heat capacity at const. pressure of dry air
     
     r_d = specific_gas_constants(0)
     c_p = spec_heat_capacities_p_gas(0)
       
     select case (trim(scenario))
     
-      case("standard","resting_mountain")
+      case("standard")
       
         ! This test case is the standard atmosphere.
       
@@ -167,7 +167,6 @@ module set_initial_state
     integer   :: varid_t                        ! variable ID of the temperature
     integer   :: varid_u                        ! variable ID of the u-wind
     integer   :: varid_v                        ! variable ID of the v-wind
-    integer   :: varid_w                        ! variable ID of the vertical wind
     real(wp)  :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
     
     filename = "../../real_weather/" // trim(restart_filename)
@@ -180,14 +179,12 @@ module set_initial_state
     call nc_check(nf90_inq_varid(ncid,"T",varid_t))
     call nc_check(nf90_inq_varid(ncid,"u",varid_u))
     call nc_check(nf90_inq_varid(ncid,"v",varid_v))
-    call nc_check(nf90_inq_varid(ncid,"w",varid_w))
     
     ! reading the NetCDF fields
-    call nc_check(nf90_get_var(ncid,varid_w,state%rho))
+    call nc_check(nf90_get_var(ncid,varid_rho,state%rho))
     call nc_check(nf90_get_var(ncid,varid_t,diag%scalar_placeholder))
     call nc_check(nf90_get_var(ncid,varid_u,state%wind_u))
     call nc_check(nf90_get_var(ncid,varid_v,state%wind_v))
-    call nc_check(nf90_get_var(ncid,varid_w,state%wind_w))
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
@@ -219,12 +216,12 @@ module set_initial_state
     real(wp),      intent(in)    :: pres_lowest_layer(:,:) ! pressure in the lowest layer
     
     ! local variables
-    integer                      :: ji,jk,jl    ! loop indices
-    real(wp)                     :: b,c         ! abbreviations needed for the hydrostatic initialization routine
-    real(wp)                     :: temperature ! single temperature value
-    real(wp)                     :: pressure    ! single pressure value
-    real(wp)                     :: r_d         ! specific gas constant of dry air
-    real(wp)                     :: c_p         ! specific heat capacity at const. pressure of dry air
+    integer  :: ji,jk,jl    ! loop indices
+    real(wp) :: b,c         ! abbreviations needed for the hydrostatic initialization routine
+    real(wp) :: temperature ! single temperature value
+    real(wp) :: pressure    ! single pressure value
+    real(wp) :: r_d         ! specific gas constant of dry air
+    real(wp) :: c_p         ! specific heat capacity at const. pressure of dry air
     
     r_d = specific_gas_constants(0)
     c_p = spec_heat_capacities_p_gas(0)
