@@ -19,9 +19,10 @@ program control
   use write_out,                 only: write_output
   use manage_rkhevi,             only: rkhevi
   use linear_combine_two_states, only: lin_combination,interpolation_t
-  use bc_nml,                    only: bc_nml_setup
+  use bc_nml,                    only: bc_nml_setup,lperiodic
   use rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
   use manage_radiation_calls,    only: call_radiation
+  use boundaries,                only: setup_bc_factor
   
   implicit none
 
@@ -226,6 +227,10 @@ program control
   write(*,*) "Setting up the grid ..."
   call grid_setup(grid)
   write(*,*) "... grid set up."
+  
+  if (.not. lperiodic) then
+    call setup_bc_factor(bc)
+  endif
   
   ! limitting the hydrometeor sedimentation velocities for stability reasons
   normal_dist_min_vert = minval(grid%dz(:,:,nlays+1))
