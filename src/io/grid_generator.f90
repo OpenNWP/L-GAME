@@ -16,6 +16,7 @@ module grid_generator
   use io_nml,             only: lwrite_grid,lread_grid
   use read_write_grid,    only: write_grid,read_grid
   use set_initial_state,  only: bg_temp,bg_pres,geopot
+  use bc_nml,             only: lperiodic
 
   implicit none
   
@@ -215,19 +216,31 @@ module grid_generator
     
     ! setting the height of the u-vector points
     ! inner domain
-    do ji=1,nlins
-      do jk=2,ncols
-        grid%z_geo_u(ji,jk,:) = 0.5_wp*(grid%z_geo_scal(ji,jk-1,:) + grid%z_geo_scal(ji,jk,:))
-      enddo
+    do jk=2,ncols
+      grid%z_geo_u(:,jk,:) = 0.5_wp*(grid%z_geo_scal(:,jk-1,:) + grid%z_geo_scal(:,jk,:))
     enddo
+    ! boundaries
+    if (lperiodic) then
+      grid%z_geo_u(:,1,:) = 0.5_wp*(grid%z_geo_scal(:,1,:) + grid%z_geo_scal(:,ncols,:))
+      grid%z_geo_u(:,ncols+1,:) = grid%z_geo_u(:,1,:)
+    else
+      grid%z_geo_u(:,1,:) = 2._wp*grid%z_geo_scal(:,1,:) - grid%z_geo_scal(:,2,:)
+      grid%z_geo_u(:,ncols+1,:) = 2._wp*grid%z_geo_scal(:,ncols,:) - grid%z_geo_scal(:,ncols-1,:)
+    endif
     
     ! setting the height of the v-vector points
     ! inner domain
-    do ji=1,nlins+1
-      do jk=1,ncols
-        grid%z_geo_v(ji,jk,:) = 0.5_wp*(grid%z_geo_scal(ji,jk,:) + grid%z_geo_scal(ji+1,jk,:))
-      enddo
+    do ji=2,nlins
+      grid%z_geo_v(ji,:,:) = 0.5_wp*(grid%z_geo_scal(ji-1,:,:) + grid%z_geo_scal(ji,:,:))
     enddo
+    ! boundaries
+    if (lperiodic) then
+      grid%z_geo_v(1,:,:) = 0.5_wp*(grid%z_geo_scal(1,:,:) + grid%z_geo_scal(nlins,:,:))
+      grid%z_geo_v(nlins+1,:,:) = grid%z_geo_v(nlins,:,:)
+    else
+      grid%z_geo_v(1,:,:) = 2._wp*grid%z_geo_scal(1,:,:) - grid%z_geo_scal(2,:,:)
+      grid%z_geo_v(nlins+1,:,:) = 2._wp*grid%z_geo_scal(nlins,:,:) - grid%z_geo_scal(nlins-1,:,:)
+    endif
     
     ! setting dx
     grid%dx = dx*(re + grid%z_geo_u)/re
@@ -238,16 +251,12 @@ module grid_generator
     call grad_hor_cov(grid%z_geo_scal,grid%slope_x,grid%slope_y,grid)
     
     ! setting the z coordinates of the vertical vector points
-    do ji=1,nlins
-      do jk=1,ncols
-        do jl=1,nlays
-          if (jl == 1) then
-            grid%z_geo_w(ji,jk,jl) = toa
-          else
-            grid%z_geo_w(ji,jk,jl) = 0.5_wp*(grid%z_geo_scal(ji,jk,jl-1) + grid%z_geo_scal(ji,jk,jl))
-          endif
-        enddo
-      enddo
+    do jl=1,nlays
+      if (jl == 1) then
+        grid%z_geo_w(:,:,jl) = toa
+      else
+        grid%z_geo_w(:,:,jl) = 0.5_wp*(grid%z_geo_scal(:,:,jl-1) + grid%z_geo_scal(:,:,jl))
+      endif
     enddo
     
     ! setting the vertical distances between the scalar data points
