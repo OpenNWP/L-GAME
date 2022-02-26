@@ -216,16 +216,36 @@ module grid_generator
     
     ! setting the height of the u-vector points
     ! inner domain
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jk)
     do jk=2,ncols
       grid%z_geo_u(:,jk,:) = 0.5_wp*(grid%z_geo_scal(:,jk-1,:) + grid%z_geo_scal(:,jk,:))
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     ! boundaries
     if (lperiodic) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       grid%z_geo_u(:,1,:) = 0.5_wp*(grid%z_geo_scal(:,1,:) + grid%z_geo_scal(:,ncols,:))
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       grid%z_geo_u(:,ncols+1,:) = grid%z_geo_u(:,1,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
     else
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       grid%z_geo_u(:,1,:) = 2._wp*grid%z_geo_scal(:,1,:) - grid%z_geo_scal(:,2,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       grid%z_geo_u(:,ncols+1,:) = 2._wp*grid%z_geo_scal(:,ncols,:) - grid%z_geo_scal(:,ncols-1,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
     endif
     
     ! setting the height of the v-vector points
@@ -235,17 +255,41 @@ module grid_generator
     enddo
     ! boundaries
     if (lperiodic) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       grid%z_geo_v(1,:,:) = 0.5_wp*(grid%z_geo_scal(1,:,:) + grid%z_geo_scal(nlins,:,:))
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       grid%z_geo_v(nlins+1,:,:) = grid%z_geo_v(nlins,:,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
     else
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       grid%z_geo_v(1,:,:) = 2._wp*grid%z_geo_scal(1,:,:) - grid%z_geo_scal(2,:,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       grid%z_geo_v(nlins+1,:,:) = 2._wp*grid%z_geo_scal(nlins,:,:) - grid%z_geo_scal(nlins-1,:,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
     endif
     
     ! setting dx
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     grid%dx = dx*(re + grid%z_geo_u)/re
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     ! setting dy
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     grid%dy = dy*(re + grid%z_geo_v)/re
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     
     ! calculating the coordinate slopes
     call grad_hor_cov(grid%z_geo_scal,grid%slope_x,grid%slope_y,grid)
