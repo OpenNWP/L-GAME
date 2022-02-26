@@ -30,6 +30,8 @@ module manage_rkhevi
   contains
   
   subroutine rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,total_step_counter,lrad_update)
+  
+    ! This subroutine manages the RKHEVI time stepping.
     
     type(t_state), intent(inout) :: state_old          ! the state at the old timestep
     type(t_state), intent(inout) :: state_new          ! the state at the new timestep
@@ -66,7 +68,7 @@ module manage_rkhevi
       ! 1.) Explicit component of the momentum equation.
       ! ------------------------------------------------
       ! Update of the pressure gradient.
-      if (rk_step == 1) then
+      if (rk_step==1) then
         call manage_pressure_gradient(state_new,diag,grid,total_step_counter==0)
       endif
       ! Only the horizontal momentum is a forward tendency.
@@ -97,7 +99,9 @@ module manage_rkhevi
     enddo
     
     ! saturation adjustment, calculation of latent heating rates, evaporation at the surface
-    call moisturizer(state_new,diag,irrev,grid)
+    if (no_of_constituents>1) then
+      call moisturizer(state_new,diag,irrev,grid)
+    endif
     
     ! calling the boundary conditions subroutine for real-data simulation
     if (.not. lperiodic) then
