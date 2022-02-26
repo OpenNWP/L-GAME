@@ -193,7 +193,7 @@ module vorticities
     ! horizontal vorticity in x-direction
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
-    do ji=1,nlins+1
+    do ji=2,nlins
       do jk=1,ncols
         do jl=1,nlays+1
           if (jl==1) then
@@ -234,7 +234,7 @@ module vorticities
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
-      do jk=1,ncols+1
+      do jk=2,ncols
         do jl=1,nlays+1
           if (jl == 1) then
             diag%z_eta_y(ji,jk,jl) = diag%z_eta_y(ji,jk,jl)/(0.5_wp*(state%rho(ji+1,jk,jl,no_of_condensed_constituents+1) &

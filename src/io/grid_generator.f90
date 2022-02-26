@@ -420,28 +420,28 @@ module grid_generator
     enddo
 
     ! setting the volume of the grid boxes
-    do ji=1,nlins
-      do jk=1,ncols
-        do jl=1,nlays
-          grid%volume(ji,jk,jl) = 1._wp/3._wp*((re + grid%z_geo_w(ji,jk,jl))**3 - (re + grid%z_geo_w(ji,jk,jl+1))**3) &
-          /(re + grid%z_geo_w(ji,jk,jl+1))**2*grid%area_z(ji,jk,jl+1)
-        enddo
-      enddo
+    do jl=1,nlays
+      grid%volume(:,:,jl) = 1._wp/3._wp*((re + grid%z_geo_w(:,:,jl))**3 - (re + grid%z_geo_w(:,:,jl+1))**3) &
+      /(re + grid%z_geo_w(:,:,jl+1))**2*grid%area_z(:,:,jl+1)
     enddo
     
     ! setting the inner product weights
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          grid%inner_product_weights(ji,jk,jl,1) = grid%area_x(ji  ,jk+1,jl)*grid%dx(ji+1,jk+1,jl)/(2._wp*grid%volume(ji,jk,jl))
-          grid%inner_product_weights(ji,jk,jl,2) = grid%area_y(ji+1,jk  ,jl)*grid%dy(ji+1,jk+1,jl)/(2._wp*grid%volume(ji,jk,jl))
-          grid%inner_product_weights(ji,jk,jl,3) = grid%area_x(ji  ,jk  ,jl)*grid%dx(ji+1,jk  ,jl)/(2._wp*grid%volume(ji,jk,jl))
-          grid%inner_product_weights(ji,jk,jl,4) = grid%area_y(ji  ,jk  ,jl)*grid%dy(ji  ,jk+1,jl)/(2._wp*grid%volume(ji,jk,jl))
-          grid%inner_product_weights(ji,jk,jl,5) = grid%area_z(ji  ,jk  ,jl)*grid%dz(ji+1,jk+1,jl)/(2._wp*grid%volume(ji,jk,jl))
-          grid%inner_product_weights(ji,jk,jl,6) = grid%area_z(ji  ,jk  ,jl+1)*grid%dz(ji+1,jk+1,jl+1)/(2._wp*grid%volume(ji,jk,jl))
+          grid%inner_product_weights(ji,jk,jl,1) = grid%area_x(ji,jk+1,jl)*grid%dx(ji,jk+1,jl)/(2._wp*grid%volume(ji,jk,jl))
+          grid%inner_product_weights(ji,jk,jl,2) = grid%area_y(ji+1,jk,jl)*grid%dy(ji+1,jk,jl)/(2._wp*grid%volume(ji,jk,jl))
+          grid%inner_product_weights(ji,jk,jl,3) = grid%area_x(ji,jk,jl)*grid%dx(ji,jk,jl)/(2._wp*grid%volume(ji,jk,jl))
+          grid%inner_product_weights(ji,jk,jl,4) = grid%area_y(ji,jk,jl)*grid%dy(ji,jk,jl)/(2._wp*grid%volume(ji,jk,jl))
+          grid%inner_product_weights(ji,jk,jl,5) = grid%area_z(ji,jk,jl)*grid%dz(ji,jk,jl)/(2._wp*grid%volume(ji,jk,jl))
+          grid%inner_product_weights(ji,jk,jl,6) = grid%area_z(ji,jk,jl+1)*grid%dz(ji,jk,jl+1)/(2._wp*grid%volume(ji,jk,jl))
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! setting the TRSK weights
     ! u
@@ -454,7 +454,7 @@ module grid_generator
         *dy/(dx*cos(grid%lat_scalar(ji)))
         grid%trsk_weights_u(ji,jk,3) = -(0.5_wp - (patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
         +patch_area(grid%lat_scalar(ji)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat))/base_area) &
-        *dx*cos(0.5_wp*(grid%lat_scalar(ji  )+grid%lat_scalar(ji)))/(dx*cos(grid%lat_scalar(ji)))
+        *dx*cos(0.5_wp*(grid%lat_scalar(ji)+grid%lat_scalar(ji)))/(dx*cos(grid%lat_scalar(ji)))
         grid%trsk_weights_u(ji,jk,4) = grid%trsk_weights_u(ji,jk,3)
         grid%trsk_weights_u(ji,jk,5) = -grid%trsk_weights_u(ji,jk,2)
         grid%trsk_weights_u(ji,jk,6) = grid%trsk_weights_u(ji,jk,1)
@@ -519,7 +519,7 @@ module grid_generator
           temperature = bg_temp(grid%z_geo_scal(ji,jk,jl))
           ! lowest layer
           if (jl == nlays) then
-            pressure    = bg_pres(grid%z_geo_scal(ji,jk,jl))
+            pressure = bg_pres(grid%z_geo_scal(ji,jk,jl))
             grid%exner_bg(ji,jk,jl) = (pressure/p_0)**(specific_gas_constants(0)/spec_heat_capacities_p_gas(0))
             grid%theta_bg(ji,jk,jl) = temperature/grid%exner_bg(ji,jk,jl)
           ! other layers
@@ -537,7 +537,7 @@ module grid_generator
     enddo
     
     ! calculating the gradient of the background Exner pressure (only needs to be done once)
-    call grad(grid%exner_bg(2:nlins+1,2:ncols+1,:),grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
+    call grad(grid%exner_bg,grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
   
   end subroutine bg_setup
   
