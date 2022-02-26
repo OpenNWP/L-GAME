@@ -28,11 +28,11 @@ module vorticities
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    integer  :: ji,jk,jl          ! loop indices
     real(wp) :: l_rescale         ! length rescale factor in orography
     real(wp) :: delta_z           ! needed for handling terrain
     real(wp) :: vertical_gradient ! needed for handling terrain
     integer  :: ind_shift         ! needed for handling terrain
+    integer  :: ji,jk,jl          ! loop indices
     
     ! calculating the relative vorticity in x-direction
     !$OMP PARALLEL
@@ -83,67 +83,68 @@ module vorticities
     ! calculating the relative vorticity in z-direction
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,l_rescale,delta_z,ind_shift,vertical_gradient)
-    do ji=1,nlins+1
-      do jk=1,ncols+1
+    do ji=2,nlins
+      do jk=2,ncols
         ! layers which do not follow the orography
         do jl=1,nlays-nlays_oro
           diag%z_eta_z(ji,jk,jl) = &
-          + grid%dy(ji,  jk+1,jl)*state%wind_v(ji,  jk+1,jl) &
-          - grid%dx(ji+1,jk,  jl)*state%wind_u(ji+1,jk,  jl) &
-          - grid%dy(ji,  jk,  jl)*state%wind_v(ji,  jk,  jl) &
-          + grid%dx(ji,  jk,  jl)*state%wind_u(ji,  jk,  jl)
+          + grid%dy(ji,jk,jl)*state%wind_v(ji,jk,jl) &
+          - grid%dx(ji,jk,jl)*state%wind_u(ji,jk,jl) &
+          - grid%dy(ji,jk-1,jl)*state%wind_v(ji,jk-1,jl) &
+          + grid%dx(ji-1,jk,jl)*state%wind_u(ji-1,jk,jl)
         enddo
         ! layers which follow the orography
         do jl=nlays-nlays_oro+1,nlays
           ! first
-          l_rescale         = (re + grid%z_geo_area_dual_z(ji,jk,jl))/(re + grid%z_geo_v(ji,jk+1,jl))
-          delta_z           = grid%z_geo_area_dual_z(ji,jk,jl) - grid%z_geo_v(ji,jk+1,jl)
+          l_rescale = (re + grid%z_geo_area_dual_z(ji,jk,jl))/(re + grid%z_geo_v(ji,jk+1,jl))
+          delta_z = grid%z_geo_area_dual_z(ji,jk,jl) - grid%z_geo_v(ji,jk+1,jl)
           ind_shift = 1
-          if (delta_z > 0 .or. jl == nlays) then
-            ind_shift = -1
-          endif
-          vertical_gradient = (state%wind_v(ji,jk+1,jl) - state%wind_v(ji,jk+1,jl+ind_shift))/ &
-          (grid%z_geo_v(ji,jk+1,jl) - grid%z_geo_v(ji,jk+1,jl+ind_shift))
-          diag%z_eta_z(ji,jk,jl) = l_rescale*grid%dy(ji,jk+1,jl)* &
-          (state%wind_v(ji,jk+1,jl) + delta_z*vertical_gradient)
-          ! second
-          l_rescale         = (re + grid%z_geo_area_dual_z(ji,jk,jl))/(re + grid%z_geo_u(ji+1,jk,jl))
-          delta_z           = grid%z_geo_area_dual_z(ji,jk,jl) - grid%z_geo_u(ji+1,jk,jl)
-          ind_shift = 1
-          if (delta_z > 0 .or. jl == nlays) then
-            ind_shift = -1
-          endif
-          vertical_gradient = (state%wind_u(ji+1,jk,jl) - state%wind_u(ji+1,jk,jl+ind_shift))/ &
-          (grid%z_geo_u(ji+1,jk,jl) - grid%z_geo_u(ji+1,jk,jl+ind_shift))
-          diag%z_eta_z(ji,jk,jl) = diag%z_eta_z(ji,jk,jl) - l_rescale*grid%dx(ji+1,jk,jl)* &
-          (state%wind_u(ji+1,jk,jl) + delta_z*vertical_gradient)
-          ! third
-          l_rescale         = (re + grid%z_geo_area_dual_z(ji,jk,jl))/(re + grid%z_geo_v(ji,jk,jl))
-          delta_z           = grid%z_geo_area_dual_z(ji,jk,jl) - grid%z_geo_v(ji,jk,jl)
-          ind_shift = 1
-          if (delta_z > 0 .or. jl == nlays) then
+          if (delta_z>0._wp .or. jl==nlays) then
             ind_shift = -1
           endif
           vertical_gradient = (state%wind_v(ji,jk,jl) - state%wind_v(ji,jk,jl+ind_shift))/ &
-          (grid%z_geo_v(ji,jk,jl) - grid%z_geo_v(ji,jk,jl+ind_shift))
-          diag%z_eta_z(ji,jk,jl) = diag%z_eta_z(ji,jk,jl) - l_rescale*grid%dy(ji,jk,jl)* &
+          (grid%z_geo_v(ji,jk+1,jl) - grid%z_geo_v(ji,jk+1,jl+ind_shift))
+          diag%z_eta_z(ji,jk,jl) = l_rescale*grid%dy(ji,jk,jl)* &
           (state%wind_v(ji,jk,jl) + delta_z*vertical_gradient)
-          ! fourth
-          l_rescale         = (re + grid%z_geo_area_dual_z(ji,jk,jl))/(re + grid%z_geo_u(ji,jk,jl))
-          delta_z           = grid%z_geo_area_dual_z(ji,jk,jl) - grid%z_geo_u(ji,jk,jl)
+          ! second
+          l_rescale = (re + grid%z_geo_area_dual_z(ji,jk,jl))/(re + grid%z_geo_u(ji+1,jk,jl))
+          delta_z = grid%z_geo_area_dual_z(ji,jk,jl) - grid%z_geo_u(ji+1,jk,jl)
           ind_shift = 1
-          if (delta_z > 0 .or. jl == nlays) then
+          if (delta_z>0._wp .or. jl==nlays) then
             ind_shift = -1
           endif
           vertical_gradient = (state%wind_u(ji,jk,jl) - state%wind_u(ji,jk,jl+ind_shift))/ &
-          (grid%z_geo_u(ji,jk,jl) - grid%z_geo_u(ji,jk,jl+ind_shift))
-          diag%z_eta_z(ji,jk,jl) = diag%z_eta_z(ji,jk,jl) + l_rescale*grid%dx(ji,jk,jl)* &
+          (grid%z_geo_u(ji+1,jk,jl) - grid%z_geo_u(ji+1,jk,jl+ind_shift))
+          diag%z_eta_z(ji,jk,jl) = diag%z_eta_z(ji,jk,jl) - l_rescale*grid%dx(ji,jk,jl)* &
           (state%wind_u(ji,jk,jl) + delta_z*vertical_gradient)
+          ! third
+          l_rescale = (re + grid%z_geo_area_dual_z(ji,jk,jl))/(re + grid%z_geo_v(ji,jk,jl))
+          delta_z = grid%z_geo_area_dual_z(ji,jk,jl) - grid%z_geo_v(ji,jk,jl)
+          ind_shift = 1
+          if (delta_z>0._wp .or. jl==nlays) then
+            ind_shift = -1
+          endif
+          vertical_gradient = (state%wind_v(ji,jk-1,jl) - state%wind_v(ji,jk-1,jl+ind_shift))/ &
+          (grid%z_geo_v(ji,jk,jl) - grid%z_geo_v(ji,jk,jl+ind_shift))
+          diag%z_eta_z(ji,jk,jl) = diag%z_eta_z(ji,jk,jl) - l_rescale*grid%dy(ji,jk-1,jl)* &
+          (state%wind_v(ji,jk-1,jl) + delta_z*vertical_gradient)
+          ! fourth
+          l_rescale = (re + grid%z_geo_area_dual_z(ji,jk,jl))/(re + grid%z_geo_u(ji,jk,jl))
+          delta_z = grid%z_geo_area_dual_z(ji,jk,jl) - grid%z_geo_u(ji,jk,jl)
+          ind_shift = 1
+          if (delta_z>0._wp .or. jl==nlays) then
+            ind_shift = -1
+          endif
+          vertical_gradient = (state%wind_u(ji-1,jk,jl) - state%wind_u(ji-1,jk,jl+ind_shift))/ &
+          (grid%z_geo_u(ji,jk,jl) - grid%z_geo_u(ji,jk,jl+ind_shift))
+          diag%z_eta_z(ji,jk,jl) = diag%z_eta_z(ji,jk,jl) + l_rescale*grid%dx(ji-1,jk,jl)* &
+          (state%wind_u(ji-1,jk,jl) + delta_z*vertical_gradient)
         enddo
       enddo
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
+    
     ! dividing by the area
     diag%z_eta_z = diag%z_eta_z/grid%area_dual_z
       

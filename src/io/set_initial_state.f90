@@ -161,13 +161,13 @@ module set_initial_state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    integer   :: ncid                           ! ID of the NetCDF file
-    character(len=64) :: filename               ! filename containing the initial state
-    integer   :: varid_rho                      ! variable ID of the densities
-    integer   :: varid_t                        ! variable ID of the temperature
-    integer   :: varid_u                        ! variable ID of the u-wind
-    integer   :: varid_v                        ! variable ID of the v-wind
-    real(wp)  :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
+    integer           :: ncid                           ! ID of the NetCDF file
+    character(len=64) :: filename                       ! filename containing the initial state
+    integer           :: varid_rho                      ! variable ID of the densities
+    integer           :: varid_t                        ! variable ID of the temperature
+    integer           :: varid_u                        ! variable ID of the u-wind
+    integer           :: varid_v                        ! variable ID of the v-wind
+    real(wp)          :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
     
     filename = "../../real_weather/" // trim(restart_filename)
     
@@ -316,6 +316,7 @@ module set_initial_state
   
     ! This function returns the geopotential as a function of the geometrical height.
   
+    ! input
     real(wp), intent(in) :: z_height
     ! output
     real(wp)             :: geopot
