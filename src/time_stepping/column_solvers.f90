@@ -33,42 +33,40 @@ module column_solvers
     integer,       intent(in)    :: rk_step   ! Runge Kutta substep
 
     ! local variables
-    integer                  :: soil_switch                 ! soil switch: 0 if soil is off, 1 if soil is on
-    real(wp)                 :: c_vector(nlays-2+nsoillays) ! needed for the vertical solver
-    real(wp)                 :: d_vector(nlays-1+nsoillays) ! needed for the vertical solver
-    real(wp)                 :: e_vector(nlays-2+nsoillays) ! needed for the vertical solver
-    real(wp)                 :: r_vector(nlays-1+nsoillays) ! needed for the vertical solver
-    real(wp)                 :: solution(nlays-1+nsoillays) ! covariant mass flux density at the interfaces (solution)
-    real(wp)                 :: rho_expl(nlays)             ! explicit mass density
-    real(wp)                 :: rhotheta_expl(nlays)        ! explicit potential temperature density
-    real(wp)                 :: exner_pert_expl(nlays)      ! explicit Exner pressure perturbation
-    real(wp)                 :: theta_pert_expl(nlays)      ! explicit potential temperature perturbation
-    real(wp)                 :: rho_int_old(nlays-1)        ! old interface mass density
-    real(wp)                 :: rho_int_expl(nlays-1)       ! explicit interface mass density
-    real(wp)                 :: theta_int_new(nlays-1)      ! preliminary new potential temperature interface values
-    integer                  :: ji,jk,jl                    ! loop variables
-    real(wp)                 :: rho_int_new                 ! new density interface value
-    real(wp)                 :: alpha_old(nlays)            ! alpha at the old time step
-    real(wp)                 :: beta_old(nlays)             ! beta at the old time step
-    real(wp)                 :: gamma_old(nlays)            ! gamma at the old time step
-    real(wp)                 :: alpha_new(nlays)            ! alpha at the new time step
-    real(wp)                 :: beta_new(nlays)             ! beta at the new time step
-    real(wp)                 :: gamma_new(nlays)            ! gamma at the new time step
-    real(wp)                 :: alpha(nlays)                ! alpha
-    real(wp)                 :: beta(nlays)                 ! beta
-    real(wp)                 :: gammaa(nlays)               ! gamma
-    real(wp)                 :: c_v                         ! specific heat capacity at constant volume
-    real(wp)                 :: c_p                         ! specific heat capacity at constant pressure
-    real(wp)                 :: r_d                         ! individual gas constant of dry air
-    real(wp)                 :: damping_start_height        ! lower boundary height of the Klemp layer
-    real(wp)                 :: damping_coeff               ! damping coefficient of the Klemp layer
-    real(wp)                 :: z_above_damping             ! height above the lower boundary of the damping height
-    real(wp)                 :: t_gas_lowest_layer_old      ! temperature of the gas in the lowest layer of the model atmosphere, old timestep
-    real(wp)                 :: t_gas_lowest_layer_new      ! temperature of the gas in the lowest layer of the model atmosphere, new timestep
-    real(wp)                 ::  heat_flux_density_expl(nsoillays)
-                                                            ! explicit heat_flux_density in the soil
-    real(wp)                 :: solution_vector(nlays-1+nsoillays)
-                                                            ! vector containing the solution of the linear problem to solve here
+    integer                  :: soil_switch                        ! soil switch: 0 if soil does not have to be calculated off, 1 if soil has to be calculated
+    real(wp)                 :: c_vector(nlays-2+nsoillays)        ! needed for the vertical solver
+    real(wp)                 :: d_vector(nlays-1+nsoillays)        ! needed for the vertical solver
+    real(wp)                 :: e_vector(nlays-2+nsoillays)        ! needed for the vertical solver
+    real(wp)                 :: r_vector(nlays-1+nsoillays)        ! needed for the vertical solver
+    real(wp)                 :: solution(nlays-1+nsoillays)        ! covariant mass flux density at the interfaces (solution)
+    real(wp)                 :: rho_expl(nlays)                    ! explicit mass density
+    real(wp)                 :: rhotheta_expl(nlays)               ! explicit potential temperature density
+    real(wp)                 :: exner_pert_expl(nlays)             ! explicit Exner pressure perturbation
+    real(wp)                 :: theta_pert_expl(nlays)             ! explicit potential temperature perturbation
+    real(wp)                 :: rho_int_old(nlays-1)               ! old interface mass density
+    real(wp)                 :: rho_int_expl(nlays-1)              ! explicit interface mass density
+    real(wp)                 :: theta_int_new(nlays-1)             ! preliminary new potential temperature interface values
+    integer                  :: ji,jk,jl                           ! loop variables
+    real(wp)                 :: rho_int_new                        ! new density interface value
+    real(wp)                 :: alpha_old(nlays)                   ! alpha at the old time step
+    real(wp)                 :: beta_old(nlays)                    ! beta at the old time step
+    real(wp)                 :: gamma_old(nlays)                   ! gamma at the old time step
+    real(wp)                 :: alpha_new(nlays)                   ! alpha at the new time step
+    real(wp)                 :: beta_new(nlays)                    ! beta at the new time step
+    real(wp)                 :: gamma_new(nlays)                   ! gamma at the new time step
+    real(wp)                 :: alpha(nlays)                       ! alpha
+    real(wp)                 :: beta(nlays)                        ! beta
+    real(wp)                 :: gammaa(nlays)                      ! gamma
+    real(wp)                 :: c_v                                ! specific heat capacity at constant volume
+    real(wp)                 :: c_p                                ! specific heat capacity at constant pressure
+    real(wp)                 :: r_d                                ! individual gas constant of dry air
+    real(wp)                 :: damping_start_height               ! lower boundary height of the Klemp layer
+    real(wp)                 :: damping_coeff                      ! damping coefficient of the Klemp layer
+    real(wp)                 :: z_above_damping                    ! height above the lower boundary of the damping height
+    real(wp)                 :: t_gas_lowest_layer_old             ! temperature of the gas in the lowest layer of the model atmosphere, old timestep
+    real(wp)                 :: t_gas_lowest_layer_new             ! temperature of the gas in the lowest layer of the model atmosphere, new timestep
+    real(wp)                 ::  heat_flux_density_expl(nsoillays) ! explicit heat_flux_density in the soil
+    real(wp)                 :: solution_vector(nlays-1+nsoillays) ! vector containing the solution of the linear problem to solve here
 
     c_v = spec_heat_capacities_v_gas(0)
     c_p = spec_heat_capacities_p_gas(0)

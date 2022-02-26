@@ -42,7 +42,7 @@ module explicit_scalar_tendencies
     ! setting the time stepping weights
     do j_constituent=1,no_of_constituents
       new_weight(j_constituent) = 1._wp
-        if (rk_step == 2 .and. j_constituent /= no_of_condensed_constituents+1) then
+        if (rk_step==2 .and. j_constituent /= no_of_condensed_constituents+1) then
           new_weight(j_constituent) = 0.5_wp
         endif
       old_weight(j_constituent) = 1._wp - new_weight(j_constituent)
@@ -115,7 +115,7 @@ module explicit_scalar_tendencies
     type(t_irrev), intent(inout) :: irrev ! irreversible quantities (phase transitions are irreversible)
     type(t_grid),  intent(in)    :: grid  ! grid properties
       
-    if (no_of_constituents > 1) then
+    if (no_of_constituents>1) then
     
       ! calculating the source rates
       call calc_h2otracers_source_rates(state,diag,irrev,grid)

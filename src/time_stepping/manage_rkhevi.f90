@@ -42,7 +42,7 @@ module manage_rkhevi
     logical,       intent(in)    :: lrad_update        ! radiation update switch
     
     ! local variables
-    integer  :: rk_step ! index of the Runge-Kutta step
+    integer :: rk_step ! index of the Runge-Kutta step
     
     ! diagnosing the temperature
     call temperature_diagnostics(state_old,diag,grid)
@@ -58,10 +58,10 @@ module manage_rkhevi
     endif
     
     ! loop over the two Runge-Kutta steps
-    do rk_step = 1,2
+    do rk_step=1,2
     
       ! state_old remains unchanged the whole time.
-      ! At rk_step == 1, it is state_old == state_new.
+      ! At rk_step==1, it is state_old==state_new.
       
       ! 1.) Explicit component of the momentum equation.
       ! ------------------------------------------------
@@ -90,7 +90,7 @@ module manage_rkhevi
       
       ! 3.) vertical tracer advection
       ! -----------------------------
-      if (no_of_constituents > 1) then
+      if (no_of_constituents>1) then
         call three_band_solver_gen_densities(state_old,state_new,tend,grid)
       endif
   

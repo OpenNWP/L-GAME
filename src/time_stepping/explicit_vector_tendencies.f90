@@ -43,7 +43,7 @@ module explicit_vector_tendencies
     old_hor_pgrad_weight = 1._wp - new_hor_pgrad_weight
      
     ! momentum advection
-    if ((rk_step == 2 .or. total_step_counter == 0) .and. ((.not. llinear) .or. lcorio)) then
+    if ((rk_step==2 .or. total_step_counter==0) .and. ((.not. llinear) .or. lcorio)) then
       ! calculating the mass flux density
       call scalar_times_vector(state%rho(:,:,:,no_of_condensed_constituents+1),state%wind_u,state%wind_v,state%wind_w, &
       diag%u_placeholder,diag%v_placeholder,diag%w_placeholder)
@@ -61,7 +61,7 @@ module explicit_vector_tendencies
     endif
     
     ! momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
-    if (rk_step == 1) then
+    if (rk_step==1) then
       ! horizontal momentum diffusion
       if (lmom_diff_h) then
         call mom_diff_h(state,diag,irrev,grid)
@@ -74,7 +74,7 @@ module explicit_vector_tendencies
     endif
     
     new_weight = 1._wp
-    if (rk_step == 2) then
+    if (rk_step==2) then
         new_weight = 0.5_wp
     endif
     old_weight = 1._wp - new_weight
