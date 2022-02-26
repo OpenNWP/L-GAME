@@ -35,9 +35,9 @@ module explicit_vector_tendencies
     integer,       intent(in)    :: total_step_counter ! time step counter of the model integration
     
     ! local variables
-    real(wp)                     :: old_hor_pgrad_weight  ! old time step pressure gradient weight
-    real(wp)                     :: new_hor_pgrad_weight  ! new time step pressure gradient weight
-    real(wp)                     :: old_weight,new_weight ! Runge-Kutta weights
+    real(wp) :: old_hor_pgrad_weight  ! old time step pressure gradient weight
+    real(wp) :: new_hor_pgrad_weight  ! new time step pressure gradient weight
+    real(wp) :: old_weight,new_weight ! Runge-Kutta weights
     
     new_hor_pgrad_weight = 0.5_wp + impl_weight
     old_hor_pgrad_weight = 1._wp - new_hor_pgrad_weight
