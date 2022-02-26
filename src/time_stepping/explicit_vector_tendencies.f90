@@ -26,6 +26,8 @@ module explicit_vector_tendencies
 
   subroutine expl_vector_tend(state,tend,diag,irrev,grid,rk_step,total_step_counter)
   
+    ! This subroutine manages the calculation of the explicit part of the wind tendencies.
+  
     type(t_state), intent(in)    :: state              ! state to use for calculating the tendencies
     type(t_tend),  intent(inout) :: tend               ! the tendency
     type(t_diag),  intent(inout) :: diag               ! diagnostic properties

@@ -24,6 +24,8 @@ module explicit_scalar_tendencies
   
   subroutine expl_scalar_tend(grid,state,tend,diag,irrev,rk_step)
   
+    ! This subroutine manages the calculation of the explicit part of the scalar tendencies.
+  
     type(t_grid),  intent(in)    :: grid    ! model grid
     type(t_state), intent(in)    :: state   ! state with which to calculate the divergence
     type(t_tend),  intent(inout) :: tend    ! state which will contain the tendencies
