@@ -260,7 +260,7 @@ module set_initial_state
     ! output
     real(wp)             :: bg_pres
 
-    if (z_height < inv_height) then  
+    if (z_height<inv_height) then  
       bg_pres = p_0_standard*(1 - lapse_rate*z_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate))
     elseif (z_height < tropo_height) then
       bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate)) &
