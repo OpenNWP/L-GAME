@@ -481,7 +481,7 @@ module column_solvers
               ! limiter: none of the densities may be negative
               do jl=1,nlays
                 if (solution_vector(jl) < 0._wp) then
-                  added_mass = added_mass - solution_vector(jl)*grid%volume(ji,jk,jl)
+                  added_mass = -solution_vector(jl)*grid%volume(ji,jk,jl)
                   solution_vector(jl) = 0
                   if (jl == 1) then
                     solution_vector(jl+1) = solution_vector(jl+1) -  added_mass/grid%volume(ji,jk,jl+1)
