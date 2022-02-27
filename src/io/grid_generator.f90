@@ -333,8 +333,19 @@ module grid_generator
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays
-          lower_z = 0.5_wp*(grid%z_geo_w(ji+1,jk,jl+1) + grid%z_geo_w(ji+1,jk+1,jl+1))
-          upper_z = 0.5_wp*(grid%z_geo_w(ji+1,jk,jl) + grid%z_geo_w(ji+1,jk+1,jl))
+          ! left boundary
+          if (jk==1) then
+            lower_z = grid%z_geo_w(ji,1,jl+1)+0.5_wp*(grid%z_geo_w(ji,1,jl+1)-grid%z_geo_w(ji,2,jl+1))
+            upper_z = grid%z_geo_w(ji,1,jl)+0.5_wp*(grid%z_geo_w(ji,1,jl)-grid%z_geo_w(ji,2,jl))
+          ! right boundary
+          elseif (jk==ncols+1) then
+            lower_z = grid%z_geo_w(ji,ncols,jl+1)+0.5_wp*(grid%z_geo_w(ji,ncols,jl+1)-grid%z_geo_w(ji,ncols-1,jl+1))
+            upper_z = grid%z_geo_w(ji,ncols,jl)+0.5_wp*(grid%z_geo_w(ji,ncols,jl)-grid%z_geo_w(ji,ncols-1,jl))
+          ! inner domain
+          else
+            lower_z = 0.5_wp*(grid%z_geo_w(ji,jk-1,jl+1) + grid%z_geo_w(ji,jk,jl+1))
+            upper_z = 0.5_wp*(grid%z_geo_w(ji,jk-1,jl) + grid%z_geo_w(ji,jk,jl))
+          endif
           lower_length = dy*(re+lower_z)/re
           grid%area_x(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
@@ -345,9 +356,20 @@ module grid_generator
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
-          lower_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl+1) + grid%z_geo_w(ji+1,jk+1,jl+1))
-          upper_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl) + grid%z_geo_w(ji+1,jk+1,jl))
-          lower_length = dx*cos(0.5_wp*(grid%lat_scalar(ji)+grid%lat_scalar(ji)))*(re+lower_z)/re
+          ! upper boundary
+          if (ji==1) then
+            lower_z = grid%z_geo_w(1,jk,jl+1)+0.5_wp*(grid%z_geo_w(1,jk,jl+1)-grid%z_geo_w(2,jk,jl+1))
+            upper_z = grid%z_geo_w(1,jk,jl)+0.5_wp*(grid%z_geo_w(1,jk,jl)-grid%z_geo_w(2,jk,jl))
+          ! lower boundary
+          elseif (ji==nlins+1) then
+            lower_z = grid%z_geo_w(nlins,jk,jl+1)+0.5_wp*(grid%z_geo_w(nlins,jk,jl+1)-grid%z_geo_w(nlins-1,jk,jl+1))
+            upper_z = grid%z_geo_w(nlins,jk,jl)+0.5_wp*(grid%z_geo_w(nlins,jk,jl)-grid%z_geo_w(nlins-1,jk,jl))
+          ! inner domain
+          else
+            lower_z = 0.5_wp*(grid%z_geo_w(ji-1,jk,jl+1) + grid%z_geo_w(ji,jk,jl+1))
+            upper_z = 0.5_wp*(grid%z_geo_w(ji-1,jk,jl) + grid%z_geo_w(ji,jk,jl))
+          endif
+          lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)*(re+lower_z)/re
           grid%area_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
       enddo
@@ -533,12 +555,13 @@ module grid_generator
   
   function patch_area(center_lat,dx_as_angle,dy_as_angle)
   
-    ! calculates the area of a quadrilateral grid cell
+    ! This function calculates the area of a quadrilateral grid cell.
   
     ! input
     real(wp) :: center_lat  ! latitude at the center of the patch
     real(wp) :: dx_as_angle ! delta x as angle
     real(wp) :: dy_as_angle ! delta y as angle
+    
     ! output
     real(wp) :: patch_area  ! the result
   
@@ -548,11 +571,13 @@ module grid_generator
   
   function vertical_face_area(lower_z,upper_z,lower_length)
   
-    ! calculates the surface of a vertical face
+    ! This function calculates the area of a vertical face.
+    
     ! input
-    real(wp) :: lower_z            ! geometric height of the lower boundary of the face
-    real(wp) :: upper_z            ! geometric height of the upper boundary of the face
-    real(wp) :: lower_length       ! length of the lower boundary of the face
+    real(wp) :: lower_z      ! geometric height of the lower boundary of the face
+    real(wp) :: upper_z      ! geometric height of the upper boundary of the face
+    real(wp) :: lower_length ! length of the lower boundary of the face
+    
     ! output
     real(wp) :: vertical_face_area ! the result
     
