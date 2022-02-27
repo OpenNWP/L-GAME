@@ -25,10 +25,10 @@ module io_nml
     ! local variables
     integer :: fileunit
     
-    dt_write_min     = 60
-    lread_grid       = .false.
-    lwrite_grid      = .false.
-    grid_filename    = "grid.nc"
+    dt_write_min = 60
+    lread_grid = .false.
+    lwrite_grid = .false.
+    grid_filename = "grid.nc"
     restart_filename = "init.nc"
     
     ! Open and read Namelist file.
@@ -45,7 +45,7 @@ module io_nml
     endif
     
     ! calculating the output timestep in seconds
-    dt_write        = 60._wp*dt_write_min
+    dt_write = 60._wp*dt_write_min
   
   end subroutine io_nml_setup
   

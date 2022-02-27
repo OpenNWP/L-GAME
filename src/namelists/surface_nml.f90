@@ -23,9 +23,9 @@ module surface_nml
     integer :: fileunit
     
     ! default values
-    orography_id            = 1
-    lsoil                   = .true.
-    nsoillays               = 5
+    orography_id = 1
+    lsoil = .true.
+    nsoillays = 5
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)

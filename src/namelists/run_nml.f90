@@ -43,28 +43,28 @@ module run_nml
     ! local variables
     integer :: fileunit
     
-    nlins               = 51
-    ncols               = 51
-    nlays               = 40
-    nlays_oro           = 30
-    dy                  = 48000._wp
-    dx                  = 52000._wp
-    run_span_hr         = 63
-    t_init              = 0._wp
-    toa                 = 40000._wp
-    sigma               = 1.3_wp
-    lrestart            = .false.
-    lideal              = .true.
-    scenario            = "standard"
-    run_id              = "ideal"
-    llinear             = .false.
-    lcorio              = .true.
-    impl_weight         = 0.75_wp
+    nlins = 51
+    ncols = 51
+    nlays = 40
+    nlays_oro = 30
+    dy = 48000._wp
+    dx = 52000._wp
+    run_span_hr = 63
+    t_init = 0._wp
+    toa = 40000._wp
+    sigma = 1.3_wp
+    lrestart = .false.
+    lideal = .true.
+    scenario = "standard"
+    run_id = "ideal"
+    llinear = .false.
+    lcorio = .true.
+    impl_weight = 0.75_wp
     partial_impl_weight = 0.5_wp
-    PRANDTL_HEIGHT      = 100._wp
-    lat_center_deg      = 0._wp
-    lon_center_deg      = 0._wp
-    x_dir_deg           = 90._wp
+    PRANDTL_HEIGHT = 100._wp
+    lat_center_deg = 0._wp
+    lon_center_deg = 0._wp
+    x_dir_deg = 90._wp
     
     ! open and read Namelist file
     open(action="read", file="namelist.nml", newunit=fileunit)

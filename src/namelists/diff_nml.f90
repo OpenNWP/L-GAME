@@ -27,11 +27,11 @@ module diff_nml
     integer :: fileunit
     
     ! default values
-    lklemp          = .true.
-    klemp_damp_max  = 0.25_wp
+    lklemp = .true.
+    klemp_damp_max = 0.25_wp
     klemp_begin_rel = 0.53_wp
-    lmom_diff_h     = .true.
-    lmom_diff_v     = .true.
+    lmom_diff_h = .true.
+    lmom_diff_v = .true.
     diff_h_smag_div = 0.01_wp
     diff_h_smag_rot = 0.01_wp
     
