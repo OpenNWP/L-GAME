@@ -36,7 +36,6 @@ module set_initial_state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    integer  :: ji,jk,jl                       ! loop indices
     real(wp) :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
     real(wp) :: n_squared                      ! Brunt-Väisälä frequency for the Schär test case
     real(wp) :: gravity                        ! gravity acceleration
@@ -44,6 +43,7 @@ module set_initial_state
     real(wp) :: T_0                            ! MSLP temperature variable
     real(wp) :: r_d                            ! specific gas constant of dry air
     real(wp) :: c_p                            ! specific heat capacity at const. pressure of dry air
+    integer  :: ji,jk,jl                       ! loop indices
     
     r_d = specific_gas_constants(0)
     c_p = spec_heat_capacities_p_gas(0)

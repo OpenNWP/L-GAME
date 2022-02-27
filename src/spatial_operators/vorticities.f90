@@ -3,7 +3,7 @@
 
 module vorticities
 
-  ! This module contians the calculation of the vorticities.
+  ! This module contains the calculation of the vorticities.
 
   use definitions,      only: t_state,t_diag,t_grid,wp
   use run_nml,          only: nlins,ncols,nlays,nlays_oro,toa,lcorio,llinear
@@ -104,7 +104,7 @@ module vorticities
           endif
           vertical_gradient = (state%wind_v(ji,jk,jl) - state%wind_v(ji,jk,jl+ind_shift))/ &
           (grid%z_geo_v(ji,jk,jl) - grid%z_geo_v(ji,jk,jl+ind_shift))
-          diag%z_eta_z(ji,jk,jl) = diag%z_eta_z(ji,jk,jl) + l_rescale*grid%dy(ji,jk,jl)* &
+          diag%z_eta_z(ji,jk,jl) = l_rescale*grid%dy(ji,jk,jl)* &
           (state%wind_v(ji,jk,jl) + delta_z*vertical_gradient)
           ! second
           l_rescale = (re + grid%z_geo_area_dual_z(ji-1,jk,jl))/(re + grid%z_geo_u(ji-1,jk,jl))
@@ -190,6 +190,7 @@ module vorticities
     endif
     
     ! dividing by the averaged density to obtain the "potential vorticity"
+    
     ! horizontal vorticity in x-direction
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
