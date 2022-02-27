@@ -125,7 +125,7 @@ module grid_generator
           c_p_soil = 830._wp
           c_p_water = 4184._wp
     
-          do ji=1,nlays
+          do ji=1,nlins
             do jk=1,ncols
 		
               grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))

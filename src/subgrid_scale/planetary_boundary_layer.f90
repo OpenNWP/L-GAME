@@ -103,7 +103,7 @@ module planetary_boundary_layer
     if (lsoil) then
       !$OMP PARALLEL
       !$OMP DO PRIVATE(ji,jk)
-      do ji=1,nlays
+      do ji=1,nlins
         do jk=1,ncols
           diag%scalar_flux_resistance(ji,jk) = scalar_flux_resistance(diag%roughness_velocity(ji,jk), &
           grid%z_geo_scal(ji+1,jk+1,nlays) - grid%z_geo_w(ji+1,jk+1,nlays+1), &
