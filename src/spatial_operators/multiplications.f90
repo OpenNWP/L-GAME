@@ -108,7 +108,7 @@ module multiplications
     real(wp), intent(inout) :: result_field_z(:,:,:)
   
     ! local variables
-    integer                     :: jl ! loop index
+    integer :: jl ! loop index
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(jl)
