@@ -203,9 +203,10 @@ module derived_quantities
 
   function calc_diffusion_coeff(temperature,density)
   
+    ! This function calculates the molecular diffusion coefficient.
+  
     ! input arguments
     real(wp)              :: temperature,density
-  
     ! output
     real(wp)              :: calc_diffusion_coeff
     
