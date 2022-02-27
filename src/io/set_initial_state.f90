@@ -256,6 +256,8 @@ module set_initial_state
     !$OMP END DO
     !$OMP END PARALLEL
     
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     ! density
     state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert)**(c_p/r_d) &
     /(r_d*diag%scalar_placeholder)
@@ -265,9 +267,15 @@ module set_initial_state
     ! substracting the background state
     state%theta_pert = state%theta_pert - grid%theta_bg
     state%exner_pert = state%exner_pert - grid%exner_bg
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     
     ! vertical wind velocity is always set to zero
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     state%wind_w = 0._wp
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     
   end subroutine unessential_init
   

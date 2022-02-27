@@ -36,7 +36,7 @@ module derived_quantities
     type(t_grid),  intent(in)    :: grid
     
     ! local variables
-    integer                      :: ji,jk,jl
+    integer :: ji,jk,jl ! loop indices
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
@@ -60,11 +60,11 @@ module derived_quantities
     integer, intent(in)        :: ji,jk,jl
     
     ! output
-    real(wp)                   :: spec_heat_cap_diagnostics_v
+    real(wp) :: spec_heat_cap_diagnostics_v
     
     ! local variables
-    integer                    :: no_of_relevant_constituents,j_constituent
-    real(wp)                   :: rho_g
+    integer  :: no_of_relevant_constituents,j_constituent
+    real(wp) :: rho_g
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
@@ -93,12 +93,12 @@ module derived_quantities
     integer, intent(in)        :: ji,jk,jl
     
     ! output
-    real(wp)                   :: spec_heat_cap_diagnostics_p
-    integer                    :: no_of_relevant_constituents
+    real(wp) :: spec_heat_cap_diagnostics_p
+    integer  :: no_of_relevant_constituents
     
     ! local variables
-    integer                    :: j_constituent
-    real(wp)                   :: rho_g
+    integer  :: j_constituent
+    real(wp) :: rho_g
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
@@ -128,12 +128,12 @@ module derived_quantities
     integer, intent(in)        :: ji,jk,jl
     
     ! output
-    real(wp)                   :: gas_constant_diagnostics
-    integer                    :: no_of_relevant_constituents
+    real(wp) :: gas_constant_diagnostics
+    integer  :: no_of_relevant_constituents
     
     ! local variables
-    integer                    :: j_constituent
-    real(wp)                   :: rho_g
+    integer  :: j_constituent
+    real(wp) :: rho_g
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
@@ -162,14 +162,13 @@ module derived_quantities
     ! This function calculates the total density of the air at a certain gridpoint.
     
     ! input arguments
-    type(t_state), intent(in) :: state
-    integer, intent(in)       :: ji,jk,jl
-    
+    type(t_state), intent(in) :: state         ! state with which to calculate the result
+    integer, intent(in)       :: ji,jk,jl      ! indices of the gridpoint
     ! output
-    real(wp)                  :: density_total
+    real(wp)                  :: density_total ! the result
     
     ! local variables
-    integer                   :: j_constituent
+    integer :: j_constituent
     
     density_total = 0._wp
     
@@ -184,14 +183,13 @@ module derived_quantities
     ! This function calculates the density of the gas phase at a certain gridpoint.
     
     ! input arguments
-    type(t_state), intent(in) :: state
-    integer, intent(in)       :: ji,jk,jl
-    
+    type(t_state), intent(in) :: state       ! state with which to calculate the result
+    integer, intent(in)       :: ji,jk,jl    ! indices of the gridpoint
     ! output
-    real(wp)                  :: density_gas
+    real(wp)                  :: density_gas ! the result
     
     ! local variables
-    integer                   :: j_constituent
+    integer :: j_constituent
     
     density_gas = 0._wp
     
@@ -206,12 +204,12 @@ module derived_quantities
     ! This function calculates the molecular diffusion coefficient.
   
     ! input arguments
-    real(wp)              :: temperature,density
+    real(wp) :: temperature,density
     ! output
-    real(wp)              :: calc_diffusion_coeff
+    real(wp) :: calc_diffusion_coeff
     
     ! local variables
-    real(wp)              :: particle_radius,particle_mass,thermal_velocity,particle_density,cross_section,mean_free_path
+    real(wp) :: particle_radius,particle_mass,thermal_velocity,particle_density,cross_section,mean_free_path
     
     ! This function calculates the molecular diffusion coefficient according to the kinetic gas theory.
 
