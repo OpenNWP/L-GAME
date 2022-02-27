@@ -41,9 +41,9 @@ module vorticities
       do jk=1,ncols
         do jl=2,nlays
           diag%z_eta_x(ji,jk,jl) = &
-          + grid%dz(ji,jk,jl)*state%wind_w(ji,jk,jl) &
+          grid%dz(ji-1,jk,jl)*state%wind_w(ji-1,jk,jl) &
           - grid%dy(ji,jk,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,jl-1) &
-          - grid%dz(ji-1,jk,jl)*state%wind_w(ji-1,jk,jl) &
+          - grid%dz(ji,jk,jl)*state%wind_w(ji,jk,jl) &
           + grid%dy(ji,jk,jl)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,jl)
         enddo
         ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
