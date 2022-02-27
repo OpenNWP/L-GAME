@@ -51,7 +51,7 @@ module planetary_boundary_layer
     !$OMP w_pert,theta_pert,w_pert_theta_pert_avg)
     do ji=1,nlins
       do jk=1,ncols
-        agl = grid%geo_scal(ji,jk,nlays) - grid%geo_w(ji,jk,nlays+1)
+        agl = grid%z_scalar(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1)
 
         ! wind speed in the lowest layer
         u_lowest_layer = diag%v_squared(ji,jk,nlays)**0.5_wp
@@ -74,7 +74,7 @@ module planetary_boundary_layer
         theta_second_layer = grid%theta_bg(ji,jk,nlays-1) + state%theta_pert(ji,jk,nlays-1)
 
         ! delta z
-        dz = grid%geo_scal(ji,jk,nlays-1) - grid%geo_scal(ji,jk,nlays)
+        dz = grid%z_scalar(ji,jk,nlays-1) - grid%z_scalar(ji,jk,nlays)
 
         ! vertical gradient of theta
         dtheta_dz = (theta_second_layer - theta_lowest_layer)/dz
@@ -106,7 +106,7 @@ module planetary_boundary_layer
       do ji=1,nlins
         do jk=1,ncols
           diag%scalar_flux_resistance(ji,jk) = scalar_flux_resistance(diag%roughness_velocity(ji,jk), &
-          grid%geo_scal(ji+1,jk+1,nlays) - grid%geo_w(ji+1,jk+1,nlays+1), &
+          grid%z_scalar(ji+1,jk+1,nlays) - grid%z_w(ji+1,jk+1,nlays+1), &
           grid%roughness_length(ji,jk),diag%monin_obukhov_length(ji,jk))
         enddo
       enddo

@@ -172,16 +172,16 @@ module column_solvers
           d_vector(jl) = -theta_int_new(jl)**2*(gammaa(jl)+gammaa(jl+1)) &
           +0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)-alpha(jl)+theta_int_new(jl)*(beta(jl+1)-beta(jl))) &
-          - (grid%geo_scal(ji,jk,jl)-grid%geo_scal(ji,jk,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
+          - (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
           *(2._wp/grid%area_z(ji,jk,jl+1)+dtime*state_old%wind_w(ji,jk,jl+1)*0.5_wp &
           *(-1._wp/grid%volume(ji,jk,jl)+1._wp/grid%volume(ji,jk,jl+1)))
           ! right hand side
           r_vector(jl) = -(state_old%wind_w(ji,jk,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
-          (grid%geo_scal(ji,jk,jl)-grid%geo_scal(ji,jk,jl+1)) &
+          (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1)) &
           /(impl_weight*dtime**2*c_p) &
           +theta_int_new(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
           +0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
-          - (grid%geo_scal(ji,jk,jl)-grid%geo_scal(ji,jk,jl+1))/(impl_weight*dtime**2*c_p) &
+          - (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime**2*c_p) &
           *state_old%wind_w(ji,jk,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
         enddo
         
@@ -190,13 +190,13 @@ module column_solvers
           c_vector(jl) = theta_int_new(jl+1)*gammaa(jl+1)*theta_int_new(jl) &
           +0.5_wp*(grid%exner_bg(ji,jk,jl+1)-grid%exner_bg(ji,jk,jl+2)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl)) &
-          - (grid%geo_scal(ji,jk,jl+1)-grid%geo_scal(ji,jk,jl+2))/(impl_weight*dtime*c_p)*0.5_wp &
+          - (grid%z_scalar(ji,jk,jl+1)-grid%z_scalar(ji,jk,jl+2))/(impl_weight*dtime*c_p)*0.5_wp &
           *state_old%wind_w(ji,jk,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))
           ! upper diagonal
           e_vector(jl) = theta_int_new(jl)*gammaa(jl+1)*theta_int_new(jl+1) &
           - 0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl+1)) &
-          +(grid%geo_scal(ji,jk,jl)-grid%geo_scal(ji,jk,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
+          +(grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
           *state_old%wind_w(ji,jk,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
         enddo
 	
@@ -207,12 +207,12 @@ module column_solvers
             heat_flux_density_expl(jl) &
             = -grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)*(state_old%temperature_soil(ji,jk,jl) &
             - state_old%temperature_soil(ji,jk,jl+1)) &
-            /(grid%soil_center(jl) - grid%soil_center(jl+1))
+            /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
           enddo
           heat_flux_density_expl(nsoillays - 1) &
           = -grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)*(state_old%temperature_soil(ji,jk,nsoillays) &
           - grid%t_const_soil(ji,jk)) &
-          /(2*(grid%soil_center(nsoillays - 1) - grid%t_const))
+          /(2*(grid%z_soil_center(nsoillays - 1) - grid%z_t_const))
 
           ! calculating the explicit part of the temperature change
           r_vector(nlays) &
@@ -228,7 +228,7 @@ module column_solvers
           - diag%sfc_lw_out(ji,jk) &
           ! heat conduction from below
           + 0.5_wp*heat_flux_density_expl(1)) &
-          /((grid%soil_interface(1) - grid%soil_interface(2))*grid%sfc_rho_c(ji,jk))*dtime
+          /((grid%z_soil_interface(1) - grid%z_soil_interface(2))*grid%sfc_rho_c(ji,jk))*dtime
 
           ! loop over all soil layers below the first layer
           do jl=1,nsoillays
@@ -239,24 +239,24 @@ module column_solvers
             + 0.5_wp*(-heat_flux_density_expl(jl) &
             ! heat conduction from below
             + heat_flux_density_expl(jl+1)) &
-            /((grid%soil_interface(jl) - grid%soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))*dtime
+            /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))*dtime
           enddo
   
           ! the diagonal component
           do jl=1,nsoillays
             if (jl==1) then
               d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
-              /((grid%soil_interface(jl) - grid%soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
-              *1/(grid%soil_center(jl) - grid%soil_center(jl+1))
+              /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
+              *1/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
             elseif (jl==nsoillays) then
               d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
-              /((grid%soil_interface(jl) - grid%soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
-              *1/(grid%soil_center(jl-1) - grid%soil_center(jl))
+              /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
+              *1/(grid%z_soil_center(jl-1) - grid%z_soil_center(jl))
             else
               d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
-              /((grid%soil_interface(jl) - grid%soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
-              *(1/(grid%soil_center(jl-1) - grid%soil_center(jl)) &
-              + 1/(grid%soil_center(jl) - grid%soil_center(jl+1)))
+              /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
+              *(1/(grid%z_soil_center(jl-1) - grid%z_soil_center(jl)) &
+              + 1/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1)))
             endif
           enddo
           
@@ -265,11 +265,11 @@ module column_solvers
           e_vector(nlays-2) = 0._wp
           do jl=1,nsoillays-1
             c_vector(jl+nlays-1) = -0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
-            /((grid%soil_interface(jl+1) - grid%soil_interface(jl+2))*grid%sfc_rho_c(ji,jk)) &
-            /(grid%soil_center(jl) - grid%soil_center(jl+1))
+            /((grid%z_soil_interface(jl+1) - grid%z_soil_interface(jl+2))*grid%sfc_rho_c(ji,jk)) &
+            /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
             e_vector(jl+nlays-1) = -0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
-            /((grid%soil_interface(jl) - grid%soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
-            /(grid%soil_center(jl) - grid%soil_center(jl+1))
+            /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
+            /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
           enddo
         endif
 		
@@ -278,7 +278,7 @@ module column_solvers
        
         ! Klemp swamp layer
         do jl=1,nlays-1
-          above_damping = grid%geo_w(ji,jk,jl+1)-damping_start_height
+          above_damping = grid%z_w(ji,jk,jl+1)-damping_start_height
           if (above_damping<0._wp .or. .not. lklemp) then
             damping_coeff = 0._wp
           else

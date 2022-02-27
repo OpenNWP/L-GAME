@@ -63,9 +63,9 @@ module set_initial_state
         do ji=1,nlins
           do jk=1,ncols
             do jl=1,nlays
-              diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%geo_scal(ji,jk,jl))
+              diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))
             enddo
-            pres_lowest_layer(ji,jk) = bg_pres(grid%geo_scal(ji,jk,nlays))
+            pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,nlays))
           enddo
         enddo
         !$OMP END DO
@@ -87,24 +87,24 @@ module set_initial_state
           do jk=1,ncols
             ! potential temperature in the lowest layer
             ! calculating delta_z
-            delta_z = grid%geo_scal(ji,jk,nlays-1)-grid%geo_scal(ji,jk,nlays)
+            delta_z = grid%z_scalar(ji,jk,nlays-1)-grid%z_scalar(ji,jk,nlays)
             ! calculating the gravity
-            gravity = (geopot(grid%geo_scal(ji,jk,nlays-1))-geopot(grid%geo_scal(ji,jk,nlays)))/delta_z
+            gravity = (geopot(grid%z_scalar(ji,jk,nlays-1))-geopot(grid%z_scalar(ji,jk,nlays)))/delta_z
             ! result
             state%theta_pert(ji,jk,nlays) &
             ! value at MSL
             = T_0 &
-            + T_0/gravity*n_squared*grid%geo_scal(ji,jk,nlays) &
+            + T_0/gravity*n_squared*grid%z_scalar(ji,jk,nlays) &
             ! substracting the background state
             - grid%theta_bg(ji,jk,nlays)
-            state%exner_pert(ji,jk,nlays)=(exp(-grid%geo_scal(ji,jk,nlays)/8000._wp))**(r_d/c_p) &
+            state%exner_pert(ji,jk,nlays)=(exp(-grid%z_scalar(ji,jk,nlays)/8000._wp))**(r_d/c_p) &
             - grid%exner_bg(ji,jk,nlays)
             ! stacking the potential temperature
             do jl=nlays-1,1,-1
               ! calculating delta_z
-              delta_z = grid%geo_scal(ji,jk,jl)-grid%geo_scal(ji,jk,jl+1)
+              delta_z = grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1)
               ! calculating the gravity
-              gravity = (geopot(grid%geo_scal(ji,jk,jl))-geopot(grid%geo_scal(ji,jk,jl+1)))/delta_z
+              gravity = (geopot(grid%z_scalar(ji,jk,jl))-geopot(grid%z_scalar(ji,jk,jl+1)))/delta_z
               ! result
               state%theta_pert(ji,jk,jl) &
               ! value in the lower layer
@@ -243,10 +243,10 @@ module set_initial_state
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
-            b = -0.5_wp*state%exner_pert(ji,jk,jl+1)/bg_temp(grid%geo_scal(ji,jk,jl+1)) &
-            *(temperature - bg_temp(grid%geo_scal(ji,jk,jl+1)) + 2.0_wp/ &
-            c_p*(geopot(grid%geo_scal(ji,jk,jl)) - geopot(grid%geo_scal(ji,jk,jl+1))))
-            c = state%exner_pert(ji,jk,jl+1)**2*temperature/bg_temp(grid%geo_scal(ji,jk,jl+1))
+            b = -0.5_wp*state%exner_pert(ji,jk,jl+1)/bg_temp(grid%z_scalar(ji,jk,jl+1)) &
+            *(temperature - bg_temp(grid%z_scalar(ji,jk,jl+1)) + 2.0_wp/ &
+            c_p*(geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1))))
+            c = state%exner_pert(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_scalar(ji,jk,jl+1))
             state%exner_pert(ji,jk,jl) = b+sqrt(b**2+c)
             state%theta_pert(ji,jk,jl) = temperature/state%exner_pert(ji,jk,jl)
           endif

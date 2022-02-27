@@ -96,47 +96,47 @@ module vorticities
         ! layers which follow the orography
         do jl=nlays-nlays_oro+1,nlays
           ! first
-          l_rescale = (re + grid%geo_area_dual_z(ji,jk,jl))/(re + grid%geo_v(ji,jk,jl))
-          delta_z = grid%geo_area_dual_z(ji,jk,jl) - grid%geo_v(ji,jk,jl)
+          l_rescale = (re + grid%z_area_dual_z(ji,jk,jl))/(re + grid%z_v(ji,jk,jl))
+          delta_z = grid%z_area_dual_z(ji,jk,jl) - grid%z_v(ji,jk,jl)
           ind_shift = 1
           if (delta_z>0._wp .or. jl==nlays) then
             ind_shift = -1
           endif
           vertical_gradient = (state%wind_v(ji,jk,jl) - state%wind_v(ji,jk,jl+ind_shift))/ &
-          (grid%geo_v(ji,jk,jl) - grid%geo_v(ji,jk,jl+ind_shift))
+          (grid%z_v(ji,jk,jl) - grid%z_v(ji,jk,jl+ind_shift))
           diag%eta_z(ji,jk,jl) = l_rescale*grid%dy(ji,jk,jl)* &
           (state%wind_v(ji,jk,jl) + delta_z*vertical_gradient)
           ! second
-          l_rescale = (re + grid%geo_area_dual_z(ji-1,jk,jl))/(re + grid%geo_u(ji-1,jk,jl))
-          delta_z = grid%geo_area_dual_z(ji-1,jk,jl) - grid%geo_u(ji-1,jk,jl)
+          l_rescale = (re + grid%z_area_dual_z(ji-1,jk,jl))/(re + grid%z_u(ji-1,jk,jl))
+          delta_z = grid%z_area_dual_z(ji-1,jk,jl) - grid%z_u(ji-1,jk,jl)
           ind_shift = 1
           if (delta_z>0._wp .or. jl==nlays) then
             ind_shift = -1
           endif
           vertical_gradient = (state%wind_u(ji-1,jk,jl) - state%wind_u(ji-1,jk,jl+ind_shift))/ &
-          (grid%geo_u(ji-1,jk,jl) - grid%geo_u(ji-1,jk,jl+ind_shift))
+          (grid%z_u(ji-1,jk,jl) - grid%z_u(ji-1,jk,jl+ind_shift))
           diag%eta_z(ji,jk,jl) = diag%eta_z(ji,jk,jl) - l_rescale*grid%dx(ji-1,jk,jl)* &
           (state%wind_u(ji-1,jk,jl) + delta_z*vertical_gradient)
           ! third
-          l_rescale = (re + grid%geo_area_dual_z(ji,jk-1,jl))/(re + grid%geo_v(ji,jk-1,jl))
-          delta_z = grid%geo_area_dual_z(ji,jk-1,jl) - grid%geo_v(ji,jk-1,jl)
+          l_rescale = (re + grid%z_area_dual_z(ji,jk-1,jl))/(re + grid%z_v(ji,jk-1,jl))
+          delta_z = grid%z_area_dual_z(ji,jk-1,jl) - grid%z_v(ji,jk-1,jl)
           ind_shift = 1
           if (delta_z>0._wp .or. jl==nlays) then
             ind_shift = -1
           endif
           vertical_gradient = (state%wind_v(ji,jk-1,jl) - state%wind_v(ji,jk-1,jl+ind_shift))/ &
-          (grid%geo_v(ji,jk-1,jl) - grid%geo_v(ji,jk-1,jl+ind_shift))
+          (grid%z_v(ji,jk-1,jl) - grid%z_v(ji,jk-1,jl+ind_shift))
           diag%eta_z(ji,jk,jl) = diag%eta_z(ji,jk,jl) - l_rescale*grid%dy(ji,jk-1,jl)* &
           (state%wind_v(ji,jk-1,jl) + delta_z*vertical_gradient)
           ! fourth
-          l_rescale = (re + grid%geo_area_dual_z(ji,jk,jl))/(re + grid%geo_u(ji,jk,jl))
-          delta_z = grid%geo_area_dual_z(ji,jk,jl) - grid%geo_u(ji,jk,jl)
+          l_rescale = (re + grid%z_area_dual_z(ji,jk,jl))/(re + grid%z_u(ji,jk,jl))
+          delta_z = grid%z_area_dual_z(ji,jk,jl) - grid%z_u(ji,jk,jl)
           ind_shift = 1
           if (delta_z>0._wp .or. jl==nlays) then
             ind_shift = -1
           endif
           vertical_gradient = (state%wind_u(ji,jk,jl) - state%wind_u(ji,jk,jl+ind_shift))/ &
-          (grid%geo_u(ji,jk,jl) - grid%geo_u(ji,jk,jl+ind_shift))
+          (grid%z_u(ji,jk,jl) - grid%z_u(ji,jk,jl+ind_shift))
           diag%eta_z(ji,jk,jl) = diag%eta_z(ji,jk,jl) + l_rescale*grid%dx(ji,jk,jl)* &
           (state%wind_u(ji,jk,jl) + delta_z*vertical_gradient)
         enddo
@@ -200,26 +200,26 @@ module vorticities
           if (jl==1) then
             diag%eta_x(ji,jk,jl) = diag%eta_x(ji,jk,jl)/(0.5_wp*(state%rho(ji-1,jk,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
-            +(toa-grid%geo_scal(ji-1,jk,jl))*(state%rho(ji-1,jk,jl,no_of_condensed_constituents+1) &
+            +(toa-grid%z_scalar(ji-1,jk,jl))*(state%rho(ji-1,jk,jl,no_of_condensed_constituents+1) &
             -state%rho(ji-1,jk,jl+1,no_of_condensed_constituents+1))/ &
-            (grid%geo_scal(ji-1,jk,jl)-grid%geo_scal(ji-1,jk,jl+1)) &
+            (grid%z_scalar(ji-1,jk,jl)-grid%z_scalar(ji-1,jk,jl+1)) &
             +state%rho(ji,jk,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
-            +(toa-grid%geo_scal(ji,jk,jl))*(state%rho(ji,jk,jl,no_of_condensed_constituents+1) &
+            +(toa-grid%z_scalar(ji,jk,jl))*(state%rho(ji,jk,jl,no_of_condensed_constituents+1) &
             -state%rho(ji,jk,jl+1,no_of_condensed_constituents+1))/ &
-            (grid%geo_scal(ji,jk,jl)-grid%geo_scal(ji,jk,jl+1))))
+            (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))))
           elseif (jl==nlays+1) then
             diag%eta_x(ji,jk,jl) = diag%eta_x(ji,jk,jl)/(0.5_wp*(state%rho(ji-1,jk,jl-1,no_of_condensed_constituents+1) &
             ! linear extrapolation to the surface
-            +(grid%geo_w(ji-1,jk,jl)-grid%geo_scal(ji-1,jk,jl-1))*(state%rho(ji-1,jk,jl-2,no_of_condensed_constituents+1) &
+            +(grid%z_w(ji-1,jk,jl)-grid%z_scalar(ji-1,jk,jl-1))*(state%rho(ji-1,jk,jl-2,no_of_condensed_constituents+1) &
             -state%rho(ji-1,jk,jl-1,no_of_condensed_constituents+1))/ &
-            (grid%geo_scal(ji-1,jk,jl-2)-grid%geo_scal(ji-1,jk,jl-1)) &
+            (grid%z_scalar(ji-1,jk,jl-2)-grid%z_scalar(ji-1,jk,jl-1)) &
             +state%rho(ji,jk,jl-1,no_of_condensed_constituents+1) &
             ! linear extrapolation to the surface
-            +(grid%geo_w(ji,jk,jl)-grid%geo_scal(ji,jk,jl-1)) &
+            +(grid%z_w(ji,jk,jl)-grid%z_scalar(ji,jk,jl-1)) &
             *(state%rho(ji,jk,jl-2,no_of_condensed_constituents+1) &
             -state%rho(ji,jk,jl-1,no_of_condensed_constituents+1))/ &
-            (grid%geo_scal(ji,jk,jl-2)-grid%geo_scal(ji,jk,jl-1))))
+            (grid%z_scalar(ji,jk,jl-2)-grid%z_scalar(ji,jk,jl-1))))
           else
             diag%eta_x(ji,jk,jl) = diag%eta_x(ji,jk,jl)/(0.25_wp*(state%rho(ji-1,jk,jl-1,no_of_condensed_constituents+1) &
             +state%rho(ji,jk,jl-1,no_of_condensed_constituents+1)+ &
@@ -240,26 +240,26 @@ module vorticities
           if (jl == 1) then
             diag%eta_y(ji,jk,jl) = diag%eta_y(ji,jk,jl)/(0.5_wp*(state%rho(ji,jk-1,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
-            +(toa-grid%geo_scal(ji,jk-1,jl))*(state%rho(ji,jk-1,jl,no_of_condensed_constituents+1) &
+            +(toa-grid%z_scalar(ji,jk-1,jl))*(state%rho(ji,jk-1,jl,no_of_condensed_constituents+1) &
             -state%rho(ji,jk-1,jl+1,no_of_condensed_constituents+1))/ &
-            (grid%geo_scal(ji,jk-1,jl)-grid%geo_scal(ji,jk-1,jl+1)) &
+            (grid%z_scalar(ji,jk-1,jl)-grid%z_scalar(ji,jk-1,jl+1)) &
             +state%rho(ji,jk,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
-            +(toa-grid%geo_scal(ji,jk,jl))*(state%rho(ji,jk,jl,no_of_condensed_constituents+1) &
+            +(toa-grid%z_scalar(ji,jk,jl))*(state%rho(ji,jk,jl,no_of_condensed_constituents+1) &
             -state%rho(ji,jk,jl+1,no_of_condensed_constituents+1))/ &
-            (grid%geo_scal(ji,jk,jl)-grid%geo_scal(ji,jk,jl+1))))
+            (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))))
           elseif (jl==nlays+1) then
             diag%eta_y(ji,jk,jl) = diag%eta_y(ji,jk,jl)/(0.5_wp*(state%rho(ji,jk-1,jl-1,no_of_condensed_constituents+1) &
             ! linear extrapolation to the surface
-            +(grid%geo_w(ji,jk-1,jl)-grid%geo_scal(ji,jk-1,jl-1))*(state%rho(ji,jk-1,jl-2,no_of_condensed_constituents+1) &
+            +(grid%z_w(ji,jk-1,jl)-grid%z_scalar(ji,jk-1,jl-1))*(state%rho(ji,jk-1,jl-2,no_of_condensed_constituents+1) &
             -state%rho(ji,jk-1,jl-1,no_of_condensed_constituents+1))/ &
-            (grid%geo_scal(ji,jk-1,jl-2)-grid%geo_scal(ji,jk-1,jl-1)) &
+            (grid%z_scalar(ji,jk-1,jl-2)-grid%z_scalar(ji,jk-1,jl-1)) &
             +state%rho(ji,jk,jl-1,no_of_condensed_constituents+1) &
             ! linear extrapolation to the surface
-            +(grid%geo_w(ji,jk,jl)-grid%geo_scal(ji,jk,jl-1)) &
+            +(grid%z_w(ji,jk,jl)-grid%z_scalar(ji,jk,jl-1)) &
             *(state%rho(ji,jk,jl-2,no_of_condensed_constituents+1) &
             -state%rho(ji,jk,jl-1,no_of_condensed_constituents+1))/ &
-            (grid%geo_scal(ji,jk,jl-2)-grid%geo_scal(ji,jk,jl-1))))
+            (grid%z_scalar(ji,jk,jl-2)-grid%z_scalar(ji,jk,jl-1))))
           else
             diag%eta_y(ji,jk,jl) = diag%eta_y(ji,jk,jl)/(0.25_wp*(state%rho(ji,jk-1,jl-1,no_of_condensed_constituents+1) &
             +state%rho(ji,jk,jl-1,no_of_condensed_constituents+1)+ &

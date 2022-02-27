@@ -228,7 +228,7 @@ module phase_trans
           - state%rho(ji+1,jk+1,jl,6)
 
           ! the thickness of the lowest model layer (we need it as a result of Guass' theorem)
-          layer_thickness = grid%geo_w(ji,jk,nlays) - grid%geo_w(ji,jk,nlays+1)
+          layer_thickness = grid%z_w(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1)
 
           ! evporation,sublimation
           irrev%mass_source_rates(ji,jk,jl,5) = irrev%mass_source_rates(ji,jk,jl,5) &

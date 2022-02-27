@@ -152,7 +152,7 @@ module write_out
     ! longitude coordinates of the grid points
     call nc_check(nf90_put_var(ncid,varid_lon,grid%lon_scalar(:)))
     ! z coordinates of the grid points
-    call nc_check(nf90_put_var(ncid,varid_z,grid%geo_scal))
+    call nc_check(nf90_put_var(ncid,varid_z,grid%z_scalar))
     
     ! writing the data to the output file
     ! 3D mass densities
@@ -187,9 +187,8 @@ module write_out
     !$OMP PARALLEL
     !$OMP DO PRIVATE(jl,upper_weight)
     do jl=1,nlays
-      upper_weight = (grid%geo_scal(:,:,jl) -&
-      grid%geo_w(:,:,jl+1))/(grid%geo_w(:,:,jl)  &
-      - grid%geo_w(:,:,jl+1))
+      upper_weight = (grid%z_scalar(:,:,jl) -&
+      grid%z_w(:,:,jl+1))/(grid%z_w(:,:,jl) - grid%z_w(:,:,jl+1))
       diag%scalar_placeholder(:,:,jl) = &
       upper_weight*state%wind_w(:,:,jl)+(1._wp-upper_weight)*state%wind_w(:,:,jl+1)
     enddo
