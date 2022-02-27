@@ -19,7 +19,7 @@ module definitions
   
   ! setting the floating point precision
   ! single precision
-  integer, parameter :: ps =  6
+  integer, parameter :: ps = 6
   integer, parameter :: rs = 37
   
   ! double precision
