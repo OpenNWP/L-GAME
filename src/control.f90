@@ -27,18 +27,18 @@ program control
   implicit none
 
   ! local variables
-  integer            :: timestep_counter                ! counter of the timestep
-  real(wp)           :: t_0,run_span,t_write            ! time information
-  type(t_grid)       :: grid                            ! grid properties
-  type(t_state)      :: state_old,state_new,state_write ! states at different time steps
-  type(t_diag)       :: diag                            ! diagnostic quantities
-  type(t_tend)       :: tend                            ! state containing the tendency
-  type(t_bc)         :: bc                              ! boundary conditions
-  type(t_irrev)      :: irrev                           ! irreversible quantities
-  real(wp)           :: normal_dist_min_vert            ! minimum vertical gridpoint distance
-  logical            :: lrad_update                     ! radiation update switch
-  real(wp)           :: t_rad_update                    ! radiation update time
-  character(len=82)  :: stars                           ! character containing stars
+  integer           :: timestep_counter                ! counter of the timestep
+  real(wp)          :: t_0,run_span,t_write            ! time information
+  type(t_grid)      :: grid                            ! grid properties
+  type(t_state)     :: state_old,state_new,state_write ! states at different time steps
+  type(t_diag)      :: diag                            ! diagnostic quantities
+  type(t_tend)      :: tend                            ! state containing the tendency
+  type(t_bc)        :: bc                              ! boundary conditions
+  type(t_irrev)     :: irrev                           ! irreversible quantities
+  real(wp)          :: normal_dist_min_vert            ! minimum vertical gridpoint distance
+  logical           :: lrad_update                     ! radiation update switch
+  real(wp)          :: t_rad_update                    ! radiation update time
+  character(len=82) :: stars                           ! character containing stars
 
   stars = "**********************************************************************************"
   write(*,*) stars
