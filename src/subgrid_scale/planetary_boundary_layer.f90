@@ -209,13 +209,15 @@ module planetary_boundary_layer
 
     ! This function returns the roughness velocity.
 
-    ! input variable
-    real(wp), intent(in) :: wind_speed,z_agl,roughness_length_value
+    ! input variables
+    real(wp), intent(in) :: wind_speed
+    real(wp), intent(in) :: z_agl
+    real(wp), intent(in) :: roughness_length_value
     ! output variable
     real(wp)             :: roughness_velocity
 
     ! local variables
-    real(wp)             :: denominator
+    real(wp) :: denominator
 
     denominator = log(z_agl/roughness_length_value)
 
@@ -232,28 +234,26 @@ module planetary_boundary_layer
 
   function psi_h(z_eff,l)
 
-    !This is a helper function for the correction to the surface scalar flux resistance for non-neutral conditions.
+    ! This is a helper function for the correction to the surface scalar flux resistance for non-neutral conditions.
 
-    ! input variable
-    real(wp), intent(in) :: z_eff,l
+    ! input variables
+    real(wp), intent(in) :: z_eff ! effective height above the surface
+    real(wp), intent(in) :: l     ! Monin-Obukhov length
     ! output variable
     real(wp)             :: psi_h
 
     ! local variables
-    real(wp)             :: x,l_local
-
-    ! z_eff: effective height above the surface
-    ! l: Monin-Obukhov length
-
-    ! avoiding l == 0
+    real(wp) :: x       ! helper variable
+    real(wp) :: l_local ! used to avoid l==0
+    
+    ! avoiding l==0
     l_local = l
     if (abs(l_local) < EPSILON_SECURITY) then
       l_local = EPSILON_SECURITY
     endif
 
     ! unstable conditions
-    if (l_local < 0._wp) then
-      ! helper variable
+    if (l_local<0._wp) then
       x = (1._wp - 15._wp*z_eff/l_local)**0.25_wp
       psi_h = 2._wp*log((1._wp + x**2)/2._wp)     
     ! neutral and stable conditions
@@ -267,16 +267,15 @@ module planetary_boundary_layer
 
     ! This is a helper function for the correction to the surface momentum flux resistance for non-neutral conditions.
 
-    ! input variable
-    real(wp), intent(in) :: z_eff,l
+    ! input variables
+    real(wp), intent(in) :: z_eff ! effective height above the surface
+    real(wp), intent(in) :: l     ! Monin-Obukhov length
     ! output variable
     real(wp)             :: psi_m
 
     ! local variables
-    real(wp)             :: x,l_local
-
-    ! z_eff: effective height above the surface
-    ! l: Monin-Obukhov length
+    real(wp) :: x       ! helper variable
+    real(wp) :: l_local ! used to avoid l==0
 
     ! avoiding l == 0
     l_local = l
@@ -285,8 +284,7 @@ module planetary_boundary_layer
     endif
 
     ! unstable conditions
-    if (l_local < 0._wp) then
-      ! helper variable
+    if (l_local<0._wp) then
       x = (1._wp - 15._wp*z_eff/l_local)**0.25_wp
 
       psi_m = 2.0_wp*log((1._wp + x)/2._wp) + log((1._wp + x**2)/2._wp) - 2._wp*atan(x) + M_PI/2._wp
