@@ -390,7 +390,7 @@ module grid_generator
         do jl=1,nlays
           grid%geo_area_dual_z(ji,jk,jl) = 0.25_wp*(grid%geo_scal(ji,jk,jl)+grid%geo_scal(ji+1,jk,jl) &
           +grid%geo_scal(ji+1,jk+1,jl)+grid%geo_scal(ji,jk+1,jl))
-          grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji) - 0.5_wp*dlat,dlon,dlat) &
+          grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji) + 0.5_wp*dlat,dlon,dlat) &
           *(re + grid%geo_area_dual_z(ji,jk,jl))**2/re**2
         enddo
       enddo
@@ -554,7 +554,7 @@ module grid_generator
         do jl=nlays,1,-1
           temperature = bg_temp(grid%geo_scal(ji,jk,jl))
           ! lowest layer
-          if (jl == nlays) then
+          if (jl==nlays) then
             pressure = bg_pres(grid%geo_scal(ji,jk,jl))
             grid%exner_bg(ji,jk,jl) = (pressure/p_0)**(specific_gas_constants(0)/spec_heat_capacities_p_gas(0))
             grid%theta_bg(ji,jk,jl) = temperature/grid%exner_bg(ji,jk,jl)
@@ -585,9 +585,8 @@ module grid_generator
     real(wp) :: center_lat  ! latitude at the center of the patch
     real(wp) :: dx_as_angle ! delta x as angle
     real(wp) :: dy_as_angle ! delta y as angle
-    
     ! output
-    real(wp) :: patch_area ! the result
+    real(wp) :: patch_area  ! the result
   
     ! computing the result
     patch_area = re**2*dx_as_angle*(sin(center_lat + 0.5_wp*dy_as_angle) - sin(center_lat - 0.5_wp*dy_as_angle))
@@ -599,10 +598,9 @@ module grid_generator
     ! This function calculates the area of a vertical face.
     
     ! input
-    real(wp) :: lower_z      ! geometric height of the lower boundary of the face
-    real(wp) :: upper_z      ! geometric height of the upper boundary of the face
-    real(wp) :: lower_length ! length of the lower boundary of the face
-    
+    real(wp) :: lower_z            ! geometric height of the lower boundary of the face
+    real(wp) :: upper_z            ! geometric height of the upper boundary of the face
+    real(wp) :: lower_length       ! length of the lower boundary of the face
     ! output
     real(wp) :: vertical_face_area ! the result
     
