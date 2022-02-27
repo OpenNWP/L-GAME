@@ -43,11 +43,11 @@ module boundaries
     
     ! local variables
     real(wp) :: dist_from_boundary ! index distance from the boundaary of the domain
-    integer  :: ji,jk,jl           ! loop indices
+    integer  :: ji,jk              ! loop indices
     
     ! rescale factor for scalar fields
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins
       do jk=1,ncols
         dist_from_boundary = min(ji-1,jk-1,nlins-ji,ncols-jk)
@@ -59,7 +59,7 @@ module boundaries
     
     ! u rescale factor
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins
       do jk=1,ncols+1
         dist_from_boundary = min(ji-1,jk-1,nlins-ji,ncols+1-jk)
@@ -71,7 +71,7 @@ module boundaries
     
     ! v rescale factor
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins+1
       do jk=1,ncols
         dist_from_boundary = min(ji-1,jk-1,nlins+1-ji,ncols-jk)
