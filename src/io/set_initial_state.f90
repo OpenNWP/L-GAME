@@ -63,9 +63,9 @@ module set_initial_state
         do ji=1,nlins
           do jk=1,ncols
             do jl=1,nlays
-              diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_geo_scal(ji,jk,jl))
+              diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%geo_scal(ji,jk,jl))
             enddo
-            pres_lowest_layer(ji,jk) = bg_pres(grid%z_geo_scal(ji,jk,nlays))
+            pres_lowest_layer(ji,jk) = bg_pres(grid%geo_scal(ji,jk,nlays))
           enddo
         enddo
         !$OMP END DO
@@ -87,24 +87,24 @@ module set_initial_state
           do jk=1,ncols
             ! potential temperature in the lowest layer
             ! calculating delta_z
-            delta_z = grid%z_geo_scal(ji,jk,nlays-1)-grid%z_geo_scal(ji,jk,nlays)
+            delta_z = grid%geo_scal(ji,jk,nlays-1)-grid%geo_scal(ji,jk,nlays)
             ! calculating the gravity
-            gravity = (geopot(grid%z_geo_scal(ji,jk,nlays-1))-geopot(grid%z_geo_scal(ji,jk,nlays)))/delta_z
+            gravity = (geopot(grid%geo_scal(ji,jk,nlays-1))-geopot(grid%geo_scal(ji,jk,nlays)))/delta_z
             ! result
             state%theta_pert(ji,jk,nlays) &
             ! value at MSL
             = T_0 &
-            + T_0/gravity*n_squared*grid%z_geo_scal(ji,jk,nlays) &
+            + T_0/gravity*n_squared*grid%geo_scal(ji,jk,nlays) &
             ! substracting the background state
             - grid%theta_bg(ji,jk,nlays)
-            state%exner_pert(ji,jk,nlays)=(exp(-grid%z_geo_scal(ji,jk,nlays)/8000._wp))**(r_d/c_p) &
+            state%exner_pert(ji,jk,nlays)=(exp(-grid%geo_scal(ji,jk,nlays)/8000._wp))**(r_d/c_p) &
             - grid%exner_bg(ji,jk,nlays)
             ! stacking the potential temperature
             do jl=nlays-1,1,-1
               ! calculating delta_z
-              delta_z = grid%z_geo_scal(ji,jk,jl)-grid%z_geo_scal(ji,jk,jl+1)
+              delta_z = grid%geo_scal(ji,jk,jl)-grid%geo_scal(ji,jk,jl+1)
               ! calculating the gravity
-              gravity = (geopot(grid%z_geo_scal(ji,jk,jl))-geopot(grid%z_geo_scal(ji,jk,jl+1)))/delta_z
+              gravity = (geopot(grid%geo_scal(ji,jk,jl))-geopot(grid%geo_scal(ji,jk,jl+1)))/delta_z
               ! result
               state%theta_pert(ji,jk,jl) &
               ! value in the lower layer
@@ -243,10 +243,10 @@ module set_initial_state
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
-            b = -0.5_wp*state%exner_pert(ji,jk,jl+1)/bg_temp(grid%z_geo_scal(ji,jk,jl+1)) &
-            *(temperature - bg_temp(grid%z_geo_scal(ji,jk,jl+1)) + 2.0_wp/ &
-            c_p*(geopot(grid%z_geo_scal(ji,jk,jl)) - geopot(grid%z_geo_scal(ji,jk,jl+1))))
-            c = state%exner_pert(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_geo_scal(ji,jk,jl+1))
+            b = -0.5_wp*state%exner_pert(ji,jk,jl+1)/bg_temp(grid%geo_scal(ji,jk,jl+1)) &
+            *(temperature - bg_temp(grid%geo_scal(ji,jk,jl+1)) + 2.0_wp/ &
+            c_p*(geopot(grid%geo_scal(ji,jk,jl)) - geopot(grid%geo_scal(ji,jk,jl+1))))
+            c = state%exner_pert(ji,jk,jl+1)**2*temperature/bg_temp(grid%geo_scal(ji,jk,jl+1))
             state%exner_pert(ji,jk,jl) = b+sqrt(b**2+c)
             state%theta_pert(ji,jk,jl) = temperature/state%exner_pert(ji,jk,jl)
           endif
@@ -271,40 +271,40 @@ module set_initial_state
     
   end subroutine unessential_init
   
-  function bg_temp(z_height)
+  function bg_temp(height)
   
     ! This function returns the temperature of the background state.
     
-    real(wp), intent(in) :: z_height
+    real(wp), intent(in) :: height
     ! output
     real(wp)             :: bg_temp
 
     ! troposphere
-    if (z_height < tropo_height) then  
-      bg_temp = surface_temp - lapse_rate*z_height
+    if (height < tropo_height) then  
+      bg_temp = surface_temp - lapse_rate*height
     ! constant temperature layer
-    elseif (z_height < inv_height) then
+    elseif (height < inv_height) then
       bg_temp = surface_temp - lapse_rate*tropo_height
     ! inversion
     else
-      bg_temp = surface_temp - lapse_rate*tropo_height + t_grad_inv*(z_height - inv_height)
+      bg_temp = surface_temp - lapse_rate*tropo_height + t_grad_inv*(height - inv_height)
     endif
   
   end function bg_temp
 
-  function bg_pres(z_height)
+  function bg_pres(height)
   
     ! This function returns the pressure of the background state (only used in the lowest layer during the initialization).
     
-    real(wp), intent(in) :: z_height
+    real(wp), intent(in) :: height
     ! output
     real(wp)             :: bg_pres
 
-    if (z_height<inv_height) then  
-      bg_pres = p_0_standard*(1 - lapse_rate*z_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate))
-    elseif (z_height < tropo_height) then
+    if (height<inv_height) then  
+      bg_pres = p_0_standard*(1 - lapse_rate*height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate))
+    elseif (height < tropo_height) then
       bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate)) &
-      *exp(-gravity*(z_height - tropo_height)/(specific_gas_constants(0)*(surface_temp - lapse_rate*tropo_height)))
+      *exp(-gravity*(height - tropo_height)/(specific_gas_constants(0)*(surface_temp - lapse_rate*tropo_height)))
     else
       write(*,*) "Argument of bg_pres is above the inversion height. This is unrealistic in the lowest layer."
       write(*,*) "Aborting."
@@ -313,16 +313,16 @@ module set_initial_state
   
   end function bg_pres
   
-  function geopot(z_height)
+  function geopot(height)
   
     ! This function returns the geopotential as a function of the geometrical height.
   
     ! input
-    real(wp), intent(in) :: z_height
+    real(wp), intent(in) :: height
     ! output
     real(wp)             :: geopot
     
-    geopot = -gravity*re**2/(re+z_height)+gravity*re
+    geopot = -gravity*re**2/(re+height)+gravity*re
   
   end function geopot
   

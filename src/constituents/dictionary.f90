@@ -126,23 +126,23 @@ module dictionary
     
   end function phase_trans_heat
   
-  real(wp) function calc_o3_vmr(z_height)
+  real(wp) function calc_o3_vmr(height)
 
     ! This function calculates the ozone VMR as a function of height.
     ! assumes a Gaussian distribution
     
-    real(wp)                          :: z_height            ! height above MSL
+    real(wp)                          :: height            ! height above MSL
     
     ! local variables
     real(wp)                          :: fwhm = 20e3_wp      ! full width at half maximum
-    real(wp)                          :: z_max = 34e3_wp     ! height of the maximum of the distribution
+    real(wp)                          :: max = 34e3_wp     ! height of the maximum of the distribution
     real(wp)                          :: max_vmr = 8.5e-6_wp ! maximum volume mixing ratio
     real(wp)                          :: sigma               ! standard deviation
     real(wp)                          :: distance            ! distance from the maximum
     
     ! calculation of the result
     sigma = fwhm/(8*log(2._wp))**0.5_wp
-    distance = z_height - z_max
+    distance = height - max
     calc_o3_vmr = max_vmr*exp(-distance**2/(2*sigma**2))
     
   end function calc_o3_vmr

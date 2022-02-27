@@ -43,7 +43,7 @@ module read_write_grid
     integer           :: varid_lon_u            ! variable ID of the longitudes of the u-vectors
     integer           :: varid_lat_v            ! variable ID of the latitudes of the v-vectors
     integer           :: varid_lon_v            ! variable ID of the longitudes of the v-vectors
-    integer           :: varid_z_geo_w          ! variable ID of the orography
+    integer           :: varid_geo_w          ! variable ID of the orography
     integer           :: varid_sfc_rho_c        ! variable ID of the volumetric specific heat conductivity of the soil
     integer           :: varid_t_conduc_soil    ! variable ID of the temperature conductivity of the soil
     integer           :: varid_is_land          ! variable ID of the land-sea-mask
@@ -98,9 +98,9 @@ module read_write_grid
     call nc_check(nf90_put_att(ncid,varid_lon_v,"Description","longitude of v-vectors"))
     call nc_check(nf90_put_att(ncid,varid_lon_v,"Unit","radians"))
     
-    call nc_check(nf90_def_var(ncid,"oro",NF90_REAL,dimids,varid_z_geo_w))
-    call nc_check(nf90_put_att(ncid,varid_z_geo_w,"Description","orography"))
-    call nc_check(nf90_put_att(ncid,varid_z_geo_w,"Unit","m"))
+    call nc_check(nf90_def_var(ncid,"oro",NF90_REAL,dimids,varid_geo_w))
+    call nc_check(nf90_put_att(ncid,varid_geo_w,"Description","orography"))
+    call nc_check(nf90_put_att(ncid,varid_geo_w,"Unit","m"))
     
     call nc_check(nf90_def_var(ncid,"sfc_rho_c",NF90_REAL,dimids,varid_sfc_rho_c))
     call nc_check(nf90_put_att(ncid,varid_sfc_rho_c,"Description","volumetric specific heat conductivity of the soil"))
@@ -140,7 +140,7 @@ module read_write_grid
     call nc_check(nf90_put_var(ncid,varid_lon_u,grid%lon_geo_u))
     call nc_check(nf90_put_var(ncid,varid_lat_v,grid%lat_geo_v))
     call nc_check(nf90_put_var(ncid,varid_lon_v,grid%lon_geo_v))
-    call nc_check(nf90_put_var(ncid,varid_z_geo_w,grid%z_geo_w(:,:,nlays+1)))
+    call nc_check(nf90_put_var(ncid,varid_geo_w,grid%geo_w(:,:,nlays+1)))
     call nc_check(nf90_put_var(ncid,varid_sfc_rho_c,grid%sfc_rho_c))
     call nc_check(nf90_put_var(ncid,varid_t_conduc_soil,grid%t_conduc_soil))
     call nc_check(nf90_put_var(ncid,varid_is_land,grid%is_land))
@@ -164,7 +164,7 @@ module read_write_grid
     ! local variables
     integer           :: ncid                ! ID of the NetCDF file
     character(len=64) :: filename            ! output filename
-    integer           :: varid_z_geo_w       ! variable ID of the orography
+    integer           :: varid_geo_w       ! variable ID of the orography
     integer           :: varid_sfc_rho_c     ! variable ID of the volumetric specific heat conductivity of the soil
     integer           :: varid_t_conduc_soil ! variable ID of the temperature conductivity of the soil
     integer           :: varid_is_land       ! variable ID of the land-sea-mask
@@ -177,14 +177,14 @@ module read_write_grid
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
-    call nc_check(nf90_inq_varid(ncid,"oro",varid_z_geo_w))
+    call nc_check(nf90_inq_varid(ncid,"oro",varid_geo_w))
     call nc_check(nf90_inq_varid(ncid,"sfc_rho_c",varid_sfc_rho_c))
     call nc_check(nf90_inq_varid(ncid,"t_conduc_soil",varid_t_conduc_soil))
     call nc_check(nf90_inq_varid(ncid,"is_land",varid_is_land))
     call nc_check(nf90_inq_varid(ncid,"sfc_albedo",varid_sfc_albedo))
     
     ! reading the arrays
-    call nc_check(nf90_get_var(ncid,varid_z_geo_w,grid%z_geo_w(:,:,nlays+1)))
+    call nc_check(nf90_get_var(ncid,varid_geo_w,grid%geo_w(:,:,nlays+1)))
     call nc_check(nf90_get_var(ncid,varid_sfc_rho_c,grid%sfc_rho_c))
     call nc_check(nf90_get_var(ncid,varid_t_conduc_soil,grid%t_conduc_soil))
     call nc_check(nf90_get_var(ncid,varid_is_land,grid%is_land))

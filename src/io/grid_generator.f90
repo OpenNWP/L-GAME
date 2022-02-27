@@ -54,8 +54,8 @@ module grid_generator
     real(wp) :: A                              ! variable for calculating the vertical grid
     real(wp) :: B                              ! variable for calculating the vertical grid
     real(wp) :: sigma_z                        ! variable for calculating the vertical grid
-    real(wp) :: z_rel                          ! variable for calculating the vertical grid
-    real(wp) :: z_vertical_vector_pre(nlays+1) ! variable for calculating the vertical grid
+    real(wp) :: rel                          ! variable for calculating the vertical grid
+    real(wp) :: vertical_vector_pre(nlays+1) ! variable for calculating the vertical grid
     real(wp) :: base_area                      ! variable for calculating the vertical grid
     real(wp) :: lower_z,upper_z,lower_length   ! variables needed for area calculations
     real(wp) :: height_mountain                ! height of Gaussian mountain (needed for test case)
@@ -107,7 +107,7 @@ module grid_generator
     
       ! no orography
       case(0)
-        grid%z_geo_w(:,:,nlays+1) = 0._wp
+        grid%geo_w(:,:,nlays+1) = 0._wp
       
       ! real orography
       case(1)
@@ -117,7 +117,7 @@ module grid_generator
         else
         
           ! real orography is not yet implemented
-          grid%z_geo_w(:,:,nlays+1) = 0._wp
+          grid%geo_w(:,:,nlays+1) = 0._wp
         
           ! idealized soil properties are being set here if no grid file shall be read in
           density_soil = 1442._wp
@@ -153,7 +153,7 @@ module grid_generator
                 endif
           
                 ! calculating a roughness length depending on the vegetation height
-                grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_geo_scalar(ji,jk),grid%z_geo_w(ji,jk,nlays+1))/8._wp
+                grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_geo_scalar(ji,jk),grid%geo_w(ji,jk,nlays+1))/8._wp
           
               endif
 		
@@ -171,20 +171,20 @@ module grid_generator
         do ji=1,nlins
           do jk=1,ncols
             x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
-            grid%z_geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))*cos(M_PI*x_coord/4000._wp)**2
+            grid%geo_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))*cos(M_PI*x_coord/4000._wp)**2
           enddo
         enddo
     
     endselect
   
     ! calculating the vertical positions of the scalar points
-    ! the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
+    ! the heights are defined according to k = A_k + B_k*surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
     do ji=1,nlins
       do jk=1,ncols
-        ! filling up z_vertical_vector_pre
+        ! filling up vertical_vector_pre
         do jl=1,nlays+1
-          z_rel = 1._wp-(jl-1._wp)/nlays ! z/toa
-          sigma_z = z_rel**sigma
+          rel = 1._wp-(jl-1._wp)/nlays ! z/toa
+          sigma_z = rel**sigma
           A = sigma_z*toa ! the height without orography
           ! B corrects for orography
           if (jl >= nlays-nlays_oro+1._wp) then
@@ -192,13 +192,13 @@ module grid_generator
           else
             B = 0
           endif
-          z_vertical_vector_pre(jl)=A+B*grid%z_geo_w(ji,jk,nlays+1)
+          vertical_vector_pre(jl)=A+B*grid%geo_w(ji,jk,nlays+1)
         enddo
         
         ! doing a check
         if (ji == 1 .and. jk == 1) then
-          max_oro = maxval(grid%z_geo_w(:,:,nlays+1))
-          if (max_oro >= z_vertical_vector_pre(max(nlays-nlays_oro,1))) then
+          max_oro = maxval(grid%geo_w(:,:,nlays+1))
+          if (max_oro >= vertical_vector_pre(max(nlays-nlays_oro,1))) then
             write(*,*) "Maximum of orography larger or equal to the height of the lowest flat level."
             write(*,*) "Aborting."
             call exit(1)
@@ -207,7 +207,7 @@ module grid_generator
         
         ! placing the scalar points in the middle between the preliminary values of the adjacent levels
         do jl=1,nlays
-          grid%z_geo_scal(ji,jk,jl) = 0.5_wp*(z_vertical_vector_pre(jl) + z_vertical_vector_pre(jl+1))
+          grid%geo_scal(ji,jk,jl) = 0.5_wp*(vertical_vector_pre(jl) + vertical_vector_pre(jl+1))
         enddo
       enddo
     enddo
@@ -217,7 +217,7 @@ module grid_generator
     !$OMP PARALLEL
     !$OMP DO PRIVATE(jk)
     do jk=2,ncols
-      grid%z_geo_u(:,jk,:) = 0.5_wp*(grid%z_geo_scal(:,jk-1,:) + grid%z_geo_scal(:,jk,:))
+      grid%geo_u(:,jk,:) = 0.5_wp*(grid%geo_scal(:,jk-1,:) + grid%geo_scal(:,jk,:))
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
@@ -225,23 +225,23 @@ module grid_generator
     if (lperiodic) then
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_geo_u(:,1,:) = 0.5_wp*(grid%z_geo_scal(:,1,:) + grid%z_geo_scal(:,ncols,:))
+      grid%geo_u(:,1,:) = 0.5_wp*(grid%geo_scal(:,1,:) + grid%geo_scal(:,ncols,:))
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_geo_u(:,ncols+1,:) = grid%z_geo_u(:,1,:)
+      grid%geo_u(:,ncols+1,:) = grid%geo_u(:,1,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     else
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_geo_u(:,1,:) = 2._wp*grid%z_geo_scal(:,1,:) - grid%z_geo_scal(:,2,:)
+      grid%geo_u(:,1,:) = 2._wp*grid%geo_scal(:,1,:) - grid%geo_scal(:,2,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_geo_u(:,ncols+1,:) = 2._wp*grid%z_geo_scal(:,ncols,:) - grid%z_geo_scal(:,ncols-1,:)
+      grid%geo_u(:,ncols+1,:) = 2._wp*grid%geo_scal(:,ncols,:) - grid%geo_scal(:,ncols-1,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     endif
@@ -249,29 +249,29 @@ module grid_generator
     ! setting the height of the v-vector points
     ! inner domain
     do ji=2,nlins
-      grid%z_geo_v(ji,:,:) = 0.5_wp*(grid%z_geo_scal(ji-1,:,:) + grid%z_geo_scal(ji,:,:))
+      grid%geo_v(ji,:,:) = 0.5_wp*(grid%geo_scal(ji-1,:,:) + grid%geo_scal(ji,:,:))
     enddo
     ! boundaries
     if (lperiodic) then
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_geo_v(1,:,:) = 0.5_wp*(grid%z_geo_scal(1,:,:) + grid%z_geo_scal(nlins,:,:))
+      grid%geo_v(1,:,:) = 0.5_wp*(grid%geo_scal(1,:,:) + grid%geo_scal(nlins,:,:))
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_geo_v(nlins+1,:,:) = grid%z_geo_v(nlins,:,:)
+      grid%geo_v(nlins+1,:,:) = grid%geo_v(nlins,:,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     else
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_geo_v(1,:,:) = 2._wp*grid%z_geo_scal(1,:,:) - grid%z_geo_scal(2,:,:)
+      grid%geo_v(1,:,:) = 2._wp*grid%geo_scal(1,:,:) - grid%geo_scal(2,:,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_geo_v(nlins+1,:,:) = 2._wp*grid%z_geo_scal(nlins,:,:) - grid%z_geo_scal(nlins-1,:,:)
+      grid%geo_v(nlins+1,:,:) = 2._wp*grid%geo_scal(nlins,:,:) - grid%geo_scal(nlins-1,:,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     endif
@@ -279,50 +279,50 @@ module grid_generator
     ! setting dx
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    grid%dx = dx*(re + grid%z_geo_u)/re
+    grid%dx = dx*(re + grid%geo_u)/re
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     ! setting dy
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    grid%dy = dy*(re + grid%z_geo_v)/re
+    grid%dy = dy*(re + grid%geo_v)/re
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     
     ! calculating the coordinate slopes
-    call grad_hor_cov(grid%z_geo_scal,grid%slope_x,grid%slope_y,grid)
+    call grad_hor_cov(grid%geo_scal,grid%slope_x,grid%slope_y,grid)
     
     ! setting the z coordinates of the vertical vector points
     do jl=1,nlays
       if (jl==1) then
-        grid%z_geo_w(:,:,jl) = toa
+        grid%geo_w(:,:,jl) = toa
       else
-        grid%z_geo_w(:,:,jl) = 0.5_wp*(grid%z_geo_scal(:,:,jl-1) + grid%z_geo_scal(:,:,jl))
+        grid%geo_w(:,:,jl) = 0.5_wp*(grid%geo_scal(:,:,jl-1) + grid%geo_scal(:,:,jl))
       endif
     enddo
     
     ! setting the vertical distances between the scalar data points
     do jl=1,nlays+1
       if (jl==1) then
-        grid%dz(:,:,jl) = 2._wp*(toa - grid%z_geo_scal(:,:,jl))
+        grid%dz(:,:,jl) = 2._wp*(toa - grid%geo_scal(:,:,jl))
       elseif (jl==nlays+1) then
-        grid%dz(:,:,jl) = 2._wp*(grid%z_geo_scal(:,:,jl-1) - grid%z_geo_w(:,:,jl))
+        grid%dz(:,:,jl) = 2._wp*(grid%geo_scal(:,:,jl-1) - grid%geo_w(:,:,jl))
       else
-        grid%dz(:,:,jl) = grid%z_geo_scal(:,:,jl-1) - grid%z_geo_scal(:,:,jl)
+        grid%dz(:,:,jl) = grid%geo_scal(:,:,jl-1) - grid%geo_scal(:,:,jl)
       endif
     enddo
     
     ! setting the horizontal areas at the surface
     do ji=1,nlins
       do jk=1,ncols
-        grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(re + grid%z_geo_w(ji,jk,nlays+1))**2/re**2
+        grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(re + grid%geo_w(ji,jk,nlays+1))**2/re**2
       enddo
     enddo
 
     ! setting the horizontal areas at the higher points (above the surface)
     do jl=1,nlays
-      grid%area_z(:,:,jl) = grid%area_z(:,:,nlays+1)*(re + grid%z_geo_w(:,:,jl))**2 &
-      /(re + grid%z_geo_w(:,:,nlays+1))**2
+      grid%area_z(:,:,jl) = grid%area_z(:,:,nlays+1)*(re + grid%geo_w(:,:,jl))**2 &
+      /(re + grid%geo_w(:,:,nlays+1))**2
     enddo
     
     ! the mean velocity area can be set now
@@ -336,16 +336,16 @@ module grid_generator
         do jl=1,nlays
           ! left boundary
           if (jk==1) then
-            lower_z = grid%z_geo_w(ji,1,jl+1)+0.5_wp*(grid%z_geo_w(ji,1,jl+1)-grid%z_geo_w(ji,2,jl+1))
-            upper_z = grid%z_geo_w(ji,1,jl)+0.5_wp*(grid%z_geo_w(ji,1,jl)-grid%z_geo_w(ji,2,jl))
+            lower_z = grid%geo_w(ji,1,jl+1)+0.5_wp*(grid%geo_w(ji,1,jl+1)-grid%geo_w(ji,2,jl+1))
+            upper_z = grid%geo_w(ji,1,jl)+0.5_wp*(grid%geo_w(ji,1,jl)-grid%geo_w(ji,2,jl))
           ! right boundary
           elseif (jk==ncols+1) then
-            lower_z = grid%z_geo_w(ji,ncols,jl+1)+0.5_wp*(grid%z_geo_w(ji,ncols,jl+1)-grid%z_geo_w(ji,ncols-1,jl+1))
-            upper_z = grid%z_geo_w(ji,ncols,jl)+0.5_wp*(grid%z_geo_w(ji,ncols,jl)-grid%z_geo_w(ji,ncols-1,jl))
+            lower_z = grid%geo_w(ji,ncols,jl+1)+0.5_wp*(grid%geo_w(ji,ncols,jl+1)-grid%geo_w(ji,ncols-1,jl+1))
+            upper_z = grid%geo_w(ji,ncols,jl)+0.5_wp*(grid%geo_w(ji,ncols,jl)-grid%geo_w(ji,ncols-1,jl))
           ! inner domain
           else
-            lower_z = 0.5_wp*(grid%z_geo_w(ji,jk-1,jl+1) + grid%z_geo_w(ji,jk,jl+1))
-            upper_z = 0.5_wp*(grid%z_geo_w(ji,jk-1,jl) + grid%z_geo_w(ji,jk,jl))
+            lower_z = 0.5_wp*(grid%geo_w(ji,jk-1,jl+1) + grid%geo_w(ji,jk,jl+1))
+            upper_z = 0.5_wp*(grid%geo_w(ji,jk-1,jl) + grid%geo_w(ji,jk,jl))
           endif
           lower_length = dy*(re+lower_z)/re
           grid%area_x(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
@@ -363,16 +363,16 @@ module grid_generator
         do jl=1,nlays
           ! upper boundary
           if (ji==1) then
-            lower_z = grid%z_geo_w(1,jk,jl+1)+0.5_wp*(grid%z_geo_w(1,jk,jl+1)-grid%z_geo_w(2,jk,jl+1))
-            upper_z = grid%z_geo_w(1,jk,jl)+0.5_wp*(grid%z_geo_w(1,jk,jl)-grid%z_geo_w(2,jk,jl))
+            lower_z = grid%geo_w(1,jk,jl+1)+0.5_wp*(grid%geo_w(1,jk,jl+1)-grid%geo_w(2,jk,jl+1))
+            upper_z = grid%geo_w(1,jk,jl)+0.5_wp*(grid%geo_w(1,jk,jl)-grid%geo_w(2,jk,jl))
           ! lower boundary
           elseif (ji==nlins+1) then
-            lower_z = grid%z_geo_w(nlins,jk,jl+1)+0.5_wp*(grid%z_geo_w(nlins,jk,jl+1)-grid%z_geo_w(nlins-1,jk,jl+1))
-            upper_z = grid%z_geo_w(nlins,jk,jl)+0.5_wp*(grid%z_geo_w(nlins,jk,jl)-grid%z_geo_w(nlins-1,jk,jl))
+            lower_z = grid%geo_w(nlins,jk,jl+1)+0.5_wp*(grid%geo_w(nlins,jk,jl+1)-grid%geo_w(nlins-1,jk,jl+1))
+            upper_z = grid%geo_w(nlins,jk,jl)+0.5_wp*(grid%geo_w(nlins,jk,jl)-grid%geo_w(nlins-1,jk,jl))
           ! inner domain
           else
-            lower_z = 0.5_wp*(grid%z_geo_w(ji-1,jk,jl+1) + grid%z_geo_w(ji,jk,jl+1))
-            upper_z = 0.5_wp*(grid%z_geo_w(ji-1,jk,jl) + grid%z_geo_w(ji,jk,jl))
+            lower_z = 0.5_wp*(grid%geo_w(ji-1,jk,jl+1) + grid%geo_w(ji,jk,jl+1))
+            upper_z = 0.5_wp*(grid%geo_w(ji-1,jk,jl) + grid%geo_w(ji,jk,jl))
           endif
           lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)*(re+lower_z)/re
           grid%area_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
@@ -388,10 +388,10 @@ module grid_generator
     do ji=1,nlins+1
       do jk=1,ncols+1
         do jl=1,nlays
-          grid%z_geo_area_dual_z(ji,jk,jl) = 0.25_wp*(grid%z_geo_scal(ji,jk,jl)+grid%z_geo_scal(ji+1,jk,jl) &
-          +grid%z_geo_scal(ji+1,jk+1,jl)+grid%z_geo_scal(ji,jk+1,jl))
+          grid%geo_area_dual_z(ji,jk,jl) = 0.25_wp*(grid%geo_scal(ji,jk,jl)+grid%geo_scal(ji+1,jk,jl) &
+          +grid%geo_scal(ji+1,jk+1,jl)+grid%geo_scal(ji,jk+1,jl))
           grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji) - 0.5_wp*dlat,dlon,dlat) &
-          *(re + grid%z_geo_area_dual_z(ji,jk,jl))**2/re**2
+          *(re + grid%geo_area_dual_z(ji,jk,jl))**2/re**2
         enddo
       enddo
     enddo
@@ -405,17 +405,17 @@ module grid_generator
       do jk=1,ncols
         do jl=1,nlays+1
           if (jl==nlays+1) then
-            lower_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl) + grid%z_geo_w(ji+1,jk+1,jl))
+            lower_z = 0.5_wp*(grid%geo_w(ji,jk+1,jl) + grid%geo_w(ji+1,jk+1,jl))
             lower_length = grid%dy(ji,jk+1,jl-1)*(re + lower_z)/ &
-            (re + 0.5_wp*(grid%z_geo_scal(ji,jk+1,jl-1) + grid%z_geo_scal(ji+1,jk+1,jl-1)))
+            (re + 0.5_wp*(grid%geo_scal(ji,jk+1,jl-1) + grid%geo_scal(ji+1,jk+1,jl-1)))
           else
-            lower_z = 0.5_wp*(grid%z_geo_scal(ji,jk+1,jl) + grid%z_geo_scal(ji+1,jk+1,jl))
+            lower_z = 0.5_wp*(grid%geo_scal(ji,jk+1,jl) + grid%geo_scal(ji+1,jk+1,jl))
             lower_length = grid%dy(ji,jk+1,jl)
           endif
           if (jl==1) then
-            upper_z = 0.5_wp*(grid%z_geo_w(ji,jk+1,jl) + grid%z_geo_w(ji+1,jk+1,jl))
+            upper_z = 0.5_wp*(grid%geo_w(ji,jk+1,jl) + grid%geo_w(ji+1,jk+1,jl))
           else
-            upper_z = 0.5_wp*(grid%z_geo_scal(ji,jk+1,jl-1) + grid%z_geo_scal(ji+1,jk+1,jl-1))
+            upper_z = 0.5_wp*(grid%geo_scal(ji,jk+1,jl-1) + grid%geo_scal(ji+1,jk+1,jl-1))
           endif
           grid%area_dual_x(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
@@ -431,17 +431,17 @@ module grid_generator
       do jk=1,ncols+1
         do jl=1,nlays+1
           if (jl==nlays+1) then
-            lower_z = 0.5_wp*(grid%z_geo_w(ji+1,jk,jl) + grid%z_geo_w(ji+1,jk+1,jl))
+            lower_z = 0.5_wp*(grid%geo_w(ji+1,jk,jl) + grid%geo_w(ji+1,jk+1,jl))
             lower_length = grid%dx(ji+1,jk,jl-1)*(re + lower_z)/ &
-            (re + 0.5_wp*(grid%z_geo_scal(ji+1,jk,jl-1) + grid%z_geo_scal(ji+1,jk+1,jl-1)))
+            (re + 0.5_wp*(grid%geo_scal(ji+1,jk,jl-1) + grid%geo_scal(ji+1,jk+1,jl-1)))
           else
-            lower_z = 0.5_wp*(grid%z_geo_scal(ji+1,jk,jl) + grid%z_geo_scal(ji+1,jk+1,jl))
+            lower_z = 0.5_wp*(grid%geo_scal(ji+1,jk,jl) + grid%geo_scal(ji+1,jk+1,jl))
             lower_length = grid%dx(ji+1,jk,jl)
           endif
           if (jl==1) then
-            upper_z = 0.5_wp*(grid%z_geo_w(ji+1,jk,jl) + grid%z_geo_w(ji+1,jk+1,jl))
+            upper_z = 0.5_wp*(grid%geo_w(ji+1,jk,jl) + grid%geo_w(ji+1,jk+1,jl))
           else
-            upper_z = 0.5_wp*(grid%z_geo_scal(ji+1,jk,jl-1) + grid%z_geo_scal(ji+1,jk+1,jl-1))
+            upper_z = 0.5_wp*(grid%geo_scal(ji+1,jk,jl-1) + grid%geo_scal(ji+1,jk+1,jl-1))
           endif
           grid%area_dual_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
@@ -454,8 +454,8 @@ module grid_generator
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji)
     do jl=1,nlays
-      grid%volume(:,:,jl) = 1._wp/3._wp*((re + grid%z_geo_w(:,:,jl))**3 - (re + grid%z_geo_w(:,:,jl+1))**3) &
-      /(re + grid%z_geo_w(:,:,jl+1))**2*grid%area_z(:,:,jl+1)
+      grid%volume(:,:,jl) = 1._wp/3._wp*((re + grid%geo_w(:,:,jl))**3 - (re + grid%geo_w(:,:,jl+1))**3) &
+      /(re + grid%geo_w(:,:,jl+1))**2*grid%area_z(:,:,jl+1)
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
@@ -509,24 +509,24 @@ module grid_generator
     
     ! soil grid
     sigma_soil = 0.36_wp
-    grid%z_t_const = -10._wp
+    grid%t_const = -10._wp
 
     ! the surface is always at zero
-    grid%z_soil_interface(1) = 0._wp
+    grid%soil_interface(1) = 0._wp
     do jk=2,nsoillays+1
-      grid%z_soil_interface(jk) = grid%z_soil_interface(jk-1) + sigma_soil**(nsoillays-jk)
+      grid%soil_interface(jk) = grid%soil_interface(jk-1) + sigma_soil**(nsoillays-jk)
     enddo
     
-    rescale_factor = grid%z_t_const/grid%z_soil_interface(nsoillays+1)
+    rescale_factor = grid%t_const/grid%soil_interface(nsoillays+1)
     
     do jk=2,nsoillays+1
-      grid%z_soil_interface(jk) = rescale_factor*grid%z_soil_interface(jk)
+      grid%soil_interface(jk) = rescale_factor*grid%soil_interface(jk)
     enddo
     do jk=1,nsoillays
-      grid%z_soil_center(jk) = 0.5_wp*(grid%z_soil_interface(jk) + grid%z_soil_interface(jk+1))
+      grid%soil_center(jk) = 0.5_wp*(grid%soil_interface(jk) + grid%soil_interface(jk+1))
     enddo
     
-    write(*,*) "Thickness of the uppermost soil layer: ", -grid%z_soil_interface(2), "m."
+    write(*,*) "Thickness of the uppermost soil layer: ", -grid%soil_interface(2), "m."
 	
     ! writing the costly grid properties to a file if required by the user
     if (lwrite_grid) then
@@ -552,19 +552,19 @@ module grid_generator
       do jk=1,ncols
         ! integrating from bottom to top
         do jl=nlays,1,-1
-          temperature = bg_temp(grid%z_geo_scal(ji,jk,jl))
+          temperature = bg_temp(grid%geo_scal(ji,jk,jl))
           ! lowest layer
           if (jl == nlays) then
-            pressure = bg_pres(grid%z_geo_scal(ji,jk,jl))
+            pressure = bg_pres(grid%geo_scal(ji,jk,jl))
             grid%exner_bg(ji,jk,jl) = (pressure/p_0)**(specific_gas_constants(0)/spec_heat_capacities_p_gas(0))
             grid%theta_bg(ji,jk,jl) = temperature/grid%exner_bg(ji,jk,jl)
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
-            b = -0.5_wp*grid%exner_bg(ji,jk,jl+1)/bg_temp(grid%z_geo_scal(ji,jk,jl+1)) &
-            *(temperature - bg_temp(grid%z_geo_scal(ji,jk,jl+1)) + 2.0_wp/ &
-            spec_heat_capacities_p_gas(0)*(geopot(grid%z_geo_scal(ji,jk,jl)) - geopot(grid%z_geo_scal(ji,jk,jl+1))))
-            c = grid%exner_bg(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_geo_scal(ji,jk,jl+1))
+            b = -0.5_wp*grid%exner_bg(ji,jk,jl+1)/bg_temp(grid%geo_scal(ji,jk,jl+1)) &
+            *(temperature - bg_temp(grid%geo_scal(ji,jk,jl+1)) + 2.0_wp/ &
+            spec_heat_capacities_p_gas(0)*(geopot(grid%geo_scal(ji,jk,jl)) - geopot(grid%geo_scal(ji,jk,jl+1))))
+            c = grid%exner_bg(ji,jk,jl+1)**2*temperature/bg_temp(grid%geo_scal(ji,jk,jl+1))
             grid%exner_bg(ji,jk,jl) = b+sqrt(b**2+c)
             grid%theta_bg(ji,jk,jl) = temperature/grid%exner_bg(ji,jk,jl)
           endif

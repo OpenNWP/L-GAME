@@ -45,13 +45,13 @@ module definitions
     real(wp), allocatable :: lon_geo_v(:,:)                   ! geographic longitudes of the v-vector gridpoints
     real(wp), allocatable :: dir_geo_v(:,:)                   ! geographic directions of the v-vectors
     real(wp), allocatable :: dir_geo_u_scalar(:,:)            ! geographic directions of the u-vectors at the scalar points
-    real(wp), allocatable :: z_geo_scal(:,:,:)                ! geometric heights of the scalar gridpoints
+    real(wp), allocatable :: geo_scal(:,:,:)                ! geometric heights of the scalar gridpoints
     real(wp), allocatable :: dx(:,:,:)                        ! grid point distance in x-direction
     real(wp), allocatable :: dy(:,:,:)                        ! grid point distance in y-direction
     real(wp), allocatable :: dz(:,:,:)                        ! grid point distance in z-direction
-    real(wp), allocatable :: z_geo_u(:,:,:)                   ! geomtric height of the u-vectors
-    real(wp), allocatable :: z_geo_v(:,:,:)                   ! geomtric height of the v-vectors
-    real(wp), allocatable :: z_geo_w(:,:,:)                   ! geomtric height of the w-vectors
+    real(wp), allocatable :: geo_u(:,:,:)                   ! geomtric height of the u-vectors
+    real(wp), allocatable :: geo_v(:,:,:)                   ! geomtric height of the v-vectors
+    real(wp), allocatable :: geo_w(:,:,:)                   ! geomtric height of the w-vectors
     real(wp), allocatable :: volume(:,:,:)                    ! volumes of the gridboxes
     real(wp), allocatable :: area_x(:,:,:)                    ! areas of the grid in x-direction
     real(wp), allocatable :: area_y(:,:,:)                    ! areas of the grid in y-direction
@@ -62,7 +62,7 @@ module definitions
     real(wp), allocatable :: area_dual_x(:,:,:)               ! areas of the dual grid in x-direction
     real(wp), allocatable :: area_dual_y(:,:,:)               ! areas of the dual grid in y-direction
     real(wp), allocatable :: area_dual_z(:,:,:)               ! areas of the dual grid in z-direction
-    real(wp), allocatable :: z_geo_area_dual_z(:,:,:)         ! geometric heights of the areas of the dual grid in z-direction
+    real(wp), allocatable :: geo_area_dual_z(:,:,:)         ! geometric heights of the areas of the dual grid in z-direction
     real(wp), allocatable :: fvec_x(:,:)                      ! x-component of Coriolis vector
     real(wp), allocatable :: fvec_y(:,:)                      ! y-component of Coriolis vector
     real(wp), allocatable :: fvec_z(:,:)                      ! z-component of Coriolis vector
@@ -78,10 +78,10 @@ module definitions
     real(wp), allocatable :: t_conduc_soil(:,:)               ! temperature conductivity of the soil
     real(wp), allocatable :: roughness_length(:,:)            ! roughness length of the surface
     integer,  allocatable :: is_land(:,:)                     ! land-sea-mask
-    real(wp), allocatable :: z_soil_interface(:)              ! heights of the interfaces of the soil layers
-    real(wp), allocatable :: z_soil_center(:)                 ! heights of the centers of the soil layers
+    real(wp), allocatable :: soil_interface(:)              ! heights of the interfaces of the soil layers
+    real(wp), allocatable :: soil_center(:)                 ! heights of the centers of the soil layers
     real(wp), allocatable :: t_const_soil(:,:)                ! temperature of the soil below the depth where it is constant
-    real(wp)              :: z_t_const                        ! depth where the soil temperature is constant
+    real(wp)              :: t_const                        ! depth where the soil temperature is constant
     real(wp)              :: lat_center                       ! latitude of the center of the model domain
     real(wp)              :: lon_center                       ! longitude of the center of the model domain
     real(wp)              :: x_dir_center                     ! direction of the x-axis of the model
@@ -166,9 +166,9 @@ module definitions
     real(wp), allocatable :: gust(:,:)                        ! gusts speed 10 m AGL
     real(wp), allocatable :: mslp(:,:)                        ! mean sea level pressure
     real(wp), allocatable :: t_2(:,:)                         ! 2 m temperature
-    real(wp), allocatable :: z_eta_x(:,:,:)                   ! relative vorticity in x-direction
-    real(wp), allocatable :: z_eta_y(:,:,:)                   ! relative vorticity in y-direction
-    real(wp), allocatable :: z_eta_z(:,:,:)                   ! relative vorticity in z-direction
+    real(wp), allocatable :: eta_x(:,:,:)                   ! relative vorticity in x-direction
+    real(wp), allocatable :: eta_y(:,:,:)                   ! relative vorticity in y-direction
+    real(wp), allocatable :: eta_z(:,:,:)                   ! relative vorticity in z-direction
     real(wp), allocatable :: radiation_tendency(:,:,:)        ! power density due to radiation
     real(wp), allocatable :: scalar_flux_resistance(:,:)      ! surface flux resistance acting on scalar quantities
     real(wp), allocatable :: monin_obukhov_length(:,:)        ! Monin-Obukhov length

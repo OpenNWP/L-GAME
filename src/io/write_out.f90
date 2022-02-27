@@ -35,7 +35,7 @@ module write_out
     integer           :: ncid                      ! ID of the NetCDF file
     integer           :: x_dimid                   ! ID of the x dimension
     integer           :: y_dimid                   ! ID of the y dimension
-    integer           :: z_dimid                   ! ID of the z dimension
+    integer           :: dimid                   ! ID of the z dimension
     integer           :: constituents_dimid        ! ID of the constituents dimension
     integer           :: single_double_dimid       ! ID of the dimension cotaining one double
     integer           :: dimids_2d(2)              ! dimensions of horizontal fields
@@ -71,7 +71,7 @@ module write_out
     call nc_check(nf90_def_dim(ncid,"single_double",1,single_double_dimid))
     call nc_check(nf90_def_dim(ncid,"lon_model",ncols,x_dimid))
     call nc_check(nf90_def_dim(ncid,"lat_model",nlins,y_dimid))
-    call nc_check(nf90_def_dim(ncid,"z",nlays,z_dimid))
+    call nc_check(nf90_def_dim(ncid,"z",nlays,dimid))
     call nc_check(nf90_def_dim(ncid,"j_constituent",no_of_constituents,constituents_dimid))
 
     ! setting the dimension ID arrays
@@ -81,11 +81,11 @@ module write_out
     ! 3D
     dimids_3d(1) = y_dimid
     dimids_3d(2) = x_dimid
-    dimids_3d(3) = z_dimid
+    dimids_3d(3) = dimid
     ! 3D mass density fields
     dimids_3d_rho(1) = y_dimid
     dimids_3d_rho(2) = x_dimid
-    dimids_3d_rho(3) = z_dimid
+    dimids_3d_rho(3) = dimid
     dimids_3d_rho(4) = constituents_dimid
 
     ! Define the variable. The type of the variable in this case is
@@ -152,7 +152,7 @@ module write_out
     ! longitude coordinates of the grid points
     call nc_check(nf90_put_var(ncid,varid_lon,grid%lon_scalar(:)))
     ! z coordinates of the grid points
-    call nc_check(nf90_put_var(ncid,varid_z,grid%z_geo_scal))
+    call nc_check(nf90_put_var(ncid,varid_z,grid%geo_scal))
     
     ! writing the data to the output file
     ! 3D mass densities
@@ -187,9 +187,9 @@ module write_out
     !$OMP PARALLEL
     !$OMP DO PRIVATE(jl,upper_weight)
     do jl=1,nlays
-      upper_weight = (grid%z_geo_scal(:,:,jl) -&
-      grid%z_geo_w(:,:,jl+1))/(grid%z_geo_w(:,:,jl)  &
-      - grid%z_geo_w(:,:,jl+1))
+      upper_weight = (grid%geo_scal(:,:,jl) -&
+      grid%geo_w(:,:,jl+1))/(grid%geo_w(:,:,jl)  &
+      - grid%geo_w(:,:,jl+1))
       diag%scalar_placeholder(:,:,jl) = &
       upper_weight*state%wind_w(:,:,jl)+(1._wp-upper_weight)*state%wind_w(:,:,jl+1)
     enddo
