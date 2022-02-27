@@ -8,6 +8,16 @@ module dictionary
   ! gaseous constituents IDs:
   ! 0: dry air
   ! 1: H2O
+  ! 2: N2
+  ! 3: O2
+  ! 4: Ar
+  ! 5: CO2
+  ! 6: Ne
+  ! 7: He
+  ! 8: CH4
+  ! 9: CO
+  ! 10: O3
+  ! 11: N2O
 
   use definitions, only: wp
   
@@ -151,19 +161,6 @@ module dictionary
     
     integer :: gas_number
   
-    ! 0: dry air
-    ! 1: H2O
-    ! 2: N2
-    ! 3: O2
-    ! 4: Ar
-    ! 5: CO2
-    ! 6: Ne
-    ! 7: He
-    ! 8: CH4
-    ! 9: CO
-    ! 10: O3
-    ! 11: N2O
-  
     if (gas_number==2) then
       molar_fraction_in_dry_air = 0.7809_wp
     endif
@@ -177,19 +174,19 @@ module dictionary
       molar_fraction_in_dry_air = 0.0003_wp
     endif
     if (gas_number==6) then
-      molar_fraction_in_dry_air=1.8e-5_wp
+      molar_fraction_in_dry_air = 1.8e-5_wp
     endif
     if (gas_number==7) then
       molar_fraction_in_dry_air = 5.2e-6_wp
     endif
     if (gas_number==8) then
-      molar_fraction_in_dry_air=1.5e-6_wp
+      molar_fraction_in_dry_air = 1.5e-6_wp
     endif
     if (gas_number==9) then
-      molar_fraction_in_dry_air=1.0e-7_wp
+      molar_fraction_in_dry_air = 1.0e-7_wp
     endif
     if (gas_number==10) then
-      molar_fraction_in_dry_air=1e-6_wp
+      molar_fraction_in_dry_air = 1e-6_wp
     endif
     if (gas_number==11) then
 	  ! https://www.epa.gov/climate-indicators/climate-change-indicators-atmospheric-concentrations-greenhouse-gases

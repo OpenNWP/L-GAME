@@ -63,7 +63,7 @@ module humidity
     real(wp)             :: rel_humidity
     
     ! local variables
-    real(wp)             :: vapour_pressure     ! actual vapour pressure
+    real(wp)             :: vapour_pressure     ! actual water vapour pressure
     real(wp)             :: saturation_pressure ! saturation water vapour pressure
     
     vapour_pressure = abs_humidity*specific_gas_constants(1)*temperature
