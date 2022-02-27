@@ -48,7 +48,6 @@ module column_solvers
     real(wp) :: rho_int_old(nlays-1)               ! old interface mass density
     real(wp) :: rho_int_expl(nlays-1)              ! explicit interface mass density
     real(wp) :: theta_int_new(nlays-1)             ! preliminary new potential temperature interface values
-    integer  :: ji,jk,jl                           ! loop variables
     real(wp) :: rho_int_new                        ! new density interface value
     real(wp) :: alpha_old(nlays)                   ! alpha at the old time step
     real(wp) :: beta_old(nlays)                    ! beta at the old time step
@@ -69,6 +68,7 @@ module column_solvers
     real(wp) :: t_gas_lowest_layer_new             ! temperature of the gas in the lowest layer of the model atmosphere, new timestep
     real(wp) ::  heat_flux_density_expl(nsoillays) ! explicit heat_flux_density in the soil
     real(wp) :: solution_vector(nlays-1+nsoillays) ! vector containing the solution of the linear problem to solve here
+    integer  :: ji,jk,jl                           ! loop variables
 
     c_v = spec_heat_capacities_v_gas(0)
     c_p = spec_heat_capacities_p_gas(0)
@@ -146,7 +146,7 @@ module column_solvers
             *(grid%exner_bg(ji,jk,jl)+state_new%exner_pert(ji,jk,jl))
             ! interpolation of partial derivatives of theta and Pi (divided by the volume)
             alpha (jl) = ((1._wp - partial_impl_weight)*alpha_old(jl)+partial_impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
-            beta  (jl) = ((1._wp - partial_impl_weight)*beta_old (jl)+partial_impl_weight*beta_new (jl))/grid%volume(ji,jk,jl)
+            beta  (jl) = ((1._wp - partial_impl_weight)*beta_old (jl)+partial_impl_weight*beta_new(jl))/grid%volume(ji,jk,jl)
             gammaa(jl) = ((1._wp - partial_impl_weight)*gamma_old(jl)+partial_impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
           endif
           ! explicit potential temperature perturbation
@@ -232,13 +232,13 @@ module column_solvers
 
           ! loop over all soil layers below the first layer
           do jl=1,nsoillays
-            r_vector(jl+nlays-1) &
+            r_vector(nlays-1+jl) &
             ! old temperature
             = state_old%temperature_soil(ji,jk,jl) &
             ! heat conduction from above
             + 0.5_wp*(-heat_flux_density_expl(jl) &
             ! heat conduction from below
-            + heat_flux_density_expl(jl)) &
+            + heat_flux_density_expl(jl+1)) &
             /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))*dtime
           enddo
   
@@ -273,12 +273,13 @@ module column_solvers
           enddo
         endif
 		
+		! calling the subroutine to solve the system of linear equations
         call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,nlays-1+soil_switch*nsoillays)
        
         ! Klemp swamp layer
         do jl=1,nlays-1
           z_above_damping = grid%z_geo_w(ji,jk,jl+1)-damping_start_height
-          if (z_above_damping < 0._wp .or. .not. lklemp) then
+          if (z_above_damping<0._wp .or. .not. lklemp) then
             damping_coeff = 0._wp
           else
             damping_coeff = klemp_damp_max*sin(0.5_wp*M_PI*z_above_damping/(toa-damping_start_height))**2
@@ -290,9 +291,9 @@ module column_solvers
         ! density, potential temperature density
         do jl=2,nlays-1
           state_new%rho(ji,jk,jl,no_of_condensed_constituents+1) = rho_expl(jl) &
-         +dtime*(-solution_vector(jl-1)+solution_vector(jl))/grid%volume(ji,jk,jl)
+          +dtime*(-solution_vector(jl-1)+solution_vector(jl))/grid%volume(ji,jk,jl)
           state_new%rhotheta(ji,jk,jl) = rhotheta_expl(jl) &
-         +dtime*(-theta_int_new(jl-1)*solution_vector(jl-1)+theta_int_new(jl)*solution_vector(jl))/grid%volume(ji,jk,jl)
+          +dtime*(-theta_int_new(jl-1)*solution_vector(jl-1)+theta_int_new(jl)*solution_vector(jl))/grid%volume(ji,jk,jl)
         enddo
         ! uppermost layer
         state_new%rho(ji,jk,1,no_of_condensed_constituents+1) = rho_expl(1)+dtime*solution_vector(1)/grid%volume(ji,jk,1)
@@ -312,7 +313,7 @@ module column_solvers
         ! Exner pressure
         do jl=1,nlays
           state_new%exner_pert(ji,jk,jl) = state_old%exner_pert(ji,jk,jl) &
-         +grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji,jk,jl)-state_old%rhotheta(ji,jk,jl))
+          +grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji,jk,jl)-state_old%rhotheta(ji,jk,jl))
         enddo
         
         ! soil temperature
