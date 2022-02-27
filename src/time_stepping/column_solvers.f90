@@ -390,7 +390,8 @@ module column_solvers
         
           ! loop over all columns
           !$OMP PARALLEL
-          !$OMP DO PRIVATE(ji,jk)
+          !$OMP DO PRIVATE(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
+          !$OMP d_vector,e_vector,r_vector,solution_vector)
           do ji=1,nlins
             do jk=1,ncols
 
