@@ -103,9 +103,9 @@ module multiplications
   
     ! Multiplication of an extended scalar with an inner vector field at vertical points.
     
-    real(wp),     intent(in)    :: scalar_field(:,:,:)
-    real(wp),     intent(in)    :: in_vector_z(:,:,:)
-    real(wp),     intent(inout) :: result_field_z(:,:,:)
+    real(wp), intent(in)    :: scalar_field(:,:,:)
+    real(wp), intent(in)    :: in_vector_z(:,:,:)
+    real(wp), intent(inout) :: result_field_z(:,:,:)
   
     ! local variables
     integer                     :: jl ! loop index
@@ -132,13 +132,13 @@ module multiplications
   
     ! Multiplication of a scalar with a vector field.
     
-    real(wp),     intent(in)    :: scalar_field(:,:,:)
-    real(wp),     intent(in)    :: in_vector_x(:,:,:)
-    real(wp),     intent(in)    :: in_vector_y(:,:,:)
-    real(wp),     intent(in)    :: in_vector_z(:,:,:)
-    real(wp),     intent(inout) :: result_field_x(:,:,:)
-    real(wp),     intent(inout) :: result_field_y(:,:,:)
-    real(wp),     intent(inout) :: result_field_z(:,:,:)
+    real(wp), intent(in)    :: scalar_field(:,:,:)
+    real(wp), intent(in)    :: in_vector_x(:,:,:)
+    real(wp), intent(in)    :: in_vector_y(:,:,:)
+    real(wp), intent(in)    :: in_vector_z(:,:,:)
+    real(wp), intent(inout) :: result_field_x(:,:,:)
+    real(wp), intent(inout) :: result_field_y(:,:,:)
+    real(wp), intent(inout) :: result_field_z(:,:,:)
     
     call scalar_times_vector_h(scalar_field,in_vector_x,in_vector_y,result_field_x,result_field_y)
     call scalar_times_vector_v(scalar_field,in_vector_z,result_field_z)

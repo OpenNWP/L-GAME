@@ -151,8 +151,8 @@ module column_solvers
           endif
           ! explicit potential temperature perturbation
           theta_pert_expl(jl) = state_old%theta_pert(ji,jk,jl) &
-         +dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl,no_of_condensed_constituents+1) &
-         +beta(jl)*tend%rhotheta(ji,jk,jl))
+          +dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl,no_of_condensed_constituents+1) &
+          +beta(jl)*tend%rhotheta(ji,jk,jl))
           ! explicit Exner pressure perturbation
           exner_pert_expl(jl) = state_old%exner_pert(ji,jk,jl)+dtime*grid%volume(ji,jk,jl)*gammaa(jl)*tend%rhotheta(ji,jk,jl)
         enddo
@@ -372,12 +372,12 @@ module column_solvers
       ! firstly the number of relevant constituents needs to be determined
       no_of_relevant_constituents = 0
       ! mass densities
-      if (quantity_id == 1) then
+      if (quantity_id==1) then
         ! all constituents have a mass density
         no_of_relevant_constituents = no_of_constituents     ! the main gaseous constituent is excluded later
       endif
       ! density x temperature fields
-      if (quantity_id == 2) then
+      if (quantity_id==2) then
         ! in this case, all the condensed constituents have a density x temperature field
         if (lassume_lte) then
           no_of_relevant_constituents = no_of_condensed_constituents
@@ -436,7 +436,7 @@ module column_solvers
                 e_vector(jl) = -impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl)
               enddo
               do jl=1,nlays
-                if (jl == 1) then
+                if (jl==1) then
                   d_vector(jl) = 1._wp - impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(1)
                 elseif (jl == nlays) then
                   d_vector(jl) = 1._wp + impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl-1)
@@ -446,30 +446,30 @@ module column_solvers
                 endif
                 ! the explicit component
                 ! mass densities
-                if (quantity_id == 1) then
+                if (quantity_id==1) then
                   r_vector(jl) = state_old%rho(ji,jk,jl,j_constituent) + dtime*tend%rho(ji,jk,jl,j_constituent)
                 endif
                 ! density x temperatures
-                if (quantity_id == 2) then
+                if (quantity_id==2) then
                   r_vector(jl) = state_old%condensed_rho_t(ji,jk,jl,j_constituent) &
                   +dtime*tend%condensed_rho_t(ji,jk,jl,j_constituent)
                 endif
                 ! adding the explicit part of the vertical flux divergence
-                if (jl == 1) then
+                if (jl==1) then
                   r_vector(jl) = r_vector(jl) + expl_weight*dtime*vertical_flux_vector_rhs(jl)/grid%volume(ji,jk,jl)
                 elseif (jl == nlays) then
                   r_vector(jl) = r_vector(jl) - expl_weight*dtime*vertical_flux_vector_rhs(jl-1)/grid%volume(ji,jk,jl)
                   ! precipitation
                   ! snow
-                  if (j_constituent < no_of_condensed_constituents/4) then
+                  if (j_constituent<no_of_condensed_constituents/4) then
                     r_vector(jl) = r_vector(jl) - snow_velocity*dtime*state_old%rho(ji,jk,jl-1,j_constituent) &
                     *grid%area_z(ji,jk,jl-1)/grid%volume(ji,jk,jl)
                   ! rain
-                  elseif (j_constituent < no_of_condensed_constituents/2) then
+                  elseif (j_constituent<no_of_condensed_constituents/2) then
                     r_vector(jl) = r_vector(jl) - rain_velocity*dtime*state_old%rho(ji,jk,jl-1,j_constituent) &
                     *grid%area_z(ji,jk,jl-1)/grid%volume(ji,jk,jl)
                   ! clouds
-                  elseif (j_constituent < no_of_condensed_constituents) then
+                  elseif (j_constituent<no_of_condensed_constituents) then
                     r_vector(jl) = r_vector(jl) - cloud_droplets_velocity*dtime*state_old%rho(ji,jk,jl-1,j_constituent) &
                     *grid%area_z(ji,jk,jl-1)/grid%volume(ji,jk,jl)
                   endif
@@ -484,13 +484,13 @@ module column_solvers
 
               ! limiter: none of the densities may be negative
               do jl=1,nlays
-                if (solution_vector(jl) < 0._wp) then
+                if (solution_vector(jl)<0._wp) then
                   added_mass = -solution_vector(jl)*grid%volume(ji,jk,jl)
-                  solution_vector(jl) = 0
+                  solution_vector(jl) = 0._wp
                   if (jl == 1) then
                     solution_vector(jl+1) = solution_vector(jl+1) -  added_mass/grid%volume(ji,jk,jl+1)
                   elseif (jl == nlays) then
-                    if (j_constituent > no_of_condensed_constituents) then
+                    if (j_constituent>no_of_condensed_constituents) then
                       solution_vector(jl-1) = solution_vector(jl-1) - added_mass/grid%volume(ji,jk,jl-1)
                     endif
                   else
