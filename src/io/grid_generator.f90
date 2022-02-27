@@ -509,17 +509,17 @@ module grid_generator
 
     ! the surface is always at zero
     grid%soil_interface(1) = 0._wp
-    do jk=2,nsoillays+1
-      grid%soil_interface(jk) = grid%soil_interface(jk-1) + sigma_soil**(nsoillays-jk)
+    do jl=2,nsoillays+1
+      grid%soil_interface(jl) = grid%soil_interface(jl-1) + sigma_soil**(nsoillays-jl)
     enddo
     
     rescale_factor = grid%t_const/grid%soil_interface(nsoillays+1)
     
-    do jk=2,nsoillays+1
-      grid%soil_interface(jk) = rescale_factor*grid%soil_interface(jk)
+    do jl=2,nsoillays+1
+      grid%soil_interface(jl) = rescale_factor*grid%soil_interface(jl)
     enddo
-    do jk=1,nsoillays
-      grid%soil_center(jk) = 0.5_wp*(grid%soil_interface(jk) + grid%soil_interface(jk+1))
+    do jl=1,nsoillays
+      grid%soil_center(jl) = 0.5_wp*(grid%soil_interface(jl) + grid%soil_interface(jl+1))
     enddo
     
     write(*,*) "Thickness of the uppermost soil layer: ", -grid%soil_interface(2), "m."
