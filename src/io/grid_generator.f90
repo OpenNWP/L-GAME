@@ -481,30 +481,26 @@ module grid_generator
     ! setting the TRSK weights
     ! u
     do ji=1,nlins
-      do jk=1,ncols-1
         base_area = patch_area(grid%lat_scalar(ji),dlon,dlat)
-        grid%trsk_weights_u(ji,jk,1) = (0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area) &
+        grid%trsk_weights_u(ji,1) = (0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area) &
         *dx*cos(0.5_wp*(grid%lat_scalar(ji)+grid%lat_scalar(ji+1)))/(dx*cos(grid%lat_scalar(ji)))
-        grid%trsk_weights_u(ji,jk,2) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area) &
+        grid%trsk_weights_u(ji,2) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area) &
         *dy/(dx*cos(grid%lat_scalar(ji)))
-        grid%trsk_weights_u(ji,jk,3) = -(0.5_wp - (patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
+        grid%trsk_weights_u(ji,3) = -(0.5_wp - (patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
         +patch_area(grid%lat_scalar(ji)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat))/base_area) &
         *dx*cos(0.5_wp*(grid%lat_scalar(ji)+grid%lat_scalar(ji)))/(dx*cos(grid%lat_scalar(ji)))
-        grid%trsk_weights_u(ji,jk,4) = grid%trsk_weights_u(ji,jk,3)
-        grid%trsk_weights_u(ji,jk,5) = -grid%trsk_weights_u(ji,jk,2)
-        grid%trsk_weights_u(ji,jk,6) = grid%trsk_weights_u(ji,jk,1)
-      enddo
+        grid%trsk_weights_u(ji,4) = grid%trsk_weights_u(ji,3)
+        grid%trsk_weights_u(ji,5) = -grid%trsk_weights_u(ji,2)
+        grid%trsk_weights_u(ji,6) = grid%trsk_weights_u(ji,1)
     enddo
     ! v
-    do ji=1,nlins-1
-      do jk=1,ncols
+    do ji=1,nlins+1
         base_area = patch_area(grid%lat_scalar(ji),dlon,dlat)
-        grid%trsk_weights_v(ji,jk,1) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
-        grid%trsk_weights_v(ji,jk,2) = grid%trsk_weights_v(ji,jk,1)
+        grid%trsk_weights_v(ji,1) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
+        grid%trsk_weights_v(ji,2) = grid%trsk_weights_v(ji,1)
         base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
-        grid%trsk_weights_v(ji,jk,3) = -(0.5_wp - patch_area(grid%lat_scalar(ji+1)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
-        grid%trsk_weights_v(ji,jk,4) = grid%trsk_weights_v(ji,jk,3)
-      enddo
+        grid%trsk_weights_v(ji,3) = -(0.5_wp - patch_area(grid%lat_scalar(ji+1)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
+        grid%trsk_weights_v(ji,4) = grid%trsk_weights_v(ji,3)
     enddo
     
     ! soil grid

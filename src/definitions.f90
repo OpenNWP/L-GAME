@@ -66,8 +66,8 @@ module definitions
     real(wp), allocatable :: fvec_x(:,:)                      ! x-component of Coriolis vector
     real(wp), allocatable :: fvec_y(:,:)                      ! y-component of Coriolis vector
     real(wp), allocatable :: fvec_z(:,:)                      ! z-component of Coriolis vector
-    real(wp), allocatable :: trsk_weights_u(:,:,:)            ! weights for computing the Coriolis acceleration in x-direction
-    real(wp), allocatable :: trsk_weights_v(:,:,:)            ! weights for computing the Coriolis acceleration in y-direction
+    real(wp), allocatable :: trsk_weights_u(:,:)              ! weights for computing the Coriolis acceleration in x-direction
+    real(wp), allocatable :: trsk_weights_v(:,:)              ! weights for computing the Coriolis acceleration in y-direction
     real(wp), allocatable :: exner_bg_grad_u(:,:,:)           ! gradient of background exner pressure in x-direction
     real(wp), allocatable :: exner_bg_grad_v(:,:,:)           ! gradient of background exner pressure in y-direction
     real(wp), allocatable :: exner_bg_grad_w(:,:,:)           ! gradient of background exner pressure in z-direction

@@ -34,17 +34,17 @@ module vorticity_flux
     do ji=1,nlins
       do jk=1,ncols-1
         diag%pot_vort_tend_x(ji,jk,:) = &
-        grid%trsk_weights_u(ji,jk,1)*diag%v_placeholder(ji+1,jk+1,:)*0.25_wp* &
+        grid%trsk_weights_u(ji,1)*diag%v_placeholder(ji+1,jk+1,:)*0.25_wp* &
         (diag%eta_z(ji,jk+1,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji+1,jk,:)) &
-        + grid%trsk_weights_u(ji,jk,2)*diag%u_placeholder(ji+2,jk,:)*0.25_wp* &
+        + grid%trsk_weights_u(ji,2)*diag%u_placeholder(ji+2,jk,:)*0.25_wp* &
         (diag%eta_z(ji,jk+1,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji+1,jk,:)+diag%eta_z(ji,jk,:)) &
-        + grid%trsk_weights_u(ji,jk,3)*diag%v_placeholder(ji,jk+1,:)*0.25_wp* &
+        + grid%trsk_weights_u(ji,3)*diag%v_placeholder(ji,jk+1,:)*0.25_wp* &
         (diag%eta_z(ji,jk+1,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji,jk+1,:)) &
-        + grid%trsk_weights_u(ji,jk,4)*diag%v_placeholder(ji,jk+2,:)*0.25_wp* &
+        + grid%trsk_weights_u(ji,4)*diag%v_placeholder(ji,jk+2,:)*0.25_wp* &
         (diag%eta_z(ji,jk+1,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji,jk+1,:)+diag%eta_z(ji,jk+2,:)) &
-        + grid%trsk_weights_u(ji,jk,5)*diag%u_placeholder(ji+1,jk+2,:)*0.25_wp* &
+        + grid%trsk_weights_u(ji,5)*diag%u_placeholder(ji+1,jk+2,:)*0.25_wp* &
         (diag%eta_z(ji,jk+1,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji,jk+2,:)+diag%eta_z(ji+1,jk+2,:)) &
-        + grid%trsk_weights_u(ji,jk,6)*diag%v_placeholder(ji+1,jk+2,:)*0.25_wp* &
+        + grid%trsk_weights_u(ji,6)*diag%v_placeholder(ji+1,jk+2,:)*0.25_wp* &
         (diag%eta_z(ji,jk+1,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji+1,jk+2,:)+diag%eta_z(ji+1,jk+1,:))
       enddo
     enddo
@@ -56,13 +56,13 @@ module vorticity_flux
     do ji=1,nlins-1
       do jk=1,ncols
         diag%pot_vort_tend_y(ji,jk,:) = &
-        grid%trsk_weights_v(ji,jk,1)*diag%u_placeholder(ji+1,jk,:)*0.25_wp* &
+        grid%trsk_weights_v(ji,1)*diag%u_placeholder(ji+1,jk,:)*0.25_wp* &
         (diag%eta_z(ji+1,jk,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji+1,jk,:)+diag%eta_z(ji,jk,:)) &
-        + grid%trsk_weights_v(ji,jk,2)*diag%u_placeholder(ji+1,jk+1,:)*0.25_wp* &
+        + grid%trsk_weights_v(ji,2)*diag%u_placeholder(ji+1,jk+1,:)*0.25_wp* &
         (diag%eta_z(ji+1,jk,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji,jk+1,:)) &
-        + grid%trsk_weights_v(ji,jk,3)*diag%u_placeholder(ji+2,jk+1,:)*0.25_wp* &
+        + grid%trsk_weights_v(ji,3)*diag%u_placeholder(ji+2,jk+1,:)*0.25_wp* &
         (diag%eta_z(ji+1,jk,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji+2,jk+1,:)) &
-        + grid%trsk_weights_v(ji,jk,4)*diag%u_placeholder(ji+2,jk,:)*0.25_wp* &
+        + grid%trsk_weights_v(ji,4)*diag%u_placeholder(ji+2,jk,:)*0.25_wp* &
         (diag%eta_z(ji+1,jk,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji+1,jk,:)+diag%eta_z(ji+2,jk,:))
       enddo
     enddo
