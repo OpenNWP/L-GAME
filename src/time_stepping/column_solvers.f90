@@ -63,7 +63,7 @@ module column_solvers
     real(wp) :: r_d                                ! individual gas constant of dry air
     real(wp) :: damping_start_height               ! lower boundary height of the Klemp layer
     real(wp) :: damping_coeff                      ! damping coefficient of the Klemp layer
-    real(wp) :: above_damping                    ! height above the lower boundary of the damping height
+    real(wp) :: above_damping                      ! height above the lower boundary of the damping height
     real(wp) :: t_gas_lowest_layer_old             ! temperature of the gas in the lowest layer of the model atmosphere, old timestep
     real(wp) :: t_gas_lowest_layer_new             ! temperature of the gas in the lowest layer of the model atmosphere, new timestep
     real(wp) ::  heat_flux_density_expl(nsoillays) ! explicit heat_flux_density in the soil

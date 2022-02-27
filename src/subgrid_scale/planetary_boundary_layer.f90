@@ -33,7 +33,7 @@ module planetary_boundary_layer
     ! local variables
     real(wp) :: u_lowest_layer        ! wind speed in the lowest model layer
     real(wp) :: u10                   ! wind speed in 10 m height
-    real(wp) :: agl                 ! height above ground f the lowest model layer
+    real(wp) :: agl                   ! height above ground f the lowest model layer
     real(wp) :: theta_lowest_layer    ! potential temperature in the lowest layer
     real(wp) :: theta_second_layer    ! potential temperature in the second-lowest layer
     real(wp) :: dz                    ! vertical grid point distance
@@ -123,7 +123,7 @@ module planetary_boundary_layer
     ! input variable
     real(wp),intent(in) :: u10
     ! output variable
-    real(wp)             :: roughness_length_from_u10_sea
+    real(wp)            :: roughness_length_from_u10_sea
 
     ! local variables
     real(wp) :: swh,period,wavelength
@@ -154,10 +154,10 @@ module planetary_boundary_layer
     ! input variable
     real(wp),intent(in) :: roughness_velocity_value,agl,roughness_length_value,monin_obukhov_length_value
     ! output variable
-    real(wp)             :: scalar_flux_resistance
+    real(wp)            :: scalar_flux_resistance
 
     ! local variables
-    real(wp)             :: used_vertical_height
+    real(wp)            :: used_vertical_height
 
     ! height of the prandtl layer
     used_vertical_height = min(agl,PRANDTL_HEIGHT)
@@ -171,7 +171,7 @@ module planetary_boundary_layer
     + log(7._wp))
 
     ! limitting the result for security
-    if (scalar_flux_resistance < 1._wp) then
+    if (scalar_flux_resistance<1._wp) then
       scalar_flux_resistance = 1._wp
     endif 
     
@@ -199,7 +199,7 @@ module planetary_boundary_layer
     - psi_m(used_vertical_height,monin_obukhov_length_value))
 
     ! limitting the result for security
-    if (momentum_flux_resistance < 1._wp) then
+    if (momentum_flux_resistance<1._wp) then
       momentum_flux_resistance = 1._wp
     endif
 
@@ -248,7 +248,7 @@ module planetary_boundary_layer
     
     ! avoiding l==0
     l_local = l
-    if (abs(l_local) < EPSILON_SECURITY) then
+    if (abs(l_local)<EPSILON_SECURITY) then
       l_local = EPSILON_SECURITY
     endif
 
@@ -279,7 +279,7 @@ module planetary_boundary_layer
 
     ! avoiding l == 0
     l_local = l
-    if (abs(l_local) < EPSILON_SECURITY) then
+    if (abs(l_local)<EPSILON_SECURITY) then
       l_local = EPSILON_SECURITY
     endif
 

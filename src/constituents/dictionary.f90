@@ -30,15 +30,14 @@ module dictionary
     ! mean particle masses of the constituents of the gas phase
     
     integer, intent(in) :: gas_constituent_id
-    
-    ! output
+    ! the result
     real(wp)            :: mean_particle_masses_gas
   
-    if (gas_constituent_id == 0) then
+    if (gas_constituent_id==0) then
       mean_particle_masses_gas = 0.004810e-23;
     endif
   
-    if (gas_constituent_id == 1) then
+    if (gas_constituent_id==1) then
       mean_particle_masses_gas = 0.002991e-23
     endif
   
@@ -49,15 +48,14 @@ module dictionary
     ! specific heat capacity at constant volume
     
     integer, intent(in) :: j_constituent
-    
-    ! output
+    ! the result
     real(wp) :: spec_heat_capacities_v_gas
     
-    if (j_constituent == 0) then
+    if (j_constituent==0) then
       spec_heat_capacities_v_gas = 717.942189_wp
     endif
     
-    if (j_constituent == 1) then
+    if (j_constituent==1) then
       spec_heat_capacities_v_gas = 1396.475121_wp
     endif
     
@@ -68,14 +66,14 @@ module dictionary
     ! specific heat capacity at constant pressure
     
     integer, intent(in) :: j_constituent
-    
+    ! the result
     real(wp) :: spec_heat_capacities_p_gas
     
-    if (j_constituent == 0) then
+    if (j_constituent==0) then
       spec_heat_capacities_p_gas = 1005.0_wp
     endif
     
-    if (j_constituent == 1) then
+    if (j_constituent==1) then
       spec_heat_capacities_p_gas = 1858.0_wp
     endif
     
@@ -86,14 +84,14 @@ module dictionary
     ! specific gas constants
     
     integer, intent(in) :: j_constituent
-    
+    ! the result
     real(wp) :: specific_gas_constants
     
-    if (j_constituent == 0) then
+    if (j_constituent==0) then
       specific_gas_constants = 287.057811_wp
     endif
     
-    if (j_constituent == 1) then
+    if (j_constituent==1) then
       specific_gas_constants = 461.524879_wp
     endif
     
@@ -114,13 +112,13 @@ module dictionary
     ! 1:  gas to solid
     ! 2: liquid to solid
 
-    if (direction == 0) then
+    if (direction==0) then
       phase_trans_heat = 2257000._wp
     endif
-    if (direction == 1) then
+    if (direction==1) then
       phase_trans_heat = 2257000._wp + 333500._wp
     endif
-    if (direction == 2) then
+    if (direction==2) then
       phase_trans_heat = 333500._wp
     endif
     
@@ -131,14 +129,14 @@ module dictionary
     ! This function calculates the ozone VMR as a function of height.
     ! assumes a Gaussian distribution
     
-    real(wp)                          :: height            ! height above MSL
+    real(wp) :: height ! height above MSL
     
     ! local variables
-    real(wp)                          :: fwhm = 20e3_wp      ! full width at half maximum
-    real(wp)                          :: max = 34e3_wp     ! height of the maximum of the distribution
-    real(wp)                          :: max_vmr = 8.5e-6_wp ! maximum volume mixing ratio
-    real(wp)                          :: sigma               ! standard deviation
-    real(wp)                          :: distance            ! distance from the maximum
+    real(wp) :: fwhm = 20e3_wp      ! full width at half maximum
+    real(wp) :: max = 34e3_wp       ! height of the maximum of the distribution
+    real(wp) :: max_vmr = 8.5e-6_wp ! maximum volume mixing ratio
+    real(wp) :: sigma               ! standard deviation
+    real(wp) :: distance            ! distance from the maximum
     
     ! calculation of the result
     sigma = fwhm/(8*log(2._wp))**0.5_wp
@@ -151,7 +149,7 @@ module dictionary
     
     ! This function returns the molar fraction of certain gases in dry air.
     
-    integer                           :: gas_number
+    integer :: gas_number
   
     ! 0: dry air
     ! 1: H2O
