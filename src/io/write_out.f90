@@ -35,7 +35,7 @@ module write_out
     integer           :: ncid                      ! ID of the NetCDF file
     integer           :: x_dimid                   ! ID of the x dimension
     integer           :: y_dimid                   ! ID of the y dimension
-    integer           :: dimid                   ! ID of the z dimension
+    integer           :: dimid                     ! ID of the z dimension
     integer           :: constituents_dimid        ! ID of the constituents dimension
     integer           :: single_double_dimid       ! ID of the dimension cotaining one double
     integer           :: dimids_2d(2)              ! dimensions of horizontal fields

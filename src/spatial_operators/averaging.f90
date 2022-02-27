@@ -26,15 +26,15 @@ module averaging
     
     real(wp),     intent(in) :: vector_field_x(:,:,:) ! x-component of vector field to work with
     real(wp),     intent(in) :: vector_field_y(:,:,:) ! y-component of vector field to work with
-    integer,      intent(in) :: ji,jk,jl            ! spatial indices
     type(t_grid), intent(in) :: grid                  ! model grid
+    integer,      intent(in) :: ji,jk,jl              ! spatial indices
     
     real(wp) :: vertical_contravariant_corr
     vertical_contravariant_corr = 0._wp
     
-    if (jl >= nlays-nlays_oro+1) then
+    if (jl>=nlays-nlays_oro+1) then
         ! highest level following orography
-      if (jl == nlays-nlays_oro+1) then
+      if (jl==nlays-nlays_oro+1) then
         vertical_contravariant_corr = vertical_contravariant_corr &
         - 0.5_wp*vector_field_x(ji,jk+1,jl)*grid%slope_x(ji,jk+1,jl)*grid%inner_product_weights(ji,jk,jl,1) &
         - 0.5_wp*vector_field_y(ji+1,jk,jl)*grid%slope_y(ji+1,jk,jl)*grid%inner_product_weights(ji,jk,jl,2) &
@@ -66,7 +66,7 @@ module averaging
     type(t_grid), intent(in)    :: grid                  ! the grid properties
   
     ! local variables
-    integer                     :: ji,jk,jl            ! loop indices
+    integer :: ji,jk,jl ! loop indices
     
     ! correction to the x-component
     !$OMP PARALLEL
@@ -107,12 +107,12 @@ module averaging
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     integer,      intent(in)    :: ji,jk,jl            ! positional indices
   
-    real(wp)                    :: remap_ver2hor_x       ! the result
+    real(wp) :: remap_ver2hor_x ! the result
     
     remap_ver2hor_x = grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
     remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk+1,jl,5)*vertical_cov(ji,jk+1,jl)
     ! layer below
-    if (jl < nlays) then
+    if (jl<nlays) then
       remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
       remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk+1,jl,6)*vertical_cov(ji,jk+1,jl+1)
     endif
@@ -126,16 +126,16 @@ module averaging
     ! This function remaps a vertical covariant component of
     ! a vector field to a position of a vector component in y-direction.
   
-    real(wp),     intent(in)    :: vertical_cov(:,:,:)   ! z-component of vector field to work with
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
-    integer,      intent(in)    :: ji,jk,jl            ! positional indices
+    real(wp),     intent(in) :: vertical_cov(:,:,:) ! z-component of vector field to work with
+    type(t_grid), intent(in) :: grid                ! the grid properties
+    integer,      intent(in) :: ji,jk,jl            ! positional indices
   
-    real(wp)                    :: remap_ver2hor_y       ! the result
+    real(wp) :: remap_ver2hor_y ! the result
     
     remap_ver2hor_y = grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
     remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji+1,jk,jl,5)*vertical_cov(ji+1,jk,jl)
     ! layer below
-    if (jl < nlays) then
+    if (jl<nlays) then
       remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
       remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji+1,jk,jl,6)*vertical_cov(ji+1,jk,jl+1)
     endif
@@ -154,7 +154,7 @@ module averaging
     integer,      intent(in) :: ji,jk,jl          ! positional indices
     
     ! output
-    real(wp)                 :: horizontal_covariant_x
+    real(wp) :: horizontal_covariant_x
     
     horizontal_covariant_x = hor_comp_x(ji,jk,jl)
     if (jl > nlays - nlays_oro) then
@@ -176,7 +176,7 @@ module averaging
     integer,      intent(in) :: ji,jk,jl          ! positional indices
     
     ! output
-    real(wp)                 :: horizontal_covariant_y
+    real(wp) :: horizontal_covariant_y
   
     horizontal_covariant_y = hor_comp_y(ji,jk,jl)
     if (jl > nlays - nlays_oro) then
