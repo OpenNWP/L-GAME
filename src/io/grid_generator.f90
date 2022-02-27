@@ -45,8 +45,8 @@ module grid_generator
   
     type(t_grid), intent(inout) :: grid ! the model grid
     ! local variables
-    real(wp) :: lat_left_lower                 ! latitude coordinate of lower left corner
-    real(wp) :: lon_left_lower                 ! longitude coordinate of lower left corner
+    real(wp) :: lat_left_upper                 ! latitude coordinate of upper left corner
+    real(wp) :: lon_left_upper                 ! longitude coordinate of upper left corner
     real(wp) :: dlat                           ! mesh size in y direction as angle
     real(wp) :: dlon                           ! mesh size in x direction as angle
     integer  :: ji,jk,jl                       ! loop indices
@@ -76,13 +76,13 @@ module grid_generator
     ! setting the dy of the model grid
     dlat = dy/re
     dlon = dx/re
-    lat_left_lower = -(nlins-1._wp)/2._wp*dlat
-    lon_left_lower = -(ncols-1._wp)/2._wp*dlon
+    lat_left_upper = (nlins-1._wp)/2._wp*dlat
+    lon_left_upper = (ncols-1._wp)/2._wp*dlon
     do ji=1,nlins
-      grid%lat_scalar(ji) = lat_left_lower + dlat*(ji-1._wp)
+      grid%lat_scalar(ji) = lat_left_upper - dlat*(ji-1._wp)
     enddo
     do ji=1,ncols
-      grid%lon_scalar(ji) = lon_left_lower + dlon*(ji-1._wp)
+      grid%lon_scalar(ji) = lon_left_upper + dlon*(ji-1._wp)
     enddo
     
     ! setting the Coriolis vector at the grid points

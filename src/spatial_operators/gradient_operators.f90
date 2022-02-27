@@ -47,7 +47,7 @@ module gradient_operators
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji)
     do ji=2,nlins
-      result_field_y(ji,:,:) = (scalar_field(ji,:,:) - scalar_field(ji-1,:,:))/grid%dy(ji,:,:)
+      result_field_y(ji,:,:) = (scalar_field(ji-1,:,:) - scalar_field(ji,:,:))/grid%dy(ji,:,:)
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
