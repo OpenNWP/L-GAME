@@ -52,21 +52,27 @@ program control
   write(*,*) "Reading in run namelist ..."
   call run_nml_setup()
   write(*,*) "... run namelist read."
+  
   write(*,*) "Reading in diff namelist ..."
   call diff_nml_setup()
   write(*,*) "... diff namelist read."
+  
   write(*,*) "Reading in I/O namelist ..."
   call io_nml_setup()
   write(*,*) "... I/O namelist read."
+  
   write(*,*) "Reading in constituents namelist ..."
   call constituents_nml_setup()
   write(*,*) "... constituents namelist read."
+  
   write(*,*) "Reading in surface namelist ..."
   call surface_nml_setup()
   write(*,*) "... surface namelist read."
+  
   write(*,*) "Reading in boundary conditions namelist ..."
   call bc_nml_setup()
   write(*,*) "... boundary conditions namelist read."
+  
   write(*,*) "Reading in radiation namelist ..."
   call rad_nml_setup()
   write(*,*) "... radiation namelist read."
@@ -175,20 +181,20 @@ program control
   allocate(state_write%temperature_soil(nlins,ncols,nsoillays))
   ! type containing diagnostic quantities
   allocate(diag%v_squared(nlins,ncols,nlays))
-  allocate(diag%v_squared_grad_x(nlins,ncols,nlays))
-  allocate(diag%v_squared_grad_y(nlins,ncols,nlays))
+  allocate(diag%v_squared_grad_x(nlins,ncols+1,nlays))
+  allocate(diag%v_squared_grad_y(nlins+1,ncols,nlays))
   allocate(diag%v_squared_grad_z(nlins,ncols,nlays+1))
-  allocate(diag%p_grad_acc_neg_l_u(nlins,ncols,nlays))
-  allocate(diag%p_grad_acc_neg_l_v(nlins,ncols,nlays))
+  allocate(diag%p_grad_acc_neg_l_u(nlins,ncols+1,nlays))
+  allocate(diag%p_grad_acc_neg_l_v(nlins+1,ncols,nlays))
   allocate(diag%p_grad_acc_neg_l_w(nlins,ncols,nlays+1))
-  allocate(diag%p_grad_acc_neg_nl_u(nlins,ncols,nlays))
-  allocate(diag%p_grad_acc_neg_nl_v(nlins,ncols,nlays))
+  allocate(diag%p_grad_acc_neg_nl_u(nlins,ncols+1,nlays))
+  allocate(diag%p_grad_acc_neg_nl_v(nlins+1,ncols,nlays))
   allocate(diag%p_grad_acc_neg_nl_w(nlins,ncols,nlays+1))
-  allocate(diag%p_grad_acc_old_u(nlins,ncols,nlays))
-  allocate(diag%p_grad_acc_old_v(nlins,ncols,nlays))
+  allocate(diag%p_grad_acc_old_u(nlins,ncols+1,nlays))
+  allocate(diag%p_grad_acc_old_v(nlins+1,ncols,nlays))
   allocate(diag%p_grad_acc_old_w(nlins,ncols,nlays+1))
-  allocate(diag%pot_vort_tend_x(nlins,ncols,nlays))
-  allocate(diag%pot_vort_tend_y(nlins,ncols,nlays))
+  allocate(diag%pot_vort_tend_x(nlins,ncols+1,nlays))
+  allocate(diag%pot_vort_tend_y(nlins+1,ncols,nlays))
   allocate(diag%pot_vort_tend_z(nlins,ncols,nlays+1))
   allocate(diag%scalar_placeholder(nlins,ncols,nlays))
   allocate(diag%temperature_gas(nlins,ncols,nlays))

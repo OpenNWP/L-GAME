@@ -82,6 +82,7 @@ module explicit_vector_tendencies
     old_weight = 1._wp - new_weight
     
     ! adding up the explicit wind tendencies
+    
     ! x-direction
     tend%wind_u = old_weight*tend%wind_u &
     + new_weight*( &
@@ -93,6 +94,7 @@ module explicit_vector_tendencies
     - 0.5_wp*diag%v_squared_grad_x + diag%pot_vort_tend_x & 
     ! momentum diffusion
     + irrev%mom_diff_tend_x)
+    
     ! y-direction
     tend%wind_v = old_weight*tend%wind_v &
     + new_weight*( &
@@ -104,6 +106,7 @@ module explicit_vector_tendencies
     - 0.5_wp*diag%v_squared_grad_y + diag%pot_vort_tend_y &
     ! momentum diffusion
     + irrev%mom_diff_tend_y)
+    
     ! z-direction
     tend%wind_w = old_weight*tend%wind_w &
     + new_weight*( &
