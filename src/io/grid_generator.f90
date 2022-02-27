@@ -86,7 +86,6 @@ module grid_generator
     enddo
     
     ! setting the Coriolis vector at the grid points
-    
     do ji=1,nlins+1
       do jk=1,ncols
         grid%fvec_x(ji,jk) = 0._wp
@@ -356,11 +355,11 @@ module grid_generator
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
-          ! upper boundary
+          ! lower boundary
           if (ji==1) then
             lower_z = grid%z_geo_w(1,jk,jl+1)+0.5_wp*(grid%z_geo_w(1,jk,jl+1)-grid%z_geo_w(2,jk,jl+1))
             upper_z = grid%z_geo_w(1,jk,jl)+0.5_wp*(grid%z_geo_w(1,jk,jl)-grid%z_geo_w(2,jk,jl))
-          ! lower boundary
+          ! upper boundary
           elseif (ji==nlins+1) then
             lower_z = grid%z_geo_w(nlins,jk,jl+1)+0.5_wp*(grid%z_geo_w(nlins,jk,jl+1)-grid%z_geo_w(nlins-1,jk,jl+1))
             upper_z = grid%z_geo_w(nlins,jk,jl)+0.5_wp*(grid%z_geo_w(nlins,jk,jl)-grid%z_geo_w(nlins-1,jk,jl))
@@ -376,16 +375,20 @@ module grid_generator
     enddo
     
     ! setting the horizontal dual areas
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins+1
       do jk=1,ncols+1
         do jl=1,nlays
           grid%z_geo_area_dual_z(ji,jk,jl) = 0.25_wp*(grid%z_geo_scal(ji,jk,jl)+grid%z_geo_scal(ji+1,jk,jl) &
           +grid%z_geo_scal(ji+1,jk+1,jl)+grid%z_geo_scal(ji,jk+1,jl))
-          grid%area_dual_z(ji,jk,jl) = patch_area(0.5_wp*(grid%lat_scalar(ji) + grid%lat_scalar(ji)),dlon,dlat) &
+          grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji) - 0.5_wp*dlat,dlon,dlat) &
           *(re + grid%z_geo_area_dual_z(ji,jk,jl))**2/re**2
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! setting the vertical dual areas in x-direction
     do ji=1,nlins+1
