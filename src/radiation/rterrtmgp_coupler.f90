@@ -20,6 +20,8 @@ module radiation
   use mo_cloud_optics,            only: ty_cloud_optics
   use mo_load_cloud_coefficients, only: load_cld_lutcoeff,load_cld_padecoeff
   use dictionary,                 only: specific_gas_constants,calc_o3_vmr,molar_fraction_in_dry_air
+  use rad_nml,                    only: rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
+                                        cloud_coefficients_file_sw,cloud_coefficients_file_lw
   
   implicit none
   
@@ -35,18 +37,6 @@ module radiation
    "N2 ","O2 ","CH4","O3 ","CO2","H2O","N2O","CO " &
    /)
   
-  character(len = *),parameter :: rrtmgp_coefficients_file_sw = &
-  ! insert the name of the short wave data file here
-  "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g112-210809.nc"
-  character(len = *),parameter :: rrtmgp_coefficients_file_lw = &
-  ! insert the name of the long wave data file here
-  "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g128-210809.nc"
-  character(len = *),parameter :: cloud_coefficients_file_sw = &
-  ! insert the name of the short wave cloud optics file here
-  "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-sw.nc"
-  character(len = *),parameter :: cloud_coefficients_file_lw = &
-  ! insert the name of the long wave cloud optics file here
-  "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-lw.nc"
   ! the gases in lowercase
   character(len = 32),dimension(size(active_gases)) :: gases_lowercase
   
@@ -658,7 +648,7 @@ module radiation
     
     ! refer to https://www.esrl.noaa.gov/gmd/grad/solcalc/azel.html
     ! Unix time coordinate of 2019-Dec-20,12:00 UTC
-    t_0             = 1576843200.0_wp
+    t_0 = 1576843200.0_wp
     ! this is a winter solstice
     phi_0_earth_around_sun = 0._wp
     phi_0_earth_rotation  = 0._wp
