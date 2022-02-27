@@ -159,7 +159,7 @@ module vorticities
     type(t_grid),  intent(in)    :: grid  ! model grid
   
     ! local variables
-    integer :: ji,jk,jl ! loop index
+    integer :: ji,jk,jl ! loop indices
   
     ! calculating the relative vorticity
     if (.not. llinear) then
@@ -222,7 +222,7 @@ module vorticities
           else
             diag%z_eta_x(ji,jk,jl) = diag%z_eta_x(ji,jk,jl)/(0.25_wp*(state%rho(ji-1,jk,jl-1,no_of_condensed_constituents+1) &
             +state%rho(ji,jk,jl-1,no_of_condensed_constituents+1)+ &
-            state%rho(ji,jk,jl,no_of_condensed_constituents+1)+state%rho(ji-1,jk,jl,no_of_condensed_constituents+1)))
+            state%rho(ji-1,jk,jl,no_of_condensed_constituents+1)+state%rho(ji,jk,jl,no_of_condensed_constituents+1)))
           endif
         enddo
       enddo
