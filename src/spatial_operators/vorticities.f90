@@ -64,7 +64,7 @@ module vorticities
       do jk=2,ncols
         do jl=2,nlays
           diag%eta_y(ji,jk,jl) = &
-          - grid%dz(ji,jk,jl)*state%wind_w(ji,jk,jl) &
+          -grid%dz(ji,jk,jl)*state%wind_w(ji,jk,jl) &
           - grid%dx(ji,jk,jl)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,jl) &
           + grid%dz(ji,jk-1,jl)*state%wind_w(ji,jk-1,jl) &
           + grid%dx(ji,jk,jl-1)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,jl-1)
