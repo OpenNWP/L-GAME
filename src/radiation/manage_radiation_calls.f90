@@ -17,7 +17,7 @@ module manage_radiation_calls
   
   subroutine call_radiation(state_old,grid,diag,irrev)
   
-    ! calls RTE+RRTMGP
+    ! This subroutine calls RTE+RRTMGP in a parallelized way.
     
     type(t_state),  intent(inout) :: state_old ! the state at the old timestep
     type(t_grid),   intent(inout) :: grid      ! the grid of the model

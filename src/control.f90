@@ -295,12 +295,12 @@ program control
   run_span = 3600._wp*run_span_hr
   timestep_counter = 0
   
-  do while (t_0 < t_init+run_span+300._wp)
+  do while (t_0<t_init+run_span+300._wp)
     
     ! writing the new state into the old state
     call lin_combination(state_new,state_new,state_old,0._wp,1._wp,grid)
 
-    if (t_0 <= t_rad_update .and. t_0+dtime >= t_rad_update) then
+    if (t_0<=t_rad_update .and. t_0+dtime>=t_rad_update) then
       lrad_update = .true.
       t_rad_update = t_rad_update+dtime_rad
     else
@@ -311,7 +311,7 @@ program control
     call rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,timestep_counter,lrad_update)
     
     ! managing the calls to the output routine
-    if (t_0 + dtime >= t_write) then
+    if (t_0+dtime>=t_write) then
     
       call interpolation_t(state_old,state_new,state_write,t_0,t_0+dtime,t_write,grid)
       call write_output(state_write,diag,int((t_write-t_init)/60._wp),grid)
