@@ -196,7 +196,7 @@ module column_solvers
           e_vector(jl) = theta_int_new(jl)*gammaa(jl+1)*theta_int_new(jl+1) &
           - 0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl+1)) &
-         +(grid%geo_scal(ji,jk,jl)-grid%geo_scal(ji,jk,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
+          +(grid%geo_scal(ji,jk,jl)-grid%geo_scal(ji,jk,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
           *state_old%wind_w(ji,jk,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
         enddo
 	
@@ -329,8 +329,12 @@ module column_solvers
     !$OMP END PARALLEL
     
     ! potential temperature perturbation at the new time step
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     state_new%theta_pert(:,:,:) = state_new%rhotheta(:,:,:)/state_new%rho(:,:,:,no_of_condensed_constituents+1) &
     - grid%theta_bg(:,:,:)
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
 
   end subroutine three_band_solver_ver
   

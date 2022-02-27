@@ -42,8 +42,8 @@ module boundaries
     type(t_bc), intent(inout) :: bc
     
     ! local variables
-    integer  :: ji,jk,jl           ! loop indices
     real(wp) :: dist_from_boundary ! index distance from the boundaary of the domain
+    integer  :: ji,jk,jl           ! loop indices
     
     ! rescale factor for scalar fields
     !$OMP PARALLEL
