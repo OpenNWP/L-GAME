@@ -31,7 +31,7 @@ module gradient_operators
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
-    integer  :: ji,jk ! loop variables
+    integer :: ji,jk ! loop variables
 
     ! inner domain
     ! calculating the x-component of the gradient

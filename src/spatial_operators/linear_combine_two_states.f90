@@ -3,6 +3,8 @@
 
 module linear_combine_two_states
 
+  ! This module contains functionality to interpolate two states.
+
   use definitions, only: t_state,wp,t_grid
   use constituents_nml, only: no_of_condensed_constituents
   
@@ -17,7 +19,7 @@ module linear_combine_two_states
 
   subroutine lin_combination(state_0,state_1,state_out,coeff_0,coeff_1,grid)
   
-    ! this performs a linear combination of two states
+    ! This subroutine performs a linear combination of two states.
   
     type(t_state), intent(in)    :: state_0
     type(t_state), intent(in)    :: state_1

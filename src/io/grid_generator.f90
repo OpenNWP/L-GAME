@@ -77,7 +77,7 @@ module grid_generator
     dlat = dy/re
     dlon = dx/re
     lat_left_upper = (nlins-1._wp)/2._wp*dlat
-    lon_left_upper = (ncols-1._wp)/2._wp*dlon
+    lon_left_upper = -(ncols-1._wp)/2._wp*dlon
     do ji=1,nlins
       grid%lat_scalar(ji) = lat_left_upper - dlat*(ji-1._wp)
     enddo
