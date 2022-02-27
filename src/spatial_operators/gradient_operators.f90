@@ -68,7 +68,7 @@ module gradient_operators
       
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      result_field_y(1,:,:) = (scalar_field(1,:,:) - scalar_field(nlins,:,:))/grid%dy(1,:,:)
+      result_field_y(1,:,:) = (scalar_field(nlins,:,:) - scalar_field(1,:,:))/grid%dy(1,:,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
       !$OMP PARALLEL

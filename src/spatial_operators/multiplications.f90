@@ -21,7 +21,7 @@ module multiplications
 
   subroutine scalar_times_scalar(scalar_field_1,scalar_field_2,scalar_field_out)
   
-    ! Multiplication of a scalar with another scalar field.
+    ! This subroutine multiplies of a scalar with another scalar field.
     
     ! input arguments and the result
     real(wp), intent(in)    :: scalar_field_1(:,:,:)   ! input field 1
@@ -40,13 +40,13 @@ module multiplications
   subroutine scalar_times_vector_h(scalar_field,in_vector_x,in_vector_y, &
                    result_field_x,result_field_y)
   
-    ! Multiplication of a scalar with a vector field at horizontal points.
+    ! This subroutine multiplies of a scalar with a vector field at horizontal points.
     
-    real(wp), intent(in)    :: scalar_field(:,:,:)
-    real(wp), intent(in)    :: in_vector_x(:,:,:)
-    real(wp), intent(in)    :: in_vector_y(:,:,:)
-    real(wp), intent(inout) :: result_field_x(:,:,:)
-    real(wp), intent(inout) :: result_field_y(:,:,:)
+    real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
+    real(wp), intent(in)    :: in_vector_x(:,:,:)    ! input vector field, x-component
+    real(wp), intent(in)    :: in_vector_y(:,:,:)    ! input vector field, y-component
+    real(wp), intent(inout) :: result_field_x(:,:,:) ! output vector field, x-component
+    real(wp), intent(inout) :: result_field_y(:,:,:) ! output vector field, y-component
   
     ! local variables
     integer :: ji,jk ! loop indices
@@ -101,11 +101,11 @@ module multiplications
   
   subroutine scalar_times_vector_v(scalar_field,in_vector_z,result_field_z)
   
-    ! Multiplication of an extended scalar with an inner vector field at vertical points.
+    ! This subroutine multiplies of an extended scalar with an inner vector field at vertical points.
     
-    real(wp), intent(in)    :: scalar_field(:,:,:)
-    real(wp), intent(in)    :: in_vector_z(:,:,:)
-    real(wp), intent(inout) :: result_field_z(:,:,:)
+    real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
+    real(wp), intent(in)    :: in_vector_z(:,:,:)    ! input vector field, z-component
+    real(wp), intent(inout) :: result_field_z(:,:,:) ! output vector field, z-component
   
     ! local variables
     integer :: jl ! loop index
@@ -130,16 +130,17 @@ module multiplications
   subroutine scalar_times_vector(scalar_field,in_vector_x,in_vector_y,in_vector_z, &
                    result_field_x,result_field_y,result_field_z)
   
-    ! Multiplication of a scalar with a vector field.
+    ! This subroutine of a scalar with a vector field.
     
-    real(wp), intent(in)    :: scalar_field(:,:,:)
-    real(wp), intent(in)    :: in_vector_x(:,:,:)
-    real(wp), intent(in)    :: in_vector_y(:,:,:)
-    real(wp), intent(in)    :: in_vector_z(:,:,:)
-    real(wp), intent(inout) :: result_field_x(:,:,:)
-    real(wp), intent(inout) :: result_field_y(:,:,:)
-    real(wp), intent(inout) :: result_field_z(:,:,:)
+    real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
+    real(wp), intent(in)    :: in_vector_x(:,:,:)    ! input vector field, x-component
+    real(wp), intent(in)    :: in_vector_y(:,:,:)    ! input vector field, y-component
+    real(wp), intent(in)    :: in_vector_z(:,:,:)    ! input vector field, z-component
+    real(wp), intent(inout) :: result_field_x(:,:,:) ! output vector field, x-component
+    real(wp), intent(inout) :: result_field_y(:,:,:) ! output vector field, y-component
+    real(wp), intent(inout) :: result_field_z(:,:,:) ! output vector field, z-component
     
+    ! this subroutine just calls the horizontal and vertical subroutines one after the other
     call scalar_times_vector_h(scalar_field,in_vector_x,in_vector_y,result_field_x,result_field_y)
     call scalar_times_vector_v(scalar_field,in_vector_z,result_field_z)
   
