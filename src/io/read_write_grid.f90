@@ -43,7 +43,7 @@ module read_write_grid
     integer           :: varid_lon_u            ! variable ID of the longitudes of the u-vectors
     integer           :: varid_lat_v            ! variable ID of the latitudes of the v-vectors
     integer           :: varid_lon_v            ! variable ID of the longitudes of the v-vectors
-    integer           :: varid_geo_w          ! variable ID of the orography
+    integer           :: varid_geo_w            ! variable ID of the orography
     integer           :: varid_sfc_rho_c        ! variable ID of the volumetric specific heat conductivity of the soil
     integer           :: varid_t_conduc_soil    ! variable ID of the temperature conductivity of the soil
     integer           :: varid_is_land          ! variable ID of the land-sea-mask
@@ -164,7 +164,7 @@ module read_write_grid
     ! local variables
     integer           :: ncid                ! ID of the NetCDF file
     character(len=64) :: filename            ! output filename
-    integer           :: varid_geo_w       ! variable ID of the orography
+    integer           :: varid_geo_w         ! variable ID of the orography
     integer           :: varid_sfc_rho_c     ! variable ID of the volumetric specific heat conductivity of the soil
     integer           :: varid_t_conduc_soil ! variable ID of the temperature conductivity of the soil
     integer           :: varid_is_land       ! variable ID of the land-sea-mask
