@@ -41,7 +41,6 @@ module column_solvers
     real(wp) :: d_vector(nlays-1+nsoillays)        ! needed for the vertical solver
     real(wp) :: e_vector(nlays-2+nsoillays)        ! needed for the vertical solver
     real(wp) :: r_vector(nlays-1+nsoillays)        ! needed for the vertical solver
-    real(wp) :: solution(nlays-1+nsoillays)        ! covariant mass flux density at the interfaces (solution)
     real(wp) :: rho_expl(nlays)                    ! explicit mass density
     real(wp) :: rhotheta_expl(nlays)               ! explicit potential temperature density
     real(wp) :: exner_pert_expl(nlays)             ! explicit Exner pressure perturbation
@@ -107,7 +106,7 @@ module column_solvers
     endif
 	
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,c_vector,d_vector,e_vector,r_vector,solution, &
+    !$OMP DO PRIVATE(ji,jk,jl,c_vector,d_vector,e_vector,r_vector,solution_vector, &
     !$OMP rho_expl,rhotheta_expl,exner_pert_expl,theta_pert_expl,rho_int_old, &
     !$OMP rho_int_expl,theta_int_new,rho_int_new,alpha_old,beta_old,gamma_old,alpha_new, &
     !$OMP beta_new,gamma_new,alpha,beta,gammaa,damping_coeff,z_above_damping,soil_switch)
@@ -127,7 +126,7 @@ module column_solvers
           +dtime*tend%rho(ji,jk,jl,no_of_condensed_constituents+1)
           ! explicit potential temperature density
           rhotheta_expl(jl) = state_old%rhotheta(ji,jk,jl)+dtime*tend%rhotheta(ji,jk,jl)
-          if (rk_Step==1) then
+          if (rk_step==1) then
             ! old time step partial derivatives of theta and Pi (divided by the volume)
             alpha(jl) = -state_old%rhotheta(ji,jk,jl)/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)**2 &
             /grid%volume(ji,jk,jl)
@@ -274,7 +273,7 @@ module column_solvers
           enddo
         endif
 		
-        call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution,nlays-1+soil_switch*nsoillays)
+        call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,nlays-1+soil_switch*nsoillays)
        
         ! Klemp swamp layer
         do jl=1,nlays-1
@@ -284,30 +283,30 @@ module column_solvers
           else
             damping_coeff = klemp_damp_max*sin(0.5_wp*M_PI*z_above_damping/(toa-damping_start_height))**2
           endif
-          solution(jl) = solution(jl)/(1._wp+damping_coeff*dtime)
+          solution_vector(jl) = solution_vector(jl)/(1._wp+damping_coeff*dtime)
         enddo
         
         ! results
         ! density, potential temperature density
         do jl=2,nlays-1
           state_new%rho(ji,jk,jl,no_of_condensed_constituents+1) = rho_expl(jl) &
-         +dtime*(-solution(jl-1)+solution(jl))/grid%volume(ji,jk,jl)
+         +dtime*(-solution_vector(jl-1)+solution_vector(jl))/grid%volume(ji,jk,jl)
           state_new%rhotheta(ji,jk,jl) = rhotheta_expl(jl) &
-         +dtime*(-theta_int_new(jl-1)*solution(jl-1)+theta_int_new(jl)*solution(jl))/grid%volume(ji,jk,jl)
+         +dtime*(-theta_int_new(jl-1)*solution_vector(jl-1)+theta_int_new(jl)*solution_vector(jl))/grid%volume(ji,jk,jl)
         enddo
         ! uppermost layer
-        state_new%rho(ji,jk,1,no_of_condensed_constituents+1) = rho_expl(1)+dtime*solution(1)/grid%volume(ji,jk,1)
-        state_new%rhotheta(ji,jk,1) = rhotheta_expl(1)+dtime*theta_int_new(1)*solution(1)/grid%volume(ji,jk,1)
+        state_new%rho(ji,jk,1,no_of_condensed_constituents+1) = rho_expl(1)+dtime*solution_vector(1)/grid%volume(ji,jk,1)
+        state_new%rhotheta(ji,jk,1) = rhotheta_expl(1)+dtime*theta_int_new(1)*solution_vector(1)/grid%volume(ji,jk,1)
         ! lowest layer
         state_new%rho(ji,jk,nlays,no_of_condensed_constituents+1) = rho_expl(nlays) &
-        - dtime*solution(nlays-1)/grid%volume(ji,jk,nlays)
+        - dtime*solution_vector(nlays-1)/grid%volume(ji,jk,nlays)
         state_new%rhotheta(ji,jk,nlays) = rhotheta_expl(nlays) &
-        -dtime*theta_int_new(nlays-1)*solution(nlays-1)/grid%volume(ji,jk,nlays)
+        -dtime*theta_int_new(nlays-1)*solution_vector(nlays-1)/grid%volume(ji,jk,nlays)
         ! vertical velocity
         do jl=2,nlays
           rho_int_new = 0.5_wp*(state_new%rho(ji,jk,jl-1,no_of_condensed_constituents+1) &
           +state_new%rho(ji,jk,jl,no_of_condensed_constituents+1))
-          state_new%wind_w(ji,jk,jl) = (2._wp*solution(jl-1)/grid%area_z(ji,jk,jl) &
+          state_new%wind_w(ji,jk,jl) = (2._wp*solution_vector(jl-1)/grid%area_z(ji,jk,jl) &
           - rho_int_new*state_old%wind_w(ji,jk,jl))/rho_int_old(jl-1)
         enddo
         ! Exner pressure
@@ -317,9 +316,9 @@ module column_solvers
         enddo
         
         ! soil temperature
-        if (lsoil) then
+        if (soil_switch==1) then
           do jl=1,nsoillays
-            state_new%temperature_soil(ji,jk,jl) = solution_vector(nlays+jl)
+            state_new%temperature_soil(ji,jk,jl) = solution_vector(nlays-1+jl)
           enddo
         endif
 		

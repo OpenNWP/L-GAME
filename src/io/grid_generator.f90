@@ -81,8 +81,8 @@ module grid_generator
     do ji=1,nlins
       grid%lat_scalar(ji) = lat_left_upper - dlat*(ji-1._wp)
     enddo
-    do ji=1,ncols
-      grid%lon_scalar(ji) = lon_left_upper + dlon*(ji-1._wp)
+    do jk=1,ncols
+      grid%lon_scalar(jk) = lon_left_upper + dlon*(jk-1._wp)
     enddo
     
     ! setting the Coriolis vector at the grid points
@@ -329,6 +329,8 @@ module grid_generator
     grid%mean_velocity_area = 2._wp*sum(grid%area_z(:,:,nlays+1))/size(grid%area_z(:,:,nlays+1))
     
     ! setting the vertical areas in x-direction
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,lower_z,upper_z,lower_length)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays
@@ -350,8 +352,12 @@ module grid_generator
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! setting the vertical areas in y-direction
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,lower_z,upper_z,lower_length)
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
@@ -373,6 +379,8 @@ module grid_generator
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! setting the horizontal dual areas
     !$OMP PARALLEL
@@ -391,6 +399,8 @@ module grid_generator
     !$OMP END PARALLEL
     
     ! setting the vertical dual areas in x-direction
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,lower_z,lower_length,upper_z)
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays+1
@@ -411,8 +421,12 @@ module grid_generator
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! setting the vertical dual areas in y-direction
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,lower_z,lower_length,upper_z)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays+1
@@ -433,6 +447,8 @@ module grid_generator
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
 
     ! setting the volume of the grid boxes
     !$OMP PARALLEL
