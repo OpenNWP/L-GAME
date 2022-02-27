@@ -275,9 +275,9 @@ module vorticities
     !$OMP DO PRIVATE(ji,jk)
     do ji=2,nlins
       do jk=2,ncols
-        diag%z_eta_z(ji,jk,:) = diag%z_eta_z(ji,jk,:)/(0.25_wp*(state%rho(ji-1,jk-1,:,no_of_condensed_constituents+1) &
-        +state%rho(ji-1,jk,:,no_of_condensed_constituents+1) &
-        +state%rho(ji,jk,:,no_of_condensed_constituents+1)+state%rho(ji,jk-1,:,no_of_condensed_constituents+1)))
+        diag%z_eta_z(ji,jk,:) = diag%z_eta_z(ji,jk,:)/(0.25_wp*(state%rho(ji,jk-1,:,no_of_condensed_constituents+1) &
+        +state%rho(ji,jk,:,no_of_condensed_constituents+1) &
+        +state%rho(ji-1,jk,:,no_of_condensed_constituents+1)+state%rho(ji-1,jk-1,:,no_of_condensed_constituents+1)))
       enddo
     enddo
     !$OMP END DO
