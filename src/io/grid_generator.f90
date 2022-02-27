@@ -432,10 +432,14 @@ module grid_generator
     enddo
 
     ! setting the volume of the grid boxes
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji)
     do jl=1,nlays
       grid%volume(:,:,jl) = 1._wp/3._wp*((re + grid%z_geo_w(:,:,jl))**3 - (re + grid%z_geo_w(:,:,jl+1))**3) &
       /(re + grid%z_geo_w(:,:,jl+1))**2*grid%area_z(:,:,jl+1)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! setting the inner product weights
     !$OMP PARALLEL
@@ -515,13 +519,14 @@ module grid_generator
   subroutine bg_setup(grid)
   
     ! This subroutine sets up the background state.
-    type(t_grid), intent(inout) :: grid     ! the model grid
+    
+    type(t_grid), intent(inout) :: grid ! the model grid
     
     ! local variables
-    integer                     :: ji,jk,jl ! index variables
-    real(wp)                    :: temperature, pressure
-                                            ! temperature and pressure at the respective grid point
-    real(wp)                    :: b,c      ! abbreviations needed for the hydrostatic initialization routine
+    real(wp) :: temperature ! temperature at the respective grid point
+    real(wp) :: pressure    ! pressure at the respective grid point
+    real(wp) :: b,c         ! abbreviations needed for the hydrostatic initialization routine
+    integer  :: ji,jk,jl    ! index variables
     
     ! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
     do ji=1,nlins
@@ -563,8 +568,9 @@ module grid_generator
     real(wp) :: dy_as_angle ! delta y as angle
     
     ! output
-    real(wp) :: patch_area  ! the result
+    real(wp) :: patch_area ! the result
   
+    ! computing the result
     patch_area = re**2*dx_as_angle*(sin(center_lat + 0.5_wp*dy_as_angle) - sin(center_lat - 0.5_wp*dy_as_angle))
   
   end function patch_area
@@ -588,18 +594,18 @@ module grid_generator
   
   function vegetation_height_ideal(latitude,oro)
   
-    ! calculating a latitude- and height-dependant idealized vegetation height
+    ! This function calculates a latitude- and height-dependant idealized vegetation height.
 
     ! input arguments
-    real(wp) :: latitude
-    real(wp) :: oro
-
+    real(wp) :: latitude                ! latitude of this point
+    real(wp) :: oro                     ! height of the terrain at this point
     ! output
-    real(wp) :: vegetation_height_ideal
+    real(wp) :: vegetation_height_ideal ! the result
     
     ! local variables
-    real(wp) :: vegetation_height_equator
+    real(wp) :: vegetation_height_equator ! the vegetation height at the equator
 
+    ! setting the vegetation height at the equator
     vegetation_height_equator = 20._wp
 
     vegetation_height_ideal = vegetation_height_equator*cos(latitude)*exp(-oro/1500._wp)
