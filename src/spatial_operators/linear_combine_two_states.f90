@@ -43,13 +43,13 @@ module linear_combine_two_states
   
     ! This subroutine performs an interpolation in time.
   
-    type(t_state), intent(in)    :: state_0
-    type(t_state), intent(in)    :: state_1
-    type(t_state), intent(inout) :: state_out
-    real(wp),      intent(in)    :: time_old
-    real(wp),      intent(in)    :: time_new
-    real(wp),      intent(in)    :: time_write
-    type(t_grid),  intent(in)    :: grid
+    type(t_state), intent(in)    :: state_0    ! first state
+    type(t_state), intent(in)    :: state_1    ! second state
+    type(t_state), intent(inout) :: state_out  ! result state
+    real(wp),      intent(in)    :: time_old   ! valid time of the first state
+    real(wp),      intent(in)    :: time_new   ! valid time of the second state
+    real(wp),      intent(in)    :: time_write ! time at which to write out the result state
+    type(t_grid),  intent(in)    :: grid       ! grid quantities
     
     ! using the lin_combination subroutine for this task
     call lin_combination(state_0,state_1,state_out,1._wp-(time_write-time_old)/(time_new-time_old), &

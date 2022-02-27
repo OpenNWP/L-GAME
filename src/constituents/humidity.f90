@@ -66,6 +66,7 @@ module humidity
     real(wp)             :: vapour_pressure     ! actual water vapour pressure
     real(wp)             :: saturation_pressure ! saturation water vapour pressure
     
+    ! calculation of the water vapour pressure according to the equation of state
     vapour_pressure = abs_humidity*specific_gas_constants(1)*temperature
     
     if (temperature>T_0) then

@@ -41,6 +41,7 @@ module effective_diff_coeffs
     ! computing the Eddy viscosity
     irrev%viscosity_coeff = diff_h_smag_div*grid%mean_velocity_area*abs(divergence_h)
     
+    ! calculation of the molecular diffusion coefficient
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
@@ -99,15 +100,15 @@ module effective_diff_coeffs
     ! This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
 	
     ! input
-    real(wp), intent(in) :: tke
-	
+    real(wp), intent(in) :: tke         ! specific turbulent kinetic energy (TKE)
     ! output
-    real(wp) :: tke2vertical_diff_coeff
+    real(wp) :: tke2vertical_diff_coeff ! the result (vertical Eddy viscosity im m^2/s)
     
     ! local variable
     real(wp) :: prop_constant ! semi-empirical constant
 	
     prop_constant = 0.4_wp ! unit: m
+    ! calculating the result
     tke2vertical_diff_coeff = prop_constant*tke**0.5_wp
 	
   end function tke2vertical_diff_coeff

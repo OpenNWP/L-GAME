@@ -28,10 +28,10 @@ module momentum_diff_diss
   
     ! This subroutine handles horizontal momentum diffusion.
     
-    type(t_state), intent(in)    :: state
-    type(t_diag),  intent(inout) :: diag
-    type(t_irrev), intent(inout) :: irrev
-    type(t_grid),  intent(in)    :: grid
+    type(t_state), intent(in)    :: state ! state with which to calculate the horizontal diffusion
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! calculating the divergence of the horizontal wind field
     call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
@@ -58,9 +58,9 @@ module momentum_diff_diss
     ! This subroutine calculates a simplified dissipation rate.
     
     ! input arguments and output
-    type(t_state), intent(in)    :: state
-    type(t_irrev), intent(inout) :: irrev
-    type(t_grid),  intent(in)    :: grid
+    type(t_state), intent(in)    :: state ! the state with which to calculate the dissipation rates
+    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
     integer :: ji,jk,jl ! loop indices
