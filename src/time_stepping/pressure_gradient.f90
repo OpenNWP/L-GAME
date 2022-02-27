@@ -21,6 +21,8 @@ module pressure_gradient
 
   subroutine manage_pressure_gradient(state,diag,grid,lfirst)
   
+    ! This subroutine manages the calculation of the pressure gradient.
+  
     type(t_state), intent(in)    :: state  ! state to work with
     type(t_diag),  intent(inout) :: diag   ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid   ! model grid
