@@ -361,11 +361,11 @@ module grid_generator
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
-          ! lower boundary
+          ! upper boundary
           if (ji==1) then
             lower_z = grid%z_geo_w(1,jk,jl+1)+0.5_wp*(grid%z_geo_w(1,jk,jl+1)-grid%z_geo_w(2,jk,jl+1))
             upper_z = grid%z_geo_w(1,jk,jl)+0.5_wp*(grid%z_geo_w(1,jk,jl)-grid%z_geo_w(2,jk,jl))
-          ! upper boundary
+          ! lower boundary
           elseif (ji==nlins+1) then
             lower_z = grid%z_geo_w(nlins,jk,jl+1)+0.5_wp*(grid%z_geo_w(nlins,jk,jl+1)-grid%z_geo_w(nlins-1,jk,jl+1))
             upper_z = grid%z_geo_w(nlins,jk,jl)+0.5_wp*(grid%z_geo_w(nlins,jk,jl)-grid%z_geo_w(nlins-1,jk,jl))
