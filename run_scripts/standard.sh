@@ -5,7 +5,7 @@
 
 lgame_home_dir=~/code/L-GAME
 run_id=standard
-export OMP_NUM_THREADS=1
+export OMP_NUM_THREADS=2
 
 cat > namelist.nml << EOF
 
@@ -22,9 +22,6 @@ scenario="standard"
 /
 
 &diff
-lklemp=.true.
-lmom_diff_h=.false.
-lmom_diff_v=.false.
 /
 
 &constituents
@@ -41,7 +38,7 @@ lperiodic=.true.
 /
 
 &io
-dt_write_min=1
+dt_write_min=60
 /
 
 EOF

@@ -352,7 +352,6 @@ module column_solvers
     ! local variables
     integer  :: no_of_relevant_constituents         ! number of relevant constituents for a certain quantity
     real(wp) :: impl_weight,expl_weight             ! time stepping weights
-    integer  :: quantity_id,j_constituent,ji,jk,jl  ! loop indices
     real(wp) :: c_vector(nlays-1)                   ! vector for solving the system of linear equations
     real(wp) :: d_vector(nlays)                     ! vector for solving the system of linear equations
     real(wp) :: e_vector(nlays-1)                   ! vector for solving the system of linear equations
@@ -361,6 +360,7 @@ module column_solvers
     real(wp) :: vertical_flux_vector_rhs(nlays-1)   ! vertical flux at the old timestep
     real(wp) :: solution_vector(nlays)              ! solution of the system of linear equations
     real(wp) :: density_old_at_interface,added_mass ! abbreviations
+    integer  :: quantity_id,j_constituent,ji,jk,jl  ! loop indices
     
     ! setting the time stepping weights
     impl_weight = 0.5_wp
@@ -379,9 +379,9 @@ module column_solvers
       ! density x temperature fields
       if (quantity_id==2) then
         ! in this case, all the condensed constituents have a density x temperature field
-        if (lassume_lte) then
+        if (.not. lassume_lte) then
           no_of_relevant_constituents = no_of_condensed_constituents
-          ! in this case, no density x temperature fields are taken into account
+        ! in this case, no density x temperature fields are taken into account
         else
           no_of_relevant_constituents = 0
         endif
@@ -438,7 +438,7 @@ module column_solvers
               do jl=1,nlays
                 if (jl==1) then
                   d_vector(jl) = 1._wp - impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(1)
-                elseif (jl == nlays) then
+                elseif (jl==nlays) then
                   d_vector(jl) = 1._wp + impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl-1)
                 else
                   d_vector(jl) = 1._wp + impl_weight*dtime/grid%volume(ji,jk,jl) &
@@ -487,9 +487,9 @@ module column_solvers
                 if (solution_vector(jl)<0._wp) then
                   added_mass = -solution_vector(jl)*grid%volume(ji,jk,jl)
                   solution_vector(jl) = 0._wp
-                  if (jl == 1) then
-                    solution_vector(jl+1) = solution_vector(jl+1) -  added_mass/grid%volume(ji,jk,jl+1)
-                  elseif (jl == nlays) then
+                  if (jl==1) then
+                    solution_vector(jl+1) = solution_vector(jl+1) - added_mass/grid%volume(ji,jk,jl+1)
+                  elseif (jl==nlays) then
                     if (j_constituent>no_of_condensed_constituents) then
                       solution_vector(jl-1) = solution_vector(jl-1) - added_mass/grid%volume(ji,jk,jl-1)
                     endif

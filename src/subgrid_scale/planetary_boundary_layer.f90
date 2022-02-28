@@ -55,7 +55,7 @@ module planetary_boundary_layer
 
         ! wind speed in the lowest layer
         u_lowest_layer = diag%v_squared(ji,jk,nlays)**0.5_wp
-
+        
         ! calculating the 10 m wind velocity from the logarithmic wind profile
         u10 = u_lowest_layer*log(10._wp/grid%roughness_length(ji,jk))/log(agl/grid%roughness_length(ji,jk))
 

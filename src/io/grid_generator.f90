@@ -45,29 +45,29 @@ module grid_generator
   
     type(t_grid), intent(inout) :: grid ! the model grid
     ! local variables
-    real(wp) :: lat_left_upper                 ! latitude coordinate of upper left corner
-    real(wp) :: lon_left_upper                 ! longitude coordinate of upper left corner
-    real(wp) :: dlat                           ! mesh size in y direction as angle
-    real(wp) :: dlon                           ! mesh size in x direction as angle
-    integer  :: ji,jk,jl                       ! loop indices
-    real(wp) :: max_oro                        ! variable for orography check
-    real(wp) :: A                              ! variable for calculating the vertical grid
-    real(wp) :: B                              ! variable for calculating the vertical grid
-    real(wp) :: sigma_z                        ! variable for calculating the vertical grid
-    real(wp) :: z_rel                          ! variable for calculating the vertical grid
-    real(wp) :: vertical_vector_pre(nlays+1)   ! variable for calculating the vertical grid
-    real(wp) :: base_area                      ! variable for calculating the vertical grid
-    real(wp) :: lower_z,upper_z,lower_length   ! variables needed for area calculations
-    real(wp) :: height_mountain                ! height of Gaussian mountain (needed for test case)
-    real(wp) :: sigma_mountain                 ! standard deviation of Gaussian mountain (needed for test case)
-    real(wp) :: x_coord                        ! help variable needed for the Schär test
-    real(wp) :: rescale_factor                 ! soil grid rescaling factor
-    real(wp) :: sigma_soil                     ! sigma of the soil grid
-    real(wp) :: density_soil                   ! typical density of soil
-    real(wp) :: c_p_soil                       ! typical c_p of soil
-    real(wp) :: c_p_water                      ! typical c_p of water
-    real(wp) :: lat_lower_center               ! variable for calculating the TRSK weights
-    real(wp) :: lat_upper_center               ! variable for calculating the TRSK weights
+    real(wp) :: lat_left_upper               ! latitude coordinate of upper left corner
+    real(wp) :: lon_left_upper               ! longitude coordinate of upper left corner
+    real(wp) :: dlat                         ! mesh size in y direction as angle
+    real(wp) :: dlon                         ! mesh size in x direction as angle
+    integer  :: ji,jk,jl                     ! loop indices
+    real(wp) :: max_oro                      ! variable for orography check
+    real(wp) :: A                            ! variable for calculating the vertical grid
+    real(wp) :: B                            ! variable for calculating the vertical grid
+    real(wp) :: sigma_z                      ! variable for calculating the vertical grid
+    real(wp) :: z_rel                        ! variable for calculating the vertical grid
+    real(wp) :: vertical_vector_pre(nlays+1) ! variable for calculating the vertical grid
+    real(wp) :: base_area                    ! variable for calculating the vertical grid
+    real(wp) :: lower_z,upper_z,lower_length ! variables needed for area calculations
+    real(wp) :: height_mountain              ! height of Gaussian mountain (needed for test case)
+    real(wp) :: sigma_mountain               ! standard deviation of Gaussian mountain (needed for test case)
+    real(wp) :: x_coord                      ! help variable needed for the Schär test
+    real(wp) :: rescale_factor               ! soil grid rescaling factor
+    real(wp) :: sigma_soil                   ! sigma of the soil grid
+    real(wp) :: density_soil                 ! typical density of soil
+    real(wp) :: c_p_soil                     ! typical c_p of soil
+    real(wp) :: c_p_water                    ! typical c_p of water
+    real(wp) :: lat_lower_center             ! variable for calculating the TRSK weights
+    real(wp) :: lat_upper_center             ! variable for calculating the TRSK weights
     
     ! setting the center and direction of the grid
     grid%lat_center = 2._wp*M_PI*lat_center_deg/360._wp
@@ -188,65 +188,14 @@ module grid_generator
       
       ! real orography
       case(1)
-        ! reading the grid
         if (lread_grid) then
           call read_grid(grid)
         else
-        
-          ! real orography and land-sea mask is not yet implemented
           !$OMP PARALLEL
           !$OMP WORKSHARE
+          ! interpolation will be implemented later at this point
           grid%z_w(:,:,nlays+1) = 0._wp
-          grid%is_land(:,:) = 0
           !$OMP END WORKSHARE
-          !$OMP END PARALLEL
-        
-          ! idealized soil properties are being set here if no grid file shall be read in
-          density_soil = 1442._wp
-          c_p_soil = 830._wp
-          c_p_water = 4184._wp
-    
-          !$OMP PARALLEL
-          !$OMP DO PRIVATE(ji,jk)
-          do ji=1,nlins
-            do jk=1,ncols
-		
-              grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
-            
-              ! albedo of water
-              grid%sfc_albedo(ji,jk) = 0.06_wp
-
-              ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
-              grid%roughness_length(ji,jk) = 0.08_wp
-		
-              ! will also not be used for water
-              grid%sfc_rho_c(ji,jk) = density_water*c_p_water
-		
-		      ! land
-              if (grid%is_land(ji,jk)==1) then
-        
-                grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
-          
-                ! setting the surface albedo of land depending on the latitude
-                ! ice
-                if (abs(360._wp/(2._wp*M_PI)*grid%lat_geo_scalar(ji,jk)) > 70._wp) then
-                  grid%sfc_albedo(ji,jk) = 0.8_wp
-                ! normal soil
-                else
-                  grid%sfc_albedo(ji,jk) = 0.12_wp
-                endif
-          
-                ! calculating a roughness length depending on the vegetation height
-                grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_geo_scalar(ji,jk),grid%z_w(ji,jk,nlays+1))/8._wp
-          
-              endif
-		
-		      ! restricting the roughness length to a minimum
-              grid%roughness_length(ji,jk) = max(0.0001_wp,grid%roughness_length(ji,jk))
-      
-            enddo
-          enddo
-          !$OMP END DO
           !$OMP END PARALLEL
         endif
       
@@ -267,6 +216,60 @@ module grid_generator
     
     endselect
     
+    ! idealized soil properties are being set here
+    density_soil = 1442._wp
+    c_p_soil = 830._wp
+    c_p_water = 4184._wp
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
+    do ji=1,nlins
+      do jk=1,ncols
+             
+	   ! land-sea-mask not yet implemented
+       grid%is_land(:,:) = 0
+		    
+       grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
+            
+        ! albedo of water
+        grid%sfc_albedo(ji,jk) = 0.06_wp
+
+        ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
+        grid%roughness_length(ji,jk) = 0.08_wp
+		
+        ! will also not be used for water
+        grid%sfc_rho_c(ji,jk) = density_water*c_p_water
+             
+        ! will only be used for land points
+        grid%t_conduc_soil(ji,jk) = 7.5e-7_wp
+		
+		! land
+        if (grid%is_land(ji,jk)==1) then
+        
+          grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
+          
+          ! setting the surface albedo of land depending on the latitude
+          ! ice
+          if (abs(360._wp/(2._wp*M_PI)*grid%lat_geo_scalar(ji,jk)) > 70._wp) then
+            grid%sfc_albedo(ji,jk) = 0.8_wp
+          ! normal soil
+          else
+            grid%sfc_albedo(ji,jk) = 0.12_wp
+          endif
+          
+          ! calculating a roughness length depending on the vegetation height
+          grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_geo_scalar(ji,jk),grid%z_w(ji,jk,nlays+1))/8._wp
+          
+        endif
+		
+	    ! restricting the roughness length to a minimum
+        grid%roughness_length(ji,jk) = max(0.0001_wp,grid%roughness_length(ji,jk))
+      
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+          
     ! calculating the vertical positions of the scalar points
     ! the heights are defined according to k = A_k + B_k*surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
     !$OMP PARALLEL

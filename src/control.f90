@@ -77,6 +77,12 @@ program control
   call rad_nml_setup()
   write(*,*) "... radiation namelist read."
   
+  ! sanity check
+  if (dtime > dt_write) then
+    write(*,*) "Error: It must be dtime <= dt_write."
+    call exit(1)
+  endif
+  
   ! allocating memory
   write(*,*) "Allocating memory ..."
   allocate(grid%lat_scalar(nlins))
@@ -320,7 +326,6 @@ program control
     
     ! managing the calls to the output routine
     if (t_0+dtime>=t_write) then
-    
       call interpolation_t(state_old,state_new,state_write,t_0,t_0+dtime,t_write,grid)
       call write_output(state_write,diag,int((t_write-t_init)/60._wp),grid)
     
