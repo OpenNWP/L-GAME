@@ -18,7 +18,6 @@ nlays_oro=${BASH_ARGV[6]}
 dy=${BASH_ARGV[5]}
 dx=${BASH_ARGV[4]}
 run_span_hr=${BASH_ARGV[3]}
-scenario="standard"
 lat_center_deg=${BASH_ARGV[2]}
 lon_center_deg=${BASH_ARGV[1]}
 x_dir_deg=${BASH_ARGV[0]}
