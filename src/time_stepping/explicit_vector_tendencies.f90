@@ -129,7 +129,7 @@ module explicit_vector_tendencies
     + irrev%mom_diff_tend_z)
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
-  
+    
   end subroutine expl_vector_tend
 
 end module explicit_vector_tendencies

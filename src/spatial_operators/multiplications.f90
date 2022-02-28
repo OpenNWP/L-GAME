@@ -74,7 +74,7 @@ module multiplications
     if (lperiodic) then
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      result_field_x(:,1,:) = 0.5_wp*(scalar_field(:,1,:) + scalar_field(:,ncols,:))
+      result_field_x(:,1,:) = 0.5_wp*(scalar_field(:,1,:) + scalar_field(:,ncols,:))*in_vector_x(:,1,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
       
@@ -86,7 +86,7 @@ module multiplications
       
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      result_field_y(1,:,:) = 0.5_wp*(scalar_field(1,:,:) + scalar_field(nlins,:,:))
+      result_field_y(1,:,:) = 0.5_wp*(scalar_field(1,:,:) + scalar_field(nlins,:,:))*in_vector_y(1,:,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
       

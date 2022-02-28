@@ -59,7 +59,7 @@ module explicit_scalar_tendencies
       call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
       ! calculating the divergence of the mass flux density
       call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
-      
+  
       !$OMP PARALLEL
       !$OMP WORKSHARE
       tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
@@ -90,7 +90,7 @@ module explicit_scalar_tendencies
       
       ! explicit temperature density integration for condensates
       ! --------------------------------------------------------
-      if (j_constituent <= no_of_condensed_constituents .and. (.not. lassume_lte)) then
+      if (j_constituent<=no_of_condensed_constituents .and. (.not. lassume_lte)) then
         call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v, &
         diag%u_placeholder,diag%v_placeholder)
         call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
