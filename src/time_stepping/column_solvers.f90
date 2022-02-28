@@ -209,10 +209,10 @@ module column_solvers
             - state_old%temperature_soil(ji,jk,jl+1)) &
             /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
           enddo
-          heat_flux_density_expl(nsoillays - 1) &
+          heat_flux_density_expl(nsoillays) &
           = -grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)*(state_old%temperature_soil(ji,jk,nsoillays) &
           - grid%t_const_soil(ji,jk)) &
-          /(2*(grid%z_soil_center(nsoillays - 1) - grid%z_t_const))
+          /(2*(grid%z_soil_center(nsoillays) - grid%z_t_const))
 
           ! calculating the explicit part of the temperature change
           r_vector(nlays) &
@@ -231,14 +231,14 @@ module column_solvers
           /((grid%z_soil_interface(1) - grid%z_soil_interface(2))*grid%sfc_rho_c(ji,jk))*dtime
 
           ! loop over all soil layers below the first layer
-          do jl=1,nsoillays
+          do jl=2,nsoillays
             r_vector(nlays-1+jl) &
             ! old temperature
             = state_old%temperature_soil(ji,jk,jl) &
             ! heat conduction from above
-            + 0.5_wp*(-heat_flux_density_expl(jl) &
+            + 0.5_wp*(-heat_flux_density_expl(jl-1) &
             ! heat conduction from below
-            + heat_flux_density_expl(jl+1)) &
+            + heat_flux_density_expl(jl)) &
             /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))*dtime
           enddo
   
@@ -247,22 +247,22 @@ module column_solvers
             if (jl==1) then
               d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
               /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
-              *1/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
+              *1._wp/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
             elseif (jl==nsoillays) then
               d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
               /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
-              *1/(grid%z_soil_center(jl-1) - grid%z_soil_center(jl))
+              *1._wp/(grid%z_soil_center(jl-1) - grid%z_soil_center(jl))
             else
               d_vector(jl+nlays-1) = 1.0_wp+0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
               /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk)) &
-              *(1/(grid%z_soil_center(jl-1) - grid%z_soil_center(jl)) &
-              + 1/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1)))
+              *(1._wp/(grid%z_soil_center(jl-1) - grid%z_soil_center(jl)) &
+              + 1._wp/(grid%z_soil_center(jl) - grid%z_soil_center(jl+1)))
             endif
           enddo
           
           ! the off-diagonal components
-          c_vector(nlays-2) = 0._wp
-          e_vector(nlays-2) = 0._wp
+          c_vector(nlays-1) = 0._wp
+          e_vector(nlays-1) = 0._wp
           do jl=1,nsoillays-1
             c_vector(jl+nlays-1) = -0.5_wp*dtime*grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk) &
             /((grid%z_soil_interface(jl+1) - grid%z_soil_interface(jl+2))*grid%sfc_rho_c(ji,jk)) &
