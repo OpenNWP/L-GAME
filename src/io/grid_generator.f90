@@ -282,10 +282,10 @@ module grid_generator
           sigma_z = z_rel**sigma
           A = sigma_z*toa ! the height without orography
           ! B corrects for orography
-          if (jl >= nlays-nlays_oro+1._wp) then
+          if (jl>=nlays-nlays_oro+1._wp) then
             B = (jl-(nlays-nlays_oro+1._wp))/nlays_oro
           else
-            B = 0
+            B = 0._wp
           endif
           vertical_vector_pre(jl)=A+B*grid%z_w(ji,jk,nlays+1)
         enddo
@@ -293,7 +293,7 @@ module grid_generator
         ! doing a check
         if (ji==1 .and. jk==1) then
           max_oro = maxval(grid%z_w(:,:,nlays+1))
-          if (max_oro >= vertical_vector_pre(max(nlays-nlays_oro,1))) then
+          if (max_oro >= vertical_vector_pre(nlays-nlays_oro+1)) then
             write(*,*) "Maximum of orography larger or equal to the height of the lowest flat level."
             write(*,*) "Aborting."
             call exit(1)
