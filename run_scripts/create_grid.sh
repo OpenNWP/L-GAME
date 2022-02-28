@@ -11,6 +11,9 @@ cat > namelist.nml << EOF
 
 &run
 run_id="$run_id"
+lat_center_deg=51.16281607668721
+lon_center_deg=6.870530100211603
+x_dir_deg=90
 nlins=25
 ncols=25
 nlays=50
@@ -22,9 +25,6 @@ scenario="create_grid"
 /
 
 &diff
-lklemp=.true.
-lmom_diff_h=.false.
-lmom_diff_v=.false.
 /
 
 &constituents
@@ -34,7 +34,6 @@ lmom_diff_v=.false.
 /
 
 &bc
-lperiodic=.true.
 /
 
 &rad
@@ -42,7 +41,6 @@ lperiodic=.true.
 
 &io
 lwrite_grid=.true.
-dt_write_min=1
 /
 
 EOF
