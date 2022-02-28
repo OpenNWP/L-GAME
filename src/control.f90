@@ -23,6 +23,7 @@ program control
   use rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
   use manage_radiation_calls,    only: call_radiation
   use boundaries,                only: setup_bc_factor
+  use radiation,                 only: radiation_init
   
   implicit none
 
@@ -410,7 +411,8 @@ program control
   t_0 = t_init
   t_rad_update = t_0
   if (lrad) then
-    call call_radiation(state_old,grid,diag,irrev)
+    call radiation_init()
+    call call_radiation(state_old,grid,diag)
   endif
   ! setting the next time for the radiation update
   t_rad_update = t_rad_update+dtime_rad

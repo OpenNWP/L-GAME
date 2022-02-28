@@ -51,7 +51,7 @@ module manage_rkhevi
     
     ! upating radiation if necessary
     if (lrad_update) then
-      call call_radiation(state_old,grid,diag,irrev)
+      call call_radiation(state_old,grid,diag)
     endif
     
     ! updating surface-related turbulence quantities if it is necessary
