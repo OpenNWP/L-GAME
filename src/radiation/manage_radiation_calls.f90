@@ -25,12 +25,21 @@ module manage_radiation_calls
     type(t_grid),   intent(inout) :: grid  ! the grid of the model
     type(t_diag),   intent(inout) :: diag  ! diagnostic quantities
     
+    ! local variables
+    integer :: ji ! line index
+    
     write(*,*) "Starting update of radiative fluxes ..."
     
-    call calc_radiative_flux_convergence(grid%lat_geo_scalar,grid%lon_geo_scalar, &
-    grid%z_scalar,grid%z_w,state%rho,diag%temperature_gas,diag%radiation_tendency, &
-    state%temperature_soil(:,:,1),diag%sfc_sw_in,diag%sfc_lw_out,grid%sfc_albedo, &
-    nlins*ncols,0._wp)
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji)
+    do ji=1,nlins
+      call calc_radiative_flux_convergence(grid%lat_geo_scalar(ji,:),grid%lon_geo_scalar(ji,:), &
+      grid%z_scalar(ji,:,:),grid%z_w,state%rho(ji,:,:,:),diag%temperature_gas(ji,:,:),diag%radiation_tendency(ji,:,:), &
+      state%temperature_soil(ji,:,1),diag%sfc_sw_in(ji,:),diag%sfc_lw_out(ji,:),grid%sfc_albedo(ji,:), &
+      ncols,0._wp)
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     write(*,*) "Update of radiative fluxes completed."
     

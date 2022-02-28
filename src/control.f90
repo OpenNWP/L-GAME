@@ -24,6 +24,7 @@ program control
   use manage_radiation_calls,    only: call_radiation
   use boundaries,                only: setup_bc_factor
   use radiation,                 only: radiation_init
+  use derived_quantities,        only: temperature_diagnostics
   
   implicit none
 
@@ -410,6 +411,8 @@ program control
   ! updating radiation for the first time if nescessary
   t_0 = t_init
   t_rad_update = t_0
+  ! calculating the temperature of the gas phase
+  call temperature_diagnostics(state_old,diag,grid)
   if (lrad) then
     call radiation_init()
     call call_radiation(state_old,grid,diag)

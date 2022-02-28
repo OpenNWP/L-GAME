@@ -107,6 +107,8 @@ module radiation
     type(ty_cloud_optics)                 :: cloud_optics_sw,cloud_optics_lw
     ! solar zenith angle
     real(wp)                              :: mu_0(no_of_scalars_h)
+    ! number of scalar data points
+    integer                               :: no_of_scalars
     ! number of points where it is day
     integer                               :: no_of_day_points
     ! loop indices and helper variables
@@ -194,7 +196,8 @@ module radiation
     ! security margin
     real(wp)                              :: security_margin = 1e-10
     
-    ! some general preparations
+    ! calculating the number of scalars
+    no_of_scalars = nlays*no_of_scalars_h
     
     ! here,the names of the gases are written to the gas_concentrations object
     call handle_error(gas_concentrations_sw%init(gases_lowercase))
@@ -227,7 +230,7 @@ module radiation
         temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
         ! the pressure is diagnozed here,using the equation of state for ideal gases
         pressure_rad(ji,jk) = specific_gas_constants(0) &
-        *mass_densities(no_of_condensed_constituents*nlays*no_of_scalars_h &
+        *mass_densities(no_of_condensed_constituents*no_of_scalars &
         + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
       enddo
     enddo
@@ -244,12 +247,12 @@ module radiation
           base_index = (jk-1)*no_of_scalars_h
           ! the solid condensates' effective radius
           ice_precip_weight = mass_densities(base_index+ji)+security_margin
-          ice_cloud_weight = mass_densities(2*nlays*no_of_scalars_h+base_index+ji)+security_margin
+          ice_cloud_weight = mass_densities(2*no_of_scalars+base_index+ji)+security_margin
           ice_eff_radius_value = (ice_precip_weight*ice_precip_radius+ice_cloud_weight*ice_cloud_radius) &
           /(ice_precip_weight+ice_cloud_weight)
           ! the liquid condensates' effective radius
-          liquid_precip_weight = mass_densities(nlays*no_of_scalars_h+base_index+ji)+security_margin
-          liquid_cloud_weight = mass_densities(3*nlays*no_of_scalars_h+base_index+ji)+security_margin
+          liquid_precip_weight = mass_densities(no_of_scalars+base_index+ji)+security_margin
+          liquid_cloud_weight = mass_densities(3*no_of_scalars+base_index+ji)+security_margin
           liquid_eff_radius_value = (liquid_precip_weight*liquid_precip_radius+liquid_cloud_weight*liquid_cloud_radius) &
           /(liquid_precip_weight+liquid_cloud_weight)
           ! thickness of the gridbox
@@ -257,11 +260,11 @@ module radiation
           ! solid water "content"
           ice_water_path(ji,jk) = thickness*1000._wp &
           *(mass_densities(base_index+ji) &
-          +mass_densities(2*nlays*no_of_scalars_h+base_index+ji))
+          +mass_densities(2*no_of_scalars+base_index+ji))
           ! liquid water "content"
           liquid_water_path(ji,jk) = thickness*1000._wp &
-          *(mass_densities(nlays*no_of_scalars_h+base_index+ji) &
-          +mass_densities(3*nlays*no_of_scalars_h+base_index+ji))
+          *(mass_densities(no_of_scalars+base_index+ji) &
+          +mass_densities(3*no_of_scalars+base_index+ji))
           ! if there is no solid water in the grid box, the solid effective radius is set to zero
           ice_eff_radius(ji,jk) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk) > 0._wp)
           ! if there is no liquid water in the grid box, the liquid effective radius is set to zero
@@ -320,7 +323,7 @@ module radiation
           temperature_interface_rad(ji,jk) = temp_sfc(ji)
           ! surface pressure
           pressure_interface_rad   (ji,jk) = pressure_rad   (ji,jk-1) &
-          *EXP(-(z_vector(nlays*no_of_scalars_h+ji) &
+          *EXP(-(z_vector(no_of_scalars+ji) &
           -z_scalar(ji+(jk-2)*no_of_scalars_h))/scale_height)
         else
           ! just the arithmetic mean
@@ -376,7 +379,7 @@ module radiation
     ! now we start the actual radiation calculation
     ! clearing the radiation tendency (it still contains the results of the previous call
     ! from the dycore)
-    do ji=1,nlays*no_of_scalars_h
+    do ji=1,no_of_scalars
       radiation_tendency(ji) = 0._wp
     enddo
     
@@ -399,7 +402,7 @@ module radiation
     ! setting the volume mixing ratios of the gases for the short wave calculation
     gas_concentrations_sw%ncol = no_of_day_points
     call set_vol_mix_ratios(mass_densities,.true.,no_of_day_points,no_of_scalars_h, &
-    nlays,nlays*no_of_scalars_h,no_of_condensed_constituents,day_indices,z_scalar, &
+    nlays,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar, &
     gas_concentrations_sw)
     
     ! initializing the short wave fluxes
@@ -449,7 +452,7 @@ module radiation
                              fluxes_day))
     
     ! short wave result (in Wm^-3)
-    call calc_power_density(.true.,nlays*no_of_scalars_h, &
+    call calc_power_density(.true.,no_of_scalars, &
     nlays,no_of_scalars_h,no_of_day_points,day_indices, &
     fluxes_day,z_vector,radiation_tendency)
     
@@ -466,7 +469,7 @@ module radiation
 1   continue
     ! setting the volume mixing ratios of the gases for the long wave calculation
     call set_vol_mix_ratios(mass_densities,.false.,no_of_day_points,no_of_scalars_h, &
-    nlays,nlays*no_of_scalars_h,no_of_condensed_constituents,day_indices,z_scalar, &
+    nlays,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar, &
     gas_concentrations_lw)
     
     ! initializing the long wave fluxes
@@ -512,7 +515,7 @@ module radiation
                              fluxes))
    
     ! add long wave result (in Wm^-3)
-    call calc_power_density(.false.,nlays*no_of_scalars_h, &
+    call calc_power_density(.false.,no_of_scalars, &
     nlays,no_of_scalars_h,no_of_day_points,day_indices, &
     fluxes,z_vector,radiation_tendency)
     
