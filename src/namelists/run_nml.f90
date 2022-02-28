@@ -43,13 +43,13 @@ module run_nml
     ! local variables
     integer :: fileunit
     
-    nlins = 51
-    ncols = 51
-    nlays = 40
-    nlays_oro = 30
-    dy = 48000._wp
-    dx = 52000._wp
-    run_span_hr = 63
+    nlins = 25
+    ncols = 25
+    nlays = 50
+    nlays_oro = 40
+    dy = 500._wp
+    dx = 500._wp
+    run_span_hr = 60
     t_init = 0._wp
     toa = 40000._wp
     sigma = 1.3_wp
