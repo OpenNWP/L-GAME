@@ -11,12 +11,12 @@ cat > namelist.nml << EOF
 
 &run
 run_id="$run_id"
-nlins=51
-ncols=51
-nlays=40
-nlays_oro=30
-dy=48000
-dx=52000
+nlins=25
+ncols=25
+nlays=50
+nlays_oro=40
+dy=500
+dx=500
 run_span_hr=0
 scenario="create_grid"
 /
