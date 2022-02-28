@@ -415,7 +415,7 @@ program control
   call temperature_diagnostics(state_old,diag,grid)
   if (lrad) then
     call radiation_init()
-    call call_radiation(state_old,grid,diag)
+    call call_radiation(state_old,grid,diag,t_0)
   endif
   ! setting the next time for the radiation update
   t_rad_update = t_rad_update+dtime_rad
@@ -443,7 +443,7 @@ program control
     endif
 
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,timestep_counter,lrad_update)
+    call rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,timestep_counter,lrad_update,t_0)
     
     ! managing the calls to the output routine
     if (t_0+dtime>=t_write) then

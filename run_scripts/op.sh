@@ -21,6 +21,11 @@ run_span_hr=${BASH_ARGV[3]}
 lat_center_deg=${BASH_ARGV[2]}
 lon_center_deg=${BASH_ARGV[1]}
 x_dir_deg=${BASH_ARGV[0]}
+start_year=${BASH_ARGV[11]}
+start_month=${BASH_ARGV[12]}
+start_day=${BASH_ARGV[13]}
+start_hour=${BASH_ARGV[14]}
+start_minute=${BASH_ARGV[15]}
 /
 
 &diff

@@ -29,7 +29,7 @@ module manage_rkhevi
 
   contains
   
-  subroutine rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,total_step_counter,lrad_update)
+  subroutine rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,total_step_counter,lrad_update,t_0)
   
     ! This subroutine manages the RKHEVI time stepping.
     
@@ -42,6 +42,7 @@ module manage_rkhevi
     type(t_irrev), intent(inout) :: irrev              ! irreversible quantities
     integer,       intent(in)    :: total_step_counter ! time step counter
     logical,       intent(in)    :: lrad_update        ! radiation update switch
+    real(wp),      intent(in)    :: t_0                ! Unix time
     
     ! local variables
     integer :: rk_step ! index of the Runge-Kutta step
@@ -51,7 +52,7 @@ module manage_rkhevi
     
     ! upating radiation if necessary
     if (lrad_update) then
-      call call_radiation(state_old,grid,diag)
+      call call_radiation(state_old,grid,diag,t_0)
     endif
     
     ! updating surface-related turbulence quantities if it is necessary

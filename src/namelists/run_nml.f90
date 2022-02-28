@@ -4,7 +4,8 @@
 module run_nml
 
   ! This is the namelists the configures the basic run properties of a model integration.
-
+  
+  use iso_c_binding
   use definitions, only: wp
   
   implicit none
@@ -20,6 +21,11 @@ module run_nml
   real(wp)          :: sigma               ! vertical grid stretching parameter
   integer           :: run_span_hr         ! run span in hours
   real              :: t_init              ! epoch time stamp of the initialization
+  integer           :: start_year          ! year when to begin the model run
+  integer           :: start_month         ! month when to begin the model run
+  integer           :: start_day           ! day when to begin the model run
+  integer           :: start_hour          ! hour when to begin the model run
+  integer           :: start_minute        ! minute when to begin the model run
   logical           :: lrestart            ! switch for restart runs
   logical           :: lcorio              ! switch for the Coriolis force
   logical           :: lideal              ! switch for analytic test cases
@@ -34,7 +40,8 @@ module run_nml
   real(wp)          :: x_dir_deg           ! direction of the x-axis of the model in degrees
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr,sigma, &
-  toa,scenario,llinear,run_id,lcorio,nlays_oro,lat_center_deg,lon_center_deg,x_dir_deg
+  toa,scenario,llinear,run_id,lcorio,nlays_oro,lat_center_deg,lon_center_deg,x_dir_deg, &
+  start_year,start_month,start_day,start_hour,start_minute
 
   contains
 
@@ -50,6 +57,11 @@ module run_nml
     dy = 500._wp
     dx = 500._wp
     run_span_hr = 60
+    start_year = 2000
+    start_month = 1
+    start_day = 1
+    start_hour = 0
+    start_minute = 0
     t_init = 0._wp
     toa = 40000._wp
     sigma = 1.3_wp
@@ -74,7 +86,14 @@ module run_nml
     
     ! this calculates the time step using the CFL criterion
     dtime           = 1.5_wp*dy/1000._wp
-        
+    
+    ! calculating the Unix time of the model start
+    t_init = (start_year-1970)*365*24*3600 + leap_year_correction(start_year)*24*3600 &
+    + month_day_vector(start_month,start_year)*24*3600 + &
+    (start_day-1)*24*3600 + start_hour*3600 + start_minute*60 &
+    ! these are the leap seconds
+    + 27
+    
     ! checking input data for correctness
     if (mod(nlins, 2) == 0) then
       write(*,*) "Error: nlins must be odd. Aborting."
@@ -105,7 +124,67 @@ module run_nml
     
   end subroutine run_nml_setup
   
+  function leap_year_correction(year)
+  
+    ! This is a helper function for calculating the Unix time.
+    ! It returns the number of 29th of Februaries since 1970.
+    
+    ! input
+    integer, intent(in) :: year ! the year for which we want to calculate the leap year correction
+    ! output
+    integer             :: leap_year_correction
+    
+    leap_year_correction = (year - 1969)/4
+    if (year>2000) then
+      leap_year_correction = leap_year_correction - 1
+    endif
+  
+  end function leap_year_correction
+  
+  function month_day_vector(month,year)
+  
+    ! This is a helper function for calculating the Unix time.
+    ! It returns the amount of days in the wanted year in the previous months.
+  
+    ! input
+    integer, intent(in) :: month
+    integer, intent(in) :: year
+    ! output
+    integer             :: month_day_vector
+    
+    ! local variables
+    integer :: month_days(12)
+    
+    month_days(1) = 31
+    month_days(2) = 28
+    month_days(3) = 31
+    month_days(4) = 30
+    month_days(5) = 31
+    month_days(6) = 30
+    month_days(7) = 31
+    month_days(8) = 31
+    month_days(9) = 30
+    month_days(10) = 31
+    month_days(11) = 30
+    month_days(12) = 31
+    
+    ! leap years
+    if (year/4==0 .and. year/=2000 .and. month>2) then
+      month_days(2) = 29
+    endif
+    
+    month_day_vector = 0
+    
+    if (month>1) then
+      month_day_vector = sum(month_days(1:(month-1)))
+    endif
+    
+  end function month_day_vector
+  
 end module run_nml
+
+
+
 
 
 
