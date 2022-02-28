@@ -223,15 +223,16 @@ module phase_trans
           else
             saturation_pressure_sfc = saturation_pressure_over_ice(state%temperature_soil(ji,jk,1))
           endif
+          
           ! difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
           diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants(1)*state%temperature_soil(ji,jk,1)) &
-          - state%rho(ji+1,jk+1,jl,6)
+          - state%rho(ji,jk,nlays,6)
 
           ! the thickness of the lowest model layer (we need it as a result of Guass' theorem)
           layer_thickness = grid%z_w(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1)
 
           ! evporation,sublimation
-          irrev%mass_source_rates(ji,jk,jl,5) = irrev%mass_source_rates(ji,jk,jl,5) &
+          irrev%mass_source_rates(ji,jk,nlays,5) = irrev%mass_source_rates(ji,jk,nlays,5) &
           + max(0._wp,diff_density_sfc/diag%scalar_flux_resistance(ji,jk))/layer_thickness
 
           ! calculating the latent heat flux density affecting the surface

@@ -209,11 +209,12 @@ module column_solvers
             - state_old%temperature_soil(ji,jk,jl+1)) &
             /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
           enddo
+          
           heat_flux_density_expl(nsoillays) &
           = -grid%sfc_rho_c(ji,jk)*grid%t_conduc_soil(ji,jk)*(state_old%temperature_soil(ji,jk,nsoillays) &
           - grid%t_const_soil(ji,jk)) &
           /(2*(grid%z_soil_center(nsoillays) - grid%z_t_const))
-
+          
           ! calculating the explicit part of the temperature change
           r_vector(nlays) &
           ! old temperature
