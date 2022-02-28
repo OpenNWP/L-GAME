@@ -389,8 +389,8 @@ program control
   normal_dist_min_vert = minval(grid%dz(:,:,nlays+1))
   rain_velocity = min(0.8_wp*normal_dist_min_vert/dtime,rain_velocity)
   snow_velocity = min(0.8_wp*normal_dist_min_vert/dtime,snow_velocity)
-  write(*,*) "Snow falling velocity set to", rain_velocity, "m/s."
-  write(*,*) "Rain falling velocity set to", snow_velocity, "m/s."
+  write(*,*) "Rain falling velocity set to", rain_velocity, "m/s."
+  write(*,*) "Snow falling velocity set to", snow_velocity, "m/s."
   
   ! maximum horizontal diffusion coefficient  
   irrev%max_diff_h_coeff_turb = 0.125_wp*grid%mean_velocity_area/dtime
