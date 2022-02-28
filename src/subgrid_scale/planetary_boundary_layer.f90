@@ -106,7 +106,7 @@ module planetary_boundary_layer
       do ji=1,nlins
         do jk=1,ncols
           diag%scalar_flux_resistance(ji,jk) = scalar_flux_resistance(diag%roughness_velocity(ji,jk), &
-          grid%z_scalar(ji+1,jk+1,nlays) - grid%z_w(ji+1,jk+1,nlays+1), &
+          grid%z_scalar(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1), &
           grid%roughness_length(ji,jk),diag%monin_obukhov_length(ji,jk))
         enddo
       enddo

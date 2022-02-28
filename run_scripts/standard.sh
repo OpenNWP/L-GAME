@@ -5,7 +5,7 @@
 
 lgame_home_dir=~/code/L-GAME
 run_id=standard
-export OMP_NUM_THREADS=2
+export OMP_NUM_THREADS=1
 
 cat > namelist.nml << EOF
 
@@ -31,7 +31,6 @@ lmom_diff_v=.false.
 /
 
 &surface
-orography_id=0
 /
 
 &bc

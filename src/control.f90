@@ -115,8 +115,8 @@ program control
   allocate(grid%trsk_weights_v(nlins+1,4))
   allocate(grid%theta_bg(nlins,ncols,nlays))
   allocate(grid%exner_bg(nlins,ncols,nlays))
-  allocate(grid%exner_bg_grad_u(nlins,ncols,nlays))
-  allocate(grid%exner_bg_grad_v(nlins,ncols,nlays))
+  allocate(grid%exner_bg_grad_u(nlins,ncols+1,nlays))
+  allocate(grid%exner_bg_grad_v(nlins+1,ncols,nlays))
   allocate(grid%exner_bg_grad_w(nlins,ncols,nlays+1))
   allocate(grid%sfc_albedo(nlins,ncols))
   allocate(grid%sfc_rho_c(nlins,ncols))
@@ -221,8 +221,8 @@ program control
   allocate(irrev%tke(nlins,ncols,nlays))
   allocate(irrev%viscosity_molecular(nlins,ncols,nlays))
   allocate(irrev%viscosity_coeff(nlins,ncols,nlays))
-  allocate(irrev%mom_diff_tend_x(nlins,ncols,nlays))
-  allocate(irrev%mom_diff_tend_y(nlins,ncols,nlays))
+  allocate(irrev%mom_diff_tend_x(nlins,ncols+1,nlays))
+  allocate(irrev%mom_diff_tend_y(nlins+1,ncols,nlays))
   allocate(irrev%mom_diff_tend_z(nlins,ncols,nlays+1))
   allocate(irrev%heating_diss(nlins,ncols,nlays))
   allocate(irrev%mass_source_rates(nlins,ncols,nlays,no_of_condensed_constituents+1))
@@ -247,7 +247,6 @@ program control
   
   ! maximum horizontal diffusion coefficient  
   irrev%max_diff_h_coeff_turb = 0.125_wp*grid%mean_velocity_area/dtime
-
   ! setting up the background state
   call bg_setup(grid)
   
@@ -261,6 +260,7 @@ program control
   write(*,*) "... initial state set."
   
   ! updating radiation for the first time if nescessary
+  t_0 = t_init
   t_rad_update = t_0
   if (lrad) then
     call call_radiation(state_old,grid,diag,irrev)
@@ -271,7 +271,17 @@ program control
   ! writing out the initial state
   call write_output(state_old,diag,0,grid)
   
-  ! initializing the wind tendencies with zero
+  ! initializing the wind tendencies and other important quantities with zero
+  diag%v_squared = 0._wp
+  diag%p_grad_acc_old_u = 0._wp
+  diag%p_grad_acc_old_v = 0._wp
+  diag%p_grad_acc_old_w = 0._wp
+  diag%p_grad_acc_neg_l_u = 0._wp
+  diag%p_grad_acc_neg_l_v = 0._wp
+  diag%p_grad_acc_neg_l_w = 0._wp
+  diag%p_grad_acc_neg_nl_u = 0._wp
+  diag%p_grad_acc_neg_nl_v = 0._wp
+  diag%p_grad_acc_neg_nl_w = 0._wp
   diag%v_squared_grad_x = 0._wp
   diag%v_squared_grad_y = 0._wp
   diag%v_squared_grad_z = 0._wp
@@ -290,11 +300,9 @@ program control
   state_new = state_old
   
   ! the loop over the time steps
-  t_0 = t_init
   t_write = t_0 + dt_write
   run_span = 3600._wp*run_span_hr
   timestep_counter = 0
-  
   do while (t_0<t_init+run_span+300._wp)
     
     ! writing the new state into the old state

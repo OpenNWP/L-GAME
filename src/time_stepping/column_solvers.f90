@@ -66,7 +66,7 @@ module column_solvers
     real(wp) :: above_damping                      ! height above the lower boundary of the damping height
     real(wp) :: t_gas_lowest_layer_old             ! temperature of the gas in the lowest layer of the model atmosphere, old timestep
     real(wp) :: t_gas_lowest_layer_new             ! temperature of the gas in the lowest layer of the model atmosphere, new timestep
-    real(wp) ::  heat_flux_density_expl(nsoillays) ! explicit heat_flux_density in the soil
+    real(wp) :: heat_flux_density_expl(nsoillays)  ! explicit heat_flux_density in the soil
     real(wp) :: solution_vector(nlays-1+nsoillays) ! vector containing the solution of the linear problem to solve here
     integer  :: ji,jk,jl                           ! loop variables
 

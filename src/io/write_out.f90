@@ -167,7 +167,7 @@ module write_out
     !$OMP PARALLEL
     !$OMP DO PRIVATE(jk)
     do jk=1,ncols
-      diag%scalar_placeholder(:,jk+1,:) = 0.5_wp*(state%wind_u(:,jk,:)+state%wind_u(:,jk+1,:))
+      diag%scalar_placeholder(:,jk,:) = 0.5_wp*(state%wind_u(:,jk,:)+state%wind_u(:,jk+1,:))
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
@@ -177,7 +177,7 @@ module write_out
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji)
     do ji=1,nlins
-      diag%scalar_placeholder(ji+1,:,:) = 0.5_wp*(state%wind_v(ji,:,:)+state%wind_v(ji+1,:,:))
+      diag%scalar_placeholder(ji,:,:) = 0.5_wp*(state%wind_v(ji,:,:)+state%wind_v(ji+1,:,:))
     enddo
     !$OMP END DO
     !$OMP END PARALLEL

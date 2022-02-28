@@ -72,10 +72,10 @@ module averaging
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
-      do jk=1,ncols-1
+      do jk=2,ncols
         do jl=1,nlays
           result_field_x(ji,jk,jl) = result_field_x(ji,jk,jl) &
-          - grid%slope_x(ji+1,jk+1,jl)*remap_ver2hor_x(result_field_z,grid,ji,jk,jl)
+          - grid%slope_x(ji,jk,jl)*remap_ver2hor_x(result_field_z,grid,ji,jk,jl)
         enddo
       enddo
     enddo
@@ -85,11 +85,11 @@ module averaging
     ! correction to the y-component
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
-    do ji=1,nlins-1
+    do ji=2,nlins
       do jk=1,ncols
         do jl=1,nlays
           result_field_y(ji,jk,jl) = result_field_y(ji,jk,jl) &
-          - grid%slope_y(ji+1,jk+1,jl)*remap_ver2hor_y(result_field_z,grid,ji,jk,jl)
+          - grid%slope_y(ji,jk,jl)*remap_ver2hor_y(result_field_z,grid,ji,jk,jl)
         enddo
       enddo
     enddo
@@ -157,11 +157,21 @@ module averaging
     real(wp) :: horizontal_covariant_x
     
     horizontal_covariant_x = hor_comp_x(ji,jk,jl)
-    if (jl > nlays - nlays_oro) then
-      horizontal_covariant_x = horizontal_covariant_x &
-      ! more self-consistency is not required, more accuracy would be an option however
-      + grid%slope_x(ji,jk,jl)*0.25_wp*(vert_comp(ji,jk,jl)+vert_comp(ji,jk+1,jl) &
-      + vert_comp(ji,jk,jl+1)+vert_comp(ji,jk+1,jl+1))
+    if (jl>nlays-nlays_oro) then
+    if (jk==1) then
+        horizontal_covariant_x = horizontal_covariant_x &
+        ! more self-consistency is not required, more accuracy would be an option however
+        + grid%slope_x(ji,jk,jl)*0.5_wp*(vert_comp(ji,jk,jl)+vert_comp(ji,jk,jl+1))
+      elseif (jk==ncols+1) then
+        horizontal_covariant_x = horizontal_covariant_x &
+        ! more self-consistency is not required, more accuracy would be an option however
+        + grid%slope_x(ji,jk,jl)*0.5_wp*(vert_comp(ji,jk-1,jl)+vert_comp(ji,jk-1,jl+1))
+      else
+        horizontal_covariant_x = horizontal_covariant_x &
+        ! more self-consistency is not required, more accuracy would be an option however
+        + grid%slope_x(ji,jk,jl)*0.25_wp*(vert_comp(ji,jk-1,jl)+vert_comp(ji,jk,jl) &
+        + vert_comp(ji,jk-1,jl+1)+vert_comp(ji,jk,jl+1))
+      endif
     endif
     
   end function horizontal_covariant_x
@@ -179,11 +189,19 @@ module averaging
     real(wp) :: horizontal_covariant_y
   
     horizontal_covariant_y = hor_comp_y(ji,jk,jl)
-    if (jl > nlays - nlays_oro) then
-      horizontal_covariant_y = horizontal_covariant_y &
+    if (jl>nlays-nlays_oro) then
       ! more self-consistency is not required, more accuracy would be an option however
-      + grid%slope_y(ji,jk,jl)*0.25_wp*(vert_comp(ji,jk,jl)+vert_comp(ji+1,jk,jl) &
-      + vert_comp(ji,jk,jl+1)+vert_comp(ji+1,jk,jl+1))
+      if (ji==1) then
+        horizontal_covariant_y = horizontal_covariant_y &
+        + grid%slope_y(ji,jk,jl)*0.5_wp*(vert_comp(ji,jk,jl) + vert_comp(ji,jk,jl+1))
+      elseif (ji==nlins+1) then
+        horizontal_covariant_y = horizontal_covariant_y &
+        + grid%slope_y(ji,jk,jl)*0.5_wp*(vert_comp(ji-1,jk,jl) + vert_comp(ji-1,jk,jl+1))
+      else
+        horizontal_covariant_y = horizontal_covariant_y &
+        + grid%slope_y(ji,jk,jl)*0.25_wp*(vert_comp(ji-1,jk,jl)+vert_comp(ji,jk,jl) &
+        + vert_comp(ji-1,jk,jl+1)+vert_comp(ji,jk,jl+1))
+      endif
     endif
   
   end function horizontal_covariant_y

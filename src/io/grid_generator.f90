@@ -89,6 +89,7 @@ module grid_generator
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
+    
     !$OMP PARALLEL
     !$OMP DO PRIVATE(jk)
     do jk=1,ncols
@@ -105,7 +106,11 @@ module grid_generator
     do ji=1,nlins
       do jk=1,ncols+1
         grid%lat_geo_u(ji,jk) = grid%lat_scalar(ji)
-        grid%lon_geo_u(ji,jk) = grid%lon_scalar(jk) - 0.5_wp*dlon
+        if (jk==ncols+1) then
+          grid%lon_geo_u(ji,jk) = grid%lon_scalar(jk-1) + 0.5_wp*dlon
+        else
+          grid%lon_geo_u(ji,jk) = grid%lon_scalar(jk) - 0.5_wp*dlon
+        endif
       enddo
     enddo
     !$OMP END DO
@@ -116,7 +121,11 @@ module grid_generator
     !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins+1
       do jk=1,ncols
-        grid%lat_geo_v(ji,jk) = grid%lat_scalar(ji) + 0.5_wp*dlat
+        if (ji==nlins+1) then
+          grid%lat_geo_v(ji,jk) = grid%lat_scalar(ji-1) - 0.5_wp*dlat
+        else
+          grid%lat_geo_v(ji,jk) = grid%lat_scalar(ji) + 0.5_wp*dlat
+        endif
         grid%lon_geo_v(ji,jk) =  grid%lon_scalar(jk)
       enddo
     enddo
@@ -184,10 +193,11 @@ module grid_generator
           call read_grid(grid)
         else
         
-          ! real orography is not yet implemented
+          ! real orography and land-sea mask is not yet implemented
           !$OMP PARALLEL
           !$OMP WORKSHARE
           grid%z_w(:,:,nlays+1) = 0._wp
+          grid%is_land(:,:) = 0
           !$OMP END WORKSHARE
           !$OMP END PARALLEL
         
@@ -256,7 +266,7 @@ module grid_generator
         !$OMP END PARALLEL
     
     endselect
-  
+    
     ! calculating the vertical positions of the scalar points
     ! the heights are defined according to k = A_k + B_k*surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
     !$OMP PARALLEL
@@ -458,7 +468,11 @@ module grid_generator
             lower_z = 0.5_wp*(grid%z_w(ji-1,jk,jl+1) + grid%z_w(ji,jk,jl+1))
             upper_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
           endif
-          lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)*(re+lower_z)/re
+          if (ji==nlins+1) then
+            lower_length = dx*cos(grid%lat_scalar(ji-1)-0.5_wp*dlat)*(re+lower_z)/re
+          else
+            lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)*(re+lower_z)/re
+          endif
           grid%area_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
       enddo
@@ -481,8 +495,13 @@ module grid_generator
             grid%z_area_dual_z(ji,jk,jl) = 0.5_wp*(grid%z_v(ji,jk-1,jl)+grid%z_v(ji,jk,jl))
           endif
           ! setting the area itself
-          grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji) + 0.5_wp*dlat,dlon,dlat) &
-          *(re + grid%z_area_dual_z(ji,jk,jl))**2/re**2
+          if (ji==nlins+1) then
+            grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji-1) - 0.5_wp*dlat,dlon,dlat) &
+            *(re + grid%z_area_dual_z(ji,jk,jl))**2/re**2
+          else
+            grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji) + 0.5_wp*dlat,dlon,dlat) &
+            *(re + grid%z_area_dual_z(ji,jk,jl))**2/re**2
+          endif
         enddo
       enddo
     enddo
