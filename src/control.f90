@@ -86,153 +86,294 @@ program control
   ! allocating memory
   write(*,*) "Allocating memory ..."
   allocate(grid%lat_scalar(nlins))
+  grid%lat_scalar = 0._wp
   allocate(grid%lon_scalar(ncols))
+  grid%lon_scalar = 0._wp
   allocate(grid%lat_geo_scalar(nlins,ncols))
+  grid%lat_geo_scalar = 0._wp
   allocate(grid%lon_geo_scalar(nlins,ncols))
+  grid%lon_geo_scalar = 0._wp
   allocate(grid%lat_geo_u(nlins,ncols+1))
+  grid%lat_geo_u = 0._wp
   allocate(grid%lon_geo_u(nlins,ncols+1))
+  grid%lon_geo_u = 0._wp
   allocate(grid%dir_geo_u(nlins,ncols+1))
+  grid%dir_geo_u = 0._wp
   allocate(grid%lat_geo_v(nlins+1,ncols))
+  grid%lat_geo_v = 0._wp
   allocate(grid%lon_geo_v(nlins+1,ncols))
+  grid%lon_geo_v = 0._wp
   allocate(grid%dir_geo_v(nlins+1,ncols))
+  grid%dir_geo_v = 0._wp
   allocate(grid%dir_geo_u_scalar(nlins,ncols))
+  grid%dir_geo_u_scalar = 0._wp
   allocate(grid%z_scalar(nlins,ncols,nlays))
+  grid%z_scalar = 0._wp
   allocate(grid%dx(nlins,ncols+1,nlays))
+  grid%dx = 0._wp
   allocate(grid%dy(nlins+1,ncols,nlays))
+  grid%dy = 0._wp
   allocate(grid%dz(nlins,ncols,nlays+1))
+  grid%dz = 0._wp
   allocate(grid%z_u(nlins,ncols+1,nlays))
+  grid%z_u = 0._wp
   allocate(grid%z_v(nlins+1,ncols,nlays))
+  grid%z_v = 0._wp
   allocate(grid%z_w(nlins,ncols,nlays+1))
+  grid%z_w = 0._wp
   allocate(grid%slope_x(nlins,ncols+1,nlays))
+  grid%slope_x = 0._wp
   allocate(grid%slope_y(nlins+1,ncols,nlays))
+  grid%slope_y = 0._wp
   allocate(grid%volume(nlins,ncols,nlays))
+  grid%volume = 0._wp
   allocate(grid%area_x(nlins,ncols+1,nlays))
+  grid%area_x = 0._wp
   allocate(grid%area_y(nlins+1,ncols,nlays))
+  grid%area_y = 0._wp
   allocate(grid%area_z(nlins,ncols,nlays+1))
+  grid%area_z = 0._wp
   allocate(grid%area_dual_x(nlins+1,ncols,nlays+1))
+  grid%area_dual_x = 0._wp
   allocate(grid%area_dual_y(nlins,ncols+1,nlays+1))
+  grid%area_dual_y = 0._wp
   allocate(grid%area_dual_z(nlins+1,ncols+1,nlays))
+  grid%area_dual_z = 0._wp
   allocate(grid%z_area_dual_z(nlins+1,ncols+1,nlays))
+  grid%z_area_dual_z = 0._wp
   allocate(grid%inner_product_weights(nlins,ncols,nlays,6))
+  grid%inner_product_weights = 0._wp
   allocate(grid%fvec_x(nlins+1,ncols))
+  grid%fvec_x = 0._wp
   allocate(grid%fvec_y(nlins,ncols+1))
+  grid%fvec_y = 0._wp
   allocate(grid%fvec_z(nlins+1,ncols+1))
+  grid%fvec_z = 0._wp
   allocate(grid%trsk_weights_u(nlins,6))
+  grid%trsk_weights_u = 0._wp
   allocate(grid%trsk_weights_v(nlins+1,4))
+  grid%trsk_weights_v = 0._wp
   allocate(grid%theta_bg(nlins,ncols,nlays))
+  grid%theta_bg = 0._wp
   allocate(grid%exner_bg(nlins,ncols,nlays))
+  grid%exner_bg = 0._wp
   allocate(grid%exner_bg_grad_u(nlins,ncols+1,nlays))
+  grid%exner_bg_grad_u = 0._wp
   allocate(grid%exner_bg_grad_v(nlins+1,ncols,nlays))
+  grid%exner_bg_grad_v = 0._wp
   allocate(grid%exner_bg_grad_w(nlins,ncols,nlays+1))
+  grid%exner_bg_grad_w = 0._wp
   allocate(grid%sfc_albedo(nlins,ncols))
+  grid%sfc_albedo = 0._wp
   allocate(grid%sfc_rho_c(nlins,ncols))
+  grid%sfc_rho_c = 0._wp
   allocate(grid%t_conduc_soil(nlins,ncols))
+  grid%t_conduc_soil = 0._wp
   allocate(grid%roughness_length(nlins,ncols))
+  grid%roughness_length = 0._wp
   allocate(grid%is_land(nlins,ncols))
+  grid%is_land = 0
   allocate(grid%z_soil_interface(nsoillays+1))
+  grid%z_soil_interface = 0._wp
   allocate(grid%z_soil_center(nsoillays))
+  grid%z_soil_center = 0._wp
   allocate(grid%t_const_soil(nlins,ncols))
+  grid%t_const_soil = 0._wp
   ! state at the old time step
   allocate(state_old%rho(nlins,ncols,nlays,no_of_constituents))
+  state_old%rho = 0._wp
   allocate(state_old%rhotheta(nlins,ncols,nlays))
+  state_old%rhotheta = 0._wp
   allocate(state_old%theta_pert(nlins,ncols,nlays))
+  state_old%theta_pert = 0._wp
   allocate(state_old%exner_pert(nlins,ncols,nlays))
+  state_old%exner_pert = 0._wp
   allocate(state_old%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
+  state_old%condensed_rho_t = 0._wp
   allocate(state_old%wind_u(nlins,ncols+1,nlays))
+  state_old%wind_u = 0._wp
   allocate(state_old%wind_v(nlins+1,ncols,nlays))
+  state_old%wind_v = 0._wp
   allocate(state_old%wind_w(nlins,ncols,nlays+1))
+  state_old%wind_w = 0._wp
   allocate(state_old%temperature_soil(nlins,ncols,nsoillays))
+  state_old%temperature_soil = 0._wp
   ! state at the new time step
   allocate(state_new%rho(nlins,ncols,nlays,no_of_constituents))
+  state_new%rho = 0._wp
   allocate(state_new%rhotheta(nlins,ncols,nlays))
+  state_new%rhotheta = 0._wp
   allocate(state_new%theta_pert(nlins,ncols,nlays))
+  state_new%theta_pert = 0._wp
   allocate(state_new%exner_pert(nlins,ncols,nlays))
+  state_new%exner_pert = 0._wp
   allocate(state_new%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
+  state_new%condensed_rho_t = 0._wp
   allocate(state_new%wind_u(nlins,ncols+1,nlays))
+  state_new%wind_u = 0._wp
   allocate(state_new%wind_v(nlins+1,ncols,nlays))
+  state_new%wind_v = 0._wp
   allocate(state_new%wind_w(nlins,ncols,nlays+1))
+  state_new%wind_w = 0._wp
   allocate(state_new%temperature_soil(nlins,ncols,nsoillays))
+  state_new%temperature_soil = 0._wp
   ! state containing the tendency
   allocate(tend%rho(nlins,ncols,nlays,no_of_constituents))
+  tend%rho = 0._wp
   allocate(tend%rhotheta(nlins,ncols,nlays))
+  tend%rhotheta = 0._wp
   allocate(tend%wind_u(nlins,ncols+1,nlays))
+  tend%wind_u = 0._wp
   allocate(tend%wind_v(nlins+1,ncols,nlays))
+  tend%wind_v = 0._wp
   allocate(tend%wind_w(nlins,ncols,nlays+1))
+  tend%wind_w = 0._wp
   allocate(tend%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
+  tend%condensed_rho_t = 0._wp
   ! state containing the tendency of the boundary conditions
   allocate(bc%rho_old(nlins,ncols,nlays,no_of_constituents))
+  bc%rho_old = 0._wp
   allocate(bc%rhotheta_old(nlins,ncols,nlays))
+  bc%rhotheta_old = 0._wp
   allocate(bc%wind_u_old(nlins,ncols+1,nlays))
+  bc%wind_u_old = 0._wp
   allocate(bc%wind_v_old(nlins+1,ncols,nlays))
+  bc%wind_v_old = 0._wp
   allocate(bc%wind_w_old(nlins,ncols,nlays+1))
+  bc%wind_w_old = 0._wp
   allocate(bc%condensed_rho_t_old(nlins,ncols,nlays,no_of_condensed_constituents))
+  bc%condensed_rho_t_old = 0._wp
   allocate(bc%rho_new(nlins,ncols,nlays,no_of_constituents))
+  bc%rho_new = 0._wp
   allocate(bc%rhotheta_new(nlins,ncols,nlays))
+  bc%rhotheta_new = 0._wp
   allocate(bc%wind_u_new(nlins,ncols+1,nlays))
+  bc%wind_u_new = 0._wp
   allocate(bc%wind_v_new(nlins+1,ncols,nlays))
+  bc%wind_v_new = 0._wp
   allocate(bc%wind_w_new(nlins,ncols,nlays+1))
+  bc%wind_w_new = 0._wp
   allocate(bc%condensed_rho_t_new(nlins,ncols,nlays,no_of_condensed_constituents))
+  bc%condensed_rho_t_new = 0._wp
   allocate(bc%scalar_bc_factor(nlins,ncols))
+  bc%scalar_bc_factor = 0._wp
   allocate(bc%u_bc_factor(nlins,ncols+1))
+  bc%u_bc_factor = 0._wp
   allocate(bc%v_bc_factor(nlins+1,ncols))
+  bc%v_bc_factor = 0._wp
   ! state to be written out
   allocate(state_write%rho(nlins,ncols,nlays,no_of_constituents))
+  state_write%rho = 0._wp
   allocate(state_write%rhotheta(nlins,ncols,nlays))
+  state_write%rhotheta = 0._wp
   allocate(state_write%theta_pert(nlins,ncols,nlays))
+  state_write%theta_pert = 0._wp
   allocate(state_write%exner_pert(nlins,ncols,nlays))
+  state_write%exner_pert = 0._wp
   allocate(state_write%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
+  state_write%condensed_rho_t = 0._wp
   allocate(state_write%wind_u(nlins,ncols+1,nlays))
+  state_write%wind_u = 0._wp
   allocate(state_write%wind_v(nlins+1,ncols,nlays))
+  state_write%wind_v = 0._wp
   allocate(state_write%wind_w(nlins,ncols,nlays+1))
+  state_write%wind_w = 0._wp
   allocate(state_write%temperature_soil(nlins,ncols,nsoillays))
+  state_write%temperature_soil = 0._wp
   ! type containing diagnostic quantities
   allocate(diag%v_squared(nlins,ncols,nlays))
+  diag%v_squared = 0._wp
   allocate(diag%v_squared_grad_x(nlins,ncols+1,nlays))
+  diag%v_squared_grad_x = 0._wp
   allocate(diag%v_squared_grad_y(nlins+1,ncols,nlays))
+  diag%v_squared_grad_y = 0._wp
   allocate(diag%v_squared_grad_z(nlins,ncols,nlays+1))
+  diag%v_squared_grad_z = 0._wp
   allocate(diag%p_grad_acc_neg_l_u(nlins,ncols+1,nlays))
+  diag%p_grad_acc_neg_l_u = 0._wp
   allocate(diag%p_grad_acc_neg_l_v(nlins+1,ncols,nlays))
+  diag%p_grad_acc_neg_l_v = 0._wp
   allocate(diag%p_grad_acc_neg_l_w(nlins,ncols,nlays+1))
+  diag%p_grad_acc_neg_l_w = 0._wp
   allocate(diag%p_grad_acc_neg_nl_u(nlins,ncols+1,nlays))
+  diag%p_grad_acc_neg_nl_u = 0._wp
   allocate(diag%p_grad_acc_neg_nl_v(nlins+1,ncols,nlays))
+  diag%p_grad_acc_neg_nl_v = 0._wp
   allocate(diag%p_grad_acc_neg_nl_w(nlins,ncols,nlays+1))
+  diag%p_grad_acc_neg_nl_w = 0._wp
   allocate(diag%p_grad_acc_old_u(nlins,ncols+1,nlays))
+  diag%p_grad_acc_old_u = 0._wp
   allocate(diag%p_grad_acc_old_v(nlins+1,ncols,nlays))
+  diag%p_grad_acc_old_v = 0._wp
   allocate(diag%p_grad_acc_old_w(nlins,ncols,nlays+1))
+  diag%p_grad_acc_old_w = 0._wp
   allocate(diag%pot_vort_tend_x(nlins,ncols+1,nlays))
+  diag%pot_vort_tend_x = 0._wp
   allocate(diag%pot_vort_tend_y(nlins+1,ncols,nlays))
+  diag%pot_vort_tend_y = 0._wp
   allocate(diag%pot_vort_tend_z(nlins,ncols,nlays+1))
+  diag%pot_vort_tend_z = 0._wp
   allocate(diag%scalar_placeholder(nlins,ncols,nlays))
+  diag%scalar_placeholder = 0._wp
   allocate(diag%temperature_gas(nlins,ncols,nlays))
+  diag%temperature_gas = 0._wp
   allocate(diag%u_placeholder(nlins,ncols+1,nlays))
+  diag%u_placeholder = 0._wp
   allocate(diag%v_placeholder(nlins+1,ncols,nlays))
+  diag%v_placeholder = 0._wp
   allocate(diag%w_placeholder(nlins,ncols,nlays+1))
+  diag%w_placeholder = 0._wp
   allocate(diag%u_10(nlins,ncols))
+  diag%u_10 = 0._wp
   allocate(diag%v_10(nlins,ncols))
+  diag%v_10 = 0._wp
   allocate(diag%gust(nlins,ncols))
+  diag%gust = 0._wp
   allocate(diag%mslp(nlins,ncols))
+  diag%mslp = 0._wp
   allocate(diag%t_2(nlins,ncols))
+  diag%t_2 = 0._wp
   allocate(diag%eta_x(nlins+1,ncols,nlays+1))
+  diag%eta_x = 0._wp
   allocate(diag%eta_y(nlins,ncols+1,nlays+1))
+  diag%eta_y = 0._wp
   allocate(diag%eta_z(nlins+1,ncols+1,nlays))
+  diag%eta_z = 0._wp
   allocate(diag%radiation_tendency(nlins,ncols,nlays))
+  diag%radiation_tendency = 0._wp
   allocate(diag%scalar_flux_resistance(nlins,ncols))
+  diag%scalar_flux_resistance = 0._wp
   allocate(diag%monin_obukhov_length(nlins,ncols))
+  diag%monin_obukhov_length = 0._wp
   allocate(diag%power_flux_density_sensible(nlins,ncols))
+  diag%power_flux_density_sensible = 0._wp
   allocate(diag%power_flux_density_latent(nlins,ncols))
+  diag%power_flux_density_latent = 0._wp
   allocate(diag%sfc_sw_in(nlins,ncols))
+  diag%sfc_sw_in = 0._wp
   allocate(diag%sfc_lw_out(nlins,ncols))
+  diag%sfc_lw_out = 0._wp
   allocate(diag%roughness_velocity(nlins,ncols))
+  diag%roughness_velocity = 0._wp
   ! type containing irreversible quantities
   allocate(irrev%tke(nlins,ncols,nlays))
+  irrev%tke = 0._wp
   allocate(irrev%viscosity_molecular(nlins,ncols,nlays))
+  irrev%viscosity_molecular = 0._wp
   allocate(irrev%viscosity_coeff(nlins,ncols,nlays))
+  irrev%viscosity_coeff = 0._wp
   allocate(irrev%mom_diff_tend_x(nlins,ncols+1,nlays))
+  irrev%mom_diff_tend_x = 0._wp
   allocate(irrev%mom_diff_tend_y(nlins+1,ncols,nlays))
+  irrev%mom_diff_tend_y = 0._wp
   allocate(irrev%mom_diff_tend_z(nlins,ncols,nlays+1))
+  irrev%mom_diff_tend_z = 0._wp
   allocate(irrev%heating_diss(nlins,ncols,nlays))
+  irrev%heating_diss = 0._wp
   allocate(irrev%mass_source_rates(nlins,ncols,nlays,no_of_condensed_constituents+1))
+  irrev%mass_source_rates = 0._wp
   allocate(irrev%heat_source_rates(nlins,ncols,nlays,no_of_condensed_constituents))
+  irrev%heat_source_rates = 0._wp
   write(*,*) "... finished."
   
   ! firstly, the grid generator needs to be called to calculate the grid properties
@@ -276,31 +417,6 @@ program control
   
   ! writing out the initial state
   call write_output(state_old,diag,0,grid)
-  
-  ! initializing the wind tendencies and other important quantities with zero
-  diag%v_squared = 0._wp
-  diag%p_grad_acc_old_u = 0._wp
-  diag%p_grad_acc_old_v = 0._wp
-  diag%p_grad_acc_old_w = 0._wp
-  diag%p_grad_acc_neg_l_u = 0._wp
-  diag%p_grad_acc_neg_l_v = 0._wp
-  diag%p_grad_acc_neg_l_w = 0._wp
-  diag%p_grad_acc_neg_nl_u = 0._wp
-  diag%p_grad_acc_neg_nl_v = 0._wp
-  diag%p_grad_acc_neg_nl_w = 0._wp
-  diag%v_squared_grad_x = 0._wp
-  diag%v_squared_grad_y = 0._wp
-  diag%v_squared_grad_z = 0._wp
-  diag%pot_vort_tend_x = 0._wp
-  diag%pot_vort_tend_y = 0._wp
-  diag%pot_vort_tend_z = 0._wp
-  irrev%mom_diff_tend_x = 0._wp
-  irrev%mom_diff_tend_y = 0._wp
-  irrev%mom_diff_tend_z = 0._wp
-  tend%wind_u = 0._wp
-  tend%wind_v = 0._wp
-  tend%wind_w = 0._wp
-  tend%condensed_rho_t = 0._wp
   
   ! copying the new state to the old state
   state_new = state_old
@@ -493,7 +609,6 @@ program control
   write(*,*) "L-GAME over."
   
 end program control
-
 
 
 
