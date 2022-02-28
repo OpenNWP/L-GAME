@@ -145,8 +145,8 @@ module column_solvers
             gamma_new(jl) = r_d/(c_v*state_new%rhotheta(ji,jk,jl)) &
             *(grid%exner_bg(ji,jk,jl)+state_new%exner_pert(ji,jk,jl))
             ! interpolation of partial derivatives of theta and Pi (divided by the volume)
-            alpha (jl) = ((1._wp - partial_impl_weight)*alpha_old(jl)+partial_impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
-            beta  (jl) = ((1._wp - partial_impl_weight)*beta_old (jl)+partial_impl_weight*beta_new(jl))/grid%volume(ji,jk,jl)
+            alpha(jl) = ((1._wp - partial_impl_weight)*alpha_old(jl)+partial_impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
+            beta(jl) = ((1._wp - partial_impl_weight)*beta_old (jl)+partial_impl_weight*beta_new(jl))/grid%volume(ji,jk,jl)
             gammaa(jl) = ((1._wp - partial_impl_weight)*gamma_old(jl)+partial_impl_weight*gamma_new(jl))/grid%volume(ji,jk,jl)
           endif
           ! explicit potential temperature perturbation
@@ -390,7 +390,7 @@ module column_solvers
       ! loop over all relevant constituents
       do j_constituent=1,no_of_relevant_constituents
         ! This is done do all tracers apart from the main gaseous constituent.
-        if (quantity_id /= 1 .or. j_constituent /= no_of_condensed_constituents+1) then
+        if (quantity_id/=1 .or. j_constituent/=no_of_condensed_constituents+1) then
         
           ! loop over all columns
           !$OMP PARALLEL
@@ -407,15 +407,15 @@ module column_solvers
                 ! for condensed constituents, a sink velocity must be added.
                 ! precipitation
                 ! snow
-                if (j_constituent < no_of_condensed_constituents/4) then
+                if (j_constituent<no_of_condensed_constituents/4) then
                   vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - snow_velocity
                   vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - snow_velocity
                 ! rain
-                elseif (j_constituent < no_of_condensed_constituents/2) then
+                elseif (j_constituent<no_of_condensed_constituents/2) then
                   vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - rain_velocity
                   vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - rain_velocity
                 ! clouds
-                elseif (j_constituent < no_of_condensed_constituents) then
+                elseif (j_constituent<no_of_condensed_constituents) then
                   vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - cloud_droplets_velocity
                   vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - cloud_droplets_velocity
                 endif
@@ -457,7 +457,7 @@ module column_solvers
                 ! adding the explicit part of the vertical flux divergence
                 if (jl==1) then
                   r_vector(jl) = r_vector(jl) + expl_weight*dtime*vertical_flux_vector_rhs(jl)/grid%volume(ji,jk,jl)
-                elseif (jl == nlays) then
+                elseif (jl==nlays) then
                   r_vector(jl) = r_vector(jl) - expl_weight*dtime*vertical_flux_vector_rhs(jl-1)/grid%volume(ji,jk,jl)
                   ! precipitation
                   ! snow

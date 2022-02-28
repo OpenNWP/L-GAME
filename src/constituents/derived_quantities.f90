@@ -55,16 +55,19 @@ module derived_quantities
 
   function spec_heat_cap_diagnostics_v(state,ji,jk,jl)
   
+    ! This function calculates the specific heat capacity at constant volume of the air at a certain gridpoint.
+  
     ! input arguments
-    type(t_state), intent(in)  :: state
-    integer, intent(in)        :: ji,jk,jl
+    type(t_state), intent(in) :: state    ! state with which to calculate c_v
+    integer, intent(in)       :: ji,jk,jl ! spatial indices of the gridpoint
     
     ! output
     real(wp) :: spec_heat_cap_diagnostics_v
     
     ! local variables
-    integer  :: no_of_relevant_constituents,j_constituent
-    real(wp) :: rho_g
+    integer  :: no_of_relevant_constituents ! the number of relevant constituents for this calculation
+    integer  :: j_constituent               ! constituent index
+    real(wp) :: rho_g                       ! gas density
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
@@ -88,17 +91,19 @@ module derived_quantities
 
   function spec_heat_cap_diagnostics_p(state,ji,jk,jl)
   
+    ! This function calculates the specific heat capacity at constant pressure of the air at a certain gridpoint.
+  
     ! input arguments
-    type(t_state), intent(in)  :: state
-    integer, intent(in)        :: ji,jk,jl
+    type(t_state), intent(in) :: state    ! state with which to calculate c_p
+    integer, intent(in)       :: ji,jk,jl ! spatial indices of the gridpoint
     
     ! output
     real(wp) :: spec_heat_cap_diagnostics_p
-    integer  :: no_of_relevant_constituents
     
     ! local variables
-    integer  :: j_constituent
-    real(wp) :: rho_g
+    integer  :: no_of_relevant_constituents ! the number of relevant constituents for this calculation
+    integer  :: j_constituent               ! constituent index
+    real(wp) :: rho_g                       ! gas density
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
@@ -123,17 +128,18 @@ module derived_quantities
     
   function gas_constant_diagnostics(state,ji,jk,jl)
   
+    ! This function calculates the specific gas constant at a certain gridpoint.
+  
     ! input arguments
-    type(t_state), intent(in)  :: state
-    integer, intent(in)        :: ji,jk,jl
-    
+    type(t_state), intent(in) :: state    ! state with which to calculate the gas constant
+    integer, intent(in)       :: ji,jk,jl ! spatial indices of the gridpoint
     ! output
-    real(wp) :: gas_constant_diagnostics
-    integer  :: no_of_relevant_constituents
+    real(wp)                  :: gas_constant_diagnostics
     
     ! local variables
-    integer  :: j_constituent
-    real(wp) :: rho_g
+    integer  :: no_of_relevant_constituents ! the number of relevant constituents for this calculation
+    integer  :: j_constituent               ! constituent index
+    real(wp) :: rho_g                       ! gas density
     
     rho_g = 0._wp
     no_of_relevant_constituents = 0
@@ -189,7 +195,7 @@ module derived_quantities
     real(wp)                  :: density_gas ! the result
     
     ! local variables
-    integer :: j_constituent
+    integer :: j_constituent ! index of the constituent
     
     density_gas = 0._wp
     
@@ -209,9 +215,8 @@ module derived_quantities
     real(wp) :: calc_diffusion_coeff
     
     ! local variables
-    real(wp) :: particle_radius,particle_mass,thermal_velocity,particle_density,cross_section,mean_free_path
-    
-    ! This function calculates the molecular diffusion coefficient according to the kinetic gas theory.
+    real(wp) :: particle_radius,particle_mass,thermal_velocity,particle_density,cross_section,mean_free_path ! some
+    ! thermodynamic quantities
 
     ! these things are hardly ever modified
     particle_radius = 130e-12_wp
@@ -220,7 +225,7 @@ module derived_quantities
     ! actual calculation
     thermal_velocity = sqrt(8.0_wp*k_B*temperature/(M_PI*particle_mass))
     particle_density = density/particle_mass
-    cross_section = 4.0_wp*M_PI*particle_radius**2.0_wp
+    cross_section = 4.0_wp*M_PI*particle_radius**2
     mean_free_path = 1.0_wp/(sqrt(2.0_wp)*particle_density*cross_section)
     calc_diffusion_coeff = 1.0_wp/3.0_wp*thermal_velocity*mean_free_path
     

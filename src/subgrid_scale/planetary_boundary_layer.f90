@@ -126,7 +126,7 @@ module planetary_boundary_layer
     real(wp)            :: roughness_length_from_u10_sea
 
     ! local variables
-    real(wp) :: swh,period,wavelength
+    real(wp) :: swh,period,wavelength ! properties of the wave field
 
     ! refer to Stensrud,Parameterization schemes (2007),p.130
 
@@ -187,7 +187,7 @@ module planetary_boundary_layer
     real(wp)             :: momentum_flux_resistance
 
     ! local variables
-    real(wp)             :: used_vertical_height
+    real(wp) :: used_vertical_height
 
     ! height of the prandtl layer
     used_vertical_height = min(agl,PRANDTL_HEIGHT)
@@ -210,14 +210,14 @@ module planetary_boundary_layer
     ! This function returns the roughness velocity.
 
     ! input variables
-    real(wp), intent(in) :: wind_speed
-    real(wp), intent(in) :: agl
-    real(wp), intent(in) :: roughness_length_value
+    real(wp), intent(in) :: wind_speed             ! wind speed at a certain height
+    real(wp), intent(in) :: agl                    ! height at which the wind speed is valid
+    real(wp), intent(in) :: roughness_length_value ! roughness length at this point
     ! output variable
-    real(wp)             :: roughness_velocity
+    real(wp)             :: roughness_velocity     ! the result
 
     ! local variables
-    real(wp) :: denominator
+    real(wp) :: denominator ! helper variable
 
     denominator = log(agl/roughness_length_value)
 
@@ -237,10 +237,10 @@ module planetary_boundary_layer
     ! This is a helper function for the correction to the surface scalar flux resistance for non-neutral conditions.
 
     ! input variables
-    real(wp), intent(in) :: eff ! effective height above the surface
+    real(wp), intent(in) :: eff   ! effective height above the surface
     real(wp), intent(in) :: l     ! Monin-Obukhov length
     ! output variable
-    real(wp)             :: psi_h
+    real(wp)             :: psi_h ! the value of the helper function
 
     ! local variables
     real(wp) :: x       ! helper variable
@@ -268,10 +268,10 @@ module planetary_boundary_layer
     ! This is a helper function for the correction to the surface momentum flux resistance for non-neutral conditions.
 
     ! input variables
-    real(wp), intent(in) :: eff ! effective height above the surface
+    real(wp), intent(in) :: eff   ! effective height above the surface
     real(wp), intent(in) :: l     ! Monin-Obukhov length
     ! output variable
-    real(wp)             :: psi_m
+    real(wp)             :: psi_m ! the value of the helper function
 
     ! local variables
     real(wp) :: x       ! helper variable

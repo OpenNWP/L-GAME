@@ -10,6 +10,7 @@ module effective_diff_coeffs
   use diff_nml,           only: diff_h_smag_div
   use derived_quantities, only: calc_diffusion_coeff
   use constituents_nml,   only: no_of_condensed_constituents
+  use tke,                only: tke_update
   
   implicit none
   
@@ -69,11 +70,20 @@ module effective_diff_coeffs
   
   end subroutine hori_curl_viscosity
   
-  subroutine vert_hori_mom_viscosity()
+  subroutine vert_hori_mom_viscosity(state,diag,irrev,grid)
   
     ! This subroutine computes the effective viscosity (Eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
 	! This quantity is located at the half level edges.
 	! To obey the symmetry of the stress tensor, the same coefficient must be used for the horizontal diffusion of vertical velocity.
+  
+    ! input arguments and output
+    type(t_state), intent(in)    :: state ! state
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
+	
+	!  updating the TKE
+    call tke_update(state,diag,irrev,grid)
   
   end subroutine vert_hori_mom_viscosity
   

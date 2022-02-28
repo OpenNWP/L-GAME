@@ -39,7 +39,7 @@ module dictionary
   
     ! mean particle masses of the constituents of the gas phase
     
-    integer, intent(in) :: gas_constituent_id
+    integer, intent(in) :: gas_constituent_id ! number of the gas constituent
     ! the result
     real(wp)            :: mean_particle_masses_gas
   
@@ -53,55 +53,55 @@ module dictionary
   
   end function mean_particle_masses_gas
 
-  function spec_heat_capacities_v_gas(j_constituent)
+  function spec_heat_capacities_v_gas(gas_constituent_id)
     
     ! specific heat capacity at constant volume
     
-    integer, intent(in) :: j_constituent
+    integer, intent(in) :: gas_constituent_id ! number of the gas constituent
     ! the result
     real(wp) :: spec_heat_capacities_v_gas
     
-    if (j_constituent==0) then
+    if (gas_constituent_id==0) then
       spec_heat_capacities_v_gas = 717.942189_wp
     endif
     
-    if (j_constituent==1) then
+    if (gas_constituent_id==1) then
       spec_heat_capacities_v_gas = 1396.475121_wp
     endif
     
   end function spec_heat_capacities_v_gas
 
-  function spec_heat_capacities_p_gas(j_constituent)
+  function spec_heat_capacities_p_gas(gas_constituent_id)
     
     ! specific heat capacity at constant pressure
     
-    integer, intent(in) :: j_constituent
+    integer, intent(in) :: gas_constituent_id ! number of the gas constituent
     ! the result
     real(wp) :: spec_heat_capacities_p_gas
     
-    if (j_constituent==0) then
+    if (gas_constituent_id==0) then
       spec_heat_capacities_p_gas = 1005.0_wp
     endif
     
-    if (j_constituent==1) then
+    if (gas_constituent_id==1) then
       spec_heat_capacities_p_gas = 1858.0_wp
     endif
     
   end function spec_heat_capacities_p_gas
   
-  function specific_gas_constants(j_constituent)
+  function specific_gas_constants(gas_constituent_id)
     
     ! specific gas constants
     
-    integer, intent(in) :: j_constituent
+    integer, intent(in) :: gas_constituent_id ! number of the gas constituent
     ! the result
     real(wp) :: specific_gas_constants
     
-    if (j_constituent==0) then
+    if (gas_constituent_id==0) then
       specific_gas_constants = 287.057811_wp
     endif
     
-    if (j_constituent==1) then
+    if (gas_constituent_id==1) then
       specific_gas_constants = 461.524879_wp
     endif
     
@@ -149,7 +149,7 @@ module dictionary
     real(wp) :: distance            ! distance from the maximum
     
     ! calculation of the result
-    sigma = fwhm/(8*log(2._wp))**0.5_wp
+    sigma = fwhm/(8._wp*log(2._wp))**0.5_wp
     distance = height - max
     calc_o3_vmr = max_vmr*exp(-distance**2/(2*sigma**2))
     

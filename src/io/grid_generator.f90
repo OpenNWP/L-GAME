@@ -54,8 +54,8 @@ module grid_generator
     real(wp) :: A                              ! variable for calculating the vertical grid
     real(wp) :: B                              ! variable for calculating the vertical grid
     real(wp) :: sigma_z                        ! variable for calculating the vertical grid
-    real(wp) :: rel                          ! variable for calculating the vertical grid
-    real(wp) :: vertical_vector_pre(nlays+1) ! variable for calculating the vertical grid
+    real(wp) :: z_rel                          ! variable for calculating the vertical grid
+    real(wp) :: vertical_vector_pre(nlays+1)   ! variable for calculating the vertical grid
     real(wp) :: base_area                      ! variable for calculating the vertical grid
     real(wp) :: lower_z,upper_z,lower_length   ! variables needed for area calculations
     real(wp) :: height_mountain                ! height of Gaussian mountain (needed for test case)
@@ -66,6 +66,8 @@ module grid_generator
     real(wp) :: density_soil                   ! typical density of soil
     real(wp) :: c_p_soil                       ! typical c_p of soil
     real(wp) :: c_p_water                      ! typical c_p of water
+    real(wp) :: lat_lower_center               ! variable for calculating the TRSK weights
+    real(wp) :: lat_upper_center               ! variable for calculating the TRSK weights
     
     ! setting the center and direction of the grid
     grid%lat_center = 2._wp*M_PI*lat_center_deg/360._wp
@@ -78,36 +80,102 @@ module grid_generator
     dlon = dx/re
     lat_left_upper = (nlins-1._wp)/2._wp*dlat
     lon_left_upper = -(ncols-1._wp)/2._wp*dlon
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji)
     do ji=1,nlins
       grid%lat_scalar(ji) = lat_left_upper - dlat*(ji-1._wp)
+      ! this will be modified later
+      grid%lat_geo_scalar(ji,:) = grid%lat_scalar(ji)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jk)
     do jk=1,ncols
       grid%lon_scalar(jk) = lon_left_upper + dlon*(jk-1._wp)
+      ! this will be modified later
+      grid%lon_geo_scalar(:,jk) = grid%lon_scalar(jk)
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! this will be modified later
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
+    do ji=1,nlins
+      do jk=1,ncols+1
+        grid%lat_geo_u(ji,jk) = grid%lat_scalar(ji)
+        grid%lon_geo_u(ji,jk) = grid%lon_scalar(jk) - 0.5_wp*dlon
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! this will be modified later
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
+    do ji=1,nlins+1
+      do jk=1,ncols
+        grid%lat_geo_v(ji,jk) = grid%lat_scalar(ji) + 0.5_wp*dlat
+        grid%lon_geo_v(ji,jk) =  grid%lon_scalar(jk)
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! this will be modified later
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    grid%dir_geo_u(:,:) = 0._wp
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
+    
+    ! this will be modified later
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    grid%dir_geo_u_scalar(:,:) = 0._wp
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     
     ! setting the Coriolis vector at the grid points
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins+1
       do jk=1,ncols
         grid%fvec_x(ji,jk) = 0._wp
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins
       do jk=1,ncols+1
         grid%fvec_y(ji,jk) = omega
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins+1
       do jk=1,ncols+1
         grid%fvec_z(ji,jk) = omega
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! setting the physical surface properties, including orography
     select case (orography_id)
     
       ! no orography
       case(0)
+        !$OMP PARALLEL
+        !$OMP WORKSHARE
         grid%z_w(:,:,nlays+1) = 0._wp
+        !$OMP END WORKSHARE
+        !$OMP END PARALLEL
       
       ! real orography
       case(1)
@@ -117,13 +185,19 @@ module grid_generator
         else
         
           ! real orography is not yet implemented
+          !$OMP PARALLEL
+          !$OMP WORKSHARE
           grid%z_w(:,:,nlays+1) = 0._wp
+          !$OMP END WORKSHARE
+          !$OMP END PARALLEL
         
           ! idealized soil properties are being set here if no grid file shall be read in
           density_soil = 1442._wp
           c_p_soil = 830._wp
           c_p_water = 4184._wp
     
+          !$OMP PARALLEL
+          !$OMP DO PRIVATE(ji,jk)
           do ji=1,nlins
             do jk=1,ncols
 		
@@ -162,29 +236,37 @@ module grid_generator
       
             enddo
           enddo
+          !$OMP END DO
+          !$OMP END PARALLEL
         endif
       
       ! Schaer orography
       case(2)
         height_mountain = 250._wp
         sigma_mountain = 5000._wp/sqrt(2._wp)
+        !$OMP PARALLEL
+        !$OMP DO PRIVATE(ji,jk)
         do ji=1,nlins
           do jk=1,ncols
             x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
             grid%z_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))*cos(M_PI*x_coord/4000._wp)**2
           enddo
         enddo
+        !$OMP END DO
+        !$OMP END PARALLEL
     
     endselect
   
     ! calculating the vertical positions of the scalar points
     ! the heights are defined according to k = A_k + B_k*surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,z_rel,sigma_z,A,B,vertical_vector_pre,max_oro)
     do ji=1,nlins
       do jk=1,ncols
         ! filling up vertical_vector_pre
         do jl=1,nlays+1
-          rel = 1._wp-(jl-1._wp)/nlays ! z/toa
-          sigma_z = rel**sigma
+          z_rel = 1._wp-(jl-1._wp)/nlays ! z/toa
+          sigma_z = z_rel**sigma
           A = sigma_z*toa ! the height without orography
           ! B corrects for orography
           if (jl >= nlays-nlays_oro+1._wp) then
@@ -196,7 +278,7 @@ module grid_generator
         enddo
         
         ! doing a check
-        if (ji == 1 .and. jk == 1) then
+        if (ji==1 .and. jk==1) then
           max_oro = maxval(grid%z_w(:,:,nlays+1))
           if (max_oro >= vertical_vector_pre(max(nlays-nlays_oro,1))) then
             write(*,*) "Maximum of orography larger or equal to the height of the lowest flat level."
@@ -211,6 +293,8 @@ module grid_generator
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! setting the height of the u-vector points
     ! inner domain
@@ -388,8 +472,15 @@ module grid_generator
     do ji=1,nlins+1
       do jk=1,ncols+1
         do jl=1,nlays
-          grid%z_area_dual_z(ji,jk,jl) = 0.25_wp*(grid%z_scalar(ji,jk,jl)+grid%z_scalar(ji+1,jk,jl) &
-          +grid%z_scalar(ji+1,jk+1,jl)+grid%z_scalar(ji,jk+1,jl))
+          ! setting the vertical position of the areas
+          if (jk==1) then
+            grid%z_area_dual_z(ji,jk,jl) = grid%z_v(ji,1,jl) + 0.5_wp*(grid%z_v(ji,1,jl)-grid%z_v(ji,2,jl))
+          elseif (jk==ncols+1) then
+            grid%z_area_dual_z(ji,jk,jl) = grid%z_v(ji,ncols,jl) + 0.5_wp*(grid%z_v(ji,ncols,jl)-grid%z_v(ji,ncols-1,jl))
+          else
+            grid%z_area_dual_z(ji,jk,jl) = 0.5_wp*(grid%z_v(ji,jk-1,jl)+grid%z_v(ji,jk,jl))
+          endif
+          ! setting the area itself
           grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji) + 0.5_wp*dlat,dlon,dlat) &
           *(re + grid%z_area_dual_z(ji,jk,jl))**2/re**2
         enddo
@@ -405,17 +496,28 @@ module grid_generator
       do jk=1,ncols
         do jl=1,nlays+1
           if (jl==nlays+1) then
-            lower_z = 0.5_wp*(grid%z_w(ji,jk+1,jl) + grid%z_w(ji+1,jk+1,jl))
-            lower_length = grid%dy(ji,jk+1,jl-1)*(re + lower_z)/ &
-            (re + 0.5_wp*(grid%z_scalar(ji,jk+1,jl-1) + grid%z_scalar(ji+1,jk+1,jl-1)))
+            if (ji==1) then
+              lower_z = grid%z_w(1,jk,jl) + 0.5_wp*(grid%z_w(1,jk,jl)-grid%z_w(2,jk,jl))
+            elseif (ji==nlins+1) then
+              lower_z = grid%z_w(nlins,jk,jl) + 0.5_wp*(grid%z_w(nlins,jk,jl)-grid%z_w(nlins-1,jk,jl))
+            else
+              lower_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
+            endif
+            lower_length = grid%dy(ji,jk,nlays)*(re + lower_z)/(re + grid%z_v(ji,jk,nlays))
           else
-            lower_z = 0.5_wp*(grid%z_scalar(ji,jk+1,jl) + grid%z_scalar(ji+1,jk+1,jl))
-            lower_length = grid%dy(ji,jk+1,jl)
+            lower_z = grid%z_v(ji,jk,jl)
+            lower_length = grid%dy(ji,jk,jl)
           endif
           if (jl==1) then
-            upper_z = 0.5_wp*(grid%z_w(ji,jk+1,jl) + grid%z_w(ji+1,jk+1,jl))
+            if (ji==1) then
+              upper_z = grid%z_w(1,jk,jl) + 0.5_wp*(grid%z_w(1,jk,jl)-grid%z_w(2,jk,jl))
+            elseif (ji==nlins+1) then
+              upper_z = grid%z_w(nlins,jk,jl) + 0.5_wp*(grid%z_w(nlins,jk,jl)-grid%z_w(nlins-1,jk,jl))
+            else
+              upper_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
+            endif
           else
-            upper_z = 0.5_wp*(grid%z_scalar(ji,jk+1,jl-1) + grid%z_scalar(ji+1,jk+1,jl-1))
+            upper_z = grid%z_v(ji,jk,jl-1)
           endif
           grid%area_dual_x(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
@@ -431,17 +533,28 @@ module grid_generator
       do jk=1,ncols+1
         do jl=1,nlays+1
           if (jl==nlays+1) then
-            lower_z = 0.5_wp*(grid%z_w(ji+1,jk,jl) + grid%z_w(ji+1,jk+1,jl))
-            lower_length = grid%dx(ji+1,jk,jl-1)*(re + lower_z)/ &
-            (re + 0.5_wp*(grid%z_scalar(ji+1,jk,jl-1) + grid%z_scalar(ji+1,jk+1,jl-1)))
+            if (jk==1) then
+              lower_z = grid%z_w(ji,1,jl) + 0.5_wp*(grid%z_w(ji,2,jl)-grid%z_w(ji,1,jl))
+            elseif (jk==ncols+1) then
+              lower_z = grid%z_w(ji,ncols,jl) + 0.5_wp*(grid%z_w(ji,ncols,jl)-grid%z_w(ji,ncols-1,jl))
+            else
+              lower_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
+            endif
+            lower_length = grid%dx(ji,jk,nlays)*(re + lower_z)/(re + grid%z_u(ji,jk,nlays))
           else
-            lower_z = 0.5_wp*(grid%z_scalar(ji+1,jk,jl) + grid%z_scalar(ji+1,jk+1,jl))
-            lower_length = grid%dx(ji+1,jk,jl)
+            lower_z = grid%z_u(ji,jk,jl)
+            lower_length = grid%dx(ji,jk,jl)
           endif
           if (jl==1) then
-            upper_z = 0.5_wp*(grid%z_w(ji+1,jk,jl) + grid%z_w(ji+1,jk+1,jl))
+            if (jk==1) then
+              upper_z = grid%z_w(ji,1,jl) + 0.5_wp*(grid%z_w(ji,2,jl)-grid%z_w(ji,1,jl))
+            elseif (jk==ncols+1) then
+              upper_z = grid%z_w(ji,ncols,jl) + 0.5_wp*(grid%z_w(ji,ncols,jl)-grid%z_w(ji,ncols-1,jl))
+            else
+              upper_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
+            endif
           else
-            upper_z = 0.5_wp*(grid%z_scalar(ji+1,jk,jl-1) + grid%z_scalar(ji+1,jk+1,jl-1))
+            upper_z = grid%z_u(ji,jk,jl-1)
           endif
           grid%area_dual_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
@@ -481,26 +594,36 @@ module grid_generator
     ! setting the TRSK weights
     ! u
     do ji=1,nlins
-        base_area = patch_area(grid%lat_scalar(ji),dlon,dlat)
-        grid%trsk_weights_u(ji,1) = (0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area) &
-        *dx*cos(0.5_wp*(grid%lat_scalar(ji)+grid%lat_scalar(ji+1)))/(dx*cos(grid%lat_scalar(ji)))
-        grid%trsk_weights_u(ji,2) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area) &
-        *dy/(dx*cos(grid%lat_scalar(ji)))
-        grid%trsk_weights_u(ji,3) = -(0.5_wp - (patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
-        +patch_area(grid%lat_scalar(ji)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat))/base_area) &
-        *dx*cos(0.5_wp*(grid%lat_scalar(ji)+grid%lat_scalar(ji)))/(dx*cos(grid%lat_scalar(ji)))
-        grid%trsk_weights_u(ji,4) = grid%trsk_weights_u(ji,3)
-        grid%trsk_weights_u(ji,5) = -grid%trsk_weights_u(ji,2)
-        grid%trsk_weights_u(ji,6) = grid%trsk_weights_u(ji,1)
+      base_area = patch_area(grid%lat_scalar(ji),dlon,dlat)
+      grid%trsk_weights_u(ji,1) = (0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area) &
+      *dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)/(dx*cos(grid%lat_scalar(ji)))
+      grid%trsk_weights_u(ji,2) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area) &
+      *dy/(dx*cos(grid%lat_scalar(ji)))
+      grid%trsk_weights_u(ji,3) = -(0.5_wp - (patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
+      + patch_area(grid%lat_scalar(ji)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat))/base_area) &
+      *dx*cos(grid%lat_scalar(ji)-0.5_wp*dlat)/(dx*cos(grid%lat_scalar(ji)))
+      grid%trsk_weights_u(ji,4) = grid%trsk_weights_u(ji,3)
+      grid%trsk_weights_u(ji,5) = -grid%trsk_weights_u(ji,2)
+      grid%trsk_weights_u(ji,6) = grid%trsk_weights_u(ji,1)
     enddo
     ! v
     do ji=1,nlins+1
-        base_area = patch_area(grid%lat_scalar(ji),dlon,dlat)
-        grid%trsk_weights_v(ji,1) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
-        grid%trsk_weights_v(ji,2) = grid%trsk_weights_v(ji,1)
-        base_area = patch_area(grid%lat_scalar(ji+1),dlon,dlat)
-        grid%trsk_weights_v(ji,3) = -(0.5_wp - patch_area(grid%lat_scalar(ji+1)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
-        grid%trsk_weights_v(ji,4) = grid%trsk_weights_v(ji,3)
+      if (ji==nlins+1) then
+        lat_lower_center = grid%lat_scalar(nlins)-dlat
+      else
+        lat_lower_center = grid%lat_scalar(ji)
+      endif
+      base_area = patch_area(lat_lower_center,dlon,dlat)
+      grid%trsk_weights_v(ji,1) = -(0.5_wp - patch_area(lat_lower_center+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
+      grid%trsk_weights_v(ji,2) = grid%trsk_weights_v(ji,1)
+      if (ji==1) then
+        lat_upper_center = grid%lat_scalar(1)+dlat
+      else
+        lat_upper_center = grid%lat_scalar(ji-1)
+      endif
+      base_area = patch_area(lat_upper_center,dlon,dlat)
+      grid%trsk_weights_v(ji,3) = -(0.5_wp - patch_area(lat_upper_center-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
+      grid%trsk_weights_v(ji,4) = grid%trsk_weights_v(ji,3)
     enddo
     
     ! soil grid
@@ -544,6 +667,8 @@ module grid_generator
     integer  :: ji,jk,jl    ! index variables
     
     ! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,b,c,temperature,pressure)
     do ji=1,nlins
       do jk=1,ncols
         ! integrating from bottom to top
@@ -567,6 +692,8 @@ module grid_generator
         enddo
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! calculating the gradient of the background Exner pressure (only needs to be done once)
     call grad(grid%exner_bg,grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
