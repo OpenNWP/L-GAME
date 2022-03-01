@@ -34,17 +34,33 @@ module vorticities
     ! calculating the relative vorticity in x-direction
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
-    do ji=2,nlins
-      do jk=1,ncols
-        do jl=2,nlays
+    do jk=1,ncols
+      do jl=2,nlays
+        do ji=2,nlins
           diag%eta_x(ji,jk,jl) = &
           grid%dz(ji-1,jk,jl)*state%wind_w(ji-1,jk,jl) &
           - grid%dy(ji,jk,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,jl-1) &
           - grid%dz(ji,jk,jl)*state%wind_w(ji,jk,jl) &
           + grid%dy(ji,jk,jl)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,jl)
         enddo
-        ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
-        diag%eta_x(ji,jk,nlays+1) = -grid%dy(ji,jk,nlays)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,nlays)
+        
+        ! boundary conditions
+        if (lperiodic) then
+          diag%eta_x(1,jk,jl) = &
+          grid%dz(nlins,jk,jl)*state%wind_w(nlins,jk,jl) &
+          - grid%dy(1,jk,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,1,jk,jl-1) &
+          - grid%dz(1,jk,jl)*state%wind_w(1,jk,jl) &
+          + grid%dy(1,jk,jl)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,1,jk,jl)
+          diag%eta_x(nlins+1,jk,jl) = diag%eta_x(1,jk,jl)
+        else
+          diag%eta_x(1,jk,jl) = 0._wp
+          diag%eta_x(nlins+1,jk,jl) = 0._wp
+        endif
+        
+        do ji=1,nlins+1
+          ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
+          diag%eta_x(ji,jk,nlays+1) = -grid%dy(ji,jk,nlays)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,nlays)
+        enddo
       enddo
     enddo
     !$OMP END DO
@@ -66,16 +82,33 @@ module vorticities
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
-      do jk=2,ncols
-        do jl=2,nlays
+      do jl=2,nlays
+        do jk=2,ncols
           diag%eta_y(ji,jk,jl) = &
           -grid%dz(ji,jk,jl)*state%wind_w(ji,jk,jl) &
           - grid%dx(ji,jk,jl)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,jl) &
           + grid%dz(ji,jk-1,jl)*state%wind_w(ji,jk-1,jl) &
           + grid%dx(ji,jk,jl-1)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,jl-1)
         enddo
-        ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
-        diag%eta_y(ji,jk,nlays+1) = grid%dx(ji,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,nlays)
+        
+        ! boundaries
+        if (lperiodic) then
+          diag%eta_y(ji,1,jl) = &
+          -grid%dz(ji,1,jl)*state%wind_w(ji,1,jl) &
+          - grid%dx(ji,1,jl)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,1,jl) &
+          + grid%dz(ji,ncols,jl)*state%wind_w(ji,ncols,jl) &
+          + grid%dx(ji,1,jl-1)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,1,jl-1)
+          diag%eta_y(ji,ncols+1,jl) = diag%eta_y(ji,1,jl)
+        else
+          diag%eta_y(ji,1,jl) = 0._wp
+          diag%eta_y(ji,ncols+1,jl) = 0._wp
+        endif
+        
+        do jk=1,ncols+1
+          ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
+          diag%eta_y(ji,jk,nlays+1) = grid%dx(ji,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,nlays)
+        enddo
+        
       enddo
     enddo
     !$OMP END DO
@@ -331,7 +364,7 @@ module vorticities
           endif
           vertical_gradient = (state%wind_v(j_i(jm),j_k(jm),jl) - state%wind_v(j_i(jm),j_k(jm),jl+ind_shift))/ &
           (grid%z_v(j_i(jm),j_k(jm),jl) - grid%z_v(j_i(jm),j_k(jm),jl+ind_shift))
-          rel_vort_z_local = sign_vector(jm)*l_rescale*grid%dy(j_i(jm),j_k(jm),jl)* &
+          rel_vort_z_local = rel_vort_z_local + sign_vector(jm)*l_rescale*grid%dy(j_i(jm),j_k(jm),jl)* &
           (state%wind_v(j_i(jm),j_k(jm),jl) + delta_z*vertical_gradient)
         else
           l_rescale = (re + grid%z_area_dual_z(j_i(jm),j_k(jm),jl))/(re + grid%z_u(j_i(jm),j_k(jm),jl))
@@ -342,7 +375,7 @@ module vorticities
           endif
           vertical_gradient = (state%wind_u(j_i(jm),j_k(jm),jl) - state%wind_u(j_i(jm),j_k(jm),jl+ind_shift))/ &
           (grid%z_u(j_i(jm),j_k(jm),jl) - grid%z_u(j_i(jm),j_k(jm),jl+ind_shift))
-          rel_vort_z_local = sign_vector(jm)*l_rescale*grid%dx(j_i(jm),j_k(jm),jl)* &
+          rel_vort_z_local = rel_vort_z_local + sign_vector(jm)*l_rescale*grid%dx(j_i(jm),j_k(jm),jl)* &
           (state%wind_u(j_i(jm),j_k(jm),jl) + delta_z*vertical_gradient)
         endif
       enddo
