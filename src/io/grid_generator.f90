@@ -77,6 +77,7 @@ module grid_generator
     real(wp) :: local_i(3)                   ! local i-vector
     real(wp) :: local_j(3)                   ! local j-vector
     real(wp) :: x_basis_local,y_basis_local  ! local Cartesian components of the local basis vector
+    real(wp) :: lat_local,lon_local          ! helper variables
     integer  :: ji,jk,jl                     ! loop indices
     
     ! setting the center and direction of the grid
@@ -160,35 +161,6 @@ module grid_generator
     !$OMP WORKSHARE
     grid%dir_geo_u_scalar(:,:) = 0._wp
     !$OMP END WORKSHARE
-    !$OMP END PARALLEL
-    
-    ! setting the Coriolis vector at the grid points
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
-    do ji=1,nlins+1
-      do jk=1,ncols
-        grid%fvec_x(ji,jk) = 0._wp
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
-    do ji=1,nlins
-      do jk=1,ncols+1
-        grid%fvec_y(ji,jk) = omega
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
-    do ji=1,nlins+1
-      do jk=1,ncols+1
-        grid%fvec_z(ji,jk) = omega
-      enddo
-    enddo
-    !$OMP END DO
     !$OMP END PARALLEL
     
     ! setting the physical surface properties, including orography
@@ -786,7 +758,51 @@ module grid_generator
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-	
+    
+    ! setting the Coriolis vector
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,y_basis_local)
+    do ji=1,nlins+1
+      do jk=1,ncols
+        y_basis_local = sin(grid%dir_geo_v(ji,jk) - 0.5_wp*M_PI)
+        grid%fvec_x(ji,jk) = 2._wp*omega*cos(grid%lat_geo_v(ji,jk))*y_basis_local
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,y_basis_local)
+    do ji=1,nlins
+      do jk=1,ncols+1
+        y_basis_local = sin(grid%dir_geo_u(ji,jk) + 0.5_wp*M_PI)
+        grid%fvec_y(ji,jk) = 2._wp*omega*cos(grid%lat_geo_u(ji,jk))*y_basis_local
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,lat_local,lon_local,r_old,r_new)
+    do ji=1,nlins+1
+      do jk=1,ncols+1
+        if (ji==nlins+1) then
+          lat_local = grid%lat_scalar(ji-1) - 0.5*dlat
+        else
+          lat_local = grid%lat_scalar(ji) + 0.5*dlat
+        endif
+        if (jk==ncols+1) then
+          lon_local = grid%lon_scalar(jk-1) + 0.5*dlon
+        else
+          lon_local = grid%lon_scalar(jk) - 0.5*dlon
+        endif
+        call find_global_normal(lat_local,lon_local,r_old)
+        r_new = matmul(rot,r_old)
+        call find_geos(r_new,lat_local,lon_local)
+        grid%fvec_z(ji,jk) = 2._wp*omega*sin(lat_local)
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+
     ! writing some grid properties to a file if required by the user
     if (lwrite_grid) then
       call write_grid(grid)
