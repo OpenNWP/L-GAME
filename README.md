@@ -16,12 +16,19 @@ L-GAME is a numerical weather prediction (NWP) model. It is the application of t
 
 ### Dependencies
 
-Everything is easy and quick to install. These instructions are for Ubuntu.
+Everything is easy and quick to install.
+
+	sudo apt-get install gcc gfortran make cmake wget libeccodes-dev python3 python3-pip libnetcdf-dev libnetcdff-dev
 
 * [geos95](https://github.com/OpenNWP/geos95)
 * Clone our fork of the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp`
-* Python and pip (only needed for the plotting routines): `sudo apt-get install python3 python3-pip`
-* Python packages (only needed for the plotting routines): `pip3 install matplotlib numpy netCDF4`
+* `pip3 install global-land-mask eccodes`
+
+#### For using the plotting routines
+
+The following packages are additionally required if you want to make use of the plotting routines:
+
+* Python visualization library scitools-iris (installation manual: https://scitools-iris.readthedocs.io/en/latest/installing.html#installing-from-source-without-conda-on-debian-based-linux-distros-developers)
 
 ### Installation
 
