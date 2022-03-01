@@ -186,9 +186,9 @@ module vorticities
     ! horizontal vorticity in x-direction
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
-    do ji=2,nlins
-      do jk=1,ncols
-        do jl=1,nlays+1
+    do jk=1,ncols
+      do jl=1,nlays+1
+        do ji=2,nlins
           if (jl==1) then
             diag%eta_x(ji,jk,jl) = diag%eta_x(ji,jk,jl)/(0.5_wp*(state%rho(ji-1,jk,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
@@ -218,6 +218,39 @@ module vorticities
             state%rho(ji-1,jk,jl,no_of_condensed_constituents+1)+state%rho(ji,jk,jl,no_of_condensed_constituents+1)))
           endif
         enddo
+        
+        if (lperiodic) then
+          if (jl==1) then
+            diag%eta_x(1,jk,jl) = diag%eta_x(1,jk,jl)/(0.5_wp*(state%rho(nlins,jk,jl,no_of_condensed_constituents+1) &
+            ! linear extrapolation to the TOA
+            +(toa-grid%z_scalar(nlins,jk,jl))*(state%rho(nlins,jk,jl,no_of_condensed_constituents+1) &
+            -state%rho(nlins,jk,jl+1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(nlins,jk,jl)-grid%z_scalar(nlins,jk,jl+1)) &
+            +state%rho(1,jk,jl,no_of_condensed_constituents+1) &
+            ! linear extrapolation to the TOA
+            +(toa-grid%z_scalar(1,jk,jl))*(state%rho(1,jk,jl,no_of_condensed_constituents+1) &
+            -state%rho(1,jk,jl+1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(1,jk,jl)-grid%z_scalar(1,jk,jl+1))))
+          elseif (jl==nlays+1) then
+            diag%eta_x(1,jk,jl) = diag%eta_x(1,jk,jl)/(0.5_wp*(state%rho(nlins,jk,jl-1,no_of_condensed_constituents+1) &
+            ! linear extrapolation to the surface
+            +(grid%z_w(nlins,jk,jl)-grid%z_scalar(nlins,jk,jl-1))*(state%rho(nlins,jk,jl-2,no_of_condensed_constituents+1) &
+            -state%rho(nlins,jk,jl-1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(nlins,jk,jl-2)-grid%z_scalar(nlins,jk,jl-1)) &
+            +state%rho(1,jk,jl-1,no_of_condensed_constituents+1) &
+            ! linear extrapolation to the surface
+            +(grid%z_w(1,jk,jl)-grid%z_scalar(1,jk,jl-1)) &
+            *(state%rho(1,jk,jl-2,no_of_condensed_constituents+1) &
+            -state%rho(1,jk,jl-1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(1,jk,jl-2)-grid%z_scalar(1,jk,jl-1))))
+          else
+            diag%eta_x(1,jk,jl) = diag%eta_x(1,jk,jl)/(0.25_wp*(state%rho(nlins,jk,jl-1,no_of_condensed_constituents+1) &
+            +state%rho(1,jk,jl-1,no_of_condensed_constituents+1)+ &
+            state%rho(nlins,jk,jl,no_of_condensed_constituents+1)+state%rho(1,jk,jl,no_of_condensed_constituents+1)))
+          endif
+          diag%eta_x(nlins+1,jk,jl) = diag%eta_x(1,jk,jl)
+        endif
+        
       enddo
     enddo
     !$OMP END DO
