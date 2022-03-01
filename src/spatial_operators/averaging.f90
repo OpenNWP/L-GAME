@@ -7,6 +7,7 @@ module averaging
 
   use definitions, only: t_grid,wp
   use run_nml,     only: nlays,nlays_oro,nlins,ncols
+  use bc_nml,      only: lperiodic
   
   implicit none
   
@@ -72,7 +73,7 @@ module averaging
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
-      do jk=2,ncols
+      do jk=1,ncols+1
         do jl=1,nlays
           result_field_x(ji,jk,jl) = result_field_x(ji,jk,jl) &
           - grid%slope_x(ji,jk,jl)*remap_ver2hor_x(result_field_z,grid,ji,jk,jl)
@@ -85,7 +86,7 @@ module averaging
     ! correction to the y-component
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
-    do ji=2,nlins
+    do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
           result_field_y(ji,jk,jl) = result_field_y(ji,jk,jl) &
@@ -103,19 +104,37 @@ module averaging
     ! This function remaps a vertical covariant component of
     ! a vector field to a position of a vector component in x-direction.
   
-    real(wp),     intent(in)    :: vertical_cov(:,:,:) ! z-component of vector field to work with
-    type(t_grid), intent(in)    :: grid                ! the grid properties
-    integer,      intent(in)    :: ji,jk,jl            ! positional indices
+    real(wp),     intent(in) :: vertical_cov(:,:,:) ! z-component of vector field to work with
+    type(t_grid), intent(in) :: grid                ! the grid properties
+    integer,      intent(in) :: ji,jk,jl            ! positional indices
   
     real(wp) :: remap_ver2hor_x ! the result
     
-    remap_ver2hor_x = grid%inner_product_weights(ji,jk-1,jl,5)*vertical_cov(ji,jk-1,jl)
-    remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
-    ! layer below
-    if (jl<nlays) then
-      remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk-1,jl,6)*vertical_cov(ji,jk-1,jl+1)
-      remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
+    ! initialization with zero
+    remap_ver2hor_x = 0._wp
+    
+    if (jk==1 .or. jk==ncols+1) then
+      if (lperiodic) then
+        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,ncols,jl,5)*vertical_cov(ji,ncols,jl)
+        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,1,jl,5)*vertical_cov(ji,1,jl)
+        ! layer below
+        if (jl<nlays) then
+          remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,ncols,jl,6)*vertical_cov(ji,ncols,jl+1)
+          remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,1,jl,6)*vertical_cov(ji,1,jl+1)
+        endif
+      else
+        return
+      endif
+    else
+      remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk-1,jl,5)*vertical_cov(ji,jk-1,jl)
+      remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
+      ! layer below
+      if (jl<nlays) then
+        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk-1,jl,6)*vertical_cov(ji,jk-1,jl+1)
+        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
+      endif
     endif
+    
     ! horizontal average
     remap_ver2hor_x = 0.5_wp*remap_ver2hor_x
   
@@ -132,13 +151,31 @@ module averaging
   
     real(wp) :: remap_ver2hor_y ! the result
     
-    remap_ver2hor_y = grid%inner_product_weights(ji-1,jk,jl,5)*vertical_cov(ji-1,jk,jl)
-    remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
-    ! layer below
-    if (jl<nlays) then
-      remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji-1,jk,jl,6)*vertical_cov(ji-1,jk,jl+1)
-      remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
+    ! initialization with zero
+    remap_ver2hor_y = 0._wp
+    
+    if (ji==1 .or. ji==nlins+1) then
+      if (lperiodic) then
+        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(nlins,jk,jl,5)*vertical_cov(nlins,jk,jl)
+        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(1,jk,jl,5)*vertical_cov(1,jk,jl)
+        ! layer below
+        if (jl<nlays) then
+          remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(nlins,jk,jl,6)*vertical_cov(nlins,jk,jl+1)
+          remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(1,jk,jl,6)*vertical_cov(1,jk,jl+1)
+        endif
+      else
+        return
+      endif
+    else
+      remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji-1,jk,jl,5)*vertical_cov(ji-1,jk,jl)
+      remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
+      ! layer below
+      if (jl<nlays) then
+        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji-1,jk,jl,6)*vertical_cov(ji-1,jk,jl+1)
+        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
+      endif
     endif
+    
     ! horizontal average
     remap_ver2hor_y = 0.5_wp*remap_ver2hor_y
   
