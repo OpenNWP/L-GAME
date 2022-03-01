@@ -40,9 +40,9 @@ module inner_product
         do jl=1,nlays
           output_scalar(ji,jk,jl) = &
           grid%inner_product_weights(ji,jk,jl,1)*u_vector_1(ji,jk+1,jl)*u_vector_2(ji,jk+1,jl) &
-          + grid%inner_product_weights(ji,jk,jl,2)*v_vector_1(ji+1,jk,jl)*v_vector_2(ji+1,jk,jl) &
+          + grid%inner_product_weights(ji,jk,jl,2)*v_vector_1(ji,jk,jl)*v_vector_2(ji,jk,jl) &
           + grid%inner_product_weights(ji,jk,jl,3)*u_vector_1(ji,jk,jl)*u_vector_2(ji,jk,jl) &
-          + grid%inner_product_weights(ji,jk,jl,4)*v_vector_1(ji,jk,jl)*v_vector_2(ji,jk,jl) &
+          + grid%inner_product_weights(ji,jk,jl,4)*v_vector_1(ji+1,jk,jl)*v_vector_2(ji+1,jk,jl) &
           + grid%inner_product_weights(ji,jk,jl,5)*w_vector_1(ji,jk,jl)*w_vector_2(ji,jk,jl) &
           + grid%inner_product_weights(ji,jk,jl,6)*w_vector_1(ji,jk,jl+1)*w_vector_2(ji,jk,jl+1)
         enddo
