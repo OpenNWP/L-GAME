@@ -260,9 +260,9 @@ module vorticities
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
-      do jk=2,ncols
-        do jl=1,nlays+1
-          if (jl == 1) then
+      do jl=1,nlays+1
+        do jk=2,ncols
+          if (jl==1) then
             diag%eta_y(ji,jk,jl) = diag%eta_y(ji,jk,jl)/(0.5_wp*(state%rho(ji,jk-1,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
             +(toa-grid%z_scalar(ji,jk-1,jl))*(state%rho(ji,jk-1,jl,no_of_condensed_constituents+1) &
@@ -291,6 +291,39 @@ module vorticities
             state%rho(ji,jk-1,jl,no_of_condensed_constituents+1)+state%rho(ji,jk,jl,no_of_condensed_constituents+1)))
           endif
         enddo
+        
+        if (lperiodic) then
+          if (jl==1) then
+            diag%eta_y(ji,1,jl) = diag%eta_y(ji,1,jl)/(0.5_wp*(state%rho(ji,ncols,jl,no_of_condensed_constituents+1) &
+            ! linear extrapolation to the TOA
+            +(toa-grid%z_scalar(ji,ncols,jl))*(state%rho(ji,ncols,jl,no_of_condensed_constituents+1) &
+            -state%rho(ji,ncols,jl+1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(ji,ncols,jl)-grid%z_scalar(ji,ncols,jl+1)) &
+            +state%rho(ji,1,jl,no_of_condensed_constituents+1) &
+            ! linear extrapolation to the TOA
+            +(toa-grid%z_scalar(ji,1,jl))*(state%rho(ji,1,jl,no_of_condensed_constituents+1) &
+            -state%rho(ji,1,jl+1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(ji,1,jl)-grid%z_scalar(ji,1,jl+1))))
+          elseif (jl==nlays+1) then
+            diag%eta_y(ji,1,jl) = diag%eta_y(ji,1,jl)/(0.5_wp*(state%rho(ji,ncols,jl-1,no_of_condensed_constituents+1) &
+            ! linear extrapolation to the surface
+            +(grid%z_w(ji,ncols,jl)-grid%z_scalar(ji,ncols,jl-1))*(state%rho(ji,ncols,jl-2,no_of_condensed_constituents+1) &
+            -state%rho(ji,ncols,jl-1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(ji,ncols,jl-2)-grid%z_scalar(ji,ncols,jl-1)) &
+            +state%rho(ji,1,jl-1,no_of_condensed_constituents+1) &
+            ! linear extrapolation to the surface
+            +(grid%z_w(ji,1,jl)-grid%z_scalar(ji,1,jl-1)) &
+            *(state%rho(ji,1,jl-2,no_of_condensed_constituents+1) &
+            -state%rho(ji,1,jl-1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(ji,1,jl-2)-grid%z_scalar(ji,1,jl-1))))
+          else
+            diag%eta_y(ji,1,jl) = diag%eta_y(ji,1,jl)/(0.25_wp*(state%rho(ji,ncols,jl-1,no_of_condensed_constituents+1) &
+            +state%rho(ji,1,jl-1,no_of_condensed_constituents+1)+ &
+            state%rho(ji,ncols,jl,no_of_condensed_constituents+1)+state%rho(ji,1,jl,no_of_condensed_constituents+1)))
+          endif
+          diag%eta_y(ji,ncols+1,jl) = diag%eta_y(ji,1,jl)
+        endif
+        
       enddo
     enddo
     !$OMP END DO
