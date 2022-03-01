@@ -7,6 +7,7 @@ module vorticity_flux
   
   use definitions, only: t_grid,t_diag,wp
   use run_nml,     only: nlins,ncols,nlays
+  use bc_nml,      only: lperiodic
   
   implicit none
   
@@ -47,6 +48,28 @@ module vorticity_flux
         + grid%trsk_weights_u(ji,6)*diag%v_placeholder(ji,jk,:)*0.25_wp* &
         (diag%eta_z(ji,jk,:)+diag%eta_z(ji,jk+1,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji+1,jk,:))
       enddo
+      
+      ! boundary conditions
+      if (lperiodic) then
+        diag%pot_vort_tend_x(ji,1,:) = &
+        grid%trsk_weights_u(ji,1)*diag%v_placeholder(ji,ncols,:)*0.25_wp* &
+        (diag%eta_z(ji,ncols,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:)) &
+        + grid%trsk_weights_u(ji,2)*diag%u_placeholder(ji,ncols,:)*0.25_wp* &
+        (diag%eta_z(ji,ncols,:)+diag%eta_z(ji+1,ncols,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:)) &
+        + grid%trsk_weights_u(ji,3)*diag%v_placeholder(ji+1,ncols,:)*0.25_wp* &
+        (diag%eta_z(ji+1,ncols,:)+diag%eta_z(ji+1,1,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:)) &
+        + grid%trsk_weights_u(ji,4)*diag%v_placeholder(ji+1,1,:)*0.25_wp* &
+        (diag%eta_z(ji+1,1,:)+diag%eta_z(ji+1,2,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:)) &
+        + grid%trsk_weights_u(ji,5)*diag%u_placeholder(ji,2,:)*0.25_wp* &
+        (diag%eta_z(ji+1,2,:)+diag%eta_z(ji,2,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:)) &
+        + grid%trsk_weights_u(ji,6)*diag%v_placeholder(ji,1,:)*0.25_wp* &
+        (diag%eta_z(ji,1,:)+diag%eta_z(ji,2,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:))
+         diag%pot_vort_tend_x(ji,ncols+1,:) = diag%pot_vort_tend_x(ji,1,:)
+      else
+        diag%pot_vort_tend_x(ji,1,:) = 0._wp
+        diag%pot_vort_tend_x(ji,ncols+1,:) = 0._wp
+      endif
+      
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
