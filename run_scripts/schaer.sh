@@ -49,6 +49,7 @@ lrad=.false.
 
 &io
 lread_oro=.false.
+lread_land_sea=.false.
 dt_write_min=1
 /
 
