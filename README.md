@@ -35,8 +35,7 @@ cd L-GAME
 ## Execution
 
 ```
-cd run_scripts
-./schaer.sh
+./run_scripts/schaer.sh
 ```
 
 Output will be placed in the directory `output`.
