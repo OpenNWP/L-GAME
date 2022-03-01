@@ -37,21 +37,21 @@ module averaging
       if (jl==nlays-nlays_oro+1) then
         vertical_contravariant_corr = vertical_contravariant_corr &
         - 0.5_wp*vector_field_x(ji,jk+1,jl)*grid%slope_x(ji,jk+1,jl)*grid%inner_product_weights(ji,jk,jl,1) &
-        - 0.5_wp*vector_field_y(ji+1,jk,jl)*grid%slope_y(ji+1,jk,jl)*grid%inner_product_weights(ji,jk,jl,2) &
+        - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,2) &
         - 0.5_wp*vector_field_x(ji,jk,jl)*grid%slope_x(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,3) &
-        - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,4)
+        - 0.5_wp*vector_field_y(ji+1,jk,jl)*grid%slope_y(ji+1,jk,jl)*grid%inner_product_weights(ji,jk,jl,4)
       ! levels in between
       else
         vertical_contravariant_corr = vertical_contravariant_corr &
         - 0.5_wp*vector_field_x(ji,jk+1,jl-1)*grid%slope_x(ji,jk+1,jl-1)*grid%inner_product_weights(ji,jk,jl-1,1) &
-        - 0.5_wp*vector_field_y(ji+1,jk,jl-1)*grid%slope_y(ji+1,jk,jl-1)*grid%inner_product_weights(ji,jk,jl-1,2) &
+        - 0.5_wp*vector_field_y(ji,jk,jl-1)*grid%slope_y(ji,jk,jl-1)*grid%inner_product_weights(ji,jk,jl-1,2) &
         - 0.5_wp*vector_field_x(ji,jk,jl-1)*grid%slope_x(ji,jk,jl-1)*grid%inner_product_weights(ji,jk,jl-1,3) &
-        - 0.5_wp*vector_field_y(ji,jk,jl-1)*grid%slope_y(ji,jk,jl-1)*grid%inner_product_weights(ji,jk,jl-1,4)
+        - 0.5_wp*vector_field_y(ji+1,jk,jl-1)*grid%slope_y(ji+1,jk,jl-1)*grid%inner_product_weights(ji,jk,jl-1,4)
         vertical_contravariant_corr = vertical_contravariant_corr &
         - 0.5_wp*vector_field_x(ji,jk+1,jl)*grid%slope_x(ji,jk+1,jl)*grid%inner_product_weights(ji,jk,jl,1) &
-        - 0.5_wp*vector_field_y(ji+1,jk,jl)*grid%slope_y(ji+1,jk,jl)*grid%inner_product_weights(ji,jk,jl,2) &
+        - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,2) &
         - 0.5_wp*vector_field_x(ji,jk,jl)*grid%slope_x(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,3) &
-        - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,4)
+        - 0.5_wp*vector_field_y(ji+1,jk,jl)*grid%slope_y(ji+1,jk,jl)*grid%inner_product_weights(ji,jk,jl,4)
       endif
     endif
   
@@ -103,18 +103,18 @@ module averaging
     ! This function remaps a vertical covariant component of
     ! a vector field to a position of a vector component in x-direction.
   
-    real(wp),     intent(in)    :: vertical_cov(:,:,:)   ! z-component of vector field to work with
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
+    real(wp),     intent(in)    :: vertical_cov(:,:,:) ! z-component of vector field to work with
+    type(t_grid), intent(in)    :: grid                ! the grid properties
     integer,      intent(in)    :: ji,jk,jl            ! positional indices
   
     real(wp) :: remap_ver2hor_x ! the result
     
-    remap_ver2hor_x = grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
-    remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk+1,jl,5)*vertical_cov(ji,jk+1,jl)
+    remap_ver2hor_x = grid%inner_product_weights(ji,jk-1,jl,5)*vertical_cov(ji,jk-1,jl)
+    remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
     ! layer below
     if (jl<nlays) then
+      remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk-1,jl,6)*vertical_cov(ji,jk-1,jl+1)
       remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
-      remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk+1,jl,6)*vertical_cov(ji,jk+1,jl+1)
     endif
     ! horizontal average
     remap_ver2hor_x = 0.5_wp*remap_ver2hor_x
@@ -132,12 +132,12 @@ module averaging
   
     real(wp) :: remap_ver2hor_y ! the result
     
-    remap_ver2hor_y = grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
-    remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji+1,jk,jl,5)*vertical_cov(ji+1,jk,jl)
+    remap_ver2hor_y = grid%inner_product_weights(ji-1,jk,jl,5)*vertical_cov(ji-1,jk,jl)
+    remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
     ! layer below
     if (jl<nlays) then
+      remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji-1,jk,jl,6)*vertical_cov(ji-1,jk,jl+1)
       remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
-      remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji+1,jk,jl,6)*vertical_cov(ji+1,jk,jl+1)
     endif
     ! horizontal average
     remap_ver2hor_y = 0.5_wp*remap_ver2hor_y
@@ -157,21 +157,9 @@ module averaging
     real(wp) :: horizontal_covariant_x
     
     horizontal_covariant_x = hor_comp_x(ji,jk,jl)
+    
     if (jl>nlays-nlays_oro) then
-    if (jk==1) then
-        horizontal_covariant_x = horizontal_covariant_x &
-        ! more self-consistency is not required, more accuracy would be an option however
-        + grid%slope_x(ji,jk,jl)*0.5_wp*(vert_comp(ji,jk,jl)+vert_comp(ji,jk,jl+1))
-      elseif (jk==ncols+1) then
-        horizontal_covariant_x = horizontal_covariant_x &
-        ! more self-consistency is not required, more accuracy would be an option however
-        + grid%slope_x(ji,jk,jl)*0.5_wp*(vert_comp(ji,jk-1,jl)+vert_comp(ji,jk-1,jl+1))
-      else
-        horizontal_covariant_x = horizontal_covariant_x &
-        ! more self-consistency is not required, more accuracy would be an option however
-        + grid%slope_x(ji,jk,jl)*0.25_wp*(vert_comp(ji,jk-1,jl)+vert_comp(ji,jk,jl) &
-        + vert_comp(ji,jk-1,jl+1)+vert_comp(ji,jk,jl+1))
-      endif
+      horizontal_covariant_x = horizontal_covariant_x + grid%slope_x(ji,jk,jl)*remap_ver2hor_x(vert_comp,grid,ji,jk,jl)
     endif
     
   end function horizontal_covariant_x
@@ -189,19 +177,9 @@ module averaging
     real(wp) :: horizontal_covariant_y
   
     horizontal_covariant_y = hor_comp_y(ji,jk,jl)
+    
     if (jl>nlays-nlays_oro) then
-      ! more self-consistency is not required, more accuracy would be an option however
-      if (ji==1) then
-        horizontal_covariant_y = horizontal_covariant_y &
-        + grid%slope_y(ji,jk,jl)*0.5_wp*(vert_comp(ji,jk,jl) + vert_comp(ji,jk,jl+1))
-      elseif (ji==nlins+1) then
-        horizontal_covariant_y = horizontal_covariant_y &
-        + grid%slope_y(ji,jk,jl)*0.5_wp*(vert_comp(ji-1,jk,jl) + vert_comp(ji-1,jk,jl+1))
-      else
-        horizontal_covariant_y = horizontal_covariant_y &
-        + grid%slope_y(ji,jk,jl)*0.25_wp*(vert_comp(ji-1,jk,jl)+vert_comp(ji,jk,jl) &
-        + vert_comp(ji-1,jk,jl+1)+vert_comp(ji,jk,jl+1))
-      endif
+      horizontal_covariant_y = horizontal_covariant_y + grid%slope_y(ji,jk,jl)*remap_ver2hor_y(vert_comp,grid,ji,jk,jl)
     endif
   
   end function horizontal_covariant_y
