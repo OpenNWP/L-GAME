@@ -49,7 +49,6 @@ module grid_generator
     real(wp) :: lon_left_upper               ! longitude coordinate of upper left corner
     real(wp) :: dlat                         ! mesh size in y direction as angle
     real(wp) :: dlon                         ! mesh size in x direction as angle
-    integer  :: ji,jk,jl                     ! loop indices
     real(wp) :: max_oro                      ! variable for orography check
     real(wp) :: A                            ! variable for calculating the vertical grid
     real(wp) :: B                            ! variable for calculating the vertical grid
@@ -71,6 +70,14 @@ module grid_generator
     real(wp) :: rot_y(3,3)                   ! rotation matrix around the global y-axis
     real(wp) :: rot_z(3,3)                   ! rotation matrix around the global z-axis
     real(wp) :: rot(3,3)                     ! complete rotation matrix
+    real(wp) :: r_old(3)                     ! positional vector before rotation
+    real(wp) :: r_new(3)                     ! positional vector after rotation
+    real(wp) :: basis_old(3)                 ! old local basis vector
+    real(wp) :: basis_new(3)                 ! new local basis vector
+    real(wp) :: local_i(3)                   ! local i-vector
+    real(wp) :: local_j(3)                   ! local j-vector
+    real(wp) :: x_basis_local,y_basis_local  ! local Cartesian components of the local basis vector
+    integer  :: ji,jk,jl                     ! loop indices
     
     ! setting the center and direction of the grid
     grid%lat_center = lat_center
@@ -680,15 +687,15 @@ module grid_generator
 	
     ! performing the rotation
     ! setting up the rotation matrix
-    rot_y(1,1) = 0._wp
+    rot_y(1,1) = cos(lat_center)
     rot_y(1,2) = 0._wp
-    rot_y(1,3) = 0._wp
+    rot_y(1,3) = -sin(lat_center)
     rot_y(2,1) = 0._wp
-    rot_y(2,2) = 0._wp
+    rot_y(2,2) = 1._wp
     rot_y(2,3) = 0._wp
-    rot_y(3,1) = 0._wp
+    rot_y(3,1) = sin(lat_center)
     rot_y(3,2) = 0._wp
-    rot_y(3,3) = 0._wp
+    rot_y(3,3) = cos(lat_center)
     rot_z(1,1) = cos(lon_center)
     rot_z(1,2) = -sin(lon_center)
     rot_z(1,3) = 0._wp
@@ -700,58 +707,67 @@ module grid_generator
     rot_z(3,3) = 1._wp
     rot = matmul(rot_z,rot_y)
 	
-	! calculating geographic coordinates of the gridpoints
+	! calculating the geographic coordinates of the gridpoints
 	! scalar points
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$OMP DO PRIVATE(ji,jk,r_old,r_new)
     do ji=1,nlins
       do jk=1,ncols
-          
+        call find_global_normal(grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk),r_old)
+        r_new = matmul(rot,r_old)
+        call find_geos(r_new,grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk))
       enddo
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
 	
-    ! u-vector points
+    ! u-vector points, including directions
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
-    do ji=1,nlins
-      do jk=1,ncols+1
-        
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-	
-    ! v-vector points
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
-    do ji=1,nlins+1
-      do jk=1,ncols
-        
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-	
-    ! calculating the directions of the vectors
-    ! u-vectors
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
     do ji=1,nlins
       do jk=1,ncols+1
-        
+        ! calculating the local i-vector before the rotation
+        call calc_local_i(grid%lon_geo_u(ji,jk),basis_old)
+        ! rotating the gridpoint itself
+        call find_global_normal(grid%lat_geo_u(ji,jk),grid%lon_geo_u(ji,jk),r_old)
+        r_new = matmul(rot,r_old)
+        call find_geos(r_new,grid%lat_geo_u(ji,jk),grid%lon_geo_u(ji,jk))
+        ! calculating the local basis elements
+        call calc_local_i(grid%lon_geo_u(ji,jk),local_i)
+        call calc_local_j(grid%lat_geo_u(ji,jk),grid%lon_geo_u(ji,jk),local_j)
+        ! rotating the basis vector
+        basis_new = matmul(rot,basis_old)
+        ! calculting th components of the local basis vector
+        x_basis_local = dot_product(local_i,basis_new)
+        y_basis_local = dot_product(local_j,basis_new)
+        ! calculating the direction of this vector
+        grid%dir_geo_u(ji,jk) = atan2(y_basis_local,x_basis_local)
       enddo
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
 	
-    ! u-vectors
+    ! v-vector points, including directions
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
     do ji=1,nlins+1
       do jk=1,ncols
-        
+        ! calculating the local j-vector before the rotation
+        call calc_local_j(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),basis_old)
+        ! rotating the gridpoint itself
+        call find_global_normal(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),r_old)
+        r_new = matmul(rot,r_old)
+        call find_geos(r_new,grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk))
+        ! calculating the local basis elements
+        call calc_local_i(grid%lon_geo_v(ji,jk),local_i)
+        call calc_local_j(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),local_j)
+        ! rotating the basis vector
+        basis_new = matmul(rot,basis_old)
+        ! calculting th components of the local basis vector
+        x_basis_local = dot_product(local_i,basis_new)
+        y_basis_local = dot_product(local_j,basis_new)
+        ! calculating the direction of this vector
+        grid%dir_geo_v(ji,jk) = atan2(y_basis_local,x_basis_local)
       enddo
     enddo
     !$OMP END DO
@@ -861,8 +877,65 @@ module grid_generator
     vegetation_height_ideal = vegetation_height_equator*cos(latitude)*exp(-oro/1500._wp)
 
   end function vegetation_height_ideal
-
   
+  subroutine find_global_normal(lat,lon,r)
+
+    ! This subroutine calculates the Cartesian normal vector of a point given its geographical coordinates.
+    
+    ! input arguments and output
+    real(wp), intent(in)  :: lat
+    real(wp), intent(in)  :: lon
+    real(wp), intent(out) :: r(3) ! positional vector (result)
+
+    r(1) = cos(lat)*cos(lon)
+    r(2) = cos(lat)*sin(lon)
+    r(3) = sin(lat)
+
+  end subroutine find_global_normal
+  
+  subroutine find_geos(r,lat_out,lon_out)
+
+    ! This subroutine calculates the geographical coordinates of a point given its Cartesian coordinates.
+
+    ! input arguments and output
+    real(wp), intent(in)  :: r(3)    ! positional vector
+    real(wp), intent(out) :: lat_out
+    real(wp), intent(out) :: lon_out
+    
+    lat_out = asin(r(3)/sqrt(r(1)**2+r(2)**2+r(3)**2))
+    lon_out = atan2(r(2),r(1))
+
+  end subroutine find_geos
+
+  subroutine calc_local_i(lon,result_vec)
+
+    ! This function calculates the local eastward basis vector.
+    
+    ! input arguments and output
+    real(wp), intent(in)  :: lon
+    real(wp), intent(out) :: result_vec(3)
+    
+    result_vec(1) = -sin(lon)
+    result_vec(2) = cos(lon)
+    result_vec(3) = 0._wp
+  
+  end subroutine calc_local_i
+
+  subroutine calc_local_j(lat,lon,result_vec)
+
+    ! This subroutine calculates the local northward basis vector.
+    
+    ! input arguments and output
+    real(wp), intent(in)  :: lat
+    real(wp), intent(in)  :: lon
+    real(wp), intent(out) :: result_vec(3)
+    
+    result_vec(1) = -sin(lat)*cos(lon)
+    result_vec(2) = -sin(lat)*sin(lon)
+    result_vec(3) = cos(lat)
+
+  end subroutine calc_local_j
+
 end module grid_generator
 
 
