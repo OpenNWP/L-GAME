@@ -732,7 +732,7 @@ module grid_generator
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-	
+    
     ! u-vector points, including directions
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
