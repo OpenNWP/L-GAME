@@ -10,6 +10,7 @@ module vorticities
   use constants,        only: re
   use constituents_nml, only: no_of_condensed_constituents
   use averaging,        only: horizontal_covariant_x,horizontal_covariant_y
+  use bc_nml,           only: lperiodic
   
   implicit none
   
@@ -28,11 +29,7 @@ module vorticities
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    real(wp) :: l_rescale         ! length rescale factor in orography
-    real(wp) :: delta_z           ! needed for handling terrain
-    real(wp) :: vertical_gradient ! needed for handling terrain
-    integer  :: ind_shift         ! needed for handling terrain
-    integer  :: ji,jk,jl          ! loop indices
+    integer  :: ji,jk,jl ! loop indices
     
     ! calculating the relative vorticity in x-direction
     !$OMP PARALLEL
@@ -98,74 +95,16 @@ module vorticities
       
     ! calculating the relative vorticity in z-direction
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,l_rescale,delta_z,ind_shift,vertical_gradient)
-    do ji=2,nlins
-      do jk=2,ncols
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do ji=1,nlins+1
+      do jk=1,ncols+1
         ! layers which do not follow the orography
-        do jl=1,nlays-nlays_oro
-          diag%eta_z(ji,jk,jl) = &
-          grid%dy(ji,jk,jl)*state%wind_v(ji,jk,jl) &
-          - grid%dx(ji-1,jk,jl)*state%wind_u(ji-1,jk,jl) &
-          - grid%dy(ji,jk-1,jl)*state%wind_v(ji,jk-1,jl) &
-          + grid%dx(ji,jk,jl)*state%wind_u(ji,jk,jl)
-        enddo
-        ! layers which follow the orography
-        do jl=nlays-nlays_oro+1,nlays
-          ! first
-          l_rescale = (re + grid%z_area_dual_z(ji,jk,jl))/(re + grid%z_v(ji,jk,jl))
-          delta_z = grid%z_area_dual_z(ji,jk,jl) - grid%z_v(ji,jk,jl)
-          ind_shift = 1
-          if (delta_z>0._wp .or. jl==nlays) then
-            ind_shift = -1
-          endif
-          vertical_gradient = (state%wind_v(ji,jk,jl) - state%wind_v(ji,jk,jl+ind_shift))/ &
-          (grid%z_v(ji,jk,jl) - grid%z_v(ji,jk,jl+ind_shift))
-          diag%eta_z(ji,jk,jl) = l_rescale*grid%dy(ji,jk,jl)* &
-          (state%wind_v(ji,jk,jl) + delta_z*vertical_gradient)
-          ! second
-          l_rescale = (re + grid%z_area_dual_z(ji-1,jk,jl))/(re + grid%z_u(ji-1,jk,jl))
-          delta_z = grid%z_area_dual_z(ji-1,jk,jl) - grid%z_u(ji-1,jk,jl)
-          ind_shift = 1
-          if (delta_z>0._wp .or. jl==nlays) then
-            ind_shift = -1
-          endif
-          vertical_gradient = (state%wind_u(ji-1,jk,jl) - state%wind_u(ji-1,jk,jl+ind_shift))/ &
-          (grid%z_u(ji-1,jk,jl) - grid%z_u(ji-1,jk,jl+ind_shift))
-          diag%eta_z(ji,jk,jl) = diag%eta_z(ji,jk,jl) - l_rescale*grid%dx(ji-1,jk,jl)* &
-          (state%wind_u(ji-1,jk,jl) + delta_z*vertical_gradient)
-          ! third
-          l_rescale = (re + grid%z_area_dual_z(ji,jk-1,jl))/(re + grid%z_v(ji,jk-1,jl))
-          delta_z = grid%z_area_dual_z(ji,jk-1,jl) - grid%z_v(ji,jk-1,jl)
-          ind_shift = 1
-          if (delta_z>0._wp .or. jl==nlays) then
-            ind_shift = -1
-          endif
-          vertical_gradient = (state%wind_v(ji,jk-1,jl) - state%wind_v(ji,jk-1,jl+ind_shift))/ &
-          (grid%z_v(ji,jk-1,jl) - grid%z_v(ji,jk-1,jl+ind_shift))
-          diag%eta_z(ji,jk,jl) = diag%eta_z(ji,jk,jl) - l_rescale*grid%dy(ji,jk-1,jl)* &
-          (state%wind_v(ji,jk-1,jl) + delta_z*vertical_gradient)
-          ! fourth
-          l_rescale = (re + grid%z_area_dual_z(ji,jk,jl))/(re + grid%z_u(ji,jk,jl))
-          delta_z = grid%z_area_dual_z(ji,jk,jl) - grid%z_u(ji,jk,jl)
-          ind_shift = 1
-          if (delta_z>0._wp .or. jl==nlays) then
-            ind_shift = -1
-          endif
-          vertical_gradient = (state%wind_u(ji,jk,jl) - state%wind_u(ji,jk,jl+ind_shift))/ &
-          (grid%z_u(ji,jk,jl) - grid%z_u(ji,jk,jl+ind_shift))
-          diag%eta_z(ji,jk,jl) = diag%eta_z(ji,jk,jl) + l_rescale*grid%dx(ji,jk,jl)* &
-          (state%wind_u(ji,jk,jl) + delta_z*vertical_gradient)
+        do jl=1,nlays
+          diag%eta_z(ji,jk,jl) = rel_vort_z_local(state,grid,ji,jk,jl)/grid%area_dual_z(ji,jk,jl)
         enddo
       enddo
     enddo
     !$OMP END DO
-    !$OMP END PARALLEL
-    
-    ! dividing by the area
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
-    diag%eta_z = diag%eta_z/grid%area_dual_z
-    !$OMP END WORKSHARE
     !$OMP END PARALLEL
       
   end subroutine rel_vort
@@ -305,6 +244,111 @@ module vorticities
     !$OMP END PARALLEL
     
   end subroutine calc_pot_vort
+  
+  function rel_vort_z_local(state,grid,ji,jk,jl)
+  
+    ! This function returns the vertical relative vorticity at a grindpoint.
+    
+    ! input arguments
+    type(t_state) :: state    ! state with which to calculate the relative vorticity
+    type(t_grid)  :: grid     ! grid properties
+    integer       :: ji,jk,jl ! indices of the gridpoint
+    ! result
+    real(wp)      :: rel_vort_z_local
+    
+    ! local variables
+    real(wp) :: delta_z,l_rescale,vertical_gradient       ! needed for terrain handling
+    integer  :: ind_shift,j_i(4),j_k(4),jm,sign_vector(4) ! helper variables containing indices
+    
+    ! setting the indices
+    j_i(1) = ji
+    j_k(1) = jk
+    j_i(2) = ji-1
+    j_k(2) = jk
+    j_i(3) = ji
+    j_k(3) = jk-1
+    j_i(4) = ji
+    j_k(4) = jk
+    sign_vector(1) = 1
+    sign_vector(2) = -1
+    sign_vector(3) = -1
+    sign_vector(4) = 1
+    
+    ! initializing the result with zero
+    rel_vort_z_local = 0._wp
+    
+    ! boundary handling
+    if (ji==1 .or. jk==1 .or. ji==nlins+1 .or. jk==ncols+1) then
+      if (lperiodic) then
+        j_i(1) = ji
+        if (jk==ncols+1) then
+          j_k(1) = 1
+        else
+          j_k(1) = jk
+        endif
+        
+        if (ji==1) then
+          j_i(2) = nlins
+        else
+          j_i(2) = ji-1
+        endif
+        j_k(2) = jk
+        
+        j_i(3) = ji
+        if (jk==1) then
+          j_k(3) = ncols
+        else
+          j_k(3) = jk-1
+        endif
+        
+        if (ji==nlins+1) then
+          j_i(4) = 1
+        else
+          j_i(4) = ji
+        endif
+        j_k(4) = jk
+      else
+        return
+      endif
+    endif
+    
+    ! flat layers
+    if (jl<=nlays-nlays_oro) then
+      rel_vort_z_local = &
+      sign_vector(1)*grid%dy(j_i(1),j_k(1),jl)*state%wind_v(j_i(1),j_k(1),jl) &
+      + sign_vector(2)*grid%dx(j_i(2),j_k(2),jl)*state%wind_u(j_i(2),j_k(2),jl) &
+      + sign_vector(3)*grid%dy(j_i(3),j_k(3),jl)*state%wind_v(j_i(3),j_k(3),jl) &
+      + sign_vector(4)*grid%dx(j_i(4),j_k(4),jl)*state%wind_u(j_i(4),j_k(4),jl)
+    ! layers which follow the orography
+    else
+      do jm=1,4
+        if (jm==1 .or. jm==3) then
+          l_rescale = (re + grid%z_area_dual_z(j_i(jm),j_k(jm),jl))/(re + grid%z_v(j_i(jm),j_k(jm),jl))
+          delta_z = grid%z_area_dual_z(j_i(jm),j_k(jm),jl) - grid%z_v(j_i(jm),j_k(jm),jl)
+          ind_shift = 1
+          if (delta_z>0._wp .or. jl==nlays) then
+            ind_shift = -1
+          endif
+          vertical_gradient = (state%wind_v(j_i(jm),j_k(jm),jl) - state%wind_v(j_i(jm),j_k(jm),jl+ind_shift))/ &
+          (grid%z_v(j_i(jm),j_k(jm),jl) - grid%z_v(j_i(jm),j_k(jm),jl+ind_shift))
+          rel_vort_z_local = sign_vector(jm)*l_rescale*grid%dy(j_i(jm),j_k(jm),jl)* &
+          (state%wind_v(j_i(jm),j_k(jm),jl) + delta_z*vertical_gradient)
+        else
+          l_rescale = (re + grid%z_area_dual_z(j_i(jm),j_k(jm),jl))/(re + grid%z_u(j_i(jm),j_k(jm),jl))
+          delta_z = grid%z_area_dual_z(j_i(jm),j_k(jm),jl) - grid%z_u(j_i(jm),j_k(jm),jl)
+          ind_shift = 1
+          if (delta_z>0._wp .or. jl==nlays) then
+            ind_shift = -1
+          endif
+          vertical_gradient = (state%wind_u(j_i(jm),j_k(jm),jl) - state%wind_u(j_i(jm),j_k(jm),jl+ind_shift))/ &
+          (grid%z_u(j_i(jm),j_k(jm),jl) - grid%z_u(j_i(jm),j_k(jm),jl+ind_shift))
+          rel_vort_z_local = sign_vector(jm)*l_rescale*grid%dx(j_i(jm),j_k(jm),jl)* &
+          (state%wind_u(j_i(jm),j_k(jm),jl) + delta_z*vertical_gradient)
+        endif
+      enddo
+    endif
+  
+  end function rel_vort_z_local
 
 end module vorticities
 
