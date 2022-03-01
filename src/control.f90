@@ -435,7 +435,7 @@ program control
     ! writing the new state into the old state
     call lin_combination(state_new,state_new,state_old,0._wp,1._wp,grid)
 
-    if (t_0<=t_rad_update .and. t_0+dtime>=t_rad_update) then
+    if (lrad .and. t_0<=t_rad_update .and. t_0+dtime>=t_rad_update) then
       lrad_update = .true.
       t_rad_update = t_rad_update+dtime_rad
     else
