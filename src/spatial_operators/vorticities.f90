@@ -452,8 +452,8 @@ module vorticities
     
     ! flat layers
     if (jl<=nlays-nlays_oro) then
-      rel_vort_z_local = &
-      sign_vector(1)*grid%dy(j_i(1),j_k(1),jl)*state%wind_v(j_i(1),j_k(1),jl) &
+      rel_vort_z_local = rel_vort_z_local &
+      + sign_vector(1)*grid%dy(j_i(1),j_k(1),jl)*state%wind_v(j_i(1),j_k(1),jl) &
       + sign_vector(2)*grid%dx(j_i(2),j_k(2),jl)*state%wind_u(j_i(2),j_k(2),jl) &
       + sign_vector(3)*grid%dy(j_i(3),j_k(3),jl)*state%wind_v(j_i(3),j_k(3),jl) &
       + sign_vector(4)*grid%dx(j_i(4),j_k(4),jl)*state%wind_u(j_i(4),j_k(4),jl)
