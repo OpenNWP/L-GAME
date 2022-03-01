@@ -53,9 +53,17 @@ module vorticities
     !$OMP END DO
     !$OMP END PARALLEL
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     diag%eta_x(:,:,1) = diag%eta_x(:,:,2)
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     ! dividing by the area
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     diag%eta_x = diag%eta_x/grid%area_dual_x
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     
     ! calculating the relative vorticity in y-direction
     !$OMP PARALLEL
@@ -76,9 +84,17 @@ module vorticities
     !$OMP END DO
     !$OMP END PARALLEL
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     diag%eta_y(:,:,1) = diag%eta_y(:,:,2)
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     ! dividing by the area
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     diag%eta_y = diag%eta_y/grid%area_dual_y
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
       
     ! calculating the relative vorticity in z-direction
     !$OMP PARALLEL
@@ -146,7 +162,11 @@ module vorticities
     !$OMP END PARALLEL
     
     ! dividing by the area
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     diag%eta_z = diag%eta_z/grid%area_dual_z
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
       
   end subroutine rel_vort
   

@@ -25,7 +25,6 @@ sigma=1.0
 /
 
 &diff
-lklemp=.true.
 lmom_diff_h=.false.
 lmom_diff_v=.false.
 /

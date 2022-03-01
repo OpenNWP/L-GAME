@@ -84,7 +84,6 @@ module definitions
     real(wp)              :: z_t_const                        ! depth where the soil temperature is constant
     real(wp)              :: lat_center                       ! latitude of the center of the model domain
     real(wp)              :: lon_center                       ! longitude of the center of the model domain
-    real(wp)              :: x_dir_center                     ! direction of the x-axis of the model
     real(wp)              :: mean_velocity_area               ! area needed for the turbulence parameterizations
     
   end type t_grid

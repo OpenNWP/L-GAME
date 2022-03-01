@@ -7,6 +7,7 @@ module run_nml
   
   use iso_c_binding
   use definitions, only: wp
+  use constants,   only: M_PI
   
   implicit none
 
@@ -35,12 +36,11 @@ module run_nml
   real(wp)          :: impl_weight         ! implicit weight of the pressure gradient
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
   real(wp)          :: PRANDTL_HEIGHT      ! height of the Prandtl layer
-  real(wp)          :: lat_center_deg      ! latitude of the center of the model domain in degrees
-  real(wp)          :: lon_center_deg      ! longitude of the center of the model domain in degrees
-  real(wp)          :: x_dir_deg           ! direction of the x-axis of the model in degrees
+  real(wp)          :: lat_center          ! latitude of the center of the model domain
+  real(wp)          :: lon_center          ! longitude of the center of the model domain
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr,sigma, &
-  toa,scenario,llinear,run_id,lcorio,nlays_oro,lat_center_deg,lon_center_deg,x_dir_deg, &
+  toa,scenario,llinear,run_id,lcorio,nlays_oro,lat_center,lon_center, &
   start_year,start_month,start_day,start_hour,start_minute
 
   contains
@@ -56,7 +56,7 @@ module run_nml
     nlays_oro = 40
     dy = 500._wp
     dx = 500._wp
-    run_span_hr = 60
+    run_span_hr = 30
     start_year = 2000
     start_month = 1
     start_day = 1
@@ -74,9 +74,8 @@ module run_nml
     impl_weight = 0.75_wp
     partial_impl_weight = 0.5_wp
     PRANDTL_HEIGHT = 100._wp
-    lat_center_deg = 0._wp
-    lon_center_deg = 0._wp
-    x_dir_deg = 90._wp
+    lat_center = 0._wp
+    lon_center = 0._wp
     
     ! open and read Namelist file
     open(action="read", file="namelist.nml", newunit=fileunit)
@@ -107,16 +106,12 @@ module run_nml
       write(*,*) "Error: TOA must be positive."
       call exit(1)
     endif
-    if (lat_center_deg < -90._wp .or. lat_center_deg > 90._wp) then
-      write(*,*) "Error: lat_center_deg must be between -90 and 90."
+    if (lat_center < -0.5_wp*M_PI .or. lat_center > 0.5_wp*M_PI) then
+      write(*,*) "Error: lat_center must be between -90 and 90."
       call exit(1)
     endif
-    if (lon_center_deg < -180._wp .or. lon_center_deg > 180._wp) then
-      write(*,*) "Error: lon_center_deg must be between -180 and 180."
-      call exit(1)
-    endif
-    if (lon_center_deg < 0._wp .or. lon_center_deg > 360._wp) then
-      write(*,*) "Error: x_dir_deg must be between 0 and 360."
+    if (lon_center < -M_PI .or. lon_center > M_PI) then
+      write(*,*) "Error: lon_center must be between -180 and 180."
       call exit(1)
     endif
     

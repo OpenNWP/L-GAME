@@ -430,7 +430,7 @@ program control
   t_write = t_0 + dt_write
   run_span = 3600._wp*run_span_hr
   timestep_counter = 0
-  do while (t_0<t_init+run_span+300._wp)
+  do while (t_0<t_init+run_span+300._wp .and. run_span/=0)
     
     ! writing the new state into the old state
     call lin_combination(state_new,state_new,state_old,0._wp,1._wp,grid)

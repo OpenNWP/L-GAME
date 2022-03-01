@@ -45,7 +45,6 @@ module write_out
     integer           :: varid_lon                 ! variable ID of the lon coordinates
     integer           :: varid_lat_center          ! variable ID of the latitude of the center
     integer           :: varid_lon_center          ! variable ID of the longitude of the center
-    integer           :: varid_x_dir               ! variable ID of the x-direction in the center
     integer           :: varid_z                   ! variable ID of the z coordinates
     integer           :: varid_rho                 ! variable ID of the 3D mass density fields
     integer           :: varid_t                   ! variable ID of the 3D temperature field
@@ -100,11 +99,6 @@ module write_out
     "Description","longitude of the model grid"))
     call nc_check(nf90_put_att(ncid,varid_lon_center,"Unit","rad"))
     
-    call nc_check(nf90_def_var(ncid,"x_dir",NF90_REAL,single_double_dimid,varid_x_dir))
-    call nc_check(nf90_put_att(ncid,varid_x_dir,"Unit","rad"))
-    call nc_check(nf90_put_att(ncid,varid_x_dir, &
-    "Description","direction of the x-axis in the center of the model grid"))
-    
     call nc_check(nf90_def_var(ncid,"lat_model",NF90_REAL,y_dimid,varid_lat))
     call nc_check(nf90_put_att(ncid,varid_lat,"Unit","rad"))
     call nc_check(nf90_put_att(ncid,varid_lat, &
@@ -145,8 +139,6 @@ module write_out
     call nc_check(nf90_put_var(ncid,varid_lat_center,grid%lat_center))
     ! longitude of the center
     call nc_check(nf90_put_var(ncid,varid_lon_center,grid%lon_center))
-    ! x-direction in the center
-    call nc_check(nf90_put_var(ncid,varid_x_dir,grid%x_dir_center))
     ! latitude coordinates of the grid points
     call nc_check(nf90_put_var(ncid,varid_lat,grid%lat_scalar(:)))
     ! longitude coordinates of the grid points

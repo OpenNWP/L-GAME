@@ -263,7 +263,6 @@ module set_initial_state
     /(r_d*diag%scalar_placeholder)
     ! potential temperature density
     state%rhotheta = state%rho(:,:,:,no_of_condensed_constituents+1)*state%theta_pert
-    
     ! substracting the background state
     state%theta_pert = state%theta_pert - grid%theta_bg
     state%exner_pert = state%exner_pert - grid%exner_bg

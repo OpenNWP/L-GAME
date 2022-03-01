@@ -6,8 +6,8 @@
 module grid_generator
 
   use definitions,        only: wp,t_grid
-  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center_deg, &
-                                lon_center_deg,x_dir_deg
+  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
+                                lon_center
   use constants,          only: re,density_water,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv
   use surface_nml,        only: nsoillays,orography_id
@@ -68,11 +68,13 @@ module grid_generator
     real(wp) :: c_p_water                    ! typical c_p of water
     real(wp) :: lat_lower_center             ! variable for calculating the TRSK weights
     real(wp) :: lat_upper_center             ! variable for calculating the TRSK weights
+    real(wp) :: rot_y(3,3)                   ! rotation matrix around the global y-axis
+    real(wp) :: rot_z(3,3)                   ! rotation matrix around the global z-axis
+    real(wp) :: rot(3,3)                     ! complete rotation matrix
     
     ! setting the center and direction of the grid
-    grid%lat_center = 2._wp*M_PI*lat_center_deg/360._wp
-    grid%lon_center = 2._wp*M_PI*lon_center_deg/360._wp
-    grid%x_dir_center = 2._wp*M_PI*x_dir_deg/360._wp
+    grid%lat_center = lat_center
+    grid%lon_center = lon_center
     
     ! setting the latitude and longitude coordinates of the scalar grid points
     ! setting the dy of the model grid
@@ -136,6 +138,13 @@ module grid_generator
     !$OMP PARALLEL
     !$OMP WORKSHARE
     grid%dir_geo_u(:,:) = 0._wp
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
+    
+    ! this will be modified later
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    grid%dir_geo_v(:,:) = 0.5_wp*M_PI
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     
@@ -668,6 +677,85 @@ module grid_generator
     enddo
     
     write(*,*) "Thickness of the uppermost soil layer: ", -grid%z_soil_interface(2), "m."
+	
+    ! performing the rotation
+    ! setting up the rotation matrix
+    rot_y(1,1) = 0._wp
+    rot_y(1,2) = 0._wp
+    rot_y(1,3) = 0._wp
+    rot_y(2,1) = 0._wp
+    rot_y(2,2) = 0._wp
+    rot_y(2,3) = 0._wp
+    rot_y(3,1) = 0._wp
+    rot_y(3,2) = 0._wp
+    rot_y(3,3) = 0._wp
+    rot_z(1,1) = cos(lon_center)
+    rot_z(1,2) = -sin(lon_center)
+    rot_z(1,3) = 0._wp
+    rot_z(2,1) = sin(lon_center)
+    rot_z(2,2) = cos(lon_center)
+    rot_z(2,3) = 0._wp
+    rot_z(3,1) = 0._wp
+    rot_z(3,2) = 0._wp
+    rot_z(3,3) = 1._wp
+    rot = matmul(rot_z,rot_y)
+	
+	! calculating geographic coordinates of the gridpoints
+	! scalar points
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
+    do ji=1,nlins
+      do jk=1,ncols
+          
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+	
+    ! u-vector points
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
+    do ji=1,nlins
+      do jk=1,ncols+1
+        
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+	
+    ! v-vector points
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
+    do ji=1,nlins+1
+      do jk=1,ncols
+        
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+	
+    ! calculating the directions of the vectors
+    ! u-vectors
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
+    do ji=1,nlins
+      do jk=1,ncols+1
+        
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+	
+    ! u-vectors
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
+    do ji=1,nlins+1
+      do jk=1,ncols
+        
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
 	
     ! writing the costly grid properties to a file if required by the user
     if (lwrite_grid) then
