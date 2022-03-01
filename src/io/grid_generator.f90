@@ -710,12 +710,24 @@ module grid_generator
 	! calculating the geographic coordinates of the gridpoints
 	! scalar points
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,r_old,r_new)
+    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
     do ji=1,nlins
       do jk=1,ncols
+        ! calculating the local i-vector before the rotation
+        call calc_local_i(grid%lon_geo_scalar(ji,jk),basis_old)
         call find_global_normal(grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk),r_old)
         r_new = matmul(rot,r_old)
         call find_geos(r_new,grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk))
+        ! calculating the local basis elements
+        call calc_local_i(grid%lon_geo_scalar(ji,jk),local_i)
+        call calc_local_j(grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk),local_j)
+        ! rotating the basis vector
+        basis_new = matmul(rot,basis_old)
+        ! calculting th components of the local basis vector
+        x_basis_local = dot_product(local_i,basis_new)
+        y_basis_local = dot_product(local_j,basis_new)
+        ! calculating the direction of this vector
+        grid%dir_geo_u_scalar(ji,jk) = atan2(y_basis_local,x_basis_local)
       enddo
     enddo
     !$OMP END DO
