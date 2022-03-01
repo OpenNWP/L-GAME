@@ -18,6 +18,7 @@ module io_nml
   logical           :: lread_land_sea    ! switch for reading the land-sea mask
   character(len=64) :: land_sea_filename ! filename of the land-sea mask
   logical           :: lset_oro          ! switch for setting the orography
+  character(len=64) :: oro_raw_filename  ! filename from which to read the raw orography
   
   namelist /io/dt_write_min,lread_oro,lwrite_grid,grid_filename,restart_filename,lread_land_sea,land_sea_filename, &
   lset_oro
@@ -37,6 +38,7 @@ module io_nml
     lread_land_sea = .true.
     land_sea_filename = "is_land.nc"
     lset_oro = .false.
+    oro_raw_filename = "etopo.nc"
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)

@@ -5,6 +5,7 @@
 
 module grid_generator
 
+  use netcdf
   use definitions,        only: wp,t_grid
   use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
                                 lon_center
@@ -13,10 +14,12 @@ module grid_generator
   use surface_nml,        only: nsoillays,orography_id
   use gradient_operators, only: grad,grad_hor_cov
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
-  use io_nml,             only: lwrite_grid,lread_oro,lread_land_sea,lset_oro
+  use io_nml,             only: lwrite_grid,lread_oro,lread_land_sea,lset_oro, &
+                                oro_raw_filename
   use read_write_grid,    only: write_grid,read_oro,read_land_sea
   use set_initial_state,  only: bg_temp,bg_pres,geopot
   use bc_nml,             only: lperiodic
+  use set_initial_state,  only: nc_check
 
   implicit none
   
@@ -313,6 +316,11 @@ module grid_generator
     ! Physical grid properties
     ! ------------------------
     
+    ! reading the land-sea mask if configured to do so
+    if (lread_land_sea) then
+      call read_land_sea(grid)
+    endif
+    
     select case (orography_id)
     
       ! no orography
@@ -348,11 +356,6 @@ module grid_generator
         !$OMP END PARALLEL
     
     endselect
-    
-    ! reading the land-sea mask if configured to do so
-    if (lread_land_sea) then
-      call read_land_sea(grid)
-    endif
     
     ! idealized soil properties are being set here
     density_soil = 1442._wp
@@ -867,11 +870,90 @@ module grid_generator
   
   subroutine set_orography(grid)
   
-    ! This subroutine interpolates the real orography.
+    ! This subroutine interpolates the real orography from ETOPO1.
     
     type(t_grid), intent(inout) :: grid
     
-    grid%z_w(:,:,nlays+1) = 0._wp
+    ! local variables
+    integer               :: ncid                   ! ID of the NetCDF file
+    character(len=64)     :: filename               ! input filename
+    integer               :: lat_in_id              ! variable ID of the latitude vector
+    integer               :: lon_in_id              ! variable ID of the longitude vector
+    integer               :: z_in_id                ! variable ID of the orography
+    integer               :: no_of_lat_points       ! number of latitude points of the input dataset
+    integer               :: no_of_lon_points       ! number of longitude points of the input dataset
+    real(wp), allocatable :: latitude_input(:)      ! latitudes of the input dataset
+    real(wp), allocatable :: longitude_input(:)     ! longitudes of the input dataset
+    real(wp), allocatable :: lat_distance_vector(:) ! latitudes distance vector
+    real(wp), allocatable :: lon_distance_vector(:) ! longitudes distance vector
+    integer, allocatable  :: z_input(:,:)           ! the input dataset
+    integer               :: lat_index,lon_index    ! minimum distance indices
+    integer               :: ji,jk,jl               ! loop indices
+    
+    no_of_lat_points = 10801
+    no_of_lon_points = 21601
+    
+    ! the filename of the grid file including the relative path
+    filename = "../../grids/phys_sfc_properties/" // trim(oro_raw_filename)
+    
+    ! opening the NetCDF file
+    call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
+    
+    ! reading the variable IDs
+    call nc_check(nf90_inq_varid(ncid,"y",lat_in_id))
+    call nc_check(nf90_inq_varid(ncid,"x",lon_in_id))
+    call nc_check(nf90_inq_varid(ncid,"z",z_in_id))
+    
+    ! allocating memory for reading the grid files
+    allocate(latitude_input(no_of_lat_points))
+    allocate(longitude_input(no_of_lon_points))
+    allocate(z_input(no_of_lon_points,no_of_lat_points))
+    
+    ! reading the arrays
+    call nc_check(nf90_get_var(ncid,lat_in_id,latitude_input))
+    call nc_check(nf90_get_var(ncid,lon_in_id,longitude_input))
+    call nc_check(nf90_get_var(ncid,z_in_id,z_input))
+    
+    ! closing the NetCDF file
+    call nc_check(nf90_close(ncid))
+    
+    ! allocating memory for the distance vectors
+    allocate(lat_distance_vector(no_of_lat_points))
+    allocate(lon_distance_vector(no_of_lon_points))
+
+    ! setting the unfiltered orography
+    do ji=1,nlins
+      do jk=1,ncols
+        ! default
+        grid%z_w(ji,jk,nlays+1) = 0._wp
+    
+        do jl=1,no_of_lat_points
+          lat_distance_vector(jl) = abs(2._wp*M_PI*latitude_input(jl)/360._wp - grid%lat_geo_scalar(ji,jk))
+        enddo
+    
+        do jl=1,no_of_lon_points
+          lon_distance_vector(jl) = abs(2._wp*M_PI*longitude_input(jl)/360._wp - grid%lon_geo_scalar(ji,jk))
+        enddo
+    
+        lat_index = find_min_index(lat_distance_vector)
+        lon_index = find_min_index(lon_distance_vector)
+          
+        grid%z_w(ji,jk,nlays+1) = real(z_input(lon_index,lat_index),wp)
+
+        ! check
+        if (grid%z_w(ji,jk,nlays+1)<-382._wp .or. grid%z_w(ji,jk,nlays+1)>8850._wp) then
+          write(*,*) "Warning: orography value out of usual range."
+        endif
+      
+      enddo
+    enddo
+
+    ! freeing the memory
+    deallocate(lat_distance_vector)
+    deallocate(lon_distance_vector)
+    deallocate(z_input)
+    deallocate(latitude_input)
+    deallocate(longitude_input)
   
   end subroutine set_orography
   
@@ -936,6 +1018,29 @@ module grid_generator
     !$OMP END PARALLEL
   
   end subroutine smooth_hor_scalar
+  
+  function find_min_index(input_vector)
+  
+    ! This function finds the index where a vector assumes its minimum.
+    
+    real(wp) :: input_vector(:)
+    integer  :: find_min_index ! the result
+    
+    ! local variables
+    integer  :: ji
+    real(wp) :: current_min
+    
+    find_min_index = 1
+    current_min = input_vector(1)
+    
+    do ji=2,size(input_vector)
+      if (input_vector(ji)<current_min) then
+        current_min = input_vector(ji)
+        find_min_index = ji
+      endif
+    enddo
+  
+  end function find_min_index
   
   function patch_area(center_lat,dx_as_angle,dy_as_angle)
   

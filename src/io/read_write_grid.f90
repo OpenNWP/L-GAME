@@ -146,7 +146,7 @@ module read_write_grid
     ! the filename of the grid file including the relative path
     filename = "../../grids/" // trim(grid_filename)
     
-    ! creating the NetCDF file
+    ! opening the NetCDF file
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
