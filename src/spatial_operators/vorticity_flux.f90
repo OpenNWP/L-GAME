@@ -65,9 +65,6 @@ module vorticity_flux
         + grid%trsk_weights_u(ji,6)*diag%v_placeholder(ji,1,:)*0.25_wp* &
         (diag%eta_z(ji,1,:)+diag%eta_z(ji,2,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:))
          diag%pot_vort_tend_x(ji,ncols+1,:) = diag%pot_vort_tend_x(ji,1,:)
-      else
-        diag%pot_vort_tend_x(ji,1,:) = 0._wp
-        diag%pot_vort_tend_x(ji,ncols+1,:) = 0._wp
       endif
       
     enddo
@@ -101,9 +98,6 @@ module vorticity_flux
         + grid%trsk_weights_v(1,4)*diag%u_placeholder(nlins,jk,:)*0.25_wp* &
         (diag%eta_z(nlins,jk,:)+diag%eta_z(1,jk,:)+diag%eta_z(1,jk,:)+diag%eta_z(1,jk+1,:))
         diag%pot_vort_tend_y(nlins+1,jk,:) = diag%pot_vort_tend_y(1,jk,:)
-      else
-        diag%pot_vort_tend_y(1,jk,:) = 0._wp
-        diag%pot_vort_tend_y(nlins+1,jk,:) = 0._wp
       endif
       
     enddo
@@ -132,9 +126,6 @@ module vorticity_flux
           - 0.5_wp*grid%inner_product_weights(ji,1,jl,5)*diag%w_placeholder(ji,1,jl)*diag%eta_y(ji,1,jl) &
           - 0.5_wp*grid%inner_product_weights(ji,1,jl,6)*diag%w_placeholder(ji,1,jl+1)*diag%eta_y(ji,1,jl+1)
           diag%pot_vort_tend_x(ji,ncols+1,jl) = diag%pot_vort_tend_x(ji,1,jl)
-        else
-          diag%pot_vort_tend_x(ji,1,jl) = 0._wp
-          diag%pot_vort_tend_x(ji,ncols+1,jl) = 0._wp
         endif
         
       enddo
@@ -162,9 +153,6 @@ module vorticity_flux
           + 0.5_wp*grid%inner_product_weights(1,jk,jl,5)*diag%w_placeholder(1,jk,jl)*diag%eta_x(1,jk,jl) &
           + 0.5_wp*grid%inner_product_weights(1,jk,jl,6)*diag%w_placeholder(1,jk,jl+1)*diag%eta_x(1,jk,jl+1)
           diag%pot_vort_tend_y(nlins+1,jk,jl) = diag%pot_vort_tend_y(1,jk,jl)
-        else
-          diag%pot_vort_tend_y(1,jk,jl) = 0._wp
-          diag%pot_vort_tend_y(nlins+1,jk,jl) = 0._wp
         endif
         
       enddo

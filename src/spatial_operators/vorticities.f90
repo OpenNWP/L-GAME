@@ -272,9 +272,48 @@ module vorticities
         +state%rho(ji,jk,:,no_of_condensed_constituents+1) &
         +state%rho(ji-1,jk,:,no_of_condensed_constituents+1)+state%rho(ji-1,jk-1,:,no_of_condensed_constituents+1)))
       enddo
+      
+      ! periodic boundary conditions
+      if (lperiodic) then
+        diag%eta_z(ji,1,:) = diag%eta_z(ji,1,:)/(0.25_wp*(state%rho(ji,ncols,:,no_of_condensed_constituents+1) &
+        +state%rho(ji,1,:,no_of_condensed_constituents+1) &
+        +state%rho(ji-1,1,:,no_of_condensed_constituents+1)+state%rho(ji-1,ncols,:,no_of_condensed_constituents+1)))
+        diag%eta_z(ji,ncols+1,:) = diag%eta_z(ji,1,:)
+      endif
+      
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
+    
+    ! periodic boundary conditions
+    if (lperiodic) then
+      !$OMP PARALLEL
+      !$OMP DO PRIVATE(jk)
+      do jk=2,ncols
+        diag%eta_z(1,jk,:) = diag%eta_z(1,jk,:)/(0.25_wp*(state%rho(1,jk-1,:,no_of_condensed_constituents+1) &
+        +state%rho(1,jk,:,no_of_condensed_constituents+1) &
+        +state%rho(nlins,jk,:,no_of_condensed_constituents+1)+state%rho(nlins,jk-1,:,no_of_condensed_constituents+1)))
+        diag%eta_z(nlins+1,jk,:) = diag%eta_z(1,jk,:)
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+    endif
+    
+    ! corners under periodic boundary conditions
+    if (lperiodic) then
+      diag%eta_z(1,1,:) = diag%eta_z(1,1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
+      +state%rho(1,1,:,no_of_condensed_constituents+1) &
+      +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
+      diag%eta_z(1,ncols+1,:) = diag%eta_z(1,ncols+1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
+      +state%rho(1,ncols+1,:,no_of_condensed_constituents+1) &
+      +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
+      diag%eta_z(nlins+1,1,:) = diag%eta_z(nlins+1,1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
+      +state%rho(nlins+1,1,:,no_of_condensed_constituents+1) &
+      +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
+      diag%eta_z(nlins+1,ncols+1,:) = diag%eta_z(nlins+1,ncols+1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
+      +state%rho(nlins+1,ncols+1,:,no_of_condensed_constituents+1) &
+      +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
+    endif
     
   end subroutine calc_pot_vort
   
