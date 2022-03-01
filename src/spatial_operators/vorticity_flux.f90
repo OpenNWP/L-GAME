@@ -115,14 +115,28 @@ module vorticity_flux
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
-      do jk=2,ncols
-        do jl=1,nlays
+      do jl=1,nlays
+        do jk=2,ncols
           diag%pot_vort_tend_x(ji,jk,jl) = diag%pot_vort_tend_x(ji,jk,jl) &
           - 0.5_wp*grid%inner_product_weights(ji,jk-1,jl,5)*diag%w_placeholder(ji,jk-1,jl)*diag%eta_y(ji,jk,jl) &
           - 0.5_wp*grid%inner_product_weights(ji,jk-1,jl,6)*diag%w_placeholder(ji,jk-1,jl+1)*diag%eta_y(ji,jk,jl+1) &
           - 0.5_wp*grid%inner_product_weights(ji,jk,jl,5)*diag%w_placeholder(ji,jk,jl)*diag%eta_y(ji,jk,jl) &
           - 0.5_wp*grid%inner_product_weights(ji,jk,jl,6)*diag%w_placeholder(ji,jk,jl+1)*diag%eta_y(ji,jk,jl+1)
         enddo
+        
+        ! boundary conditions
+        if (lperiodic) then
+          diag%pot_vort_tend_x(ji,1,jl) = diag%pot_vort_tend_x(ji,1,jl) &
+          - 0.5_wp*grid%inner_product_weights(ji,ncols,jl,5)*diag%w_placeholder(ji,ncols,jl)*diag%eta_y(ji,1,jl) &
+          - 0.5_wp*grid%inner_product_weights(ji,ncols,jl,6)*diag%w_placeholder(ji,ncols,jl+1)*diag%eta_y(ji,1,jl+1) &
+          - 0.5_wp*grid%inner_product_weights(ji,1,jl,5)*diag%w_placeholder(ji,1,jl)*diag%eta_y(ji,1,jl) &
+          - 0.5_wp*grid%inner_product_weights(ji,1,jl,6)*diag%w_placeholder(ji,1,jl+1)*diag%eta_y(ji,1,jl+1)
+          diag%pot_vort_tend_x(ji,ncols+1,jl) = diag%pot_vort_tend_x(ji,1,jl)
+        else
+          diag%pot_vort_tend_x(ji,1,jl) = 0._wp
+          diag%pot_vort_tend_x(ji,ncols+1,jl) = 0._wp
+        endif
+        
       enddo
     enddo
     !$OMP END DO
