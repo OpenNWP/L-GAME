@@ -8,7 +8,7 @@ module read_write_grid
   use netcdf
   use definitions,       only: t_grid
   use set_initial_state, only: nc_check
-  use io_nml,            only: grid_filename
+  use io_nml,            only: grid_filename,land_sea_filename
   use run_nml,           only: nlins,ncols,nlays
   
   implicit none
@@ -16,13 +16,14 @@ module read_write_grid
   private
   
   public :: write_grid
-  public :: read_grid
+  public :: read_oro
+  public :: read_land_sea
   
   contains
   
   subroutine write_grid(grid)
   
-    ! This subroutine writes costly grid properties to a file so they can be reused elsewhere.
+    ! This subroutine writes important grid properties to a file so they can be reused elsewhere.
   
     ! input arguments
     type(t_grid), intent(in) :: grid ! grid properties
@@ -44,10 +45,6 @@ module read_write_grid
     integer           :: varid_lat_v            ! variable ID of the latitudes of the v-vectors
     integer           :: varid_lon_v            ! variable ID of the longitudes of the v-vectors
     integer           :: varid_z_w              ! variable ID of the orography
-    integer           :: varid_sfc_rho_c        ! variable ID of the volumetric specific heat conductivity of the soil
-    integer           :: varid_t_conduc_soil    ! variable ID of the temperature conductivity of the soil
-    integer           :: varid_is_land          ! variable ID of the land-sea-mask
-    integer           :: varid_sfc_albedo       ! variable ID of the albedo of the surface
     integer           :: varid_dir_geo_u        ! variable ID of the direction of u-vectors
     integer           :: varid_dir_geo_v        ! variable ID of the direction of v-vectors
     integer           :: varid_dir_geo_u_scalar ! variable ID of the direction of u-vectors at the scalar data points
@@ -102,22 +99,6 @@ module read_write_grid
     call nc_check(nf90_put_att(ncid,varid_z_w,"Description","orography"))
     call nc_check(nf90_put_att(ncid,varid_z_w,"Unit","m"))
     
-    call nc_check(nf90_def_var(ncid,"sfc_rho_c",NF90_REAL,dimids,varid_sfc_rho_c))
-    call nc_check(nf90_put_att(ncid,varid_sfc_rho_c,"Description","volumetric specific heat conductivity of the soil"))
-    call nc_check(nf90_put_att(ncid,varid_sfc_rho_c,"Unit","J/(Km^3)"))
-    
-    call nc_check(nf90_def_var(ncid,"t_conduc_soil",NF90_REAL,dimids,varid_t_conduc_soil))
-    call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Description","temperature conductivity of the soil"))
-    call nc_check(nf90_put_att(ncid,varid_t_conduc_soil,"Unit","m^2/s"))
-    
-    call nc_check(nf90_def_var(ncid,"is_land",NF90_INT,dimids,varid_is_land))
-    call nc_check(nf90_put_att(ncid,varid_is_land,"Description","0 = water, 1 = land"))
-    call nc_check(nf90_put_att(ncid,varid_is_land,"Unit","1"))
-    
-    call nc_check(nf90_def_var(ncid,"sfc_albedo",NF90_REAL,dimids,varid_sfc_albedo))
-    call nc_check(nf90_put_att(ncid,varid_sfc_albedo,"Description","albedo of the surface"))
-    call nc_check(nf90_put_att(ncid,varid_sfc_albedo,"Unit","1"))
-    
     call nc_check(nf90_def_var(ncid,"u_dir",NF90_REAL,dimids_u,varid_dir_geo_u))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Description","direction of u-vectors"))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Unit","radians"))
@@ -141,10 +122,6 @@ module read_write_grid
     call nc_check(nf90_put_var(ncid,varid_lat_v,grid%lat_geo_v))
     call nc_check(nf90_put_var(ncid,varid_lon_v,grid%lon_geo_v))
     call nc_check(nf90_put_var(ncid,varid_z_w,grid%z_w(:,:,nlays+1)))
-    call nc_check(nf90_put_var(ncid,varid_sfc_rho_c,grid%sfc_rho_c))
-    call nc_check(nf90_put_var(ncid,varid_t_conduc_soil,grid%t_conduc_soil))
-    call nc_check(nf90_put_var(ncid,varid_is_land,grid%is_land))
-    call nc_check(nf90_put_var(ncid,varid_sfc_albedo,grid%sfc_albedo))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u,grid%dir_geo_u))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_v,grid%dir_geo_v))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u_scalar,grid%dir_geo_u_scalar))
@@ -154,21 +131,17 @@ module read_write_grid
   
   end subroutine write_grid
   
-  subroutine read_grid(grid)
+  subroutine read_oro(grid)
   
-    ! This subroutine reads important grid properties from a file.
+    ! This subroutine reads the orography from a file.
   
     ! input arguments
     type(t_grid), intent(inout) :: grid ! grid properties
     
     ! local variables
     integer           :: ncid                ! ID of the NetCDF file
-    character(len=64) :: filename            ! output filename
+    character(len=64) :: filename            ! input filename
     integer           :: varid_z_w           ! variable ID of the orography
-    integer           :: varid_sfc_rho_c     ! variable ID of the volumetric specific heat conductivity of the soil
-    integer           :: varid_t_conduc_soil ! variable ID of the temperature conductivity of the soil
-    integer           :: varid_is_land       ! variable ID of the land-sea-mask
-    integer           :: varid_sfc_albedo    ! variable ID of the albedo of the surface
     
     ! the filename of the grid file including the relative path
     filename = "../../grids/" // trim(grid_filename)
@@ -178,22 +151,43 @@ module read_write_grid
     
     ! reading the variable IDs
     call nc_check(nf90_inq_varid(ncid,"oro",varid_z_w))
-    call nc_check(nf90_inq_varid(ncid,"sfc_rho_c",varid_sfc_rho_c))
-    call nc_check(nf90_inq_varid(ncid,"t_conduc_soil",varid_t_conduc_soil))
-    call nc_check(nf90_inq_varid(ncid,"is_land",varid_is_land))
-    call nc_check(nf90_inq_varid(ncid,"sfc_albedo",varid_sfc_albedo))
     
     ! reading the arrays
     call nc_check(nf90_get_var(ncid,varid_z_w,grid%z_w(:,:,nlays+1)))
-    call nc_check(nf90_get_var(ncid,varid_sfc_rho_c,grid%sfc_rho_c))
-    call nc_check(nf90_get_var(ncid,varid_t_conduc_soil,grid%t_conduc_soil))
-    call nc_check(nf90_get_var(ncid,varid_is_land,grid%is_land))
-    call nc_check(nf90_get_var(ncid,varid_sfc_albedo,grid%sfc_albedo))
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
   
-  end subroutine read_grid
+  end subroutine read_oro
+  
+  subroutine read_land_sea(grid)
+  
+    ! This subroutine reads the land-sea mask from a file.
+  
+    ! input arguments
+    type(t_grid), intent(inout) :: grid ! grid properties
+    
+    ! local variables
+    integer           :: ncid                ! ID of the NetCDF file
+    character(len=64) :: filename            ! input filename
+    integer           :: varid_is_land       ! variable ID of the land-sea-mask
+    
+    ! the filename of the grid file including the relative path
+    filename = "../../grids/phys_sfc_properties/" // trim(land_sea_filename)
+    
+    ! creating the NetCDF file
+    call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
+    
+    ! reading the variable IDs
+    call nc_check(nf90_inq_varid(ncid,"is_land",varid_is_land))
+    
+    ! reading the arrays
+    call nc_check(nf90_get_var(ncid,varid_is_land,grid%is_land))
+    
+    ! closing the NetCDF file
+    call nc_check(nf90_close(ncid))
+  
+  end subroutine read_land_sea
 
 end module read_write_grid
 

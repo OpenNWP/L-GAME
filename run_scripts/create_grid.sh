@@ -40,7 +40,9 @@ lrad=.false.
 /
 
 &io
+lread_oro=.false.
 lwrite_grid=.true.
+lread_land_sea=.true.
 /
 
 EOF

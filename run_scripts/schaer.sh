@@ -48,6 +48,7 @@ lrad=.false.
 /
 
 &io
+lread_oro=.false.
 dt_write_min=1
 /
 

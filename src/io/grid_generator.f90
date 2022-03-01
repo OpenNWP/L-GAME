@@ -13,8 +13,8 @@ module grid_generator
   use surface_nml,        only: nsoillays,orography_id
   use gradient_operators, only: grad,grad_hor_cov
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
-  use io_nml,             only: lwrite_grid,lread_grid
-  use read_write_grid,    only: write_grid,read_grid
+  use io_nml,             only: lwrite_grid,lread_oro,lread_land_sea
+  use read_write_grid,    only: write_grid,read_oro,read_land_sea
   use set_initial_state,  only: bg_temp,bg_pres,geopot
   use bc_nml,             only: lperiodic
 
@@ -204,8 +204,8 @@ module grid_generator
       
       ! real orography
       case(1)
-        if (lread_grid) then
-          call read_grid(grid)
+        if (lread_oro) then
+          call read_oro(grid)
         else
           !$OMP PARALLEL
           !$OMP WORKSHARE
@@ -232,6 +232,11 @@ module grid_generator
     
     endselect
     
+    ! reading the land-sea mask if configured to do so
+    if (lread_land_sea) then
+      call read_land_sea(grid)
+    endif
+    
     ! idealized soil properties are being set here
     density_soil = 1442._wp
     c_p_soil = 830._wp
@@ -241,9 +246,6 @@ module grid_generator
     !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins
       do jk=1,ncols
-             
-	   ! land-sea-mask not yet implemented
-       grid%is_land(:,:) = 0
 		    
        grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
             
@@ -785,7 +787,7 @@ module grid_generator
     !$OMP END DO
     !$OMP END PARALLEL
 	
-    ! writing the costly grid properties to a file if required by the user
+    ! writing some grid properties to a file if required by the user
     if (lwrite_grid) then
       call write_grid(grid)
     endif
