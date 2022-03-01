@@ -29,9 +29,6 @@ start_minute=${BASH_ARGV[15]}
 /
 
 &diff
-lklemp=.true.
-lmom_diff_h=.true.
-lmom_diff_v=.true.
 /
 
 &constituents
@@ -47,7 +44,7 @@ lmom_diff_v=.true.
 /
 
 &io
-dt_write_min=60
+dt_write_min=15
 /
 
 EOF

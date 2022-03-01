@@ -38,7 +38,6 @@ lperiodic=.true.
 /
 
 &io
-dt_write_min=60
 /
 
 EOF
