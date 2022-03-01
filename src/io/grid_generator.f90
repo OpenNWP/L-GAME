@@ -80,6 +80,9 @@ module grid_generator
     real(wp) :: lat_local,lon_local          ! helper variables
     integer  :: ji,jk,jl                     ! loop indices
     
+    ! Horizontal grid properties
+    ! --------------------------
+    
     ! setting the center and direction of the grid
     grid%lat_center = lat_center
     grid%lon_center = lon_center
@@ -163,7 +166,153 @@ module grid_generator
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     
-    ! setting the physical surface properties, including orography
+    ! performing the rotation
+    ! setting up the rotation matrix
+    rot_y(1,1) = cos(lat_center)
+    rot_y(1,2) = 0._wp
+    rot_y(1,3) = -sin(lat_center)
+    rot_y(2,1) = 0._wp
+    rot_y(2,2) = 1._wp
+    rot_y(2,3) = 0._wp
+    rot_y(3,1) = sin(lat_center)
+    rot_y(3,2) = 0._wp
+    rot_y(3,3) = cos(lat_center)
+    rot_z(1,1) = cos(lon_center)
+    rot_z(1,2) = -sin(lon_center)
+    rot_z(1,3) = 0._wp
+    rot_z(2,1) = sin(lon_center)
+    rot_z(2,2) = cos(lon_center)
+    rot_z(2,3) = 0._wp
+    rot_z(3,1) = 0._wp
+    rot_z(3,2) = 0._wp
+    rot_z(3,3) = 1._wp
+    rot = matmul(rot_z,rot_y)
+	
+	! calculating the geographic coordinates of the gridpoints
+	! scalar points
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
+    do ji=1,nlins
+      do jk=1,ncols
+        ! calculating the local i-vector before the rotation
+        call calc_local_i(grid%lon_geo_scalar(ji,jk),basis_old)
+        call find_global_normal(grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk),r_old)
+        r_new = matmul(rot,r_old)
+        call find_geos(r_new,grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk))
+        ! calculating the local basis elements
+        call calc_local_i(grid%lon_geo_scalar(ji,jk),local_i)
+        call calc_local_j(grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk),local_j)
+        ! rotating the basis vector
+        basis_new = matmul(rot,basis_old)
+        ! calculting th components of the local basis vector
+        x_basis_local = dot_product(local_i,basis_new)
+        y_basis_local = dot_product(local_j,basis_new)
+        ! calculating the direction of this vector
+        grid%dir_geo_u_scalar(ji,jk) = atan2(y_basis_local,x_basis_local)
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! u-vector points, including directions
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
+    do ji=1,nlins
+      do jk=1,ncols+1
+        ! calculating the local i-vector before the rotation
+        call calc_local_i(grid%lon_geo_u(ji,jk),basis_old)
+        ! rotating the gridpoint itself
+        call find_global_normal(grid%lat_geo_u(ji,jk),grid%lon_geo_u(ji,jk),r_old)
+        r_new = matmul(rot,r_old)
+        call find_geos(r_new,grid%lat_geo_u(ji,jk),grid%lon_geo_u(ji,jk))
+        ! calculating the local basis elements
+        call calc_local_i(grid%lon_geo_u(ji,jk),local_i)
+        call calc_local_j(grid%lat_geo_u(ji,jk),grid%lon_geo_u(ji,jk),local_j)
+        ! rotating the basis vector
+        basis_new = matmul(rot,basis_old)
+        ! calculting th components of the local basis vector
+        x_basis_local = dot_product(local_i,basis_new)
+        y_basis_local = dot_product(local_j,basis_new)
+        ! calculating the direction of this vector
+        grid%dir_geo_u(ji,jk) = atan2(y_basis_local,x_basis_local)
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+	
+    ! v-vector points, including directions
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
+    do ji=1,nlins+1
+      do jk=1,ncols
+        ! calculating the local j-vector before the rotation
+        call calc_local_j(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),basis_old)
+        ! rotating the gridpoint itself
+        call find_global_normal(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),r_old)
+        r_new = matmul(rot,r_old)
+        call find_geos(r_new,grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk))
+        ! calculating the local basis elements
+        call calc_local_i(grid%lon_geo_v(ji,jk),local_i)
+        call calc_local_j(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),local_j)
+        ! rotating the basis vector
+        basis_new = matmul(rot,basis_old)
+        ! calculting th components of the local basis vector
+        x_basis_local = dot_product(local_i,basis_new)
+        y_basis_local = dot_product(local_j,basis_new)
+        ! calculating the direction of this vector
+        grid%dir_geo_v(ji,jk) = atan2(y_basis_local,x_basis_local)
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! setting the Coriolis vector
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,y_basis_local)
+    do ji=1,nlins+1
+      do jk=1,ncols
+        y_basis_local = sin(grid%dir_geo_v(ji,jk) - 0.5_wp*M_PI)
+        grid%fvec_x(ji,jk) = 2._wp*omega*cos(grid%lat_geo_v(ji,jk))*y_basis_local
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,y_basis_local)
+    do ji=1,nlins
+      do jk=1,ncols+1
+        y_basis_local = sin(grid%dir_geo_u(ji,jk) + 0.5_wp*M_PI)
+        grid%fvec_y(ji,jk) = 2._wp*omega*cos(grid%lat_geo_u(ji,jk))*y_basis_local
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,lat_local,lon_local,r_old,r_new)
+    do ji=1,nlins+1
+      do jk=1,ncols+1
+        if (ji==nlins+1) then
+          lat_local = grid%lat_scalar(ji-1) - 0.5*dlat
+        else
+          lat_local = grid%lat_scalar(ji) + 0.5*dlat
+        endif
+        if (jk==ncols+1) then
+          lon_local = grid%lon_scalar(jk-1) + 0.5*dlon
+        else
+          lon_local = grid%lon_scalar(jk) - 0.5*dlon
+        endif
+        call find_global_normal(lat_local,lon_local,r_old)
+        r_new = matmul(rot,r_old)
+        call find_geos(r_new,lat_local,lon_local)
+        grid%fvec_z(ji,jk) = 2._wp*omega*sin(lat_local)
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! Physical grid properties
+    ! ------------------------
+    
     select case (orography_id)
     
       ! no orography
@@ -259,7 +408,10 @@ module grid_generator
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-          
+    
+    ! Vertical grid
+    ! -------------
+    
     ! calculating the vertical positions of the scalar points
     ! the heights are defined according to k = A_k + B_k*surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
     !$OMP PARALLEL
@@ -585,6 +737,9 @@ module grid_generator
     !$OMP END DO
     !$OMP END PARALLEL
     
+    ! Derived quantities
+    ! ------------------
+    
     ! setting the inner product weights
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
@@ -638,7 +793,9 @@ module grid_generator
       grid%trsk_weights_v(ji,4) = grid%trsk_weights_v(ji,3)
     enddo
     
-    ! soil grid
+    ! Soil grid
+    ! ---------
+    
     sigma_soil = 0.36_wp
     grid%z_t_const = -10._wp
 
@@ -658,150 +815,6 @@ module grid_generator
     enddo
     
     write(*,*) "Thickness of the uppermost soil layer: ", -grid%z_soil_interface(2), "m."
-	
-    ! performing the rotation
-    ! setting up the rotation matrix
-    rot_y(1,1) = cos(lat_center)
-    rot_y(1,2) = 0._wp
-    rot_y(1,3) = -sin(lat_center)
-    rot_y(2,1) = 0._wp
-    rot_y(2,2) = 1._wp
-    rot_y(2,3) = 0._wp
-    rot_y(3,1) = sin(lat_center)
-    rot_y(3,2) = 0._wp
-    rot_y(3,3) = cos(lat_center)
-    rot_z(1,1) = cos(lon_center)
-    rot_z(1,2) = -sin(lon_center)
-    rot_z(1,3) = 0._wp
-    rot_z(2,1) = sin(lon_center)
-    rot_z(2,2) = cos(lon_center)
-    rot_z(2,3) = 0._wp
-    rot_z(3,1) = 0._wp
-    rot_z(3,2) = 0._wp
-    rot_z(3,3) = 1._wp
-    rot = matmul(rot_z,rot_y)
-	
-	! calculating the geographic coordinates of the gridpoints
-	! scalar points
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
-    do ji=1,nlins
-      do jk=1,ncols
-        ! calculating the local i-vector before the rotation
-        call calc_local_i(grid%lon_geo_scalar(ji,jk),basis_old)
-        call find_global_normal(grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk),r_old)
-        r_new = matmul(rot,r_old)
-        call find_geos(r_new,grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk))
-        ! calculating the local basis elements
-        call calc_local_i(grid%lon_geo_scalar(ji,jk),local_i)
-        call calc_local_j(grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk),local_j)
-        ! rotating the basis vector
-        basis_new = matmul(rot,basis_old)
-        ! calculting th components of the local basis vector
-        x_basis_local = dot_product(local_i,basis_new)
-        y_basis_local = dot_product(local_j,basis_new)
-        ! calculating the direction of this vector
-        grid%dir_geo_u_scalar(ji,jk) = atan2(y_basis_local,x_basis_local)
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    
-    ! u-vector points, including directions
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
-    do ji=1,nlins
-      do jk=1,ncols+1
-        ! calculating the local i-vector before the rotation
-        call calc_local_i(grid%lon_geo_u(ji,jk),basis_old)
-        ! rotating the gridpoint itself
-        call find_global_normal(grid%lat_geo_u(ji,jk),grid%lon_geo_u(ji,jk),r_old)
-        r_new = matmul(rot,r_old)
-        call find_geos(r_new,grid%lat_geo_u(ji,jk),grid%lon_geo_u(ji,jk))
-        ! calculating the local basis elements
-        call calc_local_i(grid%lon_geo_u(ji,jk),local_i)
-        call calc_local_j(grid%lat_geo_u(ji,jk),grid%lon_geo_u(ji,jk),local_j)
-        ! rotating the basis vector
-        basis_new = matmul(rot,basis_old)
-        ! calculting th components of the local basis vector
-        x_basis_local = dot_product(local_i,basis_new)
-        y_basis_local = dot_product(local_j,basis_new)
-        ! calculating the direction of this vector
-        grid%dir_geo_u(ji,jk) = atan2(y_basis_local,x_basis_local)
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-	
-    ! v-vector points, including directions
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
-    do ji=1,nlins+1
-      do jk=1,ncols
-        ! calculating the local j-vector before the rotation
-        call calc_local_j(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),basis_old)
-        ! rotating the gridpoint itself
-        call find_global_normal(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),r_old)
-        r_new = matmul(rot,r_old)
-        call find_geos(r_new,grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk))
-        ! calculating the local basis elements
-        call calc_local_i(grid%lon_geo_v(ji,jk),local_i)
-        call calc_local_j(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),local_j)
-        ! rotating the basis vector
-        basis_new = matmul(rot,basis_old)
-        ! calculting th components of the local basis vector
-        x_basis_local = dot_product(local_i,basis_new)
-        y_basis_local = dot_product(local_j,basis_new)
-        ! calculating the direction of this vector
-        grid%dir_geo_v(ji,jk) = atan2(y_basis_local,x_basis_local)
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    
-    ! setting the Coriolis vector
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,y_basis_local)
-    do ji=1,nlins+1
-      do jk=1,ncols
-        y_basis_local = sin(grid%dir_geo_v(ji,jk) - 0.5_wp*M_PI)
-        grid%fvec_x(ji,jk) = 2._wp*omega*cos(grid%lat_geo_v(ji,jk))*y_basis_local
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,y_basis_local)
-    do ji=1,nlins
-      do jk=1,ncols+1
-        y_basis_local = sin(grid%dir_geo_u(ji,jk) + 0.5_wp*M_PI)
-        grid%fvec_y(ji,jk) = 2._wp*omega*cos(grid%lat_geo_u(ji,jk))*y_basis_local
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,lat_local,lon_local,r_old,r_new)
-    do ji=1,nlins+1
-      do jk=1,ncols+1
-        if (ji==nlins+1) then
-          lat_local = grid%lat_scalar(ji-1) - 0.5*dlat
-        else
-          lat_local = grid%lat_scalar(ji) + 0.5*dlat
-        endif
-        if (jk==ncols+1) then
-          lon_local = grid%lon_scalar(jk-1) + 0.5*dlon
-        else
-          lon_local = grid%lon_scalar(jk) - 0.5*dlon
-        endif
-        call find_global_normal(lat_local,lon_local,r_old)
-        r_new = matmul(rot,r_old)
-        call find_geos(r_new,lat_local,lon_local)
-        grid%fvec_z(ji,jk) = 2._wp*omega*sin(lat_local)
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
 
     ! writing some grid properties to a file if required by the user
     if (lwrite_grid) then
