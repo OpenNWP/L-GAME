@@ -16,8 +16,13 @@ module diff_nml
   logical  :: lmom_diff_v     ! switch for vertical momentum diffusion
   real(wp) :: diff_h_smag_div ! horizontal diffusion Smagorinsky factor acting on divergent movements
   real(wp) :: diff_h_smag_rot ! horizontal diffusion Smagorinsky factor acting on vortical movements
+  logical  :: ltemp_diff_h    ! horizontal temperature diffusion switch
+  logical  :: ltemp_diff_v    ! vertical temperature diffusion switch
+  logical  :: ltracer_diff_h  ! horizontal tracer diffusion switch
+  logical  :: ltracer_diff_v  ! vertical tracer diffusion switch
   
-  namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v,diff_h_smag_div,diff_h_smag_rot
+  namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v,diff_h_smag_div,diff_h_smag_rot, &
+  ltemp_diff_h,ltemp_diff_v,ltracer_diff_h,ltracer_diff_v
   
   contains
   
@@ -34,6 +39,10 @@ module diff_nml
     lmom_diff_v = .true.
     diff_h_smag_div = 0.01_wp
     diff_h_smag_rot = 0.01_wp
+    ltemp_diff_h = .true.
+    ltemp_diff_v = .true.
+    ltracer_diff_h = .true.
+    ltracer_diff_v = .true.
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)

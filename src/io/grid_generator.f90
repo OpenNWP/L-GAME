@@ -13,7 +13,7 @@ module grid_generator
   use surface_nml,        only: nsoillays,orography_id
   use gradient_operators, only: grad,grad_hor_cov
   use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
-  use io_nml,             only: lwrite_grid,lread_oro,lread_land_sea
+  use io_nml,             only: lwrite_grid,lread_oro,lread_land_sea,lset_oro
   use read_write_grid,    only: write_grid,read_oro,read_land_sea
   use set_initial_state,  only: bg_temp,bg_pres,geopot
   use bc_nml,             only: lperiodic
@@ -327,13 +327,9 @@ module grid_generator
       case(1)
         if (lread_oro) then
           call read_oro(grid)
-        else
-          !$OMP PARALLEL
-          !$OMP WORKSHARE
-          ! interpolation will be implemented later at this point
-          grid%z_w(:,:,nlays+1) = 0._wp
-          !$OMP END WORKSHARE
-          !$OMP END PARALLEL
+        elseif (lset_oro) then
+          call set_orography(grid)
+          call smooth_hor_scalar(grid%z_w(:,:,nlays+1))
         endif
       
       ! Schaer orography
@@ -868,6 +864,78 @@ module grid_generator
     call grad(grid%exner_bg,grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
   
   end subroutine bg_setup
+  
+  subroutine set_orography(grid)
+  
+    ! This subroutine interpolates the real orography.
+    
+    type(t_grid), intent(inout) :: grid
+    
+    grid%z_w(:,:,nlays+1) = 0._wp
+  
+  end subroutine set_orography
+  
+  subroutine smooth_hor_scalar(array)
+  
+    ! This subroutine smoothes a scalar field on one layer.
+    
+    real(wp), intent(inout) :: array(nlins,ncols)
+    
+    ! local variables
+    real(wp) :: original_array(nlins,ncols) ! the unsmoothed input array
+    integer  :: ji,jk                       ! loop indices
+    
+    ! copying the original array
+    original_array = array
+    
+    ! inner domin
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
+    do ji=2,nlins-1
+      do jk=2,ncols-1
+        array(ji,jk) = sum(original_array(ji-1:ji+1,jk-1:jk+1))/9._wp
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! corners
+    array(1,1) = sum(original_array(1:2,1:2))/4._wp
+    array(1,ncols) = sum(original_array(1:2,ncols-1:ncols))/4._wp
+    array(nlins,1) = sum(original_array(nlins-1:nlins,1:2))/4._wp
+    array(nlins,ncols) = sum(original_array(nlins-1:nlins,ncols-1:ncols))/4._wp
+  
+    ! boundaries
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jk)
+    do jk=2,ncols-1
+      array(1,jk) = sum(original_array(1:2,jk-1:jk+1))/6._wp
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jk)
+    do jk=2,ncols-1
+      array(nlins,jk) = sum(original_array(nlins-1:nlins,jk-1:jk+1))/6._wp
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji)
+    do ji=2,nlins-1
+      array(ji,1) = sum(original_array(ji-1:ji+1,1:2))/6._wp
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji)
+    do ji=2,nlins-1
+      array(ji,ncols) = sum(original_array(ji-1:ji+1,ncols-1:ncols))/6._wp
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+  
+  end subroutine smooth_hor_scalar
   
   function patch_area(center_lat,dx_as_angle,dy_as_angle)
   

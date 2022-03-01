@@ -39,3 +39,17 @@ EOF
 
 # That's it, here we go.
 source $lgame_home_dir/run_scripts/.sh/root_script.sh
+
+
+
+
+
+
+
+
+
+
+
+
+
+

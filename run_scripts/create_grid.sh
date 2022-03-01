@@ -43,9 +43,23 @@ lrad=.false.
 lread_oro=.false.
 lwrite_grid=.true.
 lread_land_sea=.true.
+lset_oro=.true.
 /
 
 EOF
 
 # That's it, here we go.
 source $lgame_home_dir/run_scripts/.sh/root_script.sh
+
+
+
+
+
+
+
+
+
+
+
+
+

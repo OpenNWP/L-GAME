@@ -8,6 +8,7 @@ module boundaries
   use definitions, only: t_bc,wp
   use run_nml,     only: nlins,ncols
   use bc_nml,      only: n_swamp
+  use constants,   only: M_PI
 
   implicit none
   
@@ -52,6 +53,7 @@ module boundaries
       do jk=1,ncols
         dist_from_boundary = min(ji-1,jk-1,nlins-ji,ncols-jk)
         bc%scalar_bc_factor(ji,jk) = max(1._wp - dist_from_boundary/n_swamp,0._wp)
+        bc%scalar_bc_factor(ji,jk) = sin(0.5_wp*M_PI*bc%scalar_bc_factor(ji,jk))**2
       enddo
     enddo
     !$OMP END DO
@@ -64,6 +66,7 @@ module boundaries
       do jk=1,ncols+1
         dist_from_boundary = min(ji-1,jk-1,nlins-ji,ncols+1-jk)
         bc%u_bc_factor(ji,jk) = max(1._wp - dist_from_boundary/n_swamp,0._wp)
+        bc%u_bc_factor(ji,jk) = sin(0.5_wp*M_PI*bc%u_bc_factor(ji,jk))**2
       enddo
     enddo
     !$OMP END DO
@@ -76,6 +79,7 @@ module boundaries
       do jk=1,ncols
         dist_from_boundary = min(ji-1,jk-1,nlins+1-ji,ncols-jk)
         bc%v_bc_factor(ji,jk) = max(1._wp - dist_from_boundary/n_swamp,0._wp)
+        bc%v_bc_factor(ji,jk) = sin(0.5_wp*M_PI*bc%v_bc_factor(ji,jk))**2
       enddo
     enddo
     !$OMP END DO

@@ -27,6 +27,10 @@ sigma=1.0
 &diff
 lmom_diff_h=.false.
 lmom_diff_v=.false.
+ltemp_diff_h=.false.
+ltemp_diff_v=.false.
+ltracer_diff_h=.false.
+ltracer_diff_v=.false.
 /
 
 &constituents
@@ -57,3 +61,15 @@ EOF
 
 # That's it, here we go.
 source $lgame_home_dir/run_scripts/.sh/root_script.sh
+
+
+
+
+
+
+
+
+
+
+
+

@@ -17,8 +17,10 @@ module io_nml
   character(len=64) :: restart_filename  ! filename from which to read the inital state in case restart mode is on
   logical           :: lread_land_sea    ! switch for reading the land-sea mask
   character(len=64) :: land_sea_filename ! filename of the land-sea mask
+  logical           :: lset_oro          ! switch for setting the orography
   
-  namelist /io/dt_write_min,lread_oro,lwrite_grid,grid_filename,restart_filename,lread_land_sea,land_sea_filename
+  namelist /io/dt_write_min,lread_oro,lwrite_grid,grid_filename,restart_filename,lread_land_sea,land_sea_filename, &
+  lset_oro
 
   contains
 
@@ -34,6 +36,7 @@ module io_nml
     restart_filename = "init.nc"
     lread_land_sea = .true.
     land_sea_filename = "is_land.nc"
+    lset_oro = .false.
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
@@ -43,6 +46,12 @@ module io_nml
     
     ! calculating the output timestep in seconds
     dt_write = 60._wp*dt_write_min
+    
+    ! sanity check
+    if (lset_oro .and. lread_oro) then
+      write(*,*) "Error: lset_oro and lread_oro cannot both be true at the same time."
+      call exit(1)
+    endif
   
   end subroutine io_nml_setup
   
