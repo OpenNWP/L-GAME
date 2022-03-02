@@ -185,7 +185,11 @@ module definitions
     ! type cotaining irreversible quantities
     real(wp), allocatable :: tke(:,:,:)                       ! specific turbulent kinetic energy
     real(wp), allocatable :: viscosity_molecular(:,:,:)       ! molecular diffusion coefficient
-    real(wp), allocatable :: viscosity_coeff(:,:,:)           ! efficient viscosity (Eddies + molecular)
+    real(wp), allocatable :: viscosity_coeff_div(:,:,:)       ! efficient viscosity acting on divergent movements (Eddies + molecular)
+    real(wp), allocatable :: viscosity_coeff_curl(:,:,:)      ! efficient viscosity acting on rotational movements (Eddies + molecular)
+    real(wp), allocatable :: viscosity_coeff_curl_dual(:,:,:) ! efficient viscosity acting on rotational movements at vertical vorticity points (Eddies + molecular)
+    real(wp), allocatable :: scalar_diff_coeff_h(:,:,:)       ! efficient horizontal viscosity acting on scalars
+    real(wp), allocatable :: scalar_diff_coeff_v(:,:,:)       ! efficient vertical viscosity acting on scalars
     real(wp), allocatable :: mom_diff_tend_x(:,:,:)           ! tendency due to momentum diffusion in x-direction
     real(wp), allocatable :: mom_diff_tend_y(:,:,:)           ! tendency due to momentum diffusion in y-direction
     real(wp), allocatable :: mom_diff_tend_z(:,:,:)           ! tendency due to momentum diffusion in z-direction

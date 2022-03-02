@@ -40,7 +40,7 @@ module momentum_diff_diss
     call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
     
     ! multiplying the divergence by the diffusion coefficient acting on divergent movements
-    call scalar_times_scalar(irrev%viscosity_coeff,diag%scalar_placeholder,diag%scalar_placeholder)
+    call scalar_times_scalar(irrev%viscosity_coeff_div,diag%scalar_placeholder,diag%scalar_placeholder)
     
     ! calculating the horizontal gradient of the divergence
     call grad_hor(diag%scalar_placeholder,irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)

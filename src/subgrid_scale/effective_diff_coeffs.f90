@@ -40,7 +40,7 @@ module effective_diff_coeffs
     integer :: ji,jk,jl ! loop indices
     
     ! computing the Eddy viscosity
-    irrev%viscosity_coeff = diff_h_smag_div*grid%mean_velocity_area*abs(divergence_h)
+    irrev%viscosity_coeff_div = diff_h_smag_div*grid%mean_velocity_area*abs(divergence_h)
     
     ! calculation of the molecular diffusion coefficient
     !$OMP PARALLEL
@@ -57,10 +57,10 @@ module effective_diff_coeffs
     !$OMP END PARALLEL
     
     ! adding the molecular diffusion coefficient
-    irrev%viscosity_coeff = irrev%viscosity_molecular + irrev%viscosity_coeff
+    irrev%viscosity_coeff_div = irrev%viscosity_molecular + irrev%viscosity_coeff_div
     
     ! restricting the values to a maximum to ensure stability
-    irrev%viscosity_coeff = min(irrev%viscosity_coeff,irrev%max_diff_h_coeff_turb)
+    irrev%viscosity_coeff_div = min(irrev%viscosity_coeff_div,irrev%max_diff_h_coeff_turb)
   
   end subroutine hori_div_viscosity
   

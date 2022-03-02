@@ -362,8 +362,16 @@ program control
   irrev%tke = 0._wp
   allocate(irrev%viscosity_molecular(nlins,ncols,nlays))
   irrev%viscosity_molecular = 0._wp
-  allocate(irrev%viscosity_coeff(nlins,ncols,nlays))
-  irrev%viscosity_coeff = 0._wp
+  allocate(irrev%viscosity_coeff_div(nlins,ncols,nlays))
+  irrev%viscosity_coeff_div = 0._wp
+  allocate(irrev%viscosity_coeff_curl(nlins,ncols,nlays))
+  irrev%viscosity_coeff_div = 0._wp
+  allocate(irrev%viscosity_coeff_curl_dual(nlins+1,ncols+1,nlays))
+  irrev%viscosity_coeff_div = 0._wp
+  allocate(irrev%scalar_diff_coeff_h(nlins,ncols,nlays))
+  irrev%scalar_diff_coeff_h = 0._wp
+  allocate(irrev%scalar_diff_coeff_v(nlins,ncols,nlays))
+  irrev%scalar_diff_coeff_v = 0._wp
   allocate(irrev%mom_diff_tend_x(nlins,ncols+1,nlays))
   irrev%mom_diff_tend_x = 0._wp
   allocate(irrev%mom_diff_tend_y(nlins+1,ncols,nlays))
@@ -603,7 +611,11 @@ program control
   ! type containing irreversible quantities
   deallocate(irrev%tke)
   deallocate(irrev%viscosity_molecular)
-  deallocate(irrev%viscosity_coeff)
+  deallocate(irrev%viscosity_coeff_div)
+  deallocate(irrev%viscosity_coeff_curl)
+  deallocate(irrev%viscosity_coeff_curl_dual)
+  deallocate(irrev%scalar_diff_coeff_h)
+  deallocate(irrev%scalar_diff_coeff_v)
   deallocate(irrev%mom_diff_tend_x)
   deallocate(irrev%mom_diff_tend_y)
   deallocate(irrev%mom_diff_tend_z)
