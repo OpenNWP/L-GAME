@@ -56,7 +56,7 @@ module divergence_operators
           elseif (jl==nlays) then
             contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
             comp_v = contra_upper*grid%area_z(ji,jk,jl)
-          elseif (jl>nlays-nlays_oro-1) then
+          elseif (jl>nlays-nlays_oro) then
             contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
             contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
             comp_v &

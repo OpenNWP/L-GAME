@@ -35,9 +35,13 @@ module pressure_gradient
   
     ! saving the old pressure gradient acceleration before it is overwritten with the new one
     if (.not. lfirst) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - diag%p_grad_acc_neg_l_u
       diag%p_grad_acc_old_v = -diag%p_grad_acc_neg_nl_v - diag%p_grad_acc_neg_l_v
       diag%p_grad_acc_old_w = -diag%p_grad_acc_neg_nl_w - diag%p_grad_acc_neg_l_w
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
     endif
     
     ! the nonlinear pressure gradient term
@@ -56,9 +60,13 @@ module pressure_gradient
     
     ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
     if (lfirst) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - diag%p_grad_acc_neg_l_u
       diag%p_grad_acc_old_v = -diag%p_grad_acc_neg_nl_v - diag%p_grad_acc_neg_l_v
       diag%p_grad_acc_old_w = -diag%p_grad_acc_neg_nl_w - diag%p_grad_acc_neg_l_w
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
     endif
     
   end subroutine manage_pressure_gradient

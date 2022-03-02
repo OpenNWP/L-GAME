@@ -222,7 +222,7 @@ module planetary_boundary_layer
     denominator = log(agl/roughness_length_value)
 
     ! security
-    if (abs(denominator) < EPSILON_SECURITY) then
+    if (abs(denominator)<EPSILON_SECURITY) then
       denominator = EPSILON_SECURITY
     endif
 
