@@ -22,6 +22,7 @@ run_span_hr=10
 scenario="schaer"
 lcorio=.false.
 sigma=1.0
+lplane=.true.
 /
 
 &diff

@@ -30,6 +30,7 @@ module run_nml
   logical           :: lrestart            ! switch for restart runs
   logical           :: lcorio              ! switch for the Coriolis force
   logical           :: lideal              ! switch for analytic test cases
+  logical           :: lplane              ! plane geometry switch
   character(len=64) :: scenario            ! scenario for ideal runs
   character(len=64) :: run_id              ! ID of the model run
   logical           :: llinear             ! switch to turn momentum advection on or off
@@ -41,7 +42,7 @@ module run_nml
   
   namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr,sigma, &
   toa,scenario,llinear,run_id,lcorio,nlays_oro,lat_center,lon_center, &
-  start_year,start_month,start_day,start_hour,start_minute
+  start_year,start_month,start_day,start_hour,start_minute,lplane
 
   contains
 
@@ -67,6 +68,7 @@ module run_nml
     sigma = 1.3_wp
     lrestart = .false.
     lideal = .true.
+    lplane = .false.
     scenario = "standard"
     run_id = "ideal"
     llinear = .false.

@@ -8,7 +8,7 @@ module grid_generator
   use netcdf
   use definitions,        only: wp,t_grid
   use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
-                                lon_center
+                                lon_center,lplane
   use constants,          only: re,density_water,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv
   use surface_nml,        only: nsoillays,orography_id
@@ -531,6 +531,8 @@ module grid_generator
     call grad_hor_cov(grid%z_scalar,grid%slope_x,grid%slope_y,grid)
     
     ! setting the z coordinates of the vertical vector points
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
     do jl=1,nlays
       if (jl==1) then
         grid%z_w(:,:,jl) = toa
@@ -538,8 +540,12 @@ module grid_generator
         grid%z_w(:,:,jl) = 0.5_wp*(grid%z_scalar(:,:,jl-1) + grid%z_scalar(:,:,jl))
       endif
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! setting the vertical distances between the scalar data points
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
     do jl=1,nlays+1
       if (jl==1) then
         grid%dz(:,:,jl) = 2._wp*(toa - grid%z_scalar(:,:,jl))
@@ -549,19 +555,38 @@ module grid_generator
         grid%dz(:,:,jl) = grid%z_scalar(:,:,jl-1) - grid%z_scalar(:,:,jl)
       endif
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! setting the horizontal areas at the surface
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins
       do jk=1,ncols
         grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(re + grid%z_w(ji,jk,nlays+1))**2/re**2
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
 
     ! setting the horizontal areas at the higher points (above the surface)
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
     do jl=1,nlays
       grid%area_z(:,:,jl) = grid%area_z(:,:,nlays+1)*(re + grid%z_w(:,:,jl))**2 &
       /(re + grid%z_w(:,:,nlays+1))**2
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! plane geometry horizontal areas
+    if (lplane) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      grid%area_z(:,:,:) = dx*dy
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+    endif
     
     ! the mean velocity area can be set now
     grid%mean_velocity_area = 2._wp*sum(grid%area_z(:,:,nlays+1))/size(grid%area_z(:,:,nlays+1))
@@ -732,6 +757,10 @@ module grid_generator
     do jl=1,nlays
       grid%volume(:,:,jl) = 1._wp/3._wp*((re + grid%z_w(:,:,jl))**3 - (re + grid%z_w(:,:,jl+1))**3) &
       /(re + grid%z_w(:,:,jl+1))**2*grid%area_z(:,:,jl+1)
+      ! plane geometry
+      if (lplane) then
+        grid%volume(:,:,jl) = grid%area_z(:,:,jl+1)*(grid%z_w(:,:,jl) - grid%z_w(:,:,jl+1))
+      endif
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
@@ -1055,6 +1084,11 @@ module grid_generator
   
     ! computing the result
     patch_area = re**2*dx_as_angle*(sin(center_lat + 0.5_wp*dy_as_angle) - sin(center_lat - 0.5_wp*dy_as_angle))
+    
+    ! plane geometry
+    if (lplane) then
+      patch_area = re**2*dx_as_angle*dy_as_angle
+    endif
   
   end function patch_area
   
@@ -1071,6 +1105,11 @@ module grid_generator
     
     vertical_face_area = 0.5_wp*lower_length*(re + upper_z + re + lower_z) &
     /(re + lower_z)*(upper_z - lower_z)
+    
+    ! plane geometry
+    if (lplane) then
+      vertical_face_area = lower_length*(upper_z - lower_z)
+    endif
   
   end function vertical_face_area
   
