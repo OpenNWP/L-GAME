@@ -28,20 +28,6 @@ module grid_generator
   public :: grid_setup
   public :: bg_setup
   
-  interface
-    ! interface to the geos95 library
-    real(C_DOUBLE) function calculate_distance_h(latitude_a,longitude_a,latitude_b,longitude_b,radius) &
-    bind(c, name = "calculate_distance_h")
-      use, intrinsic::iso_c_binding
-      implicit none
-      real(C_DOUBLE), value :: latitude_a
-      real(C_DOUBLE), value :: longitude_a
-      real(C_DOUBLE), value :: latitude_b
-      real(C_DOUBLE), value :: longitude_b
-      real(C_DOUBLE), value :: radius
-    end function calculate_distance_h
-  end interface
-  
   contains
   
   subroutine grid_setup(grid)
@@ -345,12 +331,10 @@ module grid_generator
         height_mountain = 250._wp
         sigma_mountain = 5000._wp/sqrt(2._wp)
         !$OMP PARALLEL
-        !$OMP DO PRIVATE(ji,jk,x_coord)
-        do ji=1,nlins
-          do jk=1,ncols
-            x_coord = calculate_distance_h(0._wp,grid%lon_scalar(jk),0._wp,0._wp,re)
-            grid%z_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))*cos(M_PI*x_coord/4000._wp)**2
-          enddo
+        !$OMP DO PRIVATE(jk,x_coord)
+        do jk=1,ncols
+          x_coord = dx*jk - (ncols/2 + 1)
+          grid%z_w(:,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))*cos(M_PI*x_coord/4000._wp)**2
         enddo
         !$OMP END DO
         !$OMP END PARALLEL
