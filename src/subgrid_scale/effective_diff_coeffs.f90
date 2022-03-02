@@ -116,7 +116,7 @@ module effective_diff_coeffs
     real(wp) :: c_g_v    ! specific heat capacity
     
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
-    if (lmom_diff_h) then
+    if (.not. lmom_diff_h) then
     
       call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
       call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)

@@ -357,6 +357,14 @@ program control
   diag%sfc_lw_out = 0._wp
   allocate(diag%roughness_velocity(nlins,ncols))
   diag%roughness_velocity = 0._wp
+  allocate(diag%flux_density_u(nlins,ncols+1,nlays))
+  diag%flux_density_u = 0._wp
+  allocate(diag%flux_density_v(nlins+1,ncols,nlays))
+  diag%flux_density_v = 0._wp
+  allocate(diag%flux_density_w(nlins,ncols,nlays+1))
+  diag%flux_density_w = 0._wp
+  allocate(diag%flux_density_div(nlins,ncols,nlays))
+  diag%flux_density_div = 0._wp
   ! type containing irreversible quantities
   allocate(irrev%tke(nlins,ncols,nlays))
   irrev%tke = 0._wp
@@ -365,9 +373,9 @@ program control
   allocate(irrev%viscosity_coeff_div(nlins,ncols,nlays))
   irrev%viscosity_coeff_div = 0._wp
   allocate(irrev%viscosity_coeff_curl(nlins,ncols,nlays))
-  irrev%viscosity_coeff_div = 0._wp
+  irrev%viscosity_coeff_curl = 0._wp
   allocate(irrev%viscosity_coeff_curl_dual(nlins+1,ncols+1,nlays))
-  irrev%viscosity_coeff_div = 0._wp
+  irrev%viscosity_coeff_curl_dual = 0._wp
   allocate(irrev%scalar_diff_coeff_h(nlins,ncols,nlays))
   irrev%scalar_diff_coeff_h = 0._wp
   allocate(irrev%scalar_diff_coeff_v(nlins,ncols,nlays))
@@ -384,6 +392,8 @@ program control
   irrev%mass_source_rates = 0._wp
   allocate(irrev%heat_source_rates(nlins,ncols,nlays,no_of_condensed_constituents))
   irrev%heat_source_rates = 0._wp
+  allocate(irrev%temp_diff_heating(nlins,ncols,nlays))
+  irrev%temp_diff_heating = 0._wp
   write(*,*) "... finished."
   
   ! firstly, the grid generator needs to be called to calculate the grid properties
@@ -608,6 +618,10 @@ program control
   deallocate(diag%sfc_sw_in)
   deallocate(diag%sfc_lw_out)
   deallocate(diag%roughness_velocity)
+  deallocate(diag%flux_density_u)
+  deallocate(diag%flux_density_v)
+  deallocate(diag%flux_density_w)
+  deallocate(diag%flux_density_div)
   ! type containing irreversible quantities
   deallocate(irrev%tke)
   deallocate(irrev%viscosity_molecular)
@@ -622,6 +636,7 @@ program control
   deallocate(irrev%heating_diss)
   deallocate(irrev%mass_source_rates)
   deallocate(irrev%heat_source_rates)
+  deallocate(irrev%temp_diff_heating)
   write(*,*) "... finished."
   write(*,*) "L-GAME over."
   

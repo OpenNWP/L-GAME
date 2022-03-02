@@ -1,17 +1,20 @@
-! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
+! This source file is part of the Limited-area GAME version (L-GAME),which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module explicit_scalar_tendencies
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
-  use definitions,          only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
-  use multiplications,      only: scalar_times_vector_h
-  use divergence_operators, only: divv_h
-  use run_nml,              only: dtime
-  use phase_trans,          only: calc_h2otracers_source_rates
-  use constituents_nml,     only: no_of_condensed_constituents,no_of_constituents,lassume_lte
-  use dictionary,           only: spec_heat_capacities_p_gas
+  use definitions,           only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
+  use multiplications,       only: scalar_times_vector_h,scalar_times_vector_v
+  use divergence_operators,  only: divv_h,add_vertical_div
+  use run_nml,               only: dtime
+  use phase_trans,           only: calc_h2otracers_source_rates
+  use constituents_nml,      only: no_of_condensed_constituents,no_of_constituents,lassume_lte
+  use dictionary,            only: spec_heat_capacities_p_gas
+  use diff_nml,              only: ltemp_diff_h,ltemp_diff_v
+  use effective_diff_coeffs, only: temp_diffusion_coeffs
+  use gradient_operators,    only: grad
 
   implicit none
   
@@ -50,6 +53,24 @@ module explicit_scalar_tendencies
       old_weight(j_constituent) = 1._wp - new_weight(j_constituent)
     enddo
     
+    ! Temperature diffusion gets updated here,but only at the first RK step and if heat conduction is switched on.
+    if (ltemp_diff_h) then
+      ! Now we need to calculate the temperature diffusion coefficients.
+      call temp_diffusion_coeffs(state,diag,irrev,grid)
+      ! The diffusion of the temperature depends on its gradient.
+      call grad(diag%temperature_gas,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
+      ! Now the diffusive temperature flux density can be obtained.
+      call scalar_times_vector_h(irrev%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
+      diag%flux_density_u,diag%flux_density_v)
+      ! The divergence of the diffusive temperature flux density is the diffusive temperature heating.
+      call divv_h(diag%flux_density_u,diag%flux_density_v,irrev%temp_diff_heating,grid)
+      ! vertical temperature diffusion
+      if (ltemp_diff_v) then
+        call scalar_times_vector_v(irrev%scalar_diff_coeff_v,diag%w_placeholder,diag%flux_density_w)
+        call add_vertical_div(diag%flux_density_w,irrev%temp_diff_heating,grid)
+      endif
+    endif
+    
     ! loop over all constituents
     do j_constituent=1,no_of_constituents
     
@@ -72,7 +93,7 @@ module explicit_scalar_tendencies
       ! calculating the potential temperature density flux
       if (j_constituent == no_of_condensed_constituents+1) then
         diag%scalar_placeholder = grid%theta_bg + state%theta_pert
-        call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder, &
+        call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder,&
         diag%u_placeholder,diag%v_placeholder)
         ! calculating the divergence of the potential temperature flux density
         call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
@@ -81,7 +102,8 @@ module explicit_scalar_tendencies
         !$OMP WORKSHARE
         tend%rhotheta = -diag%scalar_placeholder &
         ! diabatic heating rates
-        + (irrev%heating_diss + diag%radiation_tendency + sum(irrev%heat_source_rates,dim=4)) &
+        + (irrev%heating_diss + diag%radiation_tendency + sum(irrev%heat_source_rates,dim=4) &
+        + irrev%temp_diff_heating) &
         /(c_p*(grid%exner_bg+state%exner_pert))
         !$OMP END WORKSHARE
         !$OMP END PARALLEL
@@ -91,7 +113,7 @@ module explicit_scalar_tendencies
       ! explicit temperature density integration for condensates
       ! --------------------------------------------------------
       if (j_constituent<=no_of_condensed_constituents .and. (.not. lassume_lte)) then
-        call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v, &
+        call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v,&
         diag%u_placeholder,diag%v_placeholder)
         call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
         
@@ -112,10 +134,10 @@ module explicit_scalar_tendencies
   
     ! This subroutine manages the calculation of the phase transition rates.
     
-    type(t_state), intent(inout) :: state ! the state with which to calculate the phase transition rates
-    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_irrev), intent(inout) :: irrev ! irreversible quantities (phase transitions are irreversible)
-    type(t_grid),  intent(in)    :: grid  ! grid properties
+    type(t_state),intent(inout) :: state ! the state with which to calculate the phase transition rates
+    type(t_diag), intent(inout) :: diag  ! diagnostic quantities
+    type(t_irrev),intent(inout) :: irrev ! irreversible quantities (phase transitions are irreversible)
+    type(t_grid), intent(in)    :: grid  ! grid properties
       
     if (no_of_constituents>1) then
     

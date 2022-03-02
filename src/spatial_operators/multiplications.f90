@@ -16,6 +16,7 @@ module multiplications
   public :: scalar_times_scalar
   public :: scalar_times_vector_h
   public :: scalar_times_vector
+  public :: scalar_times_vector_v
   
   contains
 

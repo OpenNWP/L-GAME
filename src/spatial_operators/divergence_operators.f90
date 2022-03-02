@@ -14,6 +14,7 @@ module divergence_operators
   private
   
   public :: divv_h
+  public :: add_vertical_div
   
   contains
 
@@ -73,6 +74,43 @@ module divergence_operators
     !$OMP END PARALLEL
 
   end subroutine divv_h
+  
+  subroutine add_vertical_div(in_field,out_field,grid)
+
+    ! This subroutine adds the divergence of the vertical component of a vector field to the input scalar field.	
+
+    real(wp), intent(in)     :: in_field(:,:,:)
+    real(wp), intent(inout)  :: out_field(:,:,:)
+    type(t_grid), intent(in) :: grid
+
+    !local variables
+    integer  :: ji,jk,jl ! loop indices
+    real(wp) :: contra_upper,contra_lower,comp_v
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,contra_upper,contra_lower,comp_v)
+    do ji=1,nlins
+      do jk=1,ncols
+        do jl=1,nlays
+          if (jl==0) then
+            contra_upper = 0._wp
+            contra_lower = in_field(ji,jk,jl+1)
+          elseif (jl==nlays) then
+            contra_upper = in_field(ji,jk,jl)
+            contra_lower = 0._wp
+          else
+            contra_upper = in_field(ji,jk,jl)
+            contra_lower = in_field(ji,jk,jl+1)
+          endif
+          comp_v = contra_upper*grid%area_z(ji,jk,jl) - contra_lower*grid%area_z(ji,jk,jl+1)
+          out_field(ji,jk,jl) = out_field(ji,jk,jl) + 1._wp/grid%volume(ji,jk,jl)*comp_v
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+  end subroutine add_vertical_div
 
 end module divergence_operators
 
