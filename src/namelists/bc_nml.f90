@@ -13,8 +13,9 @@ module bc_nml
   integer  :: n_swamp   ! thickness of the swamp layer
   logical  :: lperiodic ! periodic boundary conditions switch
   real(wp) :: dtime_bc  ! timestep for the boundary conditions update
+  logical  :: lyrigid   ! switch for a rigid wall in y-direction
   
-  namelist /bc/n_swamp,lperiodic,dtime_bc
+  namelist /bc/n_swamp,lperiodic,dtime_bc,lyrigid
   
   contains
   
@@ -27,6 +28,7 @@ module bc_nml
     n_swamp = 5
     lperiodic = .false.
     dtime_bc = 10800._wp
+    lyrigid = .false.
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
