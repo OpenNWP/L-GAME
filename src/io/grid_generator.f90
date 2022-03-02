@@ -333,7 +333,7 @@ module grid_generator
         !$OMP PARALLEL
         !$OMP DO PRIVATE(jk,x_coord)
         do jk=1,ncols
-          x_coord = dx*jk - (ncols/2 + 1)
+          x_coord = dx*jk - (ncols/2 + 1)*dx
           grid%z_w(:,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))*cos(M_PI*x_coord/4000._wp)**2
         enddo
         !$OMP END DO
