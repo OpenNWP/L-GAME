@@ -7,7 +7,7 @@ module explicit_scalar_tendencies
 
   use definitions,           only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
   use multiplications,       only: scalar_times_vector_h,scalar_times_vector_v
-  use divergence_operators,  only: divv_h,add_vertical_div
+  use divergence_operators,  only: div_h,div_h_limited,add_vertical_div
   use run_nml,               only: dtime
   use phase_trans,           only: calc_h2otracers_source_rates
   use constituents_nml,      only: no_of_condensed_constituents,no_of_constituents,lassume_lte
@@ -63,7 +63,7 @@ module explicit_scalar_tendencies
       call scalar_times_vector_h(irrev%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
       diag%flux_density_u,diag%flux_density_v)
       ! The divergence of the diffusive temperature flux density is the diffusive temperature heating.
-      call divv_h(diag%flux_density_u,diag%flux_density_v,irrev%temp_diff_heating,grid)
+      call div_h(diag%flux_density_u,diag%flux_density_v,irrev%temp_diff_heating,grid)
       ! vertical temperature diffusion
       if (ltemp_diff_v) then
         call scalar_times_vector_v(irrev%scalar_diff_coeff_v,diag%w_placeholder,diag%flux_density_w)
@@ -79,8 +79,12 @@ module explicit_scalar_tendencies
       ! calculating the mass flux density
       call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
       ! calculating the divergence of the mass flux density
-      call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
-  
+      if (j_constituent==no_of_condensed_constituents+1) then
+        call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+      else
+        call div_h_limited(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+      endif
+      
       !$OMP PARALLEL
       !$OMP WORKSHARE
       tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
@@ -96,7 +100,7 @@ module explicit_scalar_tendencies
         call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder,&
         diag%u_placeholder,diag%v_placeholder)
         ! calculating the divergence of the potential temperature flux density
-        call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+        call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
         
         !$OMP PARALLEL
         !$OMP WORKSHARE
@@ -115,7 +119,7 @@ module explicit_scalar_tendencies
       if (j_constituent<=no_of_condensed_constituents .and. (.not. lassume_lte)) then
         call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v,&
         diag%u_placeholder,diag%v_placeholder)
-        call divv_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+        call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
         
         !$OMP PARALLEL
         !$OMP WORKSHARE

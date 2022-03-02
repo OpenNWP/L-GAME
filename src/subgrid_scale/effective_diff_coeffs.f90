@@ -11,7 +11,7 @@ module effective_diff_coeffs
   use derived_quantities,   only: calc_diffusion_coeff
   use constituents_nml,     only: no_of_condensed_constituents
   use tke,                  only: tke_update
-  use divergence_operators, only: divv_h
+  use divergence_operators, only: div_h
   use derived_quantities,   only: density_gas,spec_heat_cap_diagnostics_v
   
   implicit none
@@ -118,7 +118,7 @@ module effective_diff_coeffs
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h) then
     
-      call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
+      call div_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
       call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
       call hori_curl_viscosity(state,diag,irrev,grid)
       call tke_update(state,diag,irrev,grid)
@@ -181,7 +181,7 @@ module effective_diff_coeffs
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
     
-      call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
+      call div_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
       call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
       call hori_curl_viscosity(state,diag,irrev,grid)
       call tke_update(state,diag,irrev,grid)

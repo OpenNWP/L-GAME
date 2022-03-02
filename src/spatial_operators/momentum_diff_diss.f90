@@ -6,7 +6,7 @@ module momentum_diff_diss
   ! This module handles momentum diffusion and dissipation.
   
   use definitions,           only: t_grid,t_diag,t_irrev,t_state
-  use divergence_operators,  only: divv_h
+  use divergence_operators,  only: div_h
   use gradient_operators,    only: grad_hor
   use run_nml,               only: nlins,ncols,nlays
   use inner_product,         only: inner
@@ -34,7 +34,7 @@ module momentum_diff_diss
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! calculating the divergence of the horizontal wind field
-    call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
+    call div_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
     
     ! computing the relevant diffusion coefficient
     call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
