@@ -54,9 +54,13 @@ module set_initial_state
       
         ! This test case is the standard atmosphere.
       
-        ! There is no horizontal wind in this case.
+        ! There is no horizontal wind in this case
+        !$OMP PARALLEL
+        !$OMP WORKSHARE
         state%wind_u = 0._wp
         state%wind_v = 0._wp
+        !$OMP END WORKSHARE
+        !$OMP END PARALLEL
         
         !$OMP PARALLEL
         !$OMP DO PRIVATE(ji,jk,jl)
@@ -75,8 +79,12 @@ module set_initial_state
       
         ! Schär et al. (2001): A New Terrain-Following Vertical Coordinate Formulation for Atmospheric Prediction Models
         
+        !$OMP PARALLEL
+        !$OMP WORKSHARE
         state%wind_u = 18.71_wp
         state%wind_v = 0._wp
+        !$OMP END WORKSHARE
+        !$OMP END PARALLEL
        
         n_squared = (0.01871_wp)**2
         T_0 = 273.16_wp
@@ -135,18 +143,24 @@ module set_initial_state
     endselect
     
     ! humidity
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     state%rho(:,:,:,no_of_constituents) = 0._wp
-    
     ! condensates
     state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
     state%condensed_rho_t = 0._wp
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     
-    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk)
     do ji=1,nlins
       do jk=1,ncols
         state%temperature_soil(ji,jk,:) = 280._wp
       enddo
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     call unessential_init(state,diag,grid,pres_lowest_layer)
     

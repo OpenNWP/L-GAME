@@ -157,9 +157,13 @@ module vorticities
     if (.not. llinear) then
       call rel_vort(state,diag,grid)
     else
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       diag%eta_x = 0._wp
       diag%eta_y = 0._wp
       diag%eta_z = 0._wp
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
     endif
     
     ! adding the Coriolis vector to the relative vorticity to obtain the absolute vorticity
@@ -182,7 +186,6 @@ module vorticities
     endif
     
     ! dividing by the averaged density to obtain the "potential vorticity"
-    
     ! horizontal vorticity in x-direction
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
@@ -371,13 +374,13 @@ module vorticities
       +state%rho(1,1,:,no_of_condensed_constituents+1) &
       +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
       diag%eta_z(1,ncols+1,:) = diag%eta_z(1,ncols+1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
-      +state%rho(1,ncols+1,:,no_of_condensed_constituents+1) &
+      +state%rho(1,1,:,no_of_condensed_constituents+1) &
       +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
       diag%eta_z(nlins+1,1,:) = diag%eta_z(nlins+1,1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
-      +state%rho(nlins+1,1,:,no_of_condensed_constituents+1) &
+      +state%rho(1,1,:,no_of_condensed_constituents+1) &
       +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
       diag%eta_z(nlins+1,ncols+1,:) = diag%eta_z(nlins+1,ncols+1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
-      +state%rho(nlins+1,ncols+1,:,no_of_condensed_constituents+1) &
+      +state%rho(1,1,:,no_of_condensed_constituents+1) &
       +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
     endif
     

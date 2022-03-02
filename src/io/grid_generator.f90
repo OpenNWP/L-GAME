@@ -345,10 +345,10 @@ module grid_generator
         height_mountain = 250._wp
         sigma_mountain = 5000._wp/sqrt(2._wp)
         !$OMP PARALLEL
-        !$OMP DO PRIVATE(ji,jk)
+        !$OMP DO PRIVATE(ji,jk,x_coord)
         do ji=1,nlins
           do jk=1,ncols
-            x_coord = calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk),0._wp,0._wp,re)
+            x_coord = calculate_distance_h(0._wp,grid%lon_scalar(jk),0._wp,0._wp,re)
             grid%z_w(ji,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))*cos(M_PI*x_coord/4000._wp)**2
           enddo
         enddo

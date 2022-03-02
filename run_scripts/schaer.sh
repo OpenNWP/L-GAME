@@ -22,7 +22,6 @@ run_span_hr=10
 scenario="schaer"
 lcorio=.false.
 sigma=1.0
-llinear=.true.
 /
 
 &diff
@@ -55,7 +54,7 @@ lrad=.false.
 &io
 lread_oro=.false.
 lread_land_sea=.false.
-dt_write_min=1
+dt_write_min=10
 /
 
 EOF
