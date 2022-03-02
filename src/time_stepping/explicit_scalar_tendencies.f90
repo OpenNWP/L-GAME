@@ -12,7 +12,7 @@ module explicit_scalar_tendencies
   use phase_trans,           only: calc_h2otracers_source_rates
   use constituents_nml,      only: no_of_condensed_constituents,no_of_constituents,lassume_lte
   use dictionary,            only: spec_heat_capacities_p_gas
-  use diff_nml,              only: ltemp_diff_h,ltemp_diff_v
+  use diff_nml,              only: ltemp_diff_h,ltemp_diff_v,ltracer_diff_h,ltracer_diff_v
   use effective_diff_coeffs, only: temp_diffusion_coeffs
   use gradient_operators,    only: grad
 
@@ -41,6 +41,7 @@ module explicit_scalar_tendencies
     real(wp) :: old_weight(no_of_constituents) ! time stepping weight
     real(wp) :: new_weight(no_of_constituents) ! time stepping weight
     real(wp) :: c_p                            ! as usual
+    integer  :: diff_switch                    ! diffusion switch
     
     c_p = spec_heat_capacities_p_gas(0)
     
@@ -84,11 +85,31 @@ module explicit_scalar_tendencies
       else
         call div_h_limited(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
       endif
+
+      ! mass diffusion, only for gaseous tracers
+      diff_switch = 0
+      if (j_constituent>no_of_condensed_constituents+1 .and. ltracer_diff_h) then
+        diff_switch = 1
+        ! firstly, we need to calculate the mass diffusion coeffcients
+        call temp_diffusion_coeffs(state,diag,irrev,grid)
+        ! The diffusion of the tracer density depends on its gradient.
+        call grad(state%rho(:,:,:,j_constituent),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
+        ! Now the diffusive mass flux density can be obtained.
+        call scalar_times_vector_h(irrev%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
+        diag%flux_density_u,diag%flux_density_v)
+        ! The divergence of the diffusive mass flux density is the diffusive mass source rate.
+        call div_h(diag%flux_density_u,diag%flux_density_v,diag%scalar_placeholder,grid)
+        ! vertical mass diffusion
+        if (ltracer_diff_v) then
+          call scalar_times_vector_v(irrev%scalar_diff_coeff_v,diag%w_placeholder,diag%flux_density_w)
+          call add_vertical_div(diag%flux_density_w,diag%scalar_placeholder,grid)
+        endif
+      endif
       
       !$OMP PARALLEL
       !$OMP WORKSHARE
       tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
-      + new_weight(j_constituent)*(-diag%scalar_placeholder)
+      + new_weight(j_constituent)*(-diag%scalar_placeholder)+diff_switch*diag%scalar_placeholder
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     
