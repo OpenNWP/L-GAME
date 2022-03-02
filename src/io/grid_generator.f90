@@ -527,6 +527,20 @@ module grid_generator
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     
+    ! plane geometry grid distances
+    if (lplane) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      grid%dx = dx
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      grid%dy = dy
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+    endif
+    
     ! calculating the coordinate slopes
     call grad_hor_cov(grid%z_scalar,grid%slope_x,grid%slope_y,grid)
     
