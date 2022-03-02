@@ -85,8 +85,8 @@ module manage_rkhevi
       if (lyrigid) then
         !$OMP PARALLEL
         !$OMP WORKSHARE
-        state_new%wind_v(1,:,:) = state_old%wind_v(1,:,:) + dtime*tend%wind_v(1,:,:)
-        state_new%wind_v(nlins+1,:,:) = state_old%wind_v(nlins+1,:,:) + dtime*tend%wind_v(nlins+1,:,:)
+        state_new%wind_v(1,:,:) = 0._wp
+        state_new%wind_v(nlins+1,:,:) = 0._wp
         !$OMP END WORKSHARE
         !$OMP END PARALLEL
       endif
