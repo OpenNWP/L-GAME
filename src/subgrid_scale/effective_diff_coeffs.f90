@@ -12,7 +12,7 @@ module effective_diff_coeffs
   use constituents_nml,     only: no_of_condensed_constituents
   use tke,                  only: tke_update
   use divergence_operators, only: divv_h
-  use derived_quantities,   only: density_gas
+  use derived_quantities,   only: density_gas,spec_heat_cap_diagnostics_v
   
   implicit none
   
@@ -101,9 +101,67 @@ module effective_diff_coeffs
   
   end subroutine vert_vert_mom_viscosity
   
-  subroutine temp_diffusion_coeffs()
+  subroutine temp_diffusion_coeffs(state,diag,irrev,grid)
   
-    ! This subroutine computes the viscous temperature diffusion coefficient (including eddies).
+    ! This function computes the viscous temperature diffusion coefficient (including eddies).
+  
+    ! input arguments and output
+    type(t_state), intent(in)    :: state ! state
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
+    
+    ! local variables
+    integer :: ji,jk,jl  ! looop variables
+    real(wp) :: c_g_v    ! specific heat capacity
+    
+    ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
+    if (lmom_diff_h) then
+    
+      call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
+      call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
+      call hori_curl_viscosity(state,diag,irrev,grid)
+      call tke_update(state,diag,irrev,grid)
+      
+      ! molecular viscosity
+      !$OMP PARALLEL
+      !$OMP DO PRIVATE(ji,jk,jl)
+      do ji=1,nlins
+        do jk=1,ncols
+          do jl=1,nlays
+            irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature_gas(ji,jk,jl), &
+            state%rho(ji,jk,jl,no_of_condensed_constituents+1))
+          enddo
+        enddo
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+    
+    endif
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,c_g_v)
+    do ji=1,nlins
+      do jk=1,ncols
+        do jl=1,nlays
+          c_g_v = spec_heat_cap_diagnostics_v(state,ji,jk,jl)
+          ! horizontal diffusion coefficient
+          irrev%scalar_diff_coeff_h(ji,jk,jl) &
+          ! molecular component
+          = c_g_v*(density_gas(state,ji,jk,jl)*irrev%viscosity_molecular(ji,jk,jl) &
+          ! turbulent component
+          + irrev%viscosity_coeff_div(ji,jk,jl) + irrev%viscosity_coeff_curl(ji,jk,jl))
+          ! vertical diffusion coefficient
+          irrev%scalar_diff_coeff_v(ji,jk,jl) &
+          ! molecular component
+          = density_gas(state,ji,jk,jl)*c_g_v*(irrev%viscosity_molecular(ji,jk,jl) &
+          ! turbulent component
+          + tke2vertical_diff_coeff(irrev%tke(ji,jk,jl)))
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
   end subroutine temp_diffusion_coeffs
   
@@ -121,7 +179,7 @@ module effective_diff_coeffs
     integer :: ji,jk,jl ! looop variables
     
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
-    if (lmom_diff_h .and. .not. ltemp_diff_h) then
+    if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
     
       call divv_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
       call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
