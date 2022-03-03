@@ -49,7 +49,7 @@ module momentum_diff_diss
     ! computing the relevant diffusion coefficient
     call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
     ! calculating the diffusion coefficient acting on rotational movements
-    call hori_curl_viscosity(diag,irrev,grid)
+    call hori_curl_viscosity(state,diag,irrev,grid)
     
     ! Computing the gradient of divergence component
     ! ----------------------------------------------
@@ -135,43 +135,55 @@ module momentum_diff_diss
     
     ! calculating the acceleration
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(jk,jl)
-    do jl=1,nlays
-      do jk=2,ncols
-        irrev%mom_diff_tend_x(:,jk,jl) = irrev%mom_diff_tend_x(:,jk,jl) &
-        + (irrev%vert_hor_viscosity_u(:,jk,jl)*diag%du_dz(:,jk,jl) - irrev%vert_hor_viscosity_u(:,jk,jl+1)*diag%du_dz(:,jk,jl+1)) &
-        /(0.5_wp*(grid%z_w(:,jk-1,jl) + grid%z_w(:,jk,jl) - grid%z_w(:,jk-1,jl+1) - grid%z_w(:,jk,jl+1)))
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do ji=1,nlins
+      do jl=1,nlays
+        do jk=2,ncols
+          irrev%mom_diff_tend_x(ji,jk,jl) = irrev%mom_diff_tend_x(ji,jk,jl) &
+          + (irrev%vert_hor_viscosity_u(ji,jk,jl)*diag%du_dz(ji,jk,jl) &
+          - irrev%vert_hor_viscosity_u(ji,jk,jl+1)*diag%du_dz(ji,jk,jl+1)) &
+          /(0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl) - grid%z_w(ji,jk-1,jl+1) - grid%z_w(ji,jk,jl+1))) &
+          /(0.5_wp*(density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl)))
+        enddo
+      
+        ! periodic boundary conditions
+        if (lperiodic) then
+          irrev%mom_diff_tend_x(ji,1,jl) = irrev%mom_diff_tend_x(ji,1,jl) &
+          + (irrev%vert_hor_viscosity_u(ji,1,jl)*diag%du_dz(ji,1,jl) &
+          - irrev%vert_hor_viscosity_u(ji,1,jl+1)*diag%du_dz(ji,1,jl+1)) &
+          /(0.5_wp*(grid%z_w(ji,ncols,jl) + grid%z_w(ji,1,jl) - grid%z_w(ji,ncols,jl+1) - grid%z_w(ji,1,jl+1))) &
+          /(0.5_wp*(density_gas(state,ji,ncols,jl) + density_gas(state,ji,1,jl)))
+          irrev%mom_diff_tend_x(ji,ncols+1,jl) = irrev%mom_diff_tend_x(ji,1,jl)
+        endif
+      
       enddo
-      
-      ! periodic boundary conditions
-      if (lperiodic) then
-        irrev%mom_diff_tend_x(:,1,jl) = irrev%mom_diff_tend_x(:,1,jl) &
-        + (irrev%vert_hor_viscosity_u(:,1,jl)*diag%du_dz(:,1,jl) - irrev%vert_hor_viscosity_u(:,1,jl+1)*diag%du_dz(:,1,jl+1)) &
-        /(0.5_wp*(grid%z_w(:,ncols,jl) + grid%z_w(:,1,jl) - grid%z_w(:,ncols,jl+1) - grid%z_w(:,1,jl+1)))
-        irrev%mom_diff_tend_x(:,ncols+1,jl) = irrev%mom_diff_tend_x(:,1,jl)
-      endif
-      
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jl)
-    do jl=1,nlays
-      do ji=2,nlins
-        irrev%mom_diff_tend_y(ji,:,jl) = irrev%mom_diff_tend_y(ji,:,jl) &
-        + (irrev%vert_hor_viscosity_v(ji,:,jl)*diag%dv_dz(ji,:,jl) - irrev%vert_hor_viscosity_v(ji,:,jl+1)*diag%dv_dz(ji,:,jl+1)) &
-        /(0.5_wp*(grid%z_w(ji-1,:,jl) + grid%z_w(ji,:,jl) - grid%z_w(ji-1,:,jl+1) - grid%z_w(ji,:,jl+1)))
+    do jk=1,ncols
+      do jl=1,nlays
+        do ji=2,nlins
+          irrev%mom_diff_tend_y(ji,jk,jl) = irrev%mom_diff_tend_y(ji,jk,jl) &
+          + (irrev%vert_hor_viscosity_v(ji,jk,jl)*diag%dv_dz(ji,jk,jl) &
+          - irrev%vert_hor_viscosity_v(ji,jk,jl+1)*diag%dv_dz(ji,jk,jl+1)) &
+          /(0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl) - grid%z_w(ji-1,jk,jl+1) - grid%z_w(ji,jk,jl+1))) &
+          /(0.5_wp*(density_gas(state,ji-1,jk,jl) + density_gas(state,ji,jk,jl)))
+        enddo
+      
+        ! periodic boundary conditions
+        if (lperiodic) then
+          irrev%mom_diff_tend_y(1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl) &
+          + (irrev%vert_hor_viscosity_v(1,jk,jl)*diag%dv_dz(1,jk,jl) &
+          - irrev%vert_hor_viscosity_v(1,jk,jl+1)*diag%dv_dz(1,jk,jl+1)) &
+          /(0.5_wp*(grid%z_w(nlins,jk,jl) + grid%z_w(1,jk,jl) - grid%z_w(nlins,jk,jl+1) - grid%z_w(1,jk,jl+1))) &
+          /(0.5_wp*(density_gas(state,nlins,jk,jl) + density_gas(state,1,jk,jl)))
+          irrev%mom_diff_tend_y(nlins+1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl)
+        endif
+      
       enddo
-      
-      ! periodic boundary conditions
-      if (lperiodic) then
-        irrev%mom_diff_tend_y(1,:,jl) = irrev%mom_diff_tend_y(1,:,jl) &
-        + (irrev%vert_hor_viscosity_v(1,:,jl)*diag%dv_dz(1,:,jl) - irrev%vert_hor_viscosity_v(1,:,jl+1)*diag%dv_dz(1,:,jl+1)) &
-        /(0.5_wp*(grid%z_w(nlins,:,jl) + grid%z_w(1,:,jl) - grid%z_w(nlins,:,jl+1) - grid%z_w(1,:,jl+1)))
-        irrev%mom_diff_tend_y(nlins+1,:,jl) = irrev%mom_diff_tend_y(1,:,jl)
-      endif
-      
     enddo
     !$OMP END DO
     !$OMP END PARALLEL

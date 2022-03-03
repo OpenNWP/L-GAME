@@ -72,14 +72,28 @@ module effective_diff_coeffs
     irrev%viscosity_coeff_div = min(irrev%viscosity_coeff_div,irrev%max_diff_h_coeff_turb)
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
+    
+    ! multiplaying by the density
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do ji=1,nlins
+      do jk=1,ncols
+        do jl=1,nlays
+          irrev%viscosity_coeff_div(ji,jk,jl) = density_gas(state,ji,jk,jl)*irrev%viscosity_coeff_div(ji,jk,jl)
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
   end subroutine hori_div_viscosity
   
-  subroutine hori_curl_viscosity(diag,irrev,grid)
+  subroutine hori_curl_viscosity(state,diag,irrev,grid)
   
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements.
   
     ! input arguments and output
+    type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_irrev), intent(inout) :: irrev ! irreversible quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
@@ -115,6 +129,9 @@ module effective_diff_coeffs
         ! corners
         irrev%viscosity_coeff_curl_dual(1,1,jl) = 0.25*(irrev%viscosity_molecular(1,1,jl) + irrev%viscosity_molecular(nlins,1,jl) &
         + irrev%viscosity_molecular(1,ncols,jl) + irrev%viscosity_molecular(nlins,ncols,jl))
+        irrev%viscosity_coeff_curl_dual(1,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        irrev%viscosity_coeff_curl_dual(nlins+1,1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        irrev%viscosity_coeff_curl_dual(nlins+1,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
         
       endif
     
@@ -141,6 +158,44 @@ module effective_diff_coeffs
     !$OMP WORKSHARE
     irrev%viscosity_coeff_curl_dual = min(irrev%viscosity_coeff_curl_dual,irrev%max_diff_h_coeff_turb)
     !$OMP END WORKSHARE
+    !$OMP END PARALLEL
+    
+    ! multiplication by the density component
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do jl=1,nlays
+      do ji=2,nlins
+        do jk=2,ncols
+          irrev%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*(density_gas(state,ji-1,jk-1,jl)+density_gas(state,ji-1,jk,jl) &
+          + density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl))*irrev%viscosity_coeff_curl_dual(ji,jk,jl)
+        enddo
+      enddo
+      
+      ! periodic boundary conditions
+      if (lperiodic) then
+      
+        do jk=2,ncols
+          irrev%viscosity_coeff_curl_dual(1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl) &
+          /(0.5_wp*(density_gas(state,1,jk,jl) + density_gas(state,ncols,jk,jl)))
+          irrev%viscosity_coeff_curl_dual(nlins+1,jk,jl) =  irrev%viscosity_coeff_curl_dual(1,jk,jl)
+        enddo
+        do ji=2,nlins
+          irrev%viscosity_coeff_curl_dual(ji,1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl) &
+          /(0.5_wp*(density_gas(state,ji,ncols,jl)+density_gas(state,ji,1,jl)))
+          irrev%viscosity_coeff_curl_dual(ji,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl)
+        enddo
+      
+        ! corners
+        irrev%viscosity_coeff_curl_dual(1,1,jl) = 0.25*(irrev%viscosity_molecular(1,1,jl) + irrev%viscosity_molecular(nlins,1,jl) &
+        + irrev%viscosity_molecular(1,ncols,jl) + irrev%viscosity_molecular(nlins,ncols,jl))
+        irrev%viscosity_coeff_curl_dual(1,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        irrev%viscosity_coeff_curl_dual(nlins+1,1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        irrev%viscosity_coeff_curl_dual(nlins+1,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        
+      endif
+    
+    enddo
+    !$OMP END DO
     !$OMP END PARALLEL
     
     ! averaging the curl diffusion coefficient to the cell centers
@@ -358,7 +413,7 @@ module effective_diff_coeffs
     
       call div_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
       call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
-      call hori_curl_viscosity(diag,irrev,grid)
+      call hori_curl_viscosity(state,diag,irrev,grid)
       call tke_update(state,diag,irrev,grid)
       
       ! molecular viscosity
@@ -421,7 +476,7 @@ module effective_diff_coeffs
     
       call div_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
       call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
-      call hori_curl_viscosity(diag,irrev,grid)
+      call hori_curl_viscosity(state,diag,irrev,grid)
       call tke_update(state,diag,irrev,grid)
       
       ! molecular viscosity
