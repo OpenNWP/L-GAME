@@ -6,9 +6,10 @@ module planetary_boundary_layer
   ! This module computes everything related to the planetary boundary layer.
   
   use definitions, only: wp,t_state,t_grid,t_diag
-  use run_nml,     only: PRANDTL_HEIGHT,nlins,ncols,nlays,dtime
+  use run_nml,     only: nlins,ncols,nlays,dtime
   use constants,   only: EPSILON_SECURITY,M_PI,gravity
   use surface_nml, only: lsoil
+  use diff_nml,    only: h_prandtl
   
   implicit none
   
@@ -160,7 +161,7 @@ module planetary_boundary_layer
     real(wp)            :: used_vertical_height
 
     ! height of the prandtl layer
-    used_vertical_height = min(agl,PRANDTL_HEIGHT)
+    used_vertical_height = min(agl,h_prandtl)
 
     scalar_flux_resistance = 1._wp/(KARMAN*roughness_velocity_value) &
     ! neutral conditions
@@ -190,7 +191,7 @@ module planetary_boundary_layer
     real(wp) :: used_vertical_height
 
     ! height of the prandtl layer
-    used_vertical_height = min(agl,PRANDTL_HEIGHT)
+    used_vertical_height = min(agl,h_prandtl)
 
     momentum_flux_resistance = 1._wp/(KARMAN*roughness_velocity(wind_h_lowest_layer,agl,roughness_length_value)) &
     ! neutral conditions

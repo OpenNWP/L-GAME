@@ -20,6 +20,7 @@ module diff_nml
   logical  :: ltemp_diff_v    ! vertical temperature diffusion switch
   logical  :: ltracer_diff_h  ! horizontal tracer diffusion switch
   logical  :: ltracer_diff_v  ! vertical tracer diffusion switch
+  real(wp) :: h_prandtl       ! height of the Prandtl layer
   
   namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v,diff_h_smag_div,diff_h_smag_rot, &
   ltemp_diff_h,ltemp_diff_v,ltracer_diff_h,ltracer_diff_v
@@ -43,6 +44,7 @@ module diff_nml
     ltemp_diff_v = .true.
     ltracer_diff_h = .true.
     ltracer_diff_v = .true.
+    h_prandtl = 100._wp
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)

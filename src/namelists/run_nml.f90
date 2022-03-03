@@ -36,7 +36,6 @@ module run_nml
   logical           :: llinear             ! switch to turn momentum advection on or off
   real(wp)          :: impl_weight         ! implicit weight of the pressure gradient
   real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
-  real(wp)          :: PRANDTL_HEIGHT      ! height of the Prandtl layer
   real(wp)          :: lat_center          ! latitude of the center of the model domain
   real(wp)          :: lon_center          ! longitude of the center of the model domain
   
@@ -75,7 +74,6 @@ module run_nml
     lcorio = .true.
     impl_weight = 0.75_wp
     partial_impl_weight = 0.5_wp
-    PRANDTL_HEIGHT = 100._wp
     lat_center = 0._wp
     lon_center = 0._wp
     
