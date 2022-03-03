@@ -38,7 +38,8 @@ module momentum_diff_diss
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer  :: ji,jk,jl ! loop indices
+    integer :: upper_index,lower_index ! vertical interpolation indices
+    integer :: ji,jk,jl                ! loop indices
     
     ! Preparation of kinematic properties of the wind field
     ! -----------------------------------------------------
@@ -60,6 +61,38 @@ module momentum_diff_diss
     call scalar_times_scalar(irrev%viscosity_coeff_div,diag%scalar_placeholder,diag%scalar_placeholder)
     ! calculating the horizontal gradient of the divergence
     call grad_hor(diag%scalar_placeholder,irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,upper_index,lower_index)
+    do ji=1,nlins
+      do jk=1,ncols+1
+        do jl=1,nlays
+          diag%u_placeholder(ji,jk,jl) = (irrev%viscosity_coeff_curl_dual(ji+1,jk,jl)*diag%zeta_z(ji+1,jk,jl) - &
+          irrev%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
+          
+          ! terrain-following correction
+          diag%u_placeholder(ji,jk,jl) = diag%u_placeholder(ji,jk,jl)
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,upper_index,lower_index)
+    do ji=1,nlins+1
+      do jk=1,ncols
+        do jl=1,nlays
+          diag%v_placeholder(ji,jk,jl) = (irrev%viscosity_coeff_curl_dual(ji,jk+1,jl)*diag%zeta_z(ji,jk+1,jl) - &
+          irrev%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
+          
+          ! terrain-following correction
+          diag%v_placeholder(ji,jk,jl) = diag%v_placeholder(ji,jk,jl)
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     
     ! adding up the two components and dividing by the averaged density
     !$OMP PARALLEL

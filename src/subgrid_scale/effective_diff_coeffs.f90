@@ -146,7 +146,7 @@ module effective_diff_coeffs
       do jk=1,ncols+1
         do jl=1,nlays
           irrev%viscosity_coeff_curl_dual(ji,jk,jl) = irrev%viscosity_coeff_curl_dual(ji,jk,jl) &
-          + diff_h_smag_rot*grid%mean_velocity_area*abs(diag%eta_z(ji,jk,jl))
+          + diff_h_smag_rot*grid%mean_velocity_area*abs(diag%zeta_z(ji,jk,jl))
         enddo
       enddo
     enddo
