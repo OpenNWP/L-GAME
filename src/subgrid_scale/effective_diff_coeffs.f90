@@ -170,9 +170,130 @@ module effective_diff_coeffs
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_irrev), intent(inout) :: irrev ! irreversible quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
+    
+    ! local variables
+    real(wp) :: max_diff_v_coeff_turb ! the maximum vertical diffusion coefficient
+    integer :: ji,jk,jl               ! loop indices
 	
 	!  updating the TKE
     call tke_update(state,diag,irrev,grid)
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,max_diff_v_coeff_turb)
+    do ji=1,nlins
+      do jl=2,nlays
+        do jk=2,ncols
+          irrev%vert_hor_viscosity_u(ji,jk,jl) = &
+          ! molecular component
+          0.25_wp*( &
+          irrev%viscosity_molecular(ji,jk-1,jl-1) + irrev%viscosity_molecular(ji,jk,jl-1) &
+          + irrev%viscosity_molecular(ji,jk-1,jl) + irrev%viscosity_molecular(ji,jk,jl)) &
+          ! turbulent component
+          + 0.25_wp*( &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk-1,jl-1)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk,jl-1)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk-1,jl)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk,jl)))
+          
+          max_diff_v_coeff_turb = 0.125_wp*(grid%z_u(ji,jk,jl-1)-grid%z_u(ji,jk,jl))**2/dtime
+          irrev%vert_hor_viscosity_u(ji,jk,jl) = min(irrev%vert_hor_viscosity_u(ji,jk,jl), &
+          max_diff_v_coeff_turb)
+          
+        enddo
+        
+        ! periodic boundary conditions
+        if (lperiodic) then
+          irrev%vert_hor_viscosity_u(ji,1,jl) = &
+          ! molecular component
+          0.25_wp*( &
+          irrev%viscosity_molecular(ji,ncols,jl-1) + irrev%viscosity_molecular(ji,1,jl-1) &
+          + irrev%viscosity_molecular(ji,ncols,jl) + irrev%viscosity_molecular(ji,1,jl)) &
+          ! turbulent component
+          + 0.25_wp*( &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,ncols,jl-1)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,1,jl-1)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,ncols,jl)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,1,jl)))
+          
+          max_diff_v_coeff_turb = 0.125_wp*(grid%z_u(ji,1,jl-1)-grid%z_u(ji,1,jl))**2/dtime
+          irrev%vert_hor_viscosity_u(ji,1,jl) = min(irrev%vert_hor_viscosity_u(ji,1,jl), &
+          max_diff_v_coeff_turb)
+          
+          irrev%vert_hor_viscosity_u(ji,ncols+1,jl) = irrev%vert_hor_viscosity_u(ji,1,jl)
+          
+        endif
+        
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,max_diff_v_coeff_turb)
+    do jk=1,ncols
+      do jl=2,nlays
+        do ji=2,nlins
+          irrev%vert_hor_viscosity_v(ji,jk,jl) = &
+          ! molecular component
+          0.25_wp*( &
+          irrev%viscosity_molecular(ji-1,jk,jl-1) + irrev%viscosity_molecular(ji,jk,jl-1) &
+          + irrev%viscosity_molecular(ji-1,jk,jl) + irrev%viscosity_molecular(ji,jk,jl)) &
+          ! turbulent component
+          + 0.25_wp*( &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji-1,jk,jl-1)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk,jl-1)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji-1,jk,jl)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk,jl)))
+          
+          max_diff_v_coeff_turb = 0.125_wp*(grid%z_v(ji,jk,jl-1)-grid%z_v(ji,jk,jl))**2/dtime
+          irrev%vert_hor_viscosity_v(ji,jk,jl) = min(irrev%vert_hor_viscosity_v(ji,jk,jl), &
+          max_diff_v_coeff_turb)
+          
+        enddo
+        
+        ! periodic boundary conditions
+        if (lperiodic) then
+          irrev%vert_hor_viscosity_v(1,jk,jl) = &
+          ! molecular component
+          0.25_wp*( &
+          irrev%viscosity_molecular(nlins,jk,jl-1) + irrev%viscosity_molecular(1,jk,jl-1) &
+          + irrev%viscosity_molecular(nlins,jk,jl) + irrev%viscosity_molecular(1,jk,jl)) &
+          ! turbulent component
+          + 0.25_wp*( &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(nlins,jk,jl-1)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(1,jk,jl-1)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(nlins,jk,jl)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(1,jk,jl)))
+          
+          max_diff_v_coeff_turb = 0.125_wp*(grid%z_v(1,jk,jl-1)-grid%z_v(1,jk,jl))**2/dtime
+          irrev%vert_hor_viscosity_v(1,jk,jl) = min(irrev%vert_hor_viscosity_v(1,jk,jl), &
+          max_diff_v_coeff_turb)
+          
+          irrev%vert_hor_viscosity_v(nlins+1,jk,jl) = irrev%vert_hor_viscosity_v(1,jk,jl)
+          
+        endif
+        
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    ! for now, we set the vertical diffusion coefficient at the TOA equal to the vertical diffusion coefficient in the layer below
+    irrev%vert_hor_viscosity_u(:,:,1) = irrev%vert_hor_viscosity_u(:,:,2)
+    ! for now, we set the vertical diffusion coefficient at the surface equal to the vertical diffusion coefficient in the layer above
+    irrev%vert_hor_viscosity_u(:,:,nlays+1) = irrev%vert_hor_viscosity_u(:,:,nlays)
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    ! for now, we set the vertical diffusion coefficient at the TOA equal to the vertical diffusion coefficient in the layer below
+    irrev%vert_hor_viscosity_v(:,:,1) = irrev%vert_hor_viscosity_v(:,:,2)
+    ! for now, we set the vertical diffusion coefficient at the surface equal to the vertical diffusion coefficient in the layer above
+    irrev%vert_hor_viscosity_v(:,:,nlays+1) = irrev%vert_hor_viscosity_v(:,:,nlays)
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
   
   end subroutine vert_hori_mom_viscosity
   
@@ -187,9 +308,9 @@ module effective_diff_coeffs
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer  :: ji,jk,jl              ! loop indices
-    real(wp) :: max_diff_v_coeff_turb ! the maximum vertical diffusion coefficient
     real(wp) :: mom_diff_coeff        ! the diffusion coefficient
+    real(wp) :: max_diff_v_coeff_turb ! the maximum vertical diffusion coefficient
+    integer  :: ji,jk,jl              ! loop indices
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,max_diff_v_coeff_turb,mom_diff_coeff)
