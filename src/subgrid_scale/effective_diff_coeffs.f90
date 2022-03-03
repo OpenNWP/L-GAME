@@ -75,6 +75,23 @@ module effective_diff_coeffs
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_irrev), intent(inout) :: irrev ! irreversible quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
+    
+    ! local variables
+    integer :: ji,jk,jl ! loop indices
+    
+    ! averaging the curl diffusion coefficient to the cell centers
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do ji=1,nlins
+      do jk=1,ncols
+        do jl=1,nlays
+          irrev%viscosity_coeff_curl(ji,jk,jl) = sum(irrev%viscosity_coeff_curl_dual(ji:ji+1,jk:jk+1,jl)) &
+          /size(irrev%viscosity_coeff_curl_dual(ji:ji+1,jk:jk+1,jl))
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
   end subroutine hori_curl_viscosity
   
