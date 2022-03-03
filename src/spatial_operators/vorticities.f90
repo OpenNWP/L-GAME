@@ -37,7 +37,7 @@ module vorticities
     do jk=1,ncols
       do jl=2,nlays
         do ji=2,nlins
-          diag%eta_x(ji,jk,jl) = &
+          diag%zeta_x(ji,jk,jl) = &
           grid%dz(ji-1,jk,jl)*state%wind_w(ji-1,jk,jl) &
           - grid%dy(ji,jk,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,jl-1) &
           - grid%dz(ji,jk,jl)*state%wind_w(ji,jk,jl) &
@@ -46,20 +46,20 @@ module vorticities
         
         ! boundary conditions
         if (lperiodic) then
-          diag%eta_x(1,jk,jl) = &
+          diag%zeta_x(1,jk,jl) = &
           grid%dz(nlins,jk,jl)*state%wind_w(nlins,jk,jl) &
           - grid%dy(1,jk,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,1,jk,jl-1) &
           - grid%dz(1,jk,jl)*state%wind_w(1,jk,jl) &
           + grid%dy(1,jk,jl)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,1,jk,jl)
-          diag%eta_x(nlins+1,jk,jl) = diag%eta_x(1,jk,jl)
+          diag%zeta_x(nlins+1,jk,jl) = diag%zeta_x(1,jk,jl)
         else
-          diag%eta_x(1,jk,jl) = 0._wp
-          diag%eta_x(nlins+1,jk,jl) = 0._wp
+          diag%zeta_x(1,jk,jl) = 0._wp
+          diag%zeta_x(nlins+1,jk,jl) = 0._wp
         endif
         
         do ji=1,nlins+1
           ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
-          diag%eta_x(ji,jk,nlays+1) = -grid%dy(ji,jk,nlays)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,nlays)
+          diag%zeta_x(ji,jk,nlays+1) = -grid%dy(ji,jk,nlays)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,nlays)
         enddo
       enddo
     enddo
@@ -68,13 +68,13 @@ module vorticities
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    diag%eta_x(:,:,1) = diag%eta_x(:,:,2)
+    diag%zeta_x(:,:,1) = diag%zeta_x(:,:,2)
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     ! dividing by the area
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    diag%eta_x = diag%eta_x/grid%area_dual_x
+    diag%zeta_x = diag%zeta_x/grid%area_dual_x
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     
@@ -84,7 +84,7 @@ module vorticities
     do ji=1,nlins
       do jl=2,nlays
         do jk=2,ncols
-          diag%eta_y(ji,jk,jl) = &
+          diag%zeta_y(ji,jk,jl) = &
           -grid%dz(ji,jk,jl)*state%wind_w(ji,jk,jl) &
           - grid%dx(ji,jk,jl)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,jl) &
           + grid%dz(ji,jk-1,jl)*state%wind_w(ji,jk-1,jl) &
@@ -93,20 +93,20 @@ module vorticities
         
         ! boundaries
         if (lperiodic) then
-          diag%eta_y(ji,1,jl) = &
+          diag%zeta_y(ji,1,jl) = &
           -grid%dz(ji,1,jl)*state%wind_w(ji,1,jl) &
           - grid%dx(ji,1,jl)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,1,jl) &
           + grid%dz(ji,ncols,jl)*state%wind_w(ji,ncols,jl) &
           + grid%dx(ji,1,jl-1)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,1,jl-1)
-          diag%eta_y(ji,ncols+1,jl) = diag%eta_y(ji,1,jl)
+          diag%zeta_y(ji,ncols+1,jl) = diag%zeta_y(ji,1,jl)
         else
-          diag%eta_y(ji,1,jl) = 0._wp
-          diag%eta_y(ji,ncols+1,jl) = 0._wp
+          diag%zeta_y(ji,1,jl) = 0._wp
+          diag%zeta_y(ji,ncols+1,jl) = 0._wp
         endif
         
         do jk=1,ncols+1
           ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
-          diag%eta_y(ji,jk,nlays+1) = grid%dx(ji,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,nlays)
+          diag%zeta_y(ji,jk,nlays+1) = grid%dx(ji,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,nlays)
         enddo
         
       enddo
@@ -116,13 +116,13 @@ module vorticities
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    diag%eta_y(:,:,1) = diag%eta_y(:,:,2)
+    diag%zeta_y(:,:,1) = diag%zeta_y(:,:,2)
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     ! dividing by the area
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    diag%eta_y = diag%eta_y/grid%area_dual_y
+    diag%zeta_y = diag%zeta_y/grid%area_dual_y
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
       
@@ -133,7 +133,7 @@ module vorticities
       do jk=1,ncols+1
         ! layers which do not follow the orography
         do jl=1,nlays
-          diag%eta_z(ji,jk,jl) = rel_vort_z_local(state,grid,ji,jk,jl)/grid%area_dual_z(ji,jk,jl)
+          diag%zeta_z(ji,jk,jl) = rel_vort_z_local(state,grid,ji,jk,jl)/grid%area_dual_z(ji,jk,jl)
         enddo
       enddo
     enddo
@@ -159,9 +159,9 @@ module vorticities
     else
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      diag%eta_x = 0._wp
-      diag%eta_y = 0._wp
-      diag%eta_z = 0._wp
+      diag%zeta_x = 0._wp
+      diag%zeta_y = 0._wp
+      diag%zeta_z = 0._wp
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     endif
@@ -171,15 +171,31 @@ module vorticities
       !$OMP PARALLEL
       !$OMP DO PRIVATE(jl)
       do jl=1,nlays+1
-        diag%eta_x(:,:,jl) = diag%eta_x(:,:,jl) + grid%fvec_x(:,:)
-        diag%eta_y(:,:,jl) = diag%eta_y(:,:,jl) + grid%fvec_y(:,:)
+        diag%eta_x(:,:,jl) = diag%zeta_x(:,:,jl) + grid%fvec_x(:,:)
+        diag%eta_y(:,:,jl) = diag%zeta_y(:,:,jl) + grid%fvec_y(:,:)
       enddo
       !$OMP END DO
       !$OMP END PARALLEL
       !$OMP PARALLEL
       !$OMP DO PRIVATE(jl)
       do jl=1,nlays
-        diag%eta_z(:,:,jl) = diag%eta_z(:,:,jl) + grid%fvec_z(:,:)
+        diag%eta_z(:,:,jl) = diag%zeta_z(:,:,jl) + grid%fvec_z(:,:)
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+    else
+      !$OMP PARALLEL
+      !$OMP DO PRIVATE(jl)
+      do jl=1,nlays+1
+        diag%eta_x(:,:,jl) = diag%zeta_x(:,:,jl)
+        diag%eta_y(:,:,jl) = diag%zeta_y(:,:,jl)
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP DO PRIVATE(jl)
+      do jl=1,nlays
+        diag%eta_z(:,:,jl) = diag%zeta_z(:,:,jl)
       enddo
       !$OMP END DO
       !$OMP END PARALLEL
@@ -373,15 +389,9 @@ module vorticities
       diag%eta_z(1,1,:) = diag%eta_z(1,1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
       +state%rho(1,1,:,no_of_condensed_constituents+1) &
       +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
-      diag%eta_z(1,ncols+1,:) = diag%eta_z(1,ncols+1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
-      +state%rho(1,1,:,no_of_condensed_constituents+1) &
-      +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
-      diag%eta_z(nlins+1,1,:) = diag%eta_z(nlins+1,1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
-      +state%rho(1,1,:,no_of_condensed_constituents+1) &
-      +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
-      diag%eta_z(nlins+1,ncols+1,:) = diag%eta_z(nlins+1,ncols+1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
-      +state%rho(1,1,:,no_of_condensed_constituents+1) &
-      +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
+      diag%eta_z(1,ncols+1,:) = diag%eta_z(1,1,:)
+      diag%eta_z(nlins+1,1,:) = diag%eta_z(1,1,:)
+      diag%eta_z(nlins+1,ncols+1,:) = diag%eta_z(1,1,:)
     endif
     
   end subroutine calc_pot_vort

@@ -165,9 +165,12 @@ module definitions
     real(wp), allocatable :: gust(:,:)                        ! gusts speed 10 m AGL
     real(wp), allocatable :: mslp(:,:)                        ! mean sea level pressure
     real(wp), allocatable :: t_2(:,:)                         ! 2 m temperature
-    real(wp), allocatable :: eta_x(:,:,:)                     ! relative vorticity in x-direction
-    real(wp), allocatable :: eta_y(:,:,:)                     ! relative vorticity in y-direction
-    real(wp), allocatable :: eta_z(:,:,:)                     ! relative vorticity in z-direction
+    real(wp), allocatable :: zeta_x(:,:,:)                    ! relative vorticity in x-direction
+    real(wp), allocatable :: zeta_y(:,:,:)                    ! relative vorticity in y-direction
+    real(wp), allocatable :: zeta_z(:,:,:)                    ! relative vorticity in z-direction
+    real(wp), allocatable :: eta_x(:,:,:)                     ! potential vorticity in x-direction
+    real(wp), allocatable :: eta_y(:,:,:)                     ! potential vorticity in y-direction
+    real(wp), allocatable :: eta_z(:,:,:)                     ! potential vorticity in z-direction
     real(wp), allocatable :: radiation_tendency(:,:,:)        ! power density due to radiation
     real(wp), allocatable :: scalar_flux_resistance(:,:)      ! surface flux resistance acting on scalar quantities
     real(wp), allocatable :: monin_obukhov_length(:,:)        ! Monin-Obukhov length

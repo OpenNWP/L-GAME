@@ -335,6 +335,12 @@ program control
   diag%mslp = 0._wp
   allocate(diag%t_2(nlins,ncols))
   diag%t_2 = 0._wp
+  allocate(diag%zeta_x(nlins+1,ncols,nlays+1))
+  diag%zeta_x = 0._wp
+  allocate(diag%zeta_y(nlins,ncols+1,nlays+1))
+  diag%zeta_y = 0._wp
+  allocate(diag%zeta_z(nlins+1,ncols+1,nlays))
+  diag%zeta_z = 0._wp
   allocate(diag%eta_x(nlins+1,ncols,nlays+1))
   diag%eta_x = 0._wp
   allocate(diag%eta_y(nlins,ncols+1,nlays+1))
@@ -611,6 +617,9 @@ program control
   deallocate(diag%gust)
   deallocate(diag%mslp)
   deallocate(diag%t_2)
+  deallocate(diag%zeta_x)
+  deallocate(diag%zeta_y)
+  deallocate(diag%zeta_z)
   deallocate(diag%eta_x)
   deallocate(diag%eta_y)
   deallocate(diag%eta_z)

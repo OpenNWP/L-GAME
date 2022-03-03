@@ -12,7 +12,7 @@ module momentum_diff_diss
   use diff_nml,                 only: h_prandtl
   use inner_product,            only: inner
   use derived_quantities,       only: density_gas
-  use effective_diff_coeffs,    only: hori_div_viscosity,vert_vert_mom_viscosity
+  use effective_diff_coeffs,    only: hori_div_viscosity,vert_vert_mom_viscosity,hori_curl_viscosity
   use multiplications,          only: scalar_times_scalar
   use planetary_boundary_layer, only: momentum_flux_resistance
   use bc_nml,                   only: lperiodic
@@ -47,6 +47,9 @@ module momentum_diff_diss
     
     ! calculating the horizontal gradient of the divergence
     call grad_hor(diag%scalar_placeholder,irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
+    
+    ! calculating the diffusion coefficient acting on rotational movements
+    call hori_curl_viscosity(diag,irrev,grid)
   
   end subroutine mom_diff_h
 
