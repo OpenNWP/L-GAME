@@ -15,6 +15,7 @@ module gradient_operators
   private
   
   public :: grad_hor_cov
+  public :: grad_vert_cov
   public :: grad
   public :: grad_hor
   

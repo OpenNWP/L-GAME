@@ -6,12 +6,12 @@ module momentum_diff_diss
   ! This module handles momentum diffusion and dissipation.
   
   use definitions,           only: t_grid,t_diag,t_irrev,t_state
-  use divergence_operators,  only: div_h
-  use gradient_operators,    only: grad_hor
-  use run_nml,               only: nlins,ncols,nlays
+  use divergence_operators,  only: div_h,add_vertical_div
+  use gradient_operators,    only: grad_hor,grad_vert_cov
+  use run_nml,               only: nlins,ncols,nlays,wp
   use inner_product,         only: inner
   use derived_quantities,    only: density_gas
-  use effective_diff_coeffs, only: hori_div_viscosity
+  use effective_diff_coeffs, only: hori_div_viscosity,vert_vert_mom_viscosity
   use multiplications,       only: scalar_times_scalar
   
   implicit none
@@ -47,9 +47,29 @@ module momentum_diff_diss
   
   end subroutine mom_diff_h
 
-  subroutine mom_diff_v
+  subroutine mom_diff_v(state,diag,irrev,grid)
   
     ! This subroutine handles vertical momentum diffusion.
+    
+    type(t_state), intent(in)    :: state ! state with which to calculate the horizontal diffusion
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
+    	
+    ! 2.) vertical diffusion of vertical velocity
+    ! -------------------------------------------
+    ! resetting the placeholder field
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    diag%scalar_placeholder = 0._wp
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
+    ! computing something like dw/dz
+    call add_vertical_div(state%wind_w,diag%scalar_placeholder,grid)
+    ! computing and multiplying by the respective diffusion coefficient
+    call vert_vert_mom_viscosity(state,diag,irrev,grid)
+    ! taking the second derivative to compute the diffusive tendency
+    call grad_vert_cov(diag%scalar_placeholder,irrev%mom_diff_tend_z,grid)
 
   end subroutine mom_diff_v
   

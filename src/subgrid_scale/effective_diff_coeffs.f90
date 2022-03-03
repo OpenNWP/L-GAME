@@ -5,7 +5,7 @@ module effective_diff_coeffs
   
   ! This module computes the effective diffusion coefficients.
   
-  use run_nml,              only: nlins,ncols,nlays
+  use run_nml,              only: nlins,ncols,nlays,dtime
   use definitions,          only: wp,t_state,t_diag,t_irrev,t_grid
   use diff_nml,             only: diff_h_smag_div,lmom_diff_h,ltemp_diff_h
   use derived_quantities,   only: calc_diffusion_coeff
@@ -112,9 +112,45 @@ module effective_diff_coeffs
   
   end subroutine vert_hori_mom_viscosity
   
-  subroutine vert_vert_mom_viscosity()
+  subroutine vert_vert_mom_viscosity(state,diag,irrev,grid)
   
     ! This subroutine multiplies scalar_field_placeholder (containing dw/dz) by the diffusion coefficient acting on w because of w.
+   
+    ! input arguments and output
+    type(t_state), intent(in)    :: state ! state
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
+    
+    ! local variables
+    integer  :: ji,jk,jl              ! loop indices
+    real(wp) :: max_diff_v_coeff_turb ! the maximum vertical diffusion coefficient
+    real(wp) :: mom_diff_coeff        ! the diffusion coefficient
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,max_diff_v_coeff_turb,mom_diff_coeff)
+    do ji=1,nlins
+      do jk=1,ncols
+        do jl=1,nlays
+    
+          max_diff_v_coeff_turb = 0.125_wp*(grid%z_w(ji,jk,jl)-grid%z_w(ji,jk,jl+1))**2/dtime
+    
+          mom_diff_coeff &
+          ! molecular viscosity
+          = irrev%viscosity_molecular(ji,jk,jl) &
+          ! turbulent component
+          + tke2vertical_diff_coeff(irrev%tke(ji,jk,jl))*abs(diag%scalar_placeholder(ji,jk,jl))
+          ! stability criterion
+          if (mom_diff_coeff>max_diff_v_coeff_turb) then
+            mom_diff_coeff = max_diff_v_coeff_turb
+          endif
+
+          diag%scalar_placeholder(ji,jk,jl) = density_gas(state,ji,jk,jl)*mom_diff_coeff*diag%scalar_placeholder(ji,jk,jl)
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
   end subroutine vert_vert_mom_viscosity
   
