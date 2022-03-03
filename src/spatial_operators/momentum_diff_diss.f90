@@ -37,6 +37,9 @@ module momentum_diff_diss
     type(t_irrev), intent(inout) :: irrev ! irreversible quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
+    ! local variables
+    integer  :: ji,jk,jl ! loop indices
+    
     ! Preparation of kinematic properties of the wind field
     ! -----------------------------------------------------
     ! calculating the divergence of the horizontal wind field
@@ -57,6 +60,49 @@ module momentum_diff_diss
     call scalar_times_scalar(irrev%viscosity_coeff_div,diag%scalar_placeholder,diag%scalar_placeholder)
     ! calculating the horizontal gradient of the divergence
     call grad_hor(diag%scalar_placeholder,irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
+    
+    ! adding up the two components and dividing by the averaged density
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do ji=1,nlins
+      do jl=1,nlays
+        do jk=2,ncols
+          irrev%mom_diff_tend_x(ji,jk,jl) = (irrev%mom_diff_tend_x(ji,jk,jl) + diag%u_placeholder(ji,jk,jl)) &
+          /(0.5_wp*(density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl)))
+        enddo
+        
+        ! periodic boundary conditions
+        if (lperiodic) then
+          irrev%mom_diff_tend_x(ji,1,jl) = (irrev%mom_diff_tend_x(ji,1,jl) + diag%u_placeholder(ji,1,jl)) &
+          /(0.5_wp*(density_gas(state,ji,ncols,jl) + density_gas(state,ji,1,jl)))
+        endif
+        irrev%mom_diff_tend_x(ji,ncols+1,jl) = irrev%mom_diff_tend_x(ji,1,jl)
+        
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do jk=1,ncols
+      do jl=1,nlays
+        do ji=2,nlins
+          irrev%mom_diff_tend_y(ji,jk,jl) = (irrev%mom_diff_tend_y(ji,jk,jl) + diag%v_placeholder(ji,jk,jl)) &
+          /(0.5_wp*(density_gas(state,ji-1,jk,jl) + density_gas(state,ji,jk,jl)))
+        enddo
+        
+        ! periodic boundary conditions
+        if (lperiodic) then
+          irrev%mom_diff_tend_y(1,jk,jl) = (irrev%mom_diff_tend_y(1,jk,jl) + diag%v_placeholder(1,jk,jl)) &
+          /(0.5_wp*(density_gas(state,nlins,jk,jl) + density_gas(state,1,jk,jl)))
+        endif
+        irrev%mom_diff_tend_y(nlins+1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl)
+        
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
   
   end subroutine mom_diff_h
 
