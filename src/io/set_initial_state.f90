@@ -9,7 +9,7 @@ module set_initial_state
   use netcdf
   use run_nml,          only: nlins,ncols,nlays,scenario,run_id
   use constituents_nml, only: no_of_condensed_constituents,no_of_constituents
-  use dictionary,       only: specific_gas_constants,spec_heat_capacities_p_gas
+  use dictionary,       only: specific_gas_constants,spec_heat_capacities_v_gas,spec_heat_capacities_p_gas
   use constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
                               gravity,p_0_standard,re,t_grad_inv
   use io_nml,           only: restart_filename
@@ -18,7 +18,7 @@ module set_initial_state
   
   private
   
-  public :: ideal
+  public :: ideal_init
   public :: bg_temp
   public :: bg_pres
   public :: geopot
@@ -27,7 +27,7 @@ module set_initial_state
   
   contains
   
-  subroutine ideal(state,diag,grid)
+  subroutine ideal_init(state,diag,grid)
   
     ! sets the initial state of the model calculation in terms of analytic functions
     
@@ -127,7 +127,7 @@ module set_initial_state
               - (state%theta_pert(ji,jk,jl)+state%theta_pert(ji,jk,jl+1))/(grid%theta_bg(ji,jk,jl)+grid%theta_bg(ji,jk,jl+1) &
               +state%theta_pert(ji,jk,jl)+state%theta_pert(ji,jk,jl+1))*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1))
             enddo
-            ! filling up what's needed for the unessential_init routine
+            ! filling up what's needed for the unessential_ideal_init routine
             ! temperature
             do jl=1,nlays
               diag%scalar_placeholder(ji,jk,jl)=(grid%exner_bg(ji,jk,jl)+state%exner_pert(ji,jk,jl)) &
@@ -162,67 +162,84 @@ module set_initial_state
     !$OMP END DO
     !$OMP END PARALLEL
     
-    call unessential_init(state,diag,grid,pres_lowest_layer)
+    call unessential_ideal_init(state,diag,grid,pres_lowest_layer)
     
-  end subroutine ideal
+  end subroutine ideal_init
   
-  subroutine restart(state,diag,grid)
+  subroutine restart(state,grid)
   
-    ! reads the initial state of the model calculation from a netcdf file
+    ! This subroutine sets the initial state of a NWP run.
     
-    ! input arguments and output
-    type(t_state), intent(inout) :: state ! state to write the initial state to
-    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_grid),  intent(in)    :: grid  ! model grid
-    
+    type(t_state), intent(inout) :: state ! state to write the arrays to
+    type(t_grid), intent(in)     :: grid  ! grid properties
+  
     ! local variables
-    integer           :: ncid                           ! ID of the NetCDF file
-    character(len=64) :: filename                       ! filename containing the initial state
-    integer           :: varid_rho                      ! variable ID of the densities
-    integer           :: varid_t                        ! variable ID of the temperature
-    integer           :: varid_u                        ! variable ID of the u-wind
-    integer           :: varid_v                        ! variable ID of the v-wind
-    real(wp)          :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
+    character(len=64) :: filename ! file to read the initial state from
+    real(wp)          :: c_v      ! specific heat capacity at constant volume
+    real(wp)          :: r_d      ! individual gas constant of dry air
+    
+    c_v = spec_heat_capacities_v_gas(0)
+    r_d = specific_gas_constants(0)
     
     filename = "../../real_weather/" // trim(restart_filename)
     
+    call read_from_nc(state%rho,state%rhotheta,state%wind_u,state%wind_v,state%wind_w,filename)
+    
+    ! setting the potential temperature peturbation
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    state%theta_pert = state%rhotheta/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_bg
+    state%exner_pert = (r_d*state%rhotheta/p_0)**(r_d/c_v) - grid%exner_bg
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
+  
+  end subroutine restart
+  
+  subroutine read_from_nc(rho,rhotheta,wind_u,wind_v,wind_w,filename)
+  
+    ! This subroutine reads a model state from a NetCDF file.
+    
+    ! input arguments and output
+    real(wp),          intent(out) :: rho(:,:,:,:)    ! density
+    real(wp),          intent(out) :: rhotheta(:,:,:) ! potential temperature density
+    real(wp),          intent(out) :: wind_u(:,:,:)   ! u-wind
+    real(wp),          intent(out) :: wind_v(:,:,:)   ! v-wind
+    real(wp),          intent(out) :: wind_w(:,:,:)   ! w-wind
+    character(len=64), intent(in)  :: filename        ! filename to read from
+    
+    ! local variables
+    integer           :: ncid                           ! ID of the NetCDF file
+    integer           :: varid_rho                      ! variable ID of the densities
+    integer           :: varid_rhotheta                 ! variable ID of the potential temperature densities
+    integer           :: varid_u                        ! variable ID of the u-wind
+    integer           :: varid_v                        ! variable ID of the v-wind
+    integer           :: varid_w                        ! variable ID of the w-wind
+    
     ! creating the NetCDF file
-    call nc_check(nf90_open(trim(restart_filename),NF90_CLOBBER,ncid))
+    call nc_check(nf90_open(filename,NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
     call nc_check(nf90_inq_varid(ncid,"rho",varid_rho))
-    call nc_check(nf90_inq_varid(ncid,"T",varid_t))
+    call nc_check(nf90_inq_varid(ncid,"rhotheta",varid_rhotheta))
     call nc_check(nf90_inq_varid(ncid,"u",varid_u))
     call nc_check(nf90_inq_varid(ncid,"v",varid_v))
+    call nc_check(nf90_inq_varid(ncid,"w",varid_w))
     
     ! reading the NetCDF fields
-    call nc_check(nf90_get_var(ncid,varid_rho,state%rho))
-    call nc_check(nf90_get_var(ncid,varid_t,diag%scalar_placeholder))
-    call nc_check(nf90_get_var(ncid,varid_u,state%wind_u))
-    call nc_check(nf90_get_var(ncid,varid_v,state%wind_v))
+    call nc_check(nf90_get_var(ncid,varid_rho,rho))
+    call nc_check(nf90_get_var(ncid,varid_rhotheta,rhotheta))
+    call nc_check(nf90_get_var(ncid,varid_u,wind_u))
+    call nc_check(nf90_get_var(ncid,varid_v,wind_v))
+    call nc_check(nf90_get_var(ncid,varid_w,wind_w))
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
     
-    ! setting the pressure in the lowest layer
-    ! moist case
-    if (no_of_constituents>1) then
-      pres_lowest_layer &
-      = state%rho(:,:,nlays,no_of_condensed_constituents+1)*specific_gas_constants(0)*diag%scalar_placeholder(:,:,nlays) &
-      + state%rho(:,:,nlays,no_of_condensed_constituents+2)*specific_gas_constants(1)*diag%scalar_placeholder(:,:,nlays)
-    ! dry case
-    else
-      pres_lowest_layer &
-      = state%rho(:,:,nlays,1)*specific_gas_constants(0)*diag%scalar_placeholder(:,:,nlays)
-    endif
-    
-    call unessential_init(state,diag,grid,pres_lowest_layer)
-    
-  end subroutine restart
+  end subroutine read_from_nc
   
-  subroutine unessential_init(state,diag,grid,pres_lowest_layer)
+  subroutine unessential_ideal_init(state,diag,grid,pres_lowest_layer)
   
-    ! setting the unessential quantities of an initial state
+    ! setting the unessential quantities of an ideal initial state
     ! scalar_placeholder is the temperature here
     
     type(t_state), intent(inout) :: state                  ! state to work with
@@ -290,7 +307,7 @@ module set_initial_state
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     
-  end subroutine unessential_init
+  end subroutine unessential_ideal_init
   
   function bg_temp(height)
   
