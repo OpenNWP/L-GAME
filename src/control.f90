@@ -117,6 +117,10 @@ program control
   grid%dy = 0._wp
   allocate(grid%dz(nlins,ncols,nlays+1))
   grid%dz = 0._wp
+  allocate(grid%dx_dual(nlins+1,ncols,nlays))
+  grid%dx_dual = 0._wp
+  allocate(grid%dy_dual(nlins,ncols+1,nlays))
+  grid%dy_dual = 0._wp
   allocate(grid%z_u(nlins,ncols+1,nlays))
   grid%z_u = 0._wp
   allocate(grid%z_v(nlins+1,ncols,nlays))
@@ -509,6 +513,8 @@ program control
   deallocate(grid%dy)
   deallocate(grid%dx)
   deallocate(grid%dz)
+  deallocate(grid%dx_dual)
+  deallocate(grid%dy_dual)
   deallocate(grid%z_u)
   deallocate(grid%z_v)
   deallocate(grid%z_w)

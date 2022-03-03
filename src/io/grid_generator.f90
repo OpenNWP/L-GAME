@@ -525,6 +525,33 @@ module grid_generator
       !$OMP END PARALLEL
     endif
     
+    ! setting dx of the dual grid
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    grid%dx_dual = dx*(re + grid%z_v)/re
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
+    ! setting dy of the dual grid
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    grid%dy_dual = dy*(re + grid%z_u)/re
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
+    
+    ! plane geometry dual grid distances
+    if (lplane) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      grid%dx_dual = dx
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      grid%dy_dual = dy
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+    endif
+    
     ! calculating the coordinate slopes
     call grad_hor_cov(grid%z_scalar,grid%slope_x,grid%slope_y,grid)
     

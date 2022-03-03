@@ -49,6 +49,8 @@ module definitions
     real(wp), allocatable :: dx(:,:,:)                        ! grid point distance in x-direction
     real(wp), allocatable :: dy(:,:,:)                        ! grid point distance in y-direction
     real(wp), allocatable :: dz(:,:,:)                        ! grid point distance in z-direction
+    real(wp), allocatable :: dx_dual(:,:,:)                   ! grid point distance in x-direction of the dual grid
+    real(wp), allocatable :: dy_dual(:,:,:)                   ! grid point distance in y-direction of the dual grid
     real(wp), allocatable :: z_u(:,:,:)                       ! geomtric height of the u-vectors
     real(wp), allocatable :: z_v(:,:,:)                       ! geomtric height of the v-vectors
     real(wp), allocatable :: z_w(:,:,:)                       ! geomtric height of the w-vectors
