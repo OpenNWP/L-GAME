@@ -16,6 +16,7 @@ module momentum_diff_diss
   use multiplications,          only: scalar_times_scalar
   use planetary_boundary_layer, only: momentum_flux_resistance
   use bc_nml,                   only: lperiodic
+  use vorticities,              only: rel_vort
   
   implicit none
   
@@ -36,20 +37,26 @@ module momentum_diff_diss
     type(t_irrev), intent(inout) :: irrev ! irreversible quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
+    ! Preparation of kinematic properties of the wind field
+    ! -----------------------------------------------------
     ! calculating the divergence of the horizontal wind field
     call div_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
+    ! calculating the relative vorticity of the wind field
+    call rel_vort(state,diag,grid)
     
+    ! Computing the necessary diffusion coefficients
+    ! ----------------------------------------------
     ! computing the relevant diffusion coefficient
     call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
-    
-    ! multiplying the divergence by the diffusion coefficient acting on divergent movements
-    call scalar_times_scalar(irrev%viscosity_coeff_div,diag%scalar_placeholder,diag%scalar_placeholder)
-    
-    ! calculating the horizontal gradient of the divergence
-    call grad_hor(diag%scalar_placeholder,irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
-    
     ! calculating the diffusion coefficient acting on rotational movements
     call hori_curl_viscosity(diag,irrev,grid)
+    
+    ! Computing the gradient of divergence component
+    ! ----------------------------------------------
+    ! multiplying the divergence by the diffusion coefficient acting on divergent movements
+    call scalar_times_scalar(irrev%viscosity_coeff_div,diag%scalar_placeholder,diag%scalar_placeholder)
+    ! calculating the horizontal gradient of the divergence
+    call grad_hor(diag%scalar_placeholder,irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
   
   end subroutine mom_diff_h
 
@@ -63,10 +70,112 @@ module momentum_diff_diss
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer  :: ji,jk,jl ! loop indices
     real(wp) :: flux_resistance,wind_speed_lowest_layer,z_agl,roughness_length ! variables needed for the surface friction
     real(wp) :: layer_thickness,monin_obukhov_length_value,wind_rescale_factor ! variables needed for the surface friction
-    	
+    integer  :: ji,jk,jl                                                       ! loop indices
+    
+    ! 1.) vertical diffusion of horizontal velocity
+    ! ---------------------------------------------
+    ! calculating the vertical gradients of the velocity components
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jl)
+    do jl=2,nlays
+      diag%du_dz(:,:,jl) = (state%wind_u(:,:,jl-1) - state%wind_u(:,:,jl))/(grid%z_u(:,:,jl-1) - grid%z_u(:,:,jl))
+      diag%dv_dz(:,:,jl) = (state%wind_v(:,:,jl-1) - state%wind_v(:,:,jl))/(grid%z_v(:,:,jl-1) - grid%z_v(:,:,jl))
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    ! extrapolation to the TOA
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    diag%du_dz(:,:,1) = diag%du_dz(:,:,2)
+    diag%dv_dz(:,:,1) = diag%dv_dz(:,:,2)
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
+    ! calculation at the surface
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jk)
+    do jk=2,ncols
+      diag%du_dz(:,jk,nlays+1) = state%wind_u(:,jk,nlays)/(grid%z_u(:,jk,nlays) &
+      - 0.5_wp*(grid%z_w(:,jk-1,nlays+1)+grid%z_w(:,jk,nlays+1)))
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! periodic boundary conditions
+    if (lperiodic) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      diag%du_dz(:,1,nlays+1) = state%wind_u(:,1,nlays)/(grid%z_u(:,1,nlays) &
+      - 0.5_wp*(grid%z_w(:,ncols,nlays+1)+grid%z_w(:,1,nlays+1)))
+      diag%du_dz(:,ncols+1,nlays+1) = diag%du_dz(:,1,nlays+1)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+    endif
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji)
+    do ji=2,nlins
+      diag%dv_dz(ji,:,nlays+1) = state%wind_v(ji,:,nlays)/(grid%z_v(ji,:,nlays) &
+      - 0.5_wp*(grid%z_w(ji-1,:,nlays+1)+grid%z_w(ji,:,nlays+1)))
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! periodic boundary conditions
+    if (lperiodic) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      diag%dv_dz(1,:,nlays+1) = state%wind_v(1,:,nlays)/(grid%z_v(1,:,nlays) &
+      - 0.5_wp*(grid%z_w(nlins,:,nlays+1)+grid%z_w(1,:,nlays+1)))
+      diag%dv_dz(nlins+1,:,nlays+1) = diag%dv_dz(1,:,nlays+1)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+    endif
+    
+    ! calculating the acceleration
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jk,jl)
+    do jl=1,nlays
+      do jk=2,ncols
+        irrev%mom_diff_tend_x(:,jk,jl) = irrev%mom_diff_tend_x(:,jk,jl) &
+        + (irrev%vert_hor_viscosity_u(:,jk,jl)*diag%du_dz(:,jk,jl) - irrev%vert_hor_viscosity_u(:,jk,jl+1)*diag%du_dz(:,jk,jl+1)) &
+        /(0.5_wp*(grid%z_w(:,jk-1,jl) + grid%z_w(:,jk,jl) - grid%z_w(:,jk-1,jl+1) - grid%z_w(:,jk,jl+1)))
+      enddo
+      
+      ! periodic boundary conditions
+      if (lperiodic) then
+        irrev%mom_diff_tend_x(:,1,jl) = irrev%mom_diff_tend_x(:,1,jl) &
+        + (irrev%vert_hor_viscosity_u(:,1,jl)*diag%du_dz(:,1,jl) - irrev%vert_hor_viscosity_u(:,1,jl+1)*diag%du_dz(:,1,jl+1)) &
+        /(0.5_wp*(grid%z_w(:,ncols,jl) + grid%z_w(:,1,jl) - grid%z_w(:,ncols,jl+1) - grid%z_w(:,1,jl+1)))
+        irrev%mom_diff_tend_x(:,ncols+1,jl) = irrev%mom_diff_tend_x(:,1,jl)
+      endif
+      
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jl)
+    do jl=1,nlays
+      do ji=2,nlins
+        irrev%mom_diff_tend_y(ji,:,jl) = irrev%mom_diff_tend_y(ji,:,jl) &
+        + (irrev%vert_hor_viscosity_v(ji,:,jl)*diag%dv_dz(ji,:,jl) - irrev%vert_hor_viscosity_v(ji,:,jl+1)*diag%dv_dz(ji,:,jl+1)) &
+        /(0.5_wp*(grid%z_w(ji-1,:,jl) + grid%z_w(ji,:,jl) - grid%z_w(ji-1,:,jl+1) - grid%z_w(ji,:,jl+1)))
+      enddo
+      
+      ! periodic boundary conditions
+      if (lperiodic) then
+        irrev%mom_diff_tend_y(1,:,jl) = irrev%mom_diff_tend_y(1,:,jl) &
+        + (irrev%vert_hor_viscosity_v(1,:,jl)*diag%dv_dz(1,:,jl) - irrev%vert_hor_viscosity_v(1,:,jl+1)*diag%dv_dz(1,:,jl+1)) &
+        /(0.5_wp*(grid%z_w(nlins,:,jl) + grid%z_w(1,:,jl) - grid%z_w(nlins,:,jl+1) - grid%z_w(1,:,jl+1)))
+        irrev%mom_diff_tend_y(nlins+1,:,jl) = irrev%mom_diff_tend_y(1,:,jl)
+      endif
+      
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
     ! 2.) vertical diffusion of vertical velocity
     ! -------------------------------------------
     ! resetting the placeholder field

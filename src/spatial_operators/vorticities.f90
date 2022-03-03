@@ -16,6 +16,7 @@ module vorticities
   
   private
   
+  public :: rel_vort
   public :: calc_pot_vort
   
   contains

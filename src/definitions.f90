@@ -183,6 +183,8 @@ module definitions
     real(wp), allocatable :: flux_density_v(:,:,:)            ! placeholder for flux densities
     real(wp), allocatable :: flux_density_w(:,:,:)            ! placeholder for flux densities
     real(wp), allocatable :: flux_density_div(:,:,:)          ! placeholder for flux density divergences
+    real(wp), allocatable :: du_dz(:,:,:)                     ! verticl gradient of u
+    real(wp), allocatable :: dv_dz(:,:,:)                     ! verticl gradient of v
   
   
   end type t_diag
