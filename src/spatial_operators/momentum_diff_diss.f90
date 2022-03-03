@@ -38,8 +38,9 @@ module momentum_diff_diss
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer :: upper_index,lower_index ! vertical interpolation indices
-    integer :: ji,jk,jl                ! loop indices
+    integer  :: upper_index,lower_index ! vertical interpolation indices
+    real(wp) :: slope,vertical_gradient ! vertical interpolation helper variables
+    integer  :: ji,jk,jl                ! loop indices
     
     ! Preparation of kinematic properties of the wind field
     ! -----------------------------------------------------
@@ -63,7 +64,7 @@ module momentum_diff_diss
     call grad_hor(diag%scalar_placeholder,irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,upper_index,lower_index)
+    !$OMP DO PRIVATE(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays
@@ -71,7 +72,19 @@ module momentum_diff_diss
           irrev%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
           
           ! terrain-following correction
-          diag%u_placeholder(ji,jk,jl) = diag%u_placeholder(ji,jk,jl)
+          slope = (grid%z_area_dual_z(ji+1,jk,jl) - grid%z_area_dual_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
+          upper_index = max(1,jl-1)
+          lower_index = min(nlays,jl+1)
+          ! computing the vertical gradient of the vertical vorticity (times the respective diffusion coefficient)
+          ! and averaging it to the vector point
+          vertical_gradient = 0.5_wp*(irrev%viscosity_coeff_curl_dual(ji+1,jk,upper_index)*diag%zeta_z(ji+1,jk,upper_index) &
+          - irrev%viscosity_coeff_curl_dual(ji+1,jk,lower_index)*diag%zeta_z(ji+1,jk,lower_index)) &
+          /(grid%z_area_dual_z(ji+1,jk,upper_index) - grid%z_area_dual_z(ji+1,jk,lower_index)) &
+          + 0.5_wp*(irrev%viscosity_coeff_curl_dual(ji,jk,upper_index)*diag%zeta_z(ji,jk,upper_index) &
+          - irrev%viscosity_coeff_curl_dual(ji,jk,lower_index)*diag%zeta_z(ji,jk,lower_index)) &
+          /(grid%z_area_dual_z(ji,jk,upper_index) - grid%z_area_dual_z(ji,jk,lower_index))
+          ! adding the terrain-following correction
+          diag%u_placeholder(ji,jk,jl) = diag%u_placeholder(ji,jk,jl) - slope*vertical_gradient
         enddo
       enddo
     enddo
@@ -79,7 +92,7 @@ module momentum_diff_diss
     !$OMP END PARALLEL
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,upper_index,lower_index)
+    !$OMP DO PRIVATE(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
@@ -87,7 +100,19 @@ module momentum_diff_diss
           irrev%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
           
           ! terrain-following correction
-          diag%v_placeholder(ji,jk,jl) = diag%v_placeholder(ji,jk,jl)
+          slope = (grid%z_area_dual_z(ji,jk+1,jl) - grid%z_area_dual_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
+          upper_index = max(1,jl-1)
+          lower_index = min(nlays,jl+1)
+          ! computing the vertical gradient of the vertical vorticity (times the respective diffusion coefficient)
+          ! and averaging it to the vector point
+          vertical_gradient = 0.5_wp*(irrev%viscosity_coeff_curl_dual(ji,jk+1,upper_index)*diag%zeta_z(ji,jk+1,upper_index) &
+          - irrev%viscosity_coeff_curl_dual(ji,jk+1,lower_index)*diag%zeta_z(ji,jk+1,lower_index)) &
+          /(grid%z_area_dual_z(ji,jk+1,upper_index) - grid%z_area_dual_z(ji,jk+1,lower_index)) &
+          + 0.5_wp*(irrev%viscosity_coeff_curl_dual(ji,jk,upper_index)*diag%zeta_z(ji,jk,upper_index) &
+          - irrev%viscosity_coeff_curl_dual(ji,jk,lower_index)*diag%zeta_z(ji,jk,lower_index)) &
+          /(grid%z_area_dual_z(ji,jk,upper_index) - grid%z_area_dual_z(ji,jk,lower_index))
+          ! adding the terrain-following correction
+          diag%v_placeholder(ji,jk,jl) = diag%v_placeholder(ji,jk,jl) - slope*vertical_gradient
         enddo
       enddo
     enddo
