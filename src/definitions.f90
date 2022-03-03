@@ -192,6 +192,8 @@ module definitions
     real(wp), allocatable :: viscosity_coeff_div(:,:,:)       ! efficient viscosity acting on divergent movements (Eddies + molecular)
     real(wp), allocatable :: viscosity_coeff_curl(:,:,:)      ! efficient viscosity acting on rotational movements (Eddies + molecular)
     real(wp), allocatable :: viscosity_coeff_curl_dual(:,:,:) ! efficient viscosity acting on rotational movements at vertical vorticity points (Eddies + molecular)
+    real(wp), allocatable :: vert_hor_viscosity_u(:,:,:)      ! verticl diffusion coefficient acting on u-momentum
+    real(wp), allocatable :: vert_hor_viscosity_v(:,:,:)      ! verticl diffusion coefficient acting on v-momentum
     real(wp), allocatable :: scalar_diff_coeff_h(:,:,:)       ! efficient horizontal viscosity acting on scalars
     real(wp), allocatable :: scalar_diff_coeff_v(:,:,:)       ! efficient vertical viscosity acting on scalars
     real(wp), allocatable :: mom_diff_tend_x(:,:,:)           ! tendency due to momentum diffusion in x-direction

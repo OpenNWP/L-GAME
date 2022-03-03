@@ -376,6 +376,10 @@ program control
   irrev%viscosity_coeff_curl = 0._wp
   allocate(irrev%viscosity_coeff_curl_dual(nlins+1,ncols+1,nlays))
   irrev%viscosity_coeff_curl_dual = 0._wp
+  allocate(irrev%vert_hor_viscosity_u(nlins,ncols+1,nlays+1))
+  irrev%vert_hor_viscosity_u = 0._wp
+  allocate(irrev%vert_hor_viscosity_v(nlins+1,ncols,nlays+1))
+  irrev%vert_hor_viscosity_v = 0._wp
   allocate(irrev%scalar_diff_coeff_h(nlins,ncols,nlays))
   irrev%scalar_diff_coeff_h = 0._wp
   allocate(irrev%scalar_diff_coeff_v(nlins,ncols,nlays))
@@ -628,6 +632,8 @@ program control
   deallocate(irrev%viscosity_coeff_div)
   deallocate(irrev%viscosity_coeff_curl)
   deallocate(irrev%viscosity_coeff_curl_dual)
+  deallocate(irrev%vert_hor_viscosity_u)
+  deallocate(irrev%vert_hor_viscosity_v)
   deallocate(irrev%scalar_diff_coeff_h)
   deallocate(irrev%scalar_diff_coeff_v)
   deallocate(irrev%mom_diff_tend_x)
