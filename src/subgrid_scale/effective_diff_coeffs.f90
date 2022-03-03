@@ -167,7 +167,8 @@ module effective_diff_coeffs
       do ji=2,nlins
         do jk=2,ncols
           irrev%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*(density_gas(state,ji-1,jk-1,jl)+density_gas(state,ji-1,jk,jl) &
-          + density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl))*irrev%viscosity_coeff_curl_dual(ji,jk,jl)
+          + density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl))*irrev%viscosity_coeff_curl_dual(ji,jk,jl) &
+          *irrev%viscosity_coeff_curl_dual(ji,jk,jl)
         enddo
       enddo
       
@@ -176,18 +177,21 @@ module effective_diff_coeffs
       
         do jk=2,ncols
           irrev%viscosity_coeff_curl_dual(1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl) &
-          /(0.5_wp*(density_gas(state,1,jk,jl) + density_gas(state,ncols,jk,jl)))
+          *(0.25_wp*(density_gas(state,1,jk-1,jl) + density_gas(state,ncols,jk-1,jl) &
+          + density_gas(state,1,jk,jl) + density_gas(state,ncols,jk,jl)))
           irrev%viscosity_coeff_curl_dual(nlins+1,jk,jl) =  irrev%viscosity_coeff_curl_dual(1,jk,jl)
         enddo
         do ji=2,nlins
           irrev%viscosity_coeff_curl_dual(ji,1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl) &
-          /(0.5_wp*(density_gas(state,ji,ncols,jl)+density_gas(state,ji,1,jl)))
+          *(0.25_wp*(density_gas(state,ji-1,ncols,jl)+density_gas(state,ji-1,1,jl) &
+          + density_gas(state,ji,ncols,jl)+density_gas(state,ji,1,jl)))
           irrev%viscosity_coeff_curl_dual(ji,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl)
         enddo
       
         ! corners
-        irrev%viscosity_coeff_curl_dual(1,1,jl) = 0.25*(irrev%viscosity_molecular(1,1,jl) + irrev%viscosity_molecular(nlins,1,jl) &
-        + irrev%viscosity_molecular(1,ncols,jl) + irrev%viscosity_molecular(nlins,ncols,jl))
+        irrev%viscosity_coeff_curl_dual(1,1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl) &
+        *(0.25_wp*(density_gas(state,nlins,ncols,jl)+density_gas(state,nlins,1,jl) &
+        + density_gas(state,1,ncols,jl)+density_gas(state,1,1,jl)))
         irrev%viscosity_coeff_curl_dual(1,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
         irrev%viscosity_coeff_curl_dual(nlins+1,1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
         irrev%viscosity_coeff_curl_dual(nlins+1,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
@@ -325,6 +329,62 @@ module effective_diff_coeffs
           max_diff_v_coeff_turb)
           
           irrev%vert_hor_viscosity_v(nlins+1,jk,jl) = irrev%vert_hor_viscosity_v(1,jk,jl)
+          
+        endif
+        
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! multiplication by the density
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do ji=1,nlins
+      do jl=2,nlays
+        do jk=2,ncols
+          irrev%vert_hor_viscosity_u(ji,jk,jl) = irrev%vert_hor_viscosity_u(ji,jk,jl) &
+          ! molecular component
+          *0.25_wp*( &
+          density_gas(state,ji,jk-1,jl-1) + density_gas(state,ji,jk,jl-1) &
+          + density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl))
+          
+        enddo
+        
+        ! periodic boundary conditions
+        if (lperiodic) then
+          irrev%vert_hor_viscosity_u(ji,1,jl) = irrev%vert_hor_viscosity_u(ji,1,jl) &
+          ! molecular component
+          *0.25_wp*( &
+          density_gas(state,ji,ncols,jl-1) + density_gas(state,ji,1,jl-1) &
+          + density_gas(state,ji,ncols,jl) + density_gas(state,ji,1,jl))
+        endif
+        
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do jk=1,ncols
+      do jl=2,nlays
+        do ji=2,nlins
+          irrev%vert_hor_viscosity_v(ji,jk,jl) = irrev%vert_hor_viscosity_v(ji,jk,jl) &
+          ! molecular component
+          *0.25_wp*( &
+          density_gas(state,ji-1,jk,jl-1) + density_gas(state,ji,jk,jl-1) &
+          + irrev%viscosity_molecular(ji-1,jk,jl) + density_gas(state,ji,jk,jl))
+          
+        enddo
+        
+        ! periodic boundary conditions
+        if (lperiodic) then
+          irrev%vert_hor_viscosity_v(1,jk,jl) = irrev%vert_hor_viscosity_v(1,jk,jl) &
+          ! molecular component
+          *0.25_wp*( &
+          density_gas(state,nlins,jk,jl-1) + density_gas(state,1,jk,jl-1) &
+          + density_gas(state,nlins,jk,jl) + density_gas(state,1,jk,jl))
           
         endif
         
