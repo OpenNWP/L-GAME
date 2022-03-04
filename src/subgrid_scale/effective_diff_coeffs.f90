@@ -160,15 +160,14 @@ module effective_diff_coeffs
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     
-    ! multiplication by the density component
+    ! multiplication by the density
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
     do jl=1,nlays
       do ji=2,nlins
         do jk=2,ncols
           irrev%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*(density_gas(state,ji-1,jk-1,jl)+density_gas(state,ji-1,jk,jl) &
-          + density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl))*irrev%viscosity_coeff_curl_dual(ji,jk,jl) &
-          *irrev%viscosity_coeff_curl_dual(ji,jk,jl)
+          + density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl))*irrev%viscosity_coeff_curl_dual(ji,jk,jl)
         enddo
       enddo
       
@@ -179,7 +178,7 @@ module effective_diff_coeffs
           irrev%viscosity_coeff_curl_dual(1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl) &
           *(0.25_wp*(density_gas(state,1,jk-1,jl) + density_gas(state,ncols,jk-1,jl) &
           + density_gas(state,1,jk,jl) + density_gas(state,ncols,jk,jl)))
-          irrev%viscosity_coeff_curl_dual(nlins+1,jk,jl) =  irrev%viscosity_coeff_curl_dual(1,jk,jl)
+          irrev%viscosity_coeff_curl_dual(nlins+1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl)
         enddo
         do ji=2,nlins
           irrev%viscosity_coeff_curl_dual(ji,1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl) &
@@ -208,8 +207,7 @@ module effective_diff_coeffs
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          irrev%viscosity_coeff_curl(ji,jk,jl) = sum(irrev%viscosity_coeff_curl_dual(ji:ji+1,jk:jk+1,jl)) &
-          /size(irrev%viscosity_coeff_curl_dual(ji:ji+1,jk:jk+1,jl))
+          irrev%viscosity_coeff_curl(ji,jk,jl) = 0.25_wp*sum(irrev%viscosity_coeff_curl_dual(ji:ji+1,jk:jk+1,jl))
         enddo
       enddo
     enddo
