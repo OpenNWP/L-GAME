@@ -37,6 +37,8 @@ start_minute=${BASH_ARGV[14]}
 /
 
 &bc
+dtime_bc=${BASH_ARGV[18]}
+bc_root_filename=${BASH_ARGV[19]}
 /
 
 &rad

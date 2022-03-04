@@ -201,7 +201,7 @@ module set_initial_state
     ! This subroutine reads a model state from a NetCDF file.
     
     ! input arguments and output
-    real(wp),          intent(out) :: rho(:,:,:,:)    ! density
+    real(wp),          intent(out) :: rho(:,:,:,:)    ! mass densities
     real(wp),          intent(out) :: rhotheta(:,:,:) ! potential temperature density
     real(wp),          intent(out) :: wind_u(:,:,:)   ! u-wind
     real(wp),          intent(out) :: wind_v(:,:,:)   ! v-wind
@@ -211,7 +211,7 @@ module set_initial_state
     ! local variables
     integer           :: ncid                           ! ID of the NetCDF file
     integer           :: varid_rho                      ! variable ID of the densities
-    integer           :: varid_rhotheta                 ! variable ID of the potential temperature densities
+    integer           :: varid_rhotheta                 ! variable ID of the potential temperature density
     integer           :: varid_u                        ! variable ID of the u-wind
     integer           :: varid_v                        ! variable ID of the v-wind
     integer           :: varid_w                        ! variable ID of the w-wind

@@ -10,12 +10,12 @@ module bc_nml
   
   implicit none
   
-  integer           :: n_swamp           ! thickness of the swamp layer
-  logical           :: lperiodic         ! periodic boundary conditions switch
-  integer           :: dtime_bc          ! timestep for the boundary conditions update
-  logical           :: lyrigid           ! switch for a rigid wall in y-direction
-  character(len=64) :: bc_root_filename  ! root filename of the boundary conditions
-  real(wp)          :: t_latest_bc       ! latest boundary conditions update time
+  integer           :: n_swamp          ! thickness of the swamp layer
+  logical           :: lperiodic        ! periodic boundary conditions switch
+  integer           :: dtime_bc         ! timestep for the boundary conditions update
+  logical           :: lyrigid          ! switch for a rigid wall in y-direction
+  character(len=64) :: bc_root_filename ! root filename of the boundary conditions
+  real(wp)          :: t_latest_bc      ! latest boundary conditions update time
   
   namelist /bc/n_swamp,lperiodic,dtime_bc,lyrigid,bc_root_filename
   
@@ -29,7 +29,7 @@ module bc_nml
     ! default values
     n_swamp = 5
     lperiodic = .false.
-    dtime_bc = 10800._wp
+    dtime_bc = 10800
     lyrigid = .false.
     bc_root_filename = "bc"
     t_latest_bc = 0._wp

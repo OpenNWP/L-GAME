@@ -43,9 +43,9 @@ module boundaries
     r_d = specific_gas_constants(0)
     
     ! setting the time interpolation weights
-    old_weight = 1._wp - (t_now - t_latest_bc)/dtime_bc
+    old_weight = 1._wp - (t_now-t_latest_bc)/dtime_bc
     ! reading from a new boundary conditions file if necessary
-    if (old_weight < 0._wp) then
+    if (old_weight<0._wp) then
       call read_boundaries(bc,t_latest_bc+dtime_bc,bc%index_old)
       ! swapping the indices
       bc%index_old = bc%index_new
@@ -53,7 +53,7 @@ module boundaries
       if (bc%index_old==1) then
         bc%index_new = 2
       endif
-      ! updating the latest boundary conditions read tome
+      ! updating the latest boundary conditions read time
       t_latest_bc = t_latest_bc + dtime_bc
     endif
     new_weight = 1._wp - old_weight
@@ -64,30 +64,30 @@ module boundaries
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          state%rho(ji,jk,jl,:) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rho(ji,jk,jl,:,1) &
-          + new_weight*bc%rho(ji,jk,jl,:,2)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rho(ji,jk,jl,:)
-          state%condensed_rho_t(ji,jk,jl,:) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%condensed_rho_t(ji,jk,jl,:,1) &
-          + new_weight*bc%condensed_rho_t(ji,jk,jl,:,2)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%condensed_rho_t(ji,jk,jl,:)
-          state%rhotheta(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rhotheta(ji,jk,jl,1) &
-          + new_weight*bc%rhotheta(ji,jk,jl,2)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rhotheta(ji,jk,jl)
-          state%wind_w(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%wind_w(ji,jk,jl,1) &
-          + new_weight*bc%wind_w(ji,jk,jl,2)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%wind_w(ji,jk,jl)
+          state%rho(ji,jk,jl,:) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rho(ji,jk,jl,:,bc%index_old) &
+          + new_weight*bc%rho(ji,jk,jl,:,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rho(ji,jk,jl,:)
+          state%condensed_rho_t(ji,jk,jl,:) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%condensed_rho_t(ji,jk,jl,:,bc%index_old) &
+          + new_weight*bc%condensed_rho_t(ji,jk,jl,:,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk)) &
+          *state%condensed_rho_t(ji,jk,jl,:)
+          state%rhotheta(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rhotheta(ji,jk,jl,bc%index_old) &
+          + new_weight*bc%rhotheta(ji,jk,jl,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rhotheta(ji,jk,jl)
+          state%wind_w(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%wind_w(ji,jk,jl,bc%index_old) &
+          + new_weight*bc%wind_w(ji,jk,jl,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%wind_w(ji,jk,jl)
         enddo
-        state%wind_w(ji,jk,nlays+1) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%wind_w(ji,jk,nlays+1,1) &
-        + new_weight*bc%wind_w(ji,jk,nlays+1,2)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%wind_w(ji,jk,nlays+1)
+        state%wind_w(ji,jk,nlays+1) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%wind_w(ji,jk,nlays+1,bc%index_old) &
+        + new_weight*bc%wind_w(ji,jk,nlays+1,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%wind_w(ji,jk,nlays+1)
       enddo
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-    
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays
-          state%wind_u(ji,jk,jl) = bc%u_bc_factor(ji,jk)*(old_weight*bc%wind_u(ji,jk,jl,1) &
-          + new_weight*bc%wind_u(ji,jk,jl,2)) + (1._wp - bc%u_bc_factor(ji,jk))*state%wind_u(ji,jk,jl)
+          state%wind_u(ji,jk,jl) = bc%u_bc_factor(ji,jk)*(old_weight*bc%wind_u(ji,jk,jl,bc%index_old) &
+          + new_weight*bc%wind_u(ji,jk,jl,bc%index_new)) + (1._wp - bc%u_bc_factor(ji,jk))*state%wind_u(ji,jk,jl)
         enddo
       enddo
     enddo
@@ -99,8 +99,8 @@ module boundaries
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
-          state%wind_v(ji,jk,jl) = bc%v_bc_factor(ji,jk)*(old_weight*bc%wind_v(ji,jk,jl,1) &
-          + new_weight*bc%wind_v(ji,jk,jl,2)) + (1._wp - bc%v_bc_factor(ji,jk))*state%wind_v(ji,jk,jl)
+          state%wind_v(ji,jk,jl) = bc%v_bc_factor(ji,jk)*(old_weight*bc%wind_v(ji,jk,jl,bc%index_old) &
+          + new_weight*bc%wind_v(ji,jk,jl,bc%index_new)) + (1._wp - bc%v_bc_factor(ji,jk))*state%wind_v(ji,jk,jl)
         enddo
       enddo
     enddo
@@ -123,7 +123,8 @@ module boundaries
     
     type(t_bc), intent(inout) :: bc             ! boundary conditions
     real(wp),   intent(in)    :: t_update       ! valid time of the boundary conditions
-    integer,    intent(in)    :: timestep_index ! index of the boundary conditions timestep (1 or 2)
+    integer,    intent(in)    :: timestep_index ! index of the boundary conditions timestep (1 or 2) to which the
+                                                ! data in the NetCDF file will be written
     
     ! local variables
     character(len=64) :: filename ! file to read the initial state from
@@ -131,7 +132,7 @@ module boundaries
     ! constructing the filename to read the data from
     filename = "../../real_weather/" // trim(bc_root_filename) // "+" // &
     trim(int2string(int(t_update - t_init))) // "s.nc"
-  
+    
     write(*,*) "Reading boundary conditions from file", trim(filename), "..."
       
     ! reading the boundary conditions from a the NetCDF file
