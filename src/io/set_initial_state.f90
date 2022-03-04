@@ -23,6 +23,7 @@ module set_initial_state
   public :: bg_pres
   public :: geopot
   public :: restart
+  public :: read_from_nc
   public :: nc_check
   
   contains
@@ -216,7 +217,7 @@ module set_initial_state
     integer           :: varid_w                        ! variable ID of the w-wind
     
     ! creating the NetCDF file
-    call nc_check(nf90_open(filename,NF90_CLOBBER,ncid))
+    call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
     call nc_check(nf90_inq_varid(ncid,"rho",varid_rho))

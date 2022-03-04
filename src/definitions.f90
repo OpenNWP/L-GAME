@@ -129,6 +129,8 @@ module definitions
     real(wp), allocatable :: scalar_bc_factor(:,:)      ! boundary conditions factor for scalar fields
     real(wp), allocatable :: u_bc_factor(:,:)           ! boundary conditions factor for u-vector fields
     real(wp), allocatable :: v_bc_factor(:,:)           ! boundary conditions factor for v-vector fields
+    integer               :: index_old                  ! index of the old BC time
+    integer               :: index_new                  ! index of the new BC time
     
   end type t_bc
   

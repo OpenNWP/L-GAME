@@ -115,7 +115,7 @@ module manage_rkhevi
     
     ! calling the boundary conditions subroutine for real-data simulation
     if (.not. lperiodic) then
-      call update_boundaries(state_new,bc,grid)
+      call update_boundaries(state_new,bc,(total_step_counter+1)*dtime,grid)
     endif
     
   end subroutine rkhevi

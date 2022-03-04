@@ -5,31 +5,33 @@ module boundaries
 
   ! This module handles everything dealing with boundary conditions.
 
-  use definitions,      only: t_state,t_bc,t_grid,wp
-  use run_nml,          only: nlins,ncols,nlays
-  use bc_nml,           only: n_swamp
-  use constants,        only: M_PI,p_0
-  use constituents_nml, only: no_of_condensed_constituents
-  use dictionary,       only: spec_heat_capacities_v_gas,specific_gas_constants
+  use definitions,       only: t_state,t_bc,t_grid,wp
+  use run_nml,           only: nlins,ncols,nlays,t_init
+  use bc_nml,            only: n_swamp,bc_root_filename,bc_root_filename,dtime_bc,t_latest_bc
+  use constants,         only: M_PI,p_0
+  use constituents_nml,  only: no_of_condensed_constituents
+  use dictionary,        only: spec_heat_capacities_v_gas,specific_gas_constants
+  use set_initial_state, only: read_from_nc
 
   implicit none
   
   private
   
   public :: update_boundaries
-  public :: rescale_tend
+  public :: read_boundaries
   public :: setup_bc_factor
   
   contains
   
-  subroutine update_boundaries(state,bc,grid)
+  subroutine update_boundaries(state,bc,t_now,grid)
   
-    ! updates the boundary conditions
+    ! This subroutine brings the boundary conditions into the model.
     
     ! input arguments and output
-    type(t_state), intent(inout) :: state
-    type(t_bc),    intent(inout) :: bc
-    type(t_grid),  intent(in)    :: grid
+    type(t_state), intent(inout) :: state ! state of the model (which will be modified)
+    type(t_bc),    intent(inout) :: bc    ! boundary conditions
+    real(wp),      intent(in)    :: t_now ! model time
+    type(t_grid),  intent(in)    :: grid  ! grid properties (containing the background state)
     
     ! local variables
     real(wp) :: old_weight,new_weight ! time interpolation weights
@@ -39,6 +41,22 @@ module boundaries
     
     c_v = spec_heat_capacities_v_gas(0)
     r_d = specific_gas_constants(0)
+    
+    ! setting the time interpolation weights
+    old_weight = 1._wp - (t_now - t_latest_bc)/dtime_bc
+    ! reading from a new boundary conditions file if necessary
+    if (old_weight < 0._wp) then
+      call read_boundaries(bc,t_latest_bc+dtime_bc,bc%index_old)
+      ! swapping the indices
+      bc%index_old = bc%index_new
+      bc%index_new = 1
+      if (bc%index_old==1) then
+        bc%index_new = 2
+      endif
+      ! updating the latest boundary conditions read tome
+      t_latest_bc = t_latest_bc + dtime_bc
+    endif
+    new_weight = 1._wp - old_weight
     
     ! linear combination of the model state and the boundary conditions
     !$OMP PARALLEL
@@ -99,11 +117,30 @@ module boundaries
     
   end subroutine update_boundaries
   
-  subroutine rescale_tend
+  subroutine read_boundaries(bc,t_update,timestep_index)
   
-    ! rescales the tendencies to account for boundary conditions
+    ! This subroutine reads the boundary conditions from a NetCDF file.
+    
+    type(t_bc), intent(inout) :: bc             ! boundary conditions
+    real(wp),   intent(in)    :: t_update       ! valid time of the boundary conditions
+    integer,    intent(in)    :: timestep_index ! index of the boundary conditions timestep (1 or 2)
+    
+    ! local variables
+    character(len=64) :: filename ! file to read the initial state from
+    
+    ! constructing the filename to read the data from
+    filename = "../../real_weather/" // trim(bc_root_filename) // "+" // &
+    trim(int2string(int(t_update - t_init))) // "s.nc"
   
-  end subroutine rescale_tend
+    write(*,*) "Reading boundary conditions from file", trim(filename), "..."
+      
+    ! reading the boundary conditions from a the NetCDF file
+    call read_from_nc(bc%rho(:,:,:,:,timestep_index),bc%rhotheta(:,:,:,timestep_index), &
+    bc%wind_u(:,:,:,timestep_index),bc%wind_v(:,:,:,timestep_index),bc%wind_w(:,:,:,timestep_index),filename)
+    
+    write(*,*) "Boundary conditions read."
+  
+  end subroutine read_boundaries
   
   subroutine setup_bc_factor(bc)
   
@@ -156,6 +193,17 @@ module boundaries
     !$OMP END PARALLEL
   
   end subroutine setup_bc_factor
+  
+  character(len=64) function int2string(input)
+  
+    ! This is a helper function which converts an integer to a string.
+  
+    integer, intent(in) :: input
+    
+    write(int2string, *) input
+    int2string = adjustl(int2string)
+    
+  end function int2string
 
 end module boundaries
 

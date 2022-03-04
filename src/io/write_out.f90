@@ -56,6 +56,8 @@ module write_out
     integer           :: ji,jk,jl                  ! line indices
     real(wp)          :: upper_weight(nlins,ncols) ! interpolation weights
     
+    write(*,*) "Writing output ..."
+    
     ! creating the NetCDF file
     write(time_since_init_min_str,*) time_since_init_min
     time_since_init_min_str = adjustl(time_since_init_min_str)
@@ -190,6 +192,8 @@ module write_out
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
+    
+    write(*,*) "Output written."
     
   end subroutine write_output
 

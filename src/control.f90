@@ -19,10 +19,10 @@ program control
   use write_out,                 only: write_output
   use manage_rkhevi,             only: rkhevi
   use linear_combine_two_states, only: lin_combination,interpolation_t
-  use bc_nml,                    only: bc_nml_setup,lperiodic
+  use bc_nml,                    only: bc_nml_setup,lperiodic,t_latest_bc,dtime_bc
   use rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
   use manage_radiation_calls,    only: call_radiation
-  use boundaries,                only: setup_bc_factor
+  use boundaries,                only: setup_bc_factor,read_boundaries
   use radiation,                 only: radiation_init
   use derived_quantities,        only: temperature_diagnostics
   
@@ -255,6 +255,8 @@ program control
   bc%u_bc_factor = 0._wp
   allocate(bc%v_bc_factor(nlins+1,ncols))
   bc%v_bc_factor = 0._wp
+  bc%index_old = 1
+  bc%index_new = 2
   ! state to be written out
   allocate(state_write%rho(nlins,ncols,nlays,no_of_constituents))
   state_write%rho = 0._wp
@@ -427,6 +429,9 @@ program control
   write(*,*) "Setting the initial state..."
   if (lrestart) then
     call restart(state_old,grid)
+    call read_boundaries(bc,real(t_init,wp),1)
+    call read_boundaries(bc,real(t_init+dtime_bc,wp),2)
+    t_latest_bc = t_0
   elseif (lideal) then
     call ideal_init(state_old,diag,grid)
   endif
@@ -480,7 +485,7 @@ program control
     
     t_0 = t_0+dtime
     timestep_counter = timestep_counter+1
-    write(*,*) "Step ", timestep_counter, " completed."
+    write(*,*) "Step", timestep_counter, " completed."
     
   enddo
   
