@@ -46,7 +46,7 @@ program control
   write(*,*) stars
   write(*,*) "*                                                                                *"
   write(*,*) "*                                 This is L-GAME                                 *"
-  write(*,*) "*                  Regional Geophysical Fluids Modeling Framework                *"
+  write(*,*) "*               Limited-area Geophysical Fluids Modeling Framework               *"
   write(*,*) "*                                                                                *"
   write(*,*) stars
 
