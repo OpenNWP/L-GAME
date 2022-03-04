@@ -120,21 +120,15 @@ module definitions
   type t_bc
   
     ! type containing information on boundary conditions
-    real(wp), allocatable :: rho_old(:,:,:,:)                 ! mass densities at the old timestep
-    real(wp), allocatable :: rhotheta_old(:,:,:)              ! potential temperature densities at the old timestep
-    real(wp), allocatable :: wind_u_old(:,:,:)                ! x-component of the wind at the old timestep
-    real(wp), allocatable :: wind_v_old(:,:,:)                ! y-component of the wind at the old timestep
-    real(wp), allocatable :: wind_w_old(:,:,:)                ! vertical wind at the old timestep
-    real(wp), allocatable :: condensed_rho_t_old(:,:,:,:)     ! temperature densities of the constituents at the old timestep
-    real(wp), allocatable :: rho_new(:,:,:,:)                 ! mass densities at the new timestep
-    real(wp), allocatable :: rhotheta_new(:,:,:)              ! potential temperature densities at the new timestep
-    real(wp), allocatable :: wind_u_new(:,:,:)                ! x-component of the wind at the new timestep
-    real(wp), allocatable :: wind_v_new(:,:,:)                ! y-component of the wind at the new timestep
-    real(wp), allocatable :: wind_w_new(:,:,:)                ! vertical wind at the new timestep
-    real(wp), allocatable :: condensed_rho_t_new(:,:,:,:)     ! temperature densities of the constituents at the new timestep
-    real(wp), allocatable :: scalar_bc_factor(:,:)            ! boundary conditions factor for scalar fields
-    real(wp), allocatable :: u_bc_factor(:,:)                 ! boundary conditions factor for u-vector fields
-    real(wp), allocatable :: v_bc_factor(:,:)                 ! boundary conditions factor for v-vector fields
+    real(wp), allocatable :: rho(:,:,:,:,:)             ! mass densities
+    real(wp), allocatable :: rhotheta(:,:,:,:)          ! potential temperature densities
+    real(wp), allocatable :: wind_u(:,:,:,:)            ! x-component of the wind
+    real(wp), allocatable :: wind_v(:,:,:,:)            ! y-component of the wind
+    real(wp), allocatable :: wind_w(:,:,:,:)            ! vertical wind
+    real(wp), allocatable :: condensed_rho_t(:,:,:,:,:) ! temperature densities of the constituents
+    real(wp), allocatable :: scalar_bc_factor(:,:)      ! boundary conditions factor for scalar fields
+    real(wp), allocatable :: u_bc_factor(:,:)           ! boundary conditions factor for u-vector fields
+    real(wp), allocatable :: v_bc_factor(:,:)           ! boundary conditions factor for v-vector fields
     
   end type t_bc
   

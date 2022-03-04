@@ -237,30 +237,18 @@ program control
   allocate(tend%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
   tend%condensed_rho_t = 0._wp
   ! state containing the tendency of the boundary conditions
-  allocate(bc%rho_old(nlins,ncols,nlays,no_of_constituents))
-  bc%rho_old = 0._wp
-  allocate(bc%rhotheta_old(nlins,ncols,nlays))
-  bc%rhotheta_old = 0._wp
-  allocate(bc%wind_u_old(nlins,ncols+1,nlays))
-  bc%wind_u_old = 0._wp
-  allocate(bc%wind_v_old(nlins+1,ncols,nlays))
-  bc%wind_v_old = 0._wp
-  allocate(bc%wind_w_old(nlins,ncols,nlays+1))
-  bc%wind_w_old = 0._wp
-  allocate(bc%condensed_rho_t_old(nlins,ncols,nlays,no_of_condensed_constituents))
-  bc%condensed_rho_t_old = 0._wp
-  allocate(bc%rho_new(nlins,ncols,nlays,no_of_constituents))
-  bc%rho_new = 0._wp
-  allocate(bc%rhotheta_new(nlins,ncols,nlays))
-  bc%rhotheta_new = 0._wp
-  allocate(bc%wind_u_new(nlins,ncols+1,nlays))
-  bc%wind_u_new = 0._wp
-  allocate(bc%wind_v_new(nlins+1,ncols,nlays))
-  bc%wind_v_new = 0._wp
-  allocate(bc%wind_w_new(nlins,ncols,nlays+1))
-  bc%wind_w_new = 0._wp
-  allocate(bc%condensed_rho_t_new(nlins,ncols,nlays,no_of_condensed_constituents))
-  bc%condensed_rho_t_new = 0._wp
+  allocate(bc%rho(nlins,ncols,nlays,no_of_constituents,2))
+  bc%rho = 0._wp
+  allocate(bc%rhotheta(nlins,ncols,nlays,2))
+  bc%rhotheta = 0._wp
+  allocate(bc%wind_u(nlins,ncols+1,nlays,2))
+  bc%wind_u = 0._wp
+  allocate(bc%wind_v(nlins+1,ncols,nlays,2))
+  bc%wind_v = 0._wp
+  allocate(bc%wind_w(nlins,ncols,nlays+1,2))
+  bc%wind_w = 0._wp
+  allocate(bc%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents,2))
+  bc%condensed_rho_t = 0._wp
   allocate(bc%scalar_bc_factor(nlins,ncols))
   bc%scalar_bc_factor = 0._wp
   allocate(bc%u_bc_factor(nlins,ncols+1))
@@ -575,18 +563,12 @@ program control
   deallocate(tend%wind_w)
   deallocate(tend%condensed_rho_t)
   ! state containing the tendency of the boundary conditions
-  deallocate(bc%rho_old)
-  deallocate(bc%rhotheta_old)
-  deallocate(bc%wind_u_old)
-  deallocate(bc%wind_v_old)
-  deallocate(bc%wind_w_old)
-  deallocate(bc%condensed_rho_t_old)
-  deallocate(bc%rho_new)
-  deallocate(bc%rhotheta_new)
-  deallocate(bc%wind_u_new)
-  deallocate(bc%wind_v_new)
-  deallocate(bc%wind_w_new)
-  deallocate(bc%condensed_rho_t_new)
+  deallocate(bc%rho)
+  deallocate(bc%rhotheta)
+  deallocate(bc%wind_u)
+  deallocate(bc%wind_v)
+  deallocate(bc%wind_w)
+  deallocate(bc%condensed_rho_t)
   deallocate(bc%scalar_bc_factor)
   deallocate(bc%u_bc_factor)
   deallocate(bc%v_bc_factor)
