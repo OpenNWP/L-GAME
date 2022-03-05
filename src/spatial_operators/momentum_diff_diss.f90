@@ -266,7 +266,7 @@ module momentum_diff_diss
     !$OMP END PARALLEL
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jl)
+    !$OMP DO PRIVATE(ji,jk,jl)
     do jk=1,ncols
       do jl=1,nlays
         do ji=2,nlins
