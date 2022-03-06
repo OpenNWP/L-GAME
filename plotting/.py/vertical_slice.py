@@ -9,9 +9,10 @@ import netCDF4 as nc
 run_id = sys.argv[1]
 plot_time_since_init_min = sys.argv[2]
 varname = sys.argv[3]
+lgame_home_dir = sys.argv[4]
 
 # reading the model output
-input_filename = "../output/" + run_id + "/" + run_id + "+" + plot_time_since_init_min + "min.nc"
+input_filename = lgame_home_dir + "/output/" + run_id + "/" + run_id + "+" + plot_time_since_init_min + "min.nc"
 ds = nc.Dataset(input_filename, "r", format="NETCDF4")
 lat_vector = ds["lat_model"][:]
 lon_vector = ds["lon_model"][:]
@@ -40,4 +41,4 @@ plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname)
 plt.ylim([0, 10])
 plt.xlabel("x / km")
 plt.ylabel("z / km")
-fig.savefig("../figs/" + run_id + "+" + plot_time_since_init_min + "min_" + varname + ".png")
+fig.savefig(lgame_home_dir + "/figs/" + run_id + "+" + plot_time_since_init_min + "min_" + varname + ".png")
