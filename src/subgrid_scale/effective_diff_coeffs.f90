@@ -73,7 +73,7 @@ module effective_diff_coeffs
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     
-    ! multiplaying by the density
+    ! multiplying by the density
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
@@ -122,7 +122,7 @@ module effective_diff_coeffs
       if (lperiodic) then
       
         irrev%viscosity_coeff_curl_dual(1,:,jl) = 0.5_wp*(irrev%viscosity_molecular(1,:,jl) + irrev%viscosity_molecular(nlins,:,jl))
-        irrev%viscosity_coeff_curl_dual(nlins+1,:,jl) =  irrev%viscosity_coeff_curl_dual(1,:,jl)
+        irrev%viscosity_coeff_curl_dual(nlins+1,:,jl) = irrev%viscosity_coeff_curl_dual(1,:,jl)
         irrev%viscosity_coeff_curl_dual(:,1,jl) = 0.5_wp*(irrev%viscosity_molecular(:,ncols,jl) + irrev%viscosity_molecular(:,1,jl))
         irrev%viscosity_coeff_curl_dual(:,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(:,1,jl)
       
@@ -463,7 +463,7 @@ module effective_diff_coeffs
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer :: ji,jk,jl  ! looop variables
+    integer :: ji,jk,jl  ! loop variables
     real(wp) :: c_g_v    ! specific heat capacity
     
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
@@ -527,7 +527,7 @@ module effective_diff_coeffs
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer :: ji,jk,jl ! looop variables
+    integer :: ji,jk,jl ! loop variables
     
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
