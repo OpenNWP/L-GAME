@@ -581,7 +581,7 @@ module effective_diff_coeffs
   
   function tke2vertical_diff_coeff(tke)
     
-    ! This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
+    ! This function returns the vertical kinematic eddy viscosity as a function of the specific TKE.
 	
     ! input
     real(wp), intent(in) :: tke         ! specific turbulent kinetic energy (TKE)

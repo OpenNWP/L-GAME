@@ -127,7 +127,7 @@ module boundaries
                                                 ! data in the NetCDF file will be written
     
     ! local variables
-    character(len=64) :: filename ! file to read the initial state from
+    character(len=64) :: filename ! file to read the boundary state from
     
     ! constructing the filename to read the data from
     filename = "../../real_weather/" // trim(bc_root_filename) // "+" // &
@@ -146,12 +146,13 @@ module boundaries
   subroutine setup_bc_factor(bc)
   
     ! This subroutine calculates the boundary conditions rescale factors.
+    ! It only needs to be called once (in the beginning).
   
     ! argument and output
     type(t_bc), intent(inout) :: bc
     
     ! local variables
-    real(wp) :: dist_from_boundary ! index distance from the boundaary of the domain
+    real(wp) :: dist_from_boundary ! index distance from the boundary of the domain
     integer  :: ji,jk              ! loop indices
     
     ! rescale factor for scalar fields

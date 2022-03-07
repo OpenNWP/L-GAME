@@ -216,7 +216,7 @@ module set_initial_state
     integer           :: varid_v                        ! variable ID of the v-wind
     integer           :: varid_w                        ! variable ID of the w-wind
     
-    ! creating the NetCDF file
+    ! opening the NetCDF file
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
