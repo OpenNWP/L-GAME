@@ -21,14 +21,14 @@ module inner_product
     ! This subroutine calculates the inner product of two vector fields.
     
     ! input arguments and output
-    real(wp), intent(in)     :: u_vector_1(:,:,:)    ! vectorfield 1 in x-direction
-    real(wp), intent(in)     :: v_vector_1(:,:,:)    ! vectorfield 1 in y-direction
-    real(wp), intent(in)     :: w_vector_1(:,:,:)    ! vectorfield 1 in z-direction
-    real(wp), intent(in)     :: u_vector_2(:,:,:)    ! vectorfield 2 in x-direction
-    real(wp), intent(in)     :: v_vector_2(:,:,:)    ! vectorfield 2 in y-direction
-    real(wp), intent(in)     :: w_vector_2(:,:,:)    ! vectorfield 2 in z-direction
-    real(wp), intent(inout)  :: output_scalar(:,:,:) ! result
-    type(t_grid), intent(in) :: grid                 ! grid properties
+    real(wp),     intent(in)    :: u_vector_1(:,:,:)    ! vectorfield 1 in x-direction
+    real(wp),     intent(in)    :: v_vector_1(:,:,:)    ! vectorfield 1 in y-direction
+    real(wp),     intent(in)    :: w_vector_1(:,:,:)    ! vectorfield 1 in z-direction
+    real(wp),     intent(in)    :: u_vector_2(:,:,:)    ! vectorfield 2 in x-direction
+    real(wp),     intent(in)    :: v_vector_2(:,:,:)    ! vectorfield 2 in y-direction
+    real(wp),     intent(in)    :: w_vector_2(:,:,:)    ! vectorfield 2 in z-direction
+    real(wp),     intent(inout) :: output_scalar(:,:,:) ! result
+    type(t_grid), intent(in)    :: grid                 ! grid properties
     
     ! local variables
     integer :: ji,jk,jl ! loop indices

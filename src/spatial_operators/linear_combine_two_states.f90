@@ -5,7 +5,7 @@ module linear_combine_two_states
 
   ! This module contains functionality to interpolate two states.
 
-  use definitions, only: t_state,wp,t_grid
+  use definitions,      only: t_state,wp,t_grid
   use constituents_nml, only: no_of_condensed_constituents
   
   implicit none

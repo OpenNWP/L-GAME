@@ -113,13 +113,13 @@ module divergence_operators
 
     ! This subroutine adds the divergence of the vertical component of a vector field to the input scalar field.	
 
-    real(wp), intent(in)     :: in_field(:,:,:)
-    real(wp), intent(inout)  :: out_field(:,:,:)
-    type(t_grid), intent(in) :: grid
+    real(wp),     intent(in)    :: in_field(:,:,:)
+    real(wp),     intent(inout) :: out_field(:,:,:)
+    type(t_grid), intent(in)    :: grid
 
     !local variables
-    integer  :: ji,jk,jl ! loop indices
-    real(wp) :: contra_upper,contra_lower,comp_v
+    integer  :: ji,jk,jl                         ! loop indices
+    real(wp) :: contra_upper,contra_lower,comp_v ! kinematic quantities for computing the vertical divergence
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,contra_upper,contra_lower,comp_v)
