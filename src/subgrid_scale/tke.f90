@@ -46,7 +46,7 @@ module tke
         do jl=1,nlays
           ! calculating the decay constant
           decay_constant = 8._wp*M_PI**2/grid%mean_velocity_area*(irrev%viscosity_coeff_div(ji,jk,jl) &
-          + irrev%viscosity_coeff_curl(ji,jk,jl))
+          + irrev%viscosity_coeff_curl(ji,jk,jl))/density_gas(state,ji,jk,jl)
           
           irrev%tke(ji,jk,jl) = irrev%tke(ji,jk,jl) + dtime*( &
           ! advection
