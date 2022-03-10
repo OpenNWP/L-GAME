@@ -25,10 +25,10 @@ module phase_trans
     ! This subroutine calculates the phase transition rates.
   
     ! input arguments, output
-    type(t_state),intent(in)    :: state ! the state with which to calculate the phase transition rates
-    type(t_diag), intent(inout) :: diag  ! diagnostic quantities
-    type(t_irrev),intent(inout) :: irrev ! irreversible quantities
-    type(t_grid), intent(in)    :: grid  ! grid properties
+    type(t_state), intent(in)    :: state ! the state with which to calculate the phase transition rates
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
+    type(t_grid),  intent(in)    :: grid  ! grid properties
   
     ! local variables
     real(wp) :: dtime_sat               ! time step for the saturation adjustment

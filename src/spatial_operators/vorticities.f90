@@ -30,7 +30,7 @@ module vorticities
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    integer  :: ji,jk,jl ! loop indices
+    integer :: ji,jk,jl ! loop indices
     
     ! calculating the relative vorticity in x-direction
     !$OMP PARALLEL

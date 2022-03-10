@@ -940,7 +940,7 @@ module grid_generator
     real(wp), allocatable :: longitude_input(:)     ! longitudes of the input dataset
     real(wp), allocatable :: lat_distance_vector(:) ! latitudes distance vector
     real(wp), allocatable :: lon_distance_vector(:) ! longitudes distance vector
-    integer, allocatable  :: z_input(:,:)           ! the input dataset
+    integer,  allocatable :: z_input(:,:)           ! the input dataset
     integer               :: lat_index,lon_index    ! minimum distance indices
     integer               :: ji,jk,jl               ! loop indices
     
@@ -1015,7 +1015,7 @@ module grid_generator
   
     ! This subroutine smoothes a scalar field on one layer.
     
-    real(wp), intent(inout) :: array(nlins,ncols)
+    real(wp), intent(inout) :: array(nlins,ncols) ! The field to smooth.
     
     ! local variables
     real(wp) :: original_array(nlins,ncols) ! the unsmoothed input array
@@ -1122,9 +1122,9 @@ module grid_generator
     ! This function calculates the area of a vertical face.
     
     ! input
-    real(wp) :: lower_z            ! geometric height of the lower boundary of the face
-    real(wp) :: upper_z            ! geometric height of the upper boundary of the face
-    real(wp) :: lower_length       ! length of the lower boundary of the face
+    real(wp) :: lower_z      ! geometric height of the lower boundary of the face
+    real(wp) :: upper_z      ! geometric height of the upper boundary of the face
+    real(wp) :: lower_length ! length of the lower boundary of the face
     ! output
     real(wp) :: vertical_face_area ! the result
     
@@ -1143,8 +1143,8 @@ module grid_generator
     ! This function calculates a latitude- and height-dependant idealized vegetation height.
 
     ! input arguments
-    real(wp) :: latitude                ! latitude of this point
-    real(wp) :: oro                     ! height of the terrain at this point
+    real(wp) :: latitude ! latitude of this point
+    real(wp) :: oro      ! height of the terrain at this point
     ! output
     real(wp) :: vegetation_height_ideal ! the result
     
@@ -1163,8 +1163,8 @@ module grid_generator
     ! This subroutine calculates the Cartesian normal vector of a point given its geographical coordinates.
     
     ! input arguments and output
-    real(wp), intent(in)  :: lat
-    real(wp), intent(in)  :: lon
+    real(wp), intent(in)  :: lat  ! input latitude
+    real(wp), intent(in)  :: lon  ! input longitude
     real(wp), intent(out) :: r(3) ! positional vector (result)
 
     r(1) = cos(lat)*cos(lon)
@@ -1179,8 +1179,8 @@ module grid_generator
 
     ! input arguments and output
     real(wp), intent(in)  :: r(3)    ! positional vector
-    real(wp), intent(out) :: lat_out
-    real(wp), intent(out) :: lon_out
+    real(wp), intent(out) :: lat_out ! output latitude
+    real(wp), intent(out) :: lon_out ! output longitude
     
     lat_out = asin(r(3)/sqrt(r(1)**2+r(2)**2+r(3)**2))
     lon_out = atan2(r(2),r(1))
@@ -1192,7 +1192,7 @@ module grid_generator
     ! This function calculates the local eastward basis vector.
     
     ! input arguments and output
-    real(wp), intent(in)  :: lon
+    real(wp), intent(in)  :: lon ! geographical longitude
     real(wp), intent(out) :: result_vec(3)
     
     result_vec(1) = -sin(lon)
@@ -1206,8 +1206,8 @@ module grid_generator
     ! This subroutine calculates the local northward basis vector.
     
     ! input arguments and output
-    real(wp), intent(in)  :: lat
-    real(wp), intent(in)  :: lon
+    real(wp), intent(in)  :: lat ! geographical latitude
+    real(wp), intent(in)  :: lon ! geographical longitude
     real(wp), intent(out) :: result_vec(3)
     
     result_vec(1) = -sin(lat)*cos(lon)

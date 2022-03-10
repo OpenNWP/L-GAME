@@ -95,7 +95,7 @@ module derived_quantities
   
     ! input arguments
     type(t_state), intent(in) :: state    ! state with which to calculate c_p
-    integer, intent(in)       :: ji,jk,jl ! spatial indices of the gridpoint
+    integer,       intent(in) :: ji,jk,jl ! spatial indices of the gridpoint
     
     ! output
     real(wp) :: spec_heat_cap_diagnostics_p
@@ -132,7 +132,7 @@ module derived_quantities
   
     ! input arguments
     type(t_state), intent(in) :: state    ! state with which to calculate the gas constant
-    integer, intent(in)       :: ji,jk,jl ! spatial indices of the gridpoint
+    integer,       intent(in) :: ji,jk,jl ! spatial indices of the gridpoint
     ! output
     real(wp)                  :: gas_constant_diagnostics
     
@@ -169,7 +169,7 @@ module derived_quantities
     
     ! input arguments
     type(t_state), intent(in) :: state         ! state with which to calculate the result
-    integer, intent(in)       :: ji,jk,jl      ! indices of the gridpoint
+    integer,       intent(in) :: ji,jk,jl      ! indices of the gridpoint
     ! output
     real(wp)                  :: density_total ! the result
     
@@ -190,7 +190,7 @@ module derived_quantities
     
     ! input arguments
     type(t_state), intent(in) :: state       ! state with which to calculate the result
-    integer, intent(in)       :: ji,jk,jl    ! indices of the gridpoint
+    integer,       intent(in) :: ji,jk,jl    ! indices of the gridpoint
     ! output
     real(wp)                  :: density_gas ! the result
     

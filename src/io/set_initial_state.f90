@@ -209,12 +209,12 @@ module set_initial_state
     character(len=64), intent(in)  :: filename        ! filename to read from
     
     ! local variables
-    integer           :: ncid                           ! ID of the NetCDF file
-    integer           :: varid_rho                      ! variable ID of the densities
-    integer           :: varid_rhotheta                 ! variable ID of the potential temperature density
-    integer           :: varid_u                        ! variable ID of the u-wind
-    integer           :: varid_v                        ! variable ID of the v-wind
-    integer           :: varid_w                        ! variable ID of the w-wind
+    integer :: ncid           ! ID of the NetCDF file
+    integer :: varid_rho      ! variable ID of the densities
+    integer :: varid_rhotheta ! variable ID of the potential temperature density
+    integer :: varid_u        ! variable ID of the u-wind
+    integer :: varid_v        ! variable ID of the v-wind
+    integer :: varid_w        ! variable ID of the w-wind
     
     ! opening the NetCDF file
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
@@ -314,9 +314,9 @@ module set_initial_state
   
     ! This function returns the temperature of the background state.
     
-    real(wp), intent(in) :: height
+    real(wp), intent(in) :: height  ! geometric height above mean sea level
     ! output
-    real(wp)             :: bg_temp
+    real(wp)             :: bg_temp ! the result
 
     ! troposphere
     if (height < tropo_height) then  
@@ -335,9 +335,9 @@ module set_initial_state
   
     ! This function returns the pressure of the background state (only used in the lowest layer during the initialization).
     
-    real(wp), intent(in) :: height
+    real(wp), intent(in) :: height  ! geomteric height above mean sea level
     ! output
-    real(wp)             :: bg_pres
+    real(wp)             :: bg_pres ! the result
 
     if (height<inv_height) then  
       bg_pres = p_0_standard*(1 - lapse_rate*height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate))

@@ -24,9 +24,9 @@ module humidity
     ! This function returns the saturation pressure in Pa over liquid water as a function of the temperature in K.
     
     ! input argument
-    real(wp), intent(in) :: temperature                    ! gas temperature
+    real(wp), intent(in) :: temperature
     ! output argument
-    real(wp)             :: saturation_pressure_over_water ! the result
+    real(wp)             :: saturation_pressure_over_water
     
     ! local variables
     real(wp)  :: temp_c ! temperature in degrees Celsius

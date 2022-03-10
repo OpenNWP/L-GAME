@@ -120,17 +120,17 @@ module definitions
   type t_bc
   
     ! type containing information on boundary conditions
-    real(wp), allocatable :: rho(:,:,:,:,:)             ! mass densities
-    real(wp), allocatable :: rhotheta(:,:,:,:)          ! potential temperature densities
-    real(wp), allocatable :: wind_u(:,:,:,:)            ! x-component of the wind
-    real(wp), allocatable :: wind_v(:,:,:,:)            ! y-component of the wind
-    real(wp), allocatable :: wind_w(:,:,:,:)            ! vertical wind
-    real(wp), allocatable :: condensed_rho_t(:,:,:,:,:) ! temperature densities of the constituents
-    real(wp), allocatable :: scalar_bc_factor(:,:)      ! boundary conditions factor for scalar fields
-    real(wp), allocatable :: u_bc_factor(:,:)           ! boundary conditions factor for u-vector fields
-    real(wp), allocatable :: v_bc_factor(:,:)           ! boundary conditions factor for v-vector fields
-    integer               :: index_old                  ! index of the old BC time
-    integer               :: index_new                  ! index of the new BC time
+    real(wp), allocatable :: rho(:,:,:,:,:)                   ! mass densities
+    real(wp), allocatable :: rhotheta(:,:,:,:)                ! potential temperature densities
+    real(wp), allocatable :: wind_u(:,:,:,:)                  ! x-component of the wind
+    real(wp), allocatable :: wind_v(:,:,:,:)                  ! y-component of the wind
+    real(wp), allocatable :: wind_w(:,:,:,:)                  ! vertical wind
+    real(wp), allocatable :: condensed_rho_t(:,:,:,:,:)       ! temperature densities of the constituents
+    real(wp), allocatable :: scalar_bc_factor(:,:)            ! boundary conditions factor for scalar fields
+    real(wp), allocatable :: u_bc_factor(:,:)                 ! boundary conditions factor for u-vector fields
+    real(wp), allocatable :: v_bc_factor(:,:)                 ! boundary conditions factor for v-vector fields
+    integer               :: index_old                        ! index of the old BC time
+    integer               :: index_new                        ! index of the new BC time
     
   end type t_bc
   

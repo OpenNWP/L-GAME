@@ -30,13 +30,13 @@ module divergence_operators
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
-    integer                     :: ji,jk,jl     ! loop variables
-    real(wp)                    :: comp_h       ! horizontal component of divergence
-    real(wp)                    :: comp_v       ! horizontal component of divergence
-    real(wp)                    :: contra_upper ! contravariant mass flux density resulting 
-                                                ! from the horizontal vector components through the upper area
-    real(wp)                    :: contra_lower ! contravariant mass flux density resulting
-                                                ! from the horizontal vector components through the lower area
+    integer  :: ji,jk,jl     ! loop variables
+    real(wp) :: comp_h       ! horizontal component of divergence
+    real(wp) :: comp_v       ! horizontal component of divergence
+    real(wp) :: contra_upper ! contravariant mass flux density resulting 
+                             ! from the horizontal vector components through the upper area
+    real(wp) :: contra_lower ! contravariant mass flux density resulting
+                             ! from the horizontal vector components through the lower area
 
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,comp_h,comp_v)
@@ -87,7 +87,7 @@ module divergence_operators
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
-    integer                     :: ji,jk,jl     ! loop variables
+    integer :: ji,jk,jl ! loop variables
     
     ! the normal divergence operator
     call div_h(vector_field_x,vector_field_y,result_field,grid)
@@ -113,9 +113,9 @@ module divergence_operators
 
     ! This subroutine adds the divergence of the vertical component of a vector field to the input scalar field.	
 
-    real(wp),     intent(in)    :: in_field(:,:,:)
-    real(wp),     intent(inout) :: out_field(:,:,:)
-    type(t_grid), intent(in)    :: grid
+    real(wp),     intent(in)    :: in_field(:,:,:)  ! input vertical vector field
+    real(wp),     intent(inout) :: out_field(:,:,:) ! scalar field to which the vertical divergence will be added
+    type(t_grid), intent(in)    :: grid             ! grid properties
 
     !local variables
     integer  :: ji,jk,jl                         ! loop indices

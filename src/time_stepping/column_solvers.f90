@@ -375,7 +375,7 @@ module column_solvers
       ! mass densities
       if (quantity_id==1) then
         ! all constituents have a mass density
-        no_of_relevant_constituents = no_of_constituents     ! the main gaseous constituent is excluded later
+        no_of_relevant_constituents = no_of_constituents ! the main gaseous constituent is excluded later
       endif
       ! density x temperature fields
       if (quantity_id==2) then

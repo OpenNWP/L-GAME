@@ -149,7 +149,7 @@ module boundaries
     ! It only needs to be called once (in the beginning).
   
     ! argument and output
-    type(t_bc), intent(inout) :: bc
+    type(t_bc), intent(inout) :: bc ! boundary conditions type
     
     ! local variables
     real(wp) :: dist_from_boundary ! index distance from the boundary of the domain

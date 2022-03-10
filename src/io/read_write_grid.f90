@@ -139,9 +139,9 @@ module read_write_grid
     type(t_grid), intent(inout) :: grid ! grid properties
     
     ! local variables
-    integer           :: ncid                ! ID of the NetCDF file
-    character(len=64) :: filename            ! input filename
-    integer           :: varid_z_w           ! variable ID of the orography
+    integer           :: ncid      ! ID of the NetCDF file
+    character(len=64) :: filename  ! input filename
+    integer           :: varid_z_w ! variable ID of the orography
     
     ! the filename of the grid file including the relative path
     filename = "../../grids/" // trim(grid_filename)
@@ -168,9 +168,9 @@ module read_write_grid
     type(t_grid), intent(inout) :: grid ! grid properties
     
     ! local variables
-    integer           :: ncid                ! ID of the NetCDF file
-    character(len=64) :: filename            ! input filename
-    integer           :: varid_is_land       ! variable ID of the land-sea-mask
+    integer           :: ncid          ! ID of the NetCDF file
+    character(len=64) :: filename      ! input filename
+    integer           :: varid_is_land ! variable ID of the land-sea-mask
     
     ! the filename of the grid file including the relative path
     filename = "../../grids/phys_sfc_properties/" // trim(land_sea_filename)

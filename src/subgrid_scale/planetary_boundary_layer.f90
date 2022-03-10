@@ -152,13 +152,13 @@ module planetary_boundary_layer
 
     ! This function returns the surface flux resistance for scalar quantities.
 
-    ! input variable
-    real(wp),intent(in) :: roughness_velocity_value,agl,roughness_length_value,monin_obukhov_length_value
+    ! input variables
+    real(wp), intent(in) :: roughness_velocity_value,agl,roughness_length_value,monin_obukhov_length_value
     ! output variable
-    real(wp)            :: scalar_flux_resistance
+    real(wp)             :: scalar_flux_resistance
 
     ! local variables
-    real(wp)            :: used_vertical_height
+    real(wp) :: used_vertical_height
 
     ! height of the prandtl layer
     used_vertical_height = min(agl,h_prandtl)
@@ -182,7 +182,7 @@ module planetary_boundary_layer
 
     ! This function returns the surface flux resistance for momentum.
 
-    ! input variable
+    ! input variables
     real(wp), intent(in) :: wind_h_lowest_layer,agl,roughness_length_value,monin_obukhov_length_value
     ! output variable
     real(wp)             :: momentum_flux_resistance

@@ -86,9 +86,9 @@ module gradient_operators
     ! This subroutine computes the vertical covariant gradient of a scalar field.
     
     ! input arguments and output
-    real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
-    real(wp),     intent(inout) :: result_field(:,:,:)   ! z-component of resulting vector field
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
+    real(wp),     intent(in)    :: scalar_field(:,:,:) ! scalar field of which to calculate the gradient
+    real(wp),     intent(inout) :: result_field(:,:,:) ! z-component of resulting vector field
+    type(t_grid), intent(in)    :: grid                ! the grid properties
     
     ! local variables
     integer :: jl ! loop variables

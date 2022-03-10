@@ -21,10 +21,10 @@ module manage_radiation_calls
   
     ! This subroutine calls RTE+RRTMGP in a parallelized way.
     
-    type(t_state),  intent(inout) :: state           ! the state with which to calculate the radiative fluxes
-    type(t_grid),   intent(inout) :: grid            ! the grid of the model
-    type(t_diag),   intent(inout) :: diag            ! diagnostic quantities
-    real(wp),       intent(in)    :: time_coordinate ! Unix time
+    type(t_state), intent(inout) :: state           ! the state with which to calculate the radiative fluxes
+    type(t_grid),  intent(inout) :: grid            ! the grid of the model
+    type(t_diag),  intent(inout) :: diag            ! diagnostic quantities
+    real(wp),      intent(in)    :: time_coordinate ! Unix time
     
     ! local variables
     integer :: ji ! line index
