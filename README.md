@@ -40,6 +40,8 @@ cd L-GAME
 
 ## Execution
 
+For example:
+
 ```
 ./run_scripts/schaer.sh
 ```
