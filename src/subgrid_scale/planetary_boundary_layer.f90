@@ -42,10 +42,10 @@ module planetary_boundary_layer
     real(wp) :: w_pert                ! vertical velocity peturbation near the surface
     real(wp) :: theta_pert            ! potential temperature peturbation near the surface
     real(wp) :: w_pert_theta_pert_avg ! correlation between vertical velocity and potential temperature peturbations
-    real(wp) :: prop_coeff            ! semi-empirical coefficient for computing w_pert_theta_pert_avg
+    real(wp) :: w_theta_corr          ! semi-empirical coefficient for computing w_pert_theta_pert_avg
     integer  :: ji,jk                 ! loop variables
 
-    prop_coeff = 0.2_wp
+    w_theta_corr = 0.2_wp
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,u_lowest_layer,u10,agl,theta_lowest_layer,theta_second_layer,dz,dtheta_dz, &
@@ -84,7 +84,7 @@ module planetary_boundary_layer
         ! times a stability-dependant factor
         w_pert = u10*max(0.001_wp,0.02_wp*(1._wp - dtheta_dz/0.01_wp))
         theta_pert = -0.2_wp*dtime*w_pert*dtheta_dz
-        w_pert_theta_pert_avg = prop_coeff*w_pert*theta_pert
+        w_pert_theta_pert_avg = w_theta_corr*w_pert*theta_pert
 
         ! security
         if (abs(w_pert_theta_pert_avg)<EPSILON_SECURITY) then
