@@ -278,7 +278,7 @@ module planetary_boundary_layer
     real(wp) :: x       ! helper variable
     real(wp) :: l_local ! used to avoid l==0
 
-    ! avoiding l == 0
+    ! avoiding l==0
     l_local = l
     if (abs(l_local)<EPSILON_SECURITY) then
       l_local = EPSILON_SECURITY

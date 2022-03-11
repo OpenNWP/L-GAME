@@ -250,7 +250,6 @@ module set_initial_state
     
     ! local variables
     real(wp) :: b,c         ! abbreviations needed for the hydrostatic initialization routine
-    real(wp) :: temperature ! single temperature value
     real(wp) :: pressure    ! single pressure value
     real(wp) :: r_d         ! specific gas constant of dry air
     real(wp) :: c_p         ! specific heat capacity at const. pressure of dry air
@@ -261,26 +260,25 @@ module set_initial_state
     
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,b,c,temperature,pressure)
+    !$OMP DO PRIVATE(ji,jk,jl,b,c,pressure)
     do ji=1,nlins
       do jk=1,ncols  
         ! integrating from bottom to top
         do jl=nlays,1,-1
-          temperature = diag%scalar_placeholder(ji,jk,jl)
           ! lowest layer
-          if (jl == nlays) then
+          if (jl==nlays) then
             pressure = pres_lowest_layer(ji,jk)
             state%exner_pert(ji,jk,jl) = (pressure/p_0)**(r_d/c_p)
-            state%theta_pert(ji,jk,jl) = temperature/state%exner_pert(ji,jk,jl)
+            state%theta_pert(ji,jk,jl) = diag%scalar_placeholder(ji,jk,jl)/state%exner_pert(ji,jk,jl)
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
-            b = -0.5_wp*state%exner_pert(ji,jk,jl+1)/bg_temp(grid%z_scalar(ji,jk,jl+1)) &
-            *(temperature - bg_temp(grid%z_scalar(ji,jk,jl+1)) + 2.0_wp/ &
+            b = -0.5_wp*state%exner_pert(ji,jk,jl+1)/diag%scalar_placeholder(ji,jk,jl+1) &
+            *(diag%scalar_placeholder(ji,jk,jl) - diag%scalar_placeholder(ji,jk,jl+1) + 2.0_wp/ &
             c_p*(geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1))))
-            c = state%exner_pert(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_scalar(ji,jk,jl+1))
+            c = state%exner_pert(ji,jk,jl+1)**2*diag%scalar_placeholder(ji,jk,jl)/diag%scalar_placeholder(ji,jk,jl+1)
             state%exner_pert(ji,jk,jl) = b+sqrt(b**2+c)
-            state%theta_pert(ji,jk,jl) = temperature/state%exner_pert(ji,jk,jl)
+            state%theta_pert(ji,jk,jl) = diag%scalar_placeholder(ji,jk,jl)/state%exner_pert(ji,jk,jl)
           endif
         enddo
       enddo

@@ -116,7 +116,7 @@ module explicit_scalar_tendencies
       ! explicit potential temperature density integration
       ! --------------------------------------------------
       ! calculating the potential temperature density flux
-      if (j_constituent == no_of_condensed_constituents+1) then
+      if (j_constituent==no_of_condensed_constituents+1) then
         diag%scalar_placeholder = grid%theta_bg + state%theta_pert
         call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder,&
         diag%u_placeholder,diag%v_placeholder)

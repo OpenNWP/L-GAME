@@ -94,11 +94,11 @@ module run_nml
     + 27
     
     ! checking input data for correctness
-    if (mod(nlins, 2) == 0) then
+    if (mod(nlins, 2)==0) then
       write(*,*) "Error: nlins must be odd. Aborting."
       call exit(1)
     endif
-    if (mod(ncols, 2) == 0) then
+    if (mod(ncols, 2)==0) then
       write(*,*) "Error: ncols must be odd. Aborting."
       call exit(1)
     endif
