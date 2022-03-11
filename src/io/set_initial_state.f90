@@ -269,7 +269,6 @@ module set_initial_state
           if (jl==nlays) then
             pressure = pres_lowest_layer(ji,jk)
             state%exner_pert(ji,jk,jl) = (pressure/p_0)**(r_d/c_p)
-            state%theta_pert(ji,jk,jl) = diag%scalar_placeholder(ji,jk,jl)/state%exner_pert(ji,jk,jl)
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
@@ -278,8 +277,9 @@ module set_initial_state
             c_p*(geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1))))
             c = state%exner_pert(ji,jk,jl+1)**2*diag%scalar_placeholder(ji,jk,jl)/diag%scalar_placeholder(ji,jk,jl+1)
             state%exner_pert(ji,jk,jl) = b+sqrt(b**2+c)
-            state%theta_pert(ji,jk,jl) = diag%scalar_placeholder(ji,jk,jl)/state%exner_pert(ji,jk,jl)
           endif
+          ! this is the full potential temperature here
+          state%theta_pert(ji,jk,jl) = diag%scalar_placeholder(ji,jk,jl)/state%exner_pert(ji,jk,jl)
         enddo
       enddo
     enddo
