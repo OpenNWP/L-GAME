@@ -48,7 +48,7 @@ module explicit_scalar_tendencies
     ! setting the time stepping weights
     do j_constituent=1,no_of_constituents
       new_weight(j_constituent) = 1._wp
-        if (rk_step==2 .and. j_constituent /= no_of_condensed_constituents+1) then
+        if (rk_step==2 .and. j_constituent/=no_of_condensed_constituents+1) then
           new_weight(j_constituent) = 0.5_wp
         endif
       old_weight(j_constituent) = 1._wp - new_weight(j_constituent)

@@ -369,7 +369,7 @@ module set_initial_state
   
     integer, intent(in) :: i_status
 
-    if(i_status /= nf90_noerr) then 
+    if(i_status/=nf90_noerr) then 
       print *, trim(nf90_strerror(i_status))
       stop "Netcdf threw an error."
     end if
