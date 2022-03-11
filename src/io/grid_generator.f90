@@ -883,34 +883,31 @@ module grid_generator
     type(t_grid), intent(inout) :: grid ! the model grid
     
     ! local variables
-    real(wp) :: temperature ! temperature at the respective grid point
     real(wp) :: pressure    ! pressure at the respective grid point
     real(wp) :: b,c         ! abbreviations needed for the hydrostatic initialization routine
     integer  :: ji,jk,jl    ! index variables
     
     ! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,b,c,temperature,pressure)
+    !$OMP DO PRIVATE(ji,jk,jl,b,c,pressure)
     do ji=1,nlins
       do jk=1,ncols
         ! integrating from bottom to top
         do jl=nlays,1,-1
-          temperature = bg_temp(grid%z_scalar(ji,jk,jl))
           ! lowest layer
           if (jl==nlays) then
             pressure = bg_pres(grid%z_scalar(ji,jk,jl))
             grid%exner_bg(ji,jk,jl) = (pressure/p_0)**(specific_gas_constants(0)/spec_heat_capacities_p_gas(0))
-            grid%theta_bg(ji,jk,jl) = temperature/grid%exner_bg(ji,jk,jl)
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
             b = -0.5_wp*grid%exner_bg(ji,jk,jl+1)/bg_temp(grid%z_scalar(ji,jk,jl+1)) &
-            *(temperature - bg_temp(grid%z_scalar(ji,jk,jl+1)) + 2.0_wp/ &
+            *(bg_temp(grid%z_scalar(ji,jk,jl)) - bg_temp(grid%z_scalar(ji,jk,jl+1)) + 2.0_wp/ &
             spec_heat_capacities_p_gas(0)*(geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1))))
-            c = grid%exner_bg(ji,jk,jl+1)**2*temperature/bg_temp(grid%z_scalar(ji,jk,jl+1))
+            c = grid%exner_bg(ji,jk,jl+1)**2*bg_temp(grid%z_scalar(ji,jk,jl))/bg_temp(grid%z_scalar(ji,jk,jl+1))
             grid%exner_bg(ji,jk,jl) = b+sqrt(b**2+c)
-            grid%theta_bg(ji,jk,jl) = temperature/grid%exner_bg(ji,jk,jl)
           endif
+          grid%theta_bg(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))/grid%exner_bg(ji,jk,jl)
         enddo
       enddo
     enddo
