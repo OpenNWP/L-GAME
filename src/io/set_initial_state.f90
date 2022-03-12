@@ -39,7 +39,7 @@ module set_initial_state
     ! local variables
     real(wp) :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
     real(wp) :: n_squared                      ! Brunt-Väisälä frequency for the Schär test case
-    real(wp) :: gravity                        ! gravity acceleration
+    real(wp) :: gravity_local                  ! gravity acceleration
     real(wp) :: delta_z                        ! delta z
     real(wp) :: T_0                            ! MSLP temperature variable
     real(wp) :: r_d                            ! specific gas constant of dry air
@@ -93,18 +93,18 @@ module set_initial_state
         ! background state not yet substracted here
        
         !$OMP PARALLEL
-        !$OMP DO PRIVATE(ji,jk,jl,delta_z,gravity)
+        !$OMP DO PRIVATE(ji,jk,jl,delta_z,gravity_local)
         do ji=1,nlins
           do jk=1,ncols
             ! calculating delta_z
             delta_z = grid%z_scalar(ji,jk,nlays)
             ! calculating the gravity
-            gravity = geopot(grid%z_scalar(ji,jk,nlays))/delta_z
+            gravity_local = geopot(grid%z_scalar(ji,jk,nlays))/delta_z
             
             ! potential temperature in the lowest layer
             state%theta_pert(ji,jk,nlays) = T_0 &
-            *(1._wp + n_squared*delta_z/(2._wp*gravity)) &
-            /(1._wp - n_squared*delta_z/(2._wp*gravity))
+            *(1._wp + n_squared*delta_z/(2._wp*gravity_local)) &
+            /(1._wp - n_squared*delta_z/(2._wp*gravity_local))
             ! Exner pressure in the lowest layer
             state%exner_pert(ji,jk,nlays) = 1._wp &
             - 2._wp*geopot(grid%z_scalar(ji,jk,nlays))/(c_p*(state%theta_pert(ji,jk,nlays) + T_0))
@@ -114,12 +114,12 @@ module set_initial_state
               ! calculating delta_z
               delta_z = grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1)
               ! calculating the gravity
-              gravity = (geopot(grid%z_scalar(ji,jk,jl))-geopot(grid%z_scalar(ji,jk,jl+1)))/delta_z
+              gravity_local = (geopot(grid%z_scalar(ji,jk,jl))-geopot(grid%z_scalar(ji,jk,jl+1)))/delta_z
               
               ! result
               state%theta_pert(ji,jk,jl) = state%theta_pert(ji,jk,jl+1) &
-              *(1._wp + n_squared*delta_z/(2._wp*gravity)) &
-              /(1._wp - n_squared*delta_z/(2._wp*gravity))
+              *(1._wp + n_squared*delta_z/(2._wp*gravity_local)) &
+              /(1._wp - n_squared*delta_z/(2._wp*gravity_local))
             enddo
             
             ! stacking the Exner pressure
@@ -361,6 +361,11 @@ module set_initial_state
     real(wp)             :: geopot
     
     geopot = -gravity*re**2/(re+height)+gravity*re
+    
+    ! Schaer test case
+    if (trim(scenario)=="schaer") then
+      geopot = gravity*height
+    endif
   
   end function geopot
   
