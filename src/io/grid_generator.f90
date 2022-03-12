@@ -883,9 +883,9 @@ module grid_generator
     type(t_grid), intent(inout) :: grid ! the model grid
     
     ! local variables
-    real(wp) :: pressure    ! pressure at the respective grid point
-    real(wp) :: b,c         ! abbreviations needed for the hydrostatic initialization routine
-    integer  :: ji,jk,jl    ! index variables
+    real(wp) :: pressure ! pressure at the respective grid point
+    real(wp) :: b,c      ! abbreviations needed for the hydrostatic initialization routine
+    integer  :: ji,jk,jl ! index variables
     
     ! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
     !$OMP PARALLEL
