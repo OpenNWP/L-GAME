@@ -97,9 +97,9 @@ module set_initial_state
         do ji=1,nlins
           do jk=1,ncols
             ! calculating delta_z
-            delta_z = grid%z_scalar(ji,jk,nlays-1)-grid%z_scalar(ji,jk,nlays)
+            delta_z = grid%z_scalar(ji,jk,nlays)
             ! calculating the gravity
-            gravity = (geopot(grid%z_scalar(ji,jk,nlays-1))-geopot(grid%z_scalar(ji,jk,nlays)))/delta_z
+            gravity = geopot(grid%z_scalar(ji,jk,nlays))/delta_z
             
             ! potential temperature in the lowest layer
             state%theta_pert(ji,jk,nlays) = T_0 &
