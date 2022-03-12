@@ -101,13 +101,6 @@ module gradient_operators
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
-    
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
-    result_field(:,:,1) = 0._wp
-    result_field(:,:,nlays+1) = 0._wp
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
 
   end subroutine grad_vert_cov
   
