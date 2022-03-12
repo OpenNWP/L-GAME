@@ -80,7 +80,7 @@ program control
   write(*,*) "... radiation namelist read."
   
   ! sanity check
-  if (dtime > dt_write) then
+  if (dtime>dt_write) then
     write(*,*) "Error: It must be dtime <= dt_write."
     call exit(1)
   endif

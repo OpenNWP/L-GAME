@@ -106,11 +106,11 @@ module run_nml
       write(*,*) "Error: TOA must be positive."
       call exit(1)
     endif
-    if (lat_center < -0.5_wp*M_PI .or. lat_center > 0.5_wp*M_PI) then
+    if (lat_center<-0.5_wp*M_PI .or. lat_center>0.5_wp*M_PI) then
       write(*,*) "Error: lat_center must be between -90 and 90."
       call exit(1)
     endif
-    if (lon_center < -M_PI .or. lon_center > M_PI) then
+    if (lon_center<-M_PI .or. lon_center>M_PI) then
       write(*,*) "Error: lon_center must be between -180 and 180."
       call exit(1)
     endif

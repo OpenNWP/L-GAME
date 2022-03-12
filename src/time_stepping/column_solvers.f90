@@ -503,7 +503,7 @@ module column_solvers
       
               ! the final brute-force limiter
               do jl=1,nlays
-                if (solution_vector(jl) < 0._wp) then
+                if (solution_vector(jl)<0._wp) then
                   solution_vector(jl) = 0._wp
                 endif
               enddo

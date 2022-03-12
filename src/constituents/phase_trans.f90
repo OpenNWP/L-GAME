@@ -118,7 +118,7 @@ module phase_trans
               irrev%heat_source_rates(ji,jk,jl,4) = &
               ! the evaporation
               -phase_trans_density*phase_trans_heat(0,T_0)/dtime_sat
-            ! temperature < 0 °C
+            ! temperature<0 °C
             else
               ! Everything that can sublimate will sublimate.
               phase_trans_density = min(state%rho(ji,jk,jl,3),diff_density)
@@ -167,7 +167,7 @@ module phase_trans
               irrev%heat_source_rates(ji,jk,jl,4) = &
               ! it is only affected by the condensation
               -diff_density*phase_trans_heat(0,liquid_temperature)/dtime_sat
-              ! temperature < 0 °C
+              ! temperature<0 °C
             else
               ! The source rate for the ice consists of two terms:
               ! 1.) the resublimation

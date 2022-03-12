@@ -266,9 +266,9 @@ module radiation
           *(mass_densities(no_of_scalars+base_index+ji) &
           +mass_densities(3*no_of_scalars+base_index+ji))
           ! if there is no solid water in the grid box, the solid effective radius is set to zero
-          ice_eff_radius(ji,jk) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk) > 0._wp)
+          ice_eff_radius(ji,jk) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk)>0._wp)
           ! if there is no liquid water in the grid box, the liquid effective radius is set to zero
-          liquid_eff_radius(ji,jk) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jk) > 0._wp)
+          liquid_eff_radius(ji,jk) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jk)>0._wp)
         enddo
       enddo
     ! the dry case
@@ -282,16 +282,16 @@ module radiation
     ! moving the temperature into the allowed area
     do ji=1,no_of_scalars_h
       do jk=1,nlays
-        if (temperature_rad(ji,jk) > k_dist_sw%get_temp_max()) then
+        if (temperature_rad(ji,jk)>k_dist_sw%get_temp_max()) then
           temperature_rad(ji,jk) = k_dist_sw%get_temp_max()
         endif
-        if (temperature_rad(ji,jk) < k_dist_sw%get_temp_min()) then
+        if (temperature_rad(ji,jk)<k_dist_sw%get_temp_min()) then
           temperature_rad(ji,jk) = k_dist_sw%get_temp_min()
         endif
-        if (temperature_rad(ji,jk) > k_dist_lw%get_temp_max()) then
+        if (temperature_rad(ji,jk)>k_dist_lw%get_temp_max()) then
           temperature_rad(ji,jk) = k_dist_lw%get_temp_max()
         endif
-        if (temperature_rad(ji,jk) < k_dist_lw%get_temp_min()) then
+        if (temperature_rad(ji,jk)<k_dist_lw%get_temp_min()) then
           temperature_rad(ji,jk) = k_dist_lw%get_temp_min()
         endif
       enddo
@@ -335,28 +335,28 @@ module radiation
     
     ! moving the interface temperature into the allowed area
     do ji=1,no_of_scalars_h
-      if (temperature_interface_rad(ji,1) > k_dist_sw%get_temp_max()) then
+      if (temperature_interface_rad(ji,1)>k_dist_sw%get_temp_max()) then
          temperature_interface_rad(ji,1) = k_dist_sw%get_temp_max()
       endif
-      if (temperature_interface_rad(ji,1) < k_dist_sw%get_temp_min()) then
+      if (temperature_interface_rad(ji,1)<k_dist_sw%get_temp_min()) then
         temperature_interface_rad(ji,1) = k_dist_sw%get_temp_min()
       endif
-      if (temperature_interface_rad(ji,1) > k_dist_lw%get_temp_max()) then
+      if (temperature_interface_rad(ji,1)>k_dist_lw%get_temp_max()) then
         temperature_interface_rad(ji,1) = k_dist_lw%get_temp_max()
       endif
-      if (temperature_interface_rad(ji,1) < k_dist_lw%get_temp_min()) then
+      if (temperature_interface_rad(ji,1)<k_dist_lw%get_temp_min()) then
         temperature_interface_rad(ji,1) = k_dist_lw%get_temp_min()
       endif
-      if (temperature_interface_rad(ji,nlays+1) > k_dist_sw%get_temp_max()) then
+      if (temperature_interface_rad(ji,nlays+1)>k_dist_sw%get_temp_max()) then
          temperature_interface_rad(ji,nlays+1) = k_dist_sw%get_temp_max()
       endif
-      if (temperature_interface_rad(ji,nlays+1) < k_dist_sw%get_temp_min()) then
+      if (temperature_interface_rad(ji,nlays+1)<k_dist_sw%get_temp_min()) then
         temperature_interface_rad(ji,nlays+1) = k_dist_sw%get_temp_min()
       endif
-      if (temperature_interface_rad(ji,nlays+1) > k_dist_lw%get_temp_max()) then
+      if (temperature_interface_rad(ji,nlays+1)>k_dist_lw%get_temp_max()) then
         temperature_interface_rad(ji,nlays+1) = k_dist_lw%get_temp_max()
       endif
-      if (temperature_interface_rad(ji,nlays+1) < k_dist_lw%get_temp_min()) then
+      if (temperature_interface_rad(ji,nlays+1)<k_dist_lw%get_temp_min()) then
         temperature_interface_rad(ji,nlays+1) = k_dist_lw%get_temp_min()
       endif
     enddo
@@ -365,7 +365,7 @@ module radiation
     j_day = 0
     do ji=1,no_of_scalars_h
       mu_0(ji) = coszenith(latitude_scalar(ji),longitude_scalar(ji),time_coord)
-      if (mu_0(ji) > 0) then
+      if (mu_0(ji)>0) then
         j_day  = j_day + 1
         day_indices(j_day) = ji
       endif
@@ -680,7 +680,7 @@ module radiation
     coszenith = DOT_PRODUCT(normal_vector_rel2_sun,-sun_2_earth)
     
     ! the night case
-    if (coszenith < 0._wp) then
+    if (coszenith<0._wp) then
       coszenith = 0._wp
     endif
   
@@ -837,7 +837,7 @@ module radiation
     character(len = *), intent(in) :: error_message
     
     ! write the error message if its real length is larger than zero
-    if (len(trim(error_message)) > 0) then
+    if (len(trim(error_message))>0) then
       write(*,*) error_message
     endif
   

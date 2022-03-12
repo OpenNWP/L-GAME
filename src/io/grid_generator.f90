@@ -372,7 +372,7 @@ module grid_generator
           
           ! setting the surface albedo of land depending on the latitude
           ! ice
-          if (abs(360._wp/(2._wp*M_PI)*grid%lat_geo_scalar(ji,jk)) > 70._wp) then
+          if (abs(360._wp/(2._wp*M_PI)*grid%lat_geo_scalar(ji,jk))>70._wp) then
             grid%sfc_albedo(ji,jk) = 0.8_wp
           ! normal soil
           else

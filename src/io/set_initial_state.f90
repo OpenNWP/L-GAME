@@ -318,10 +318,10 @@ module set_initial_state
     real(wp)             :: bg_temp ! the result
 
     ! troposphere
-    if (height < tropo_height) then  
+    if (height<tropo_height) then  
       bg_temp = surface_temp - lapse_rate*height
     ! constant temperature layer
-    elseif (height < inv_height) then
+    elseif (height<inv_height) then
       bg_temp = surface_temp - lapse_rate*tropo_height
     ! inversion
     else
@@ -340,7 +340,7 @@ module set_initial_state
 
     if (height<inv_height) then  
       bg_pres = p_0_standard*(1 - lapse_rate*height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate))
-    elseif (height < tropo_height) then
+    elseif (height<tropo_height) then
       bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate)) &
       *exp(-gravity*(height - tropo_height)/(specific_gas_constants(0)*(surface_temp - lapse_rate*tropo_height)))
     else
