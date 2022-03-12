@@ -103,8 +103,8 @@ module set_initial_state
             
             ! potential temperature in the lowest layer
             state%theta_pert(ji,jk,nlays) = T_0 &
-            *(1._wp + n_squared*grid%z_scalar(ji,jk,nlays)/(2._wp*gravity)) &
-            /(1._wp - n_squared*grid%z_scalar(ji,jk,nlays)/(2._wp*gravity))
+            *(1._wp + n_squared*delta_z/(2._wp*gravity)) &
+            /(1._wp - n_squared*delta_z/(2._wp*gravity))
             ! Exner pressure in the lowest layer
             state%exner_pert(ji,jk,nlays) = 1._wp &
             - 2._wp*geopot(grid%z_scalar(ji,jk,nlays))/(c_p*(state%theta_pert(ji,jk,nlays) + T_0))
@@ -115,18 +115,21 @@ module set_initial_state
               delta_z = grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1)
               ! calculating the gravity
               gravity = (geopot(grid%z_scalar(ji,jk,jl))-geopot(grid%z_scalar(ji,jk,jl+1)))/delta_z
+              
               ! result
-              state%theta_pert(ji,jk,jl) &
-              ! value in the lower layer
-              = state%theta_pert(ji,jk,jl+1)*(1._wp + n_squared*delta_z/(2._wp*gravity)) &
+              state%theta_pert(ji,jk,jl) = state%theta_pert(ji,jk,jl+1) &
+              *(1._wp + n_squared*delta_z/(2._wp*gravity)) &
               /(1._wp - n_squared*delta_z/(2._wp*gravity))
             enddo
+            
             ! stacking the Exner pressure
             do jl=nlays-1,1,-1
+              ! result
               state%exner_pert(ji,jk,jl) = state%exner_pert(ji,jk,jl+1) &
               + 2._wp*(geopot(grid%z_scalar(ji,jk,jl+1)) - geopot(grid%z_scalar(ji,jk,jl))) &
               /(c_p*(state%theta_pert(ji,jk,jl) + state%theta_pert(ji,jk,jl+1)))
             enddo
+            
             ! filling up what's needed for the unessential_ideal_init routine
             ! temperature
             do jl=1,nlays
