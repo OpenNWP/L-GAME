@@ -27,6 +27,8 @@ module linear_combine_two_states
     real(wp),      intent(in)    :: coeff_0,coeff_1 ! coefficients for the linear combination
     type(t_grid),  intent(in)    :: grid            ! grid properties (containing the background state)
     
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     state_out%rho = coeff_0*state_0%rho + coeff_1*state_1%rho
     state_out%rhotheta = coeff_0*state_0%rhotheta + coeff_1*state_1%rhotheta
     state_out%theta_pert = state_out%rhotheta/state_out%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_bg
@@ -36,6 +38,8 @@ module linear_combine_two_states
     state_out%wind_w = coeff_0*state_0%wind_w + coeff_1*state_1%wind_w
     state_out%condensed_rho_t = coeff_0*state_0%condensed_rho_t + coeff_1*state_1%condensed_rho_t
     state_out%temperature_soil = coeff_0*state_0%temperature_soil + coeff_1*state_1%temperature_soil
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
   
   end subroutine lin_combination
   
