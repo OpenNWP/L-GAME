@@ -167,7 +167,7 @@ module vorticity_flux
       do jk=1,ncols
         do jl=2,nlays
           diag%pot_vort_tend_z(ji,jk,jl) = 0.5_wp*( &
-          + grid%inner_product_weights(ji,jk,jl-1,1)*diag%u_placeholder(ji,jk+1,jl-1)*diag%eta_y(ji,jk+1,jl) &
+          grid%inner_product_weights(ji,jk,jl-1,1)*diag%u_placeholder(ji,jk+1,jl-1)*diag%eta_y(ji,jk+1,jl) &
           - grid%inner_product_weights(ji,jk,jl-1,2)*diag%v_placeholder(ji,jk,jl-1)*diag%eta_x(ji,jk,jl) &
           + grid%inner_product_weights(ji,jk,jl-1,3)*diag%u_placeholder(ji,jk,jl-1)*diag%eta_y(ji,jk,jl) &
           - grid%inner_product_weights(ji,jk,jl-1,4)*diag%v_placeholder(ji+1,jk,jl-1)*diag%eta_x(ji+1,jk,jl) &
