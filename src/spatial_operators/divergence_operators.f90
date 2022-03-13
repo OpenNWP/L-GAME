@@ -32,7 +32,7 @@ module divergence_operators
     ! local variables
     integer  :: ji,jk,jl     ! loop variables
     real(wp) :: comp_h       ! horizontal component of divergence
-    real(wp) :: comp_v       ! horizontal component of divergence
+    real(wp) :: comp_v       ! vertical component of divergence
     real(wp) :: contra_upper ! contravariant mass flux density resulting 
                              ! from the horizontal vector components through the upper area
     real(wp) :: contra_lower ! contravariant mass flux density resulting
