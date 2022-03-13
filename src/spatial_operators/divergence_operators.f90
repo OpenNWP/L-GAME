@@ -39,7 +39,7 @@ module divergence_operators
                              ! from the horizontal vector components through the lower area
 
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,comp_h,comp_v)
+    !$OMP DO PRIVATE(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
