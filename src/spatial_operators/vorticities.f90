@@ -475,8 +475,8 @@ module vorticities
     else
       do jm=1,4
         if (jm==1 .or. jm==3) then
-          l_rescale = (re + grid%z_area_dual_z(j_i(jm),j_k(jm),jl))/(re + grid%z_v(j_i(jm),j_k(jm),jl))
-          delta_z = grid%z_area_dual_z(j_i(jm),j_k(jm),jl) - grid%z_v(j_i(jm),j_k(jm),jl)
+          l_rescale = (re + grid%z_area_dual_z(ji,jk,jl))/(re + grid%z_v(j_i(jm),j_k(jm),jl))
+          delta_z = grid%z_area_dual_z(ji,jk,jl) - grid%z_v(j_i(jm),j_k(jm),jl)
           ind_shift = 1
           if (delta_z>0._wp .or. jl==nlays) then
             ind_shift = -1
@@ -486,8 +486,8 @@ module vorticities
           rel_vort_z_local = rel_vort_z_local + sign_vector(jm)*l_rescale*grid%dy(j_i(jm),j_k(jm),jl)* &
           (state%wind_v(j_i(jm),j_k(jm),jl) + delta_z*vertical_gradient)
         else
-          l_rescale = (re + grid%z_area_dual_z(j_i(jm),j_k(jm),jl))/(re + grid%z_u(j_i(jm),j_k(jm),jl))
-          delta_z = grid%z_area_dual_z(j_i(jm),j_k(jm),jl) - grid%z_u(j_i(jm),j_k(jm),jl)
+          l_rescale = (re + grid%z_area_dual_z(ji,jk,jl))/(re + grid%z_u(j_i(jm),j_k(jm),jl))
+          delta_z = grid%z_area_dual_z(ji,jk,jl) - grid%z_u(j_i(jm),j_k(jm),jl)
           ind_shift = 1
           if (delta_z>0._wp .or. jl==nlays) then
             ind_shift = -1
