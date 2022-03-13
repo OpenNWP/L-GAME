@@ -132,7 +132,6 @@ module vorticities
     !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins+1
       do jk=1,ncols+1
-        ! layers which do not follow the orography
         do jl=1,nlays
           diag%zeta_z(ji,jk,jl) = rel_vort_z_local(state,grid,ji,jk,jl)/grid%area_dual_z(ji,jk,jl)
         enddo
