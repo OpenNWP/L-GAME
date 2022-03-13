@@ -66,8 +66,8 @@ module radiation
   temp_sfc,sfc_sw_in,sfc_lw_out,sfc_albedo,no_of_scalars_h,time_coord)
   
     ! This is the function that is called by the dynamical core. The dycore hands over
-    ! the thermodynamic state as well as meta data (time stamp,coordinates) and gets
-    ! back radiative fux convergences in W/m^3.
+    ! the thermodynamic state as well as meta data (time stamp, coordinates) and gets
+    ! back radiative flux convergences in W/m^3.
     
     ! the number of scalar points of the model grid
     integer, intent(in)     :: no_of_scalars_h
