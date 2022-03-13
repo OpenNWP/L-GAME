@@ -48,7 +48,11 @@ module pressure_gradient
     ! calculating the gradient of the perturbed Exner pressure
     call grad(state%exner_pert,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
     ! calculating the full potential temperature
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     diag%scalar_placeholder = c_p*(grid%theta_bg + state%theta_pert)
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     ! multiplying the perturbed Exner pressure gradient by the full potential temperature
     call scalar_times_vector(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
     diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w)
