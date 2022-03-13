@@ -78,12 +78,12 @@ module explicit_scalar_tendencies
       ! explicit mass densities integration
       ! -----------------------------------
       ! calculating the mass flux density
-      call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%u_placeholder,diag%v_placeholder)
+      call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%flux_density_u,diag%flux_density_v)
       ! calculating the divergence of the mass flux density
       if (j_constituent==no_of_condensed_constituents+1) then
-        call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+        call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
       else
-        call div_h_limited(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+        call div_h_limited(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
       endif
 
       ! mass diffusion, only for gaseous tracers
@@ -109,7 +109,7 @@ module explicit_scalar_tendencies
       !$OMP PARALLEL
       !$OMP WORKSHARE
       tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
-      + new_weight(j_constituent)*(-diag%scalar_placeholder)+diff_switch*diag%scalar_placeholder
+      + new_weight(j_constituent)*(-diag%flux_density_div)+diff_switch*diag%scalar_placeholder
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     
@@ -117,11 +117,15 @@ module explicit_scalar_tendencies
       ! --------------------------------------------------
       ! calculating the potential temperature density flux
       if (j_constituent==no_of_condensed_constituents+1) then
+        !$OMP PARALLEL
+        !$OMP WORKSHARE
         diag%scalar_placeholder = grid%theta_bg + state%theta_pert
-        call scalar_times_vector_h(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder,&
-        diag%u_placeholder,diag%v_placeholder)
+        !$OMP END WORKSHARE
+        !$OMP END PARALLEL
+        call scalar_times_vector_h(diag%scalar_placeholder,diag%flux_density_u,diag%flux_density_v,&
+        diag%flux_density_u,diag%flux_density_v)
         ! calculating the divergence of the potential temperature flux density
-        call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
+        call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
         
         !$OMP PARALLEL
         !$OMP WORKSHARE
