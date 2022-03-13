@@ -636,6 +636,9 @@ module grid_generator
             upper_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
           endif
           lower_length = dy*(re+lower_z)/re
+          if (lplane) then
+            lower_length = dy
+          endif
           grid%area_x(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
       enddo
@@ -663,9 +666,12 @@ module grid_generator
             upper_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
           endif
           if (ji==nlins+1) then
-            lower_length = dx*cos(grid%lat_scalar(ji-1)-0.5_wp*dlat)*(re+lower_z)/re
+            lower_length = dx*cos(grid%lat_scalar(ji-1)-0.5_wp*dlat)
           else
-            lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)*(re+lower_z)/re
+            lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)
+          endif
+          if (.not. lplane) then
+            lower_length = lower_length*(re+lower_z)/re
           endif
           grid%area_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
@@ -717,6 +723,9 @@ module grid_generator
               lower_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
             endif
             lower_length = grid%dy(ji,jk,nlays)*(re + lower_z)/(re + grid%z_v(ji,jk,nlays))
+            if (lplane) then
+              lower_length = grid%dy(ji,jk,nlays)
+            endif
           else
             lower_z = grid%z_v(ji,jk,jl)
             lower_length = grid%dy(ji,jk,jl)
@@ -754,6 +763,9 @@ module grid_generator
               lower_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
             endif
             lower_length = grid%dx(ji,jk,nlays)*(re + lower_z)/(re + grid%z_u(ji,jk,nlays))
+            if (lplane) then
+              lower_length = grid%dx(ji,jk,nlays)
+            endif
           else
             lower_z = grid%z_u(ji,jk,jl)
             lower_length = grid%dx(ji,jk,jl)
