@@ -102,7 +102,7 @@ module explicit_scalar_tendencies
         ! vertical mass diffusion
         if (ltracer_diff_v) then
           call scalar_times_vector_v(irrev%scalar_diff_coeff_v,diag%w_placeholder,diag%w_placeholder)
-          call add_vertical_div(diag%flux_density_w,diag%scalar_placeholder,grid)
+          call add_vertical_div(diag%w_placeholder,diag%scalar_placeholder,grid)
         endif
       endif
       
