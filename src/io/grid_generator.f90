@@ -458,12 +458,12 @@ module grid_generator
     else
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_u(:,1,:) = 2._wp*grid%z_scalar(:,1,:) - grid%z_scalar(:,2,:)
+      grid%z_u(:,1,:) = grid%z_scalar(:,1,:) + 0.5_wp*(grid%z_scalar(:,1,:) - grid%z_scalar(:,2,:))
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_u(:,ncols+1,:) = 2._wp*grid%z_scalar(:,ncols,:) - grid%z_scalar(:,ncols-1,:)
+      grid%z_u(:,ncols+1,:) = grid%z_scalar(:,ncols,:) + 0.5_wp*(grid%z_scalar(:,ncols,:) - grid%z_scalar(:,ncols-1,:))
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     endif
@@ -482,18 +482,18 @@ module grid_generator
       !$OMP END PARALLEL
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_v(nlins+1,:,:) = grid%z_v(nlins,:,:)
+      grid%z_v(nlins+1,:,:) = grid%z_v(1,:,:)
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     else
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_v(1,:,:) = 2._wp*grid%z_scalar(1,:,:) - grid%z_scalar(2,:,:)
+      grid%z_v(1,:,:) = grid%z_scalar(1,:,:) + 0.5_wp*(grid%z_scalar(1,:,:) - grid%z_scalar(2,:,:))
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
       !$OMP PARALLEL
       !$OMP WORKSHARE
-      grid%z_v(nlins+1,:,:) = 2._wp*grid%z_scalar(nlins,:,:) - grid%z_scalar(nlins-1,:,:)
+      grid%z_v(nlins+1,:,:) = grid%z_scalar(nlins,:,:) + 0.5_wp*(grid%z_scalar(nlins,:,:) - grid%z_scalar(nlins-1,:,:))
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     endif
