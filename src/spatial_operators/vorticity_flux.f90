@@ -3,7 +3,7 @@
 
 module vorticity_flux
 
-  ! This module computes the voriticity flux term.
+  ! This module computes the vorticity flux term.
   
   use definitions, only: t_grid,t_diag,wp
   use run_nml,     only: nlins,ncols,nlays
@@ -19,7 +19,7 @@ module vorticity_flux
   
   subroutine calc_vorticity_flux_term(diag,grid)
   
-    ! This module computes the voriticity flux.
+    ! This module computes the vorticity flux.
 
     ! input arguments and output
     type(t_diag), intent(inout) :: diag ! diagnostic quantities
