@@ -303,18 +303,18 @@ module column_solvers
         state_new%rho(ji,jk,nlays,no_of_condensed_constituents+1) = rho_expl(nlays) &
         - dtime*solution_vector(nlays-1)/grid%volume(ji,jk,nlays)
         state_new%rhotheta(ji,jk,nlays) = rhotheta_expl(nlays) &
-        -dtime*theta_int_new(nlays-1)*solution_vector(nlays-1)/grid%volume(ji,jk,nlays)
+        - dtime*theta_int_new(nlays-1)*solution_vector(nlays-1)/grid%volume(ji,jk,nlays)
         ! vertical velocity
         do jl=2,nlays
           rho_int_new = 0.5_wp*(state_new%rho(ji,jk,jl-1,no_of_condensed_constituents+1) &
-          +state_new%rho(ji,jk,jl,no_of_condensed_constituents+1))
+          + state_new%rho(ji,jk,jl,no_of_condensed_constituents+1))
           state_new%wind_w(ji,jk,jl) = (2._wp*solution_vector(jl-1)/grid%area_z(ji,jk,jl) &
           - rho_int_new*state_old%wind_w(ji,jk,jl))/rho_int_old(jl-1)
         enddo
         ! Exner pressure
         do jl=1,nlays
           state_new%exner_pert(ji,jk,jl) = state_old%exner_pert(ji,jk,jl) &
-          +grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji,jk,jl)-state_old%rhotheta(ji,jk,jl))
+          + grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta(ji,jk,jl)-state_old%rhotheta(ji,jk,jl))
         enddo
         
         ! soil temperature
