@@ -170,7 +170,7 @@ module column_solvers
         do jl=1,nlays-1
           ! main diagonal
           d_vector(jl) = -theta_int_new(jl)**2*(gammaa(jl)+gammaa(jl+1)) &
-          +0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
+          + 0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)-alpha(jl)+theta_int_new(jl)*(beta(jl+1)-beta(jl))) &
           - (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
           *(2._wp/grid%area_z(ji,jk,jl+1)+dtime*state_old%wind_w(ji,jk,jl+1)*0.5_wp &
@@ -179,8 +179,8 @@ module column_solvers
           r_vector(jl) = -(state_old%wind_w(ji,jk,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
           (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1)) &
           /(impl_weight*dtime**2*c_p) &
-          +theta_int_new(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
-          +0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
+          + theta_int_new(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
+          + 0.5_wp/dtime*(theta_pert_expl(jl)+theta_pert_expl(jl+1))*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           - (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime**2*c_p) &
           *state_old%wind_w(ji,jk,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
         enddo
@@ -188,7 +188,7 @@ module column_solvers
         do jl=1,nlays-2
           ! lower diagonal
           c_vector(jl) = theta_int_new(jl+1)*gammaa(jl+1)*theta_int_new(jl) &
-          +0.5_wp*(grid%exner_bg(ji,jk,jl+1)-grid%exner_bg(ji,jk,jl+2)) &
+          + 0.5_wp*(grid%exner_bg(ji,jk,jl+1)-grid%exner_bg(ji,jk,jl+2)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl)) &
           - (grid%z_scalar(ji,jk,jl+1)-grid%z_scalar(ji,jk,jl+2))/(impl_weight*dtime*c_p)*0.5_wp &
           *state_old%wind_w(ji,jk,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))
@@ -196,7 +196,7 @@ module column_solvers
           e_vector(jl) = theta_int_new(jl)*gammaa(jl+1)*theta_int_new(jl+1) &
           - 0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)+beta(jl+1)*theta_int_new(jl+1)) &
-          +(grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
+          + (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
           *state_old%wind_w(ji,jk,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
         enddo
 	
@@ -292,9 +292,9 @@ module column_solvers
         ! density, potential temperature density
         do jl=2,nlays-1
           state_new%rho(ji,jk,jl,no_of_condensed_constituents+1) = rho_expl(jl) &
-          +dtime*(-solution_vector(jl-1)+solution_vector(jl))/grid%volume(ji,jk,jl)
+          + dtime*(-solution_vector(jl-1)+solution_vector(jl))/grid%volume(ji,jk,jl)
           state_new%rhotheta(ji,jk,jl) = rhotheta_expl(jl) &
-          +dtime*(-theta_int_new(jl-1)*solution_vector(jl-1)+theta_int_new(jl)*solution_vector(jl))/grid%volume(ji,jk,jl)
+          + dtime*(-theta_int_new(jl-1)*solution_vector(jl-1)+theta_int_new(jl)*solution_vector(jl))/grid%volume(ji,jk,jl)
         enddo
         ! uppermost layer
         state_new%rho(ji,jk,1,no_of_condensed_constituents+1) = rho_expl(1)+dtime*solution_vector(1)/grid%volume(ji,jk,1)
@@ -453,7 +453,7 @@ module column_solvers
                 ! density x temperatures
                 if (quantity_id==2) then
                   r_vector(jl) = state_old%condensed_rho_t(ji,jk,jl,j_constituent) &
-                  +dtime*tend%condensed_rho_t(ji,jk,jl,j_constituent)
+                  + dtime*tend%condensed_rho_t(ji,jk,jl,j_constituent)
                 endif
                 ! adding the explicit part of the vertical flux divergence
                 if (jl==1) then
