@@ -77,7 +77,7 @@ module explicit_vector_tendencies
     
     new_weight = 1._wp
     if (rk_step==2) then
-        new_weight = 0.5_wp
+      new_weight = 0.5_wp
     endif
     old_weight = 1._wp - new_weight
     
