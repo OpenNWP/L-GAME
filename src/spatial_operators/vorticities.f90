@@ -386,12 +386,16 @@ module vorticities
     
     ! corners under periodic boundary conditions
     if (lperiodic) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
       diag%eta_z(1,1,:) = diag%eta_z(1,1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
       +state%rho(1,1,:,no_of_condensed_constituents+1) &
       +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
       diag%eta_z(1,ncols+1,:) = diag%eta_z(1,1,:)
       diag%eta_z(nlins+1,1,:) = diag%eta_z(1,1,:)
       diag%eta_z(nlins+1,ncols+1,:) = diag%eta_z(1,1,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
     endif
     
   end subroutine calc_pot_vort
