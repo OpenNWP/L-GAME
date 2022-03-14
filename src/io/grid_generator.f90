@@ -762,23 +762,20 @@ module grid_generator
         do jl=1,nlays+1
           if (jl==nlays+1) then
             if (jk==1) then
-              lower_z = grid%z_w(ji,1,jl) + 0.5_wp*(grid%z_w(ji,2,jl)-grid%z_w(ji,1,jl))
+              lower_z = grid%z_w(ji,1,jl) + 0.5_wp*(grid%z_w(ji,1,jl)-grid%z_w(ji,2,jl))
             elseif (jk==ncols+1) then
               lower_z = grid%z_w(ji,ncols,jl) + 0.5_wp*(grid%z_w(ji,ncols,jl)-grid%z_w(ji,ncols-1,jl))
             else
               lower_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
             endif
             lower_length = grid%dx(ji,jk,nlays)*(re + lower_z)/(re + grid%z_u(ji,jk,nlays))
-            if (lplane) then
-              lower_length = grid%dx(ji,jk,nlays)
-            endif
           else
             lower_z = grid%z_u(ji,jk,jl)
             lower_length = grid%dx(ji,jk,jl)
           endif
           if (jl==1) then
             if (jk==1) then
-              upper_z = grid%z_w(ji,1,jl) + 0.5_wp*(grid%z_w(ji,2,jl)-grid%z_w(ji,1,jl))
+              upper_z = grid%z_w(ji,1,jl) + 0.5_wp*(grid%z_w(ji,1,jl)-grid%z_w(ji,2,jl))
             elseif (jk==ncols+1) then
               upper_z = grid%z_w(ji,ncols,jl) + 0.5_wp*(grid%z_w(ji,ncols,jl)-grid%z_w(ji,ncols-1,jl))
             else
@@ -786,6 +783,10 @@ module grid_generator
             endif
           else
             upper_z = grid%z_u(ji,jk,jl-1)
+          endif
+          ! plane geometry
+          if (lplane) then
+            lower_length = dx
           endif
           grid%area_dual_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
