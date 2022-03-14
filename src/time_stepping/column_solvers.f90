@@ -543,8 +543,8 @@ module column_solvers
     integer,  intent(in)    :: solution_length    ! length of the solution vector
     
     ! local variables
-    real(wp) :: e_prime_vector(solution_length-1) ! help vector do solving the matrix equation
-    real(wp) :: r_prime_vector(solution_length)   ! help vector do solving the matrix equation
+    real(wp) :: e_prime_vector(solution_length-1) ! help vector for solving the matrix equation
+    real(wp) :: r_prime_vector(solution_length)   ! help vector for solving the matrix equation
     integer  :: jl                                ! loop index
     
     ! downward sweep (matrix)

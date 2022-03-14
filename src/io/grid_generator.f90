@@ -636,6 +636,7 @@ module grid_generator
             upper_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
           endif
           lower_length = dy*(re+lower_z)/re
+          ! plane geometry
           if (lplane) then
             lower_length = dy
           endif
@@ -666,12 +667,13 @@ module grid_generator
             upper_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
           endif
           if (ji==nlins+1) then
-            lower_length = dx*cos(grid%lat_scalar(ji-1)-0.5_wp*dlat)
+            lower_length = dx*cos(grid%lat_scalar(ji-1)-0.5_wp*dlat)*(re+lower_z)/re
           else
-            lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)
+            lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)*(re+lower_z)/re
           endif
-          if (.not. lplane) then
-            lower_length = lower_length*(re+lower_z)/re
+          ! plane geometry
+          if (lplane) then
+            lower_length = dx
           endif
           grid%area_y(ji,jk,jl) = vertical_face_area(lower_z,upper_z,lower_length)
         enddo
@@ -686,6 +688,7 @@ module grid_generator
     do ji=1,nlins+1
       do jk=1,ncols+1
         do jl=1,nlays
+        
           ! setting the vertical position of the areas
           if (jk==1) then
             grid%z_area_dual_z(ji,jk,jl) = grid%z_v(ji,1,jl) + 0.5_wp*(grid%z_v(ji,1,jl)-grid%z_v(ji,2,jl))
@@ -694,6 +697,7 @@ module grid_generator
           else
             grid%z_area_dual_z(ji,jk,jl) = 0.5_wp*(grid%z_v(ji,jk-1,jl)+grid%z_v(ji,jk,jl))
           endif
+          
           ! setting the area itself
           if (ji==nlins+1) then
             grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji-1) - 0.5_wp*dlat,dlon,dlat) &
@@ -702,6 +706,7 @@ module grid_generator
             grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji) + 0.5_wp*dlat,dlon,dlat) &
             *(re + grid%z_area_dual_z(ji,jk,jl))**2/re**2
           endif
+          
         enddo
       enddo
     enddo
@@ -790,7 +795,7 @@ module grid_generator
 
     ! setting the volume of the grid boxes
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$OMP DO PRIVATE(jl)
     do jl=1,nlays
       grid%volume(:,:,jl) = 1._wp/3._wp*((re + grid%z_w(:,:,jl))**3 - (re + grid%z_w(:,:,jl+1))**3) &
       /(re + grid%z_w(:,:,jl+1))**2*grid%area_z(:,:,jl+1)
