@@ -107,7 +107,7 @@ module boundaries
     !$OMP END DO
     !$OMP END PARALLEL
     
-    ! setting the potential temperature peturbation
+    ! setting the potential temperature perturbation
     !$OMP PARALLEL
     !$OMP WORKSHARE
     state%theta_pert = state%rhotheta/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_bg

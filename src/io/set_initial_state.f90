@@ -187,7 +187,7 @@ module set_initial_state
     
     call read_from_nc(state%rho,state%rhotheta,state%wind_u,state%wind_v,state%wind_w,filename)
     
-    ! setting the potential temperature peturbation
+    ! setting the potential temperature perturbation
     !$OMP PARALLEL
     !$OMP WORKSHARE
     state%theta_pert = state%rhotheta/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_bg

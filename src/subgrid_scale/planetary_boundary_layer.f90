@@ -39,9 +39,9 @@ module planetary_boundary_layer
     real(wp) :: theta_second_layer    ! potential temperature in the second-lowest layer
     real(wp) :: dz                    ! vertical grid point distance
     real(wp) :: dtheta_dz             ! vertical gradient of the potential temperature
-    real(wp) :: w_pert                ! vertical velocity peturbation near the surface
-    real(wp) :: theta_pert            ! potential temperature peturbation near the surface
-    real(wp) :: w_pert_theta_pert_avg ! correlation between vertical velocity and potential temperature peturbations
+    real(wp) :: w_pert                ! vertical velocity perturbation near the surface
+    real(wp) :: theta_pert            ! potential temperature perturbation near the surface
+    real(wp) :: w_pert_theta_pert_avg ! correlation between vertical velocity and potential temperature perturbations
     real(wp) :: w_theta_corr          ! semi-empirical coefficient for computing w_pert_theta_pert_avg
     integer  :: ji,jk                 ! loop variables
 

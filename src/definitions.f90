@@ -95,8 +95,8 @@ module definitions
     ! type containing the state variables
     real(wp), allocatable :: rho(:,:,:,:)                     ! mass densities
     real(wp), allocatable :: rhotheta(:,:,:)                  ! potential temperature density
-    real(wp), allocatable :: theta_pert(:,:,:)                ! potential temperature peturbation
-    real(wp), allocatable :: exner_pert(:,:,:)                ! Exner pressure peturbation
+    real(wp), allocatable :: theta_pert(:,:,:)                ! potential temperature perturbation
+    real(wp), allocatable :: exner_pert(:,:,:)                ! Exner pressure perturbation
     real(wp), allocatable :: condensed_rho_t(:,:,:,:)         ! temperature densities of the condensates
     real(wp), allocatable :: wind_u(:,:,:)                    ! x-component of the wind
     real(wp), allocatable :: wind_v(:,:,:)                    ! y-component of the wind

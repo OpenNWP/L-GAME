@@ -123,9 +123,9 @@ module column_solvers
         do jl=1,nlays
           ! explicit density
           rho_expl(jl) = state_old%rho(ji,jk,jl,no_of_condensed_constituents+1) &
-          +dtime*tend%rho(ji,jk,jl,no_of_condensed_constituents+1)
+          + dtime*tend%rho(ji,jk,jl,no_of_condensed_constituents+1)
           ! explicit potential temperature density
-          rhotheta_expl(jl) = state_old%rhotheta(ji,jk,jl)+dtime*tend%rhotheta(ji,jk,jl)
+          rhotheta_expl(jl) = state_old%rhotheta(ji,jk,jl) + dtime*tend%rhotheta(ji,jk,jl)
           if (rk_step==1) then
             ! old time step partial derivatives of theta and Pi (divided by the volume)
             alpha(jl) = -state_old%rhotheta(ji,jk,jl)/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)**2 &
@@ -151,8 +151,8 @@ module column_solvers
           endif
           ! explicit potential temperature perturbation
           theta_pert_expl(jl) = state_old%theta_pert(ji,jk,jl) &
-          +dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl,no_of_condensed_constituents+1) &
-          +beta(jl)*tend%rhotheta(ji,jk,jl))
+          + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl,no_of_condensed_constituents+1) &
+          + beta(jl)*tend%rhotheta(ji,jk,jl))
           ! explicit Exner pressure perturbation
           exner_pert_expl(jl) = state_old%exner_pert(ji,jk,jl)+dtime*grid%volume(ji,jk,jl)*gammaa(jl)*tend%rhotheta(ji,jk,jl)
         enddo
@@ -160,10 +160,10 @@ module column_solvers
         ! interface values
         do jl=1,nlays-1
           rho_int_old(jl) = 0.5_wp*(state_old%rho(ji,jk,jl,no_of_condensed_constituents+1) &
-          +state_old%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
+          + state_old%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
           theta_int_new(jl) = 0.5_wp*(state_new%rhotheta(ji,jk,jl)/state_new%rho(ji,jk,jl,no_of_condensed_constituents+1) &
-          +state_new%rhotheta(ji,jk,jl+1)/state_new%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
+          + state_new%rhotheta(ji,jk,jl+1)/state_new%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
         enddo
       
         ! filling up the coefficient vectors
