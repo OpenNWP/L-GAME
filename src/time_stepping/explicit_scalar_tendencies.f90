@@ -13,7 +13,7 @@ module explicit_scalar_tendencies
   use constituents_nml,      only: no_of_condensed_constituents,no_of_constituents,lassume_lte
   use dictionary,            only: spec_heat_capacities_p_gas
   use diff_nml,              only: ltemp_diff_h,ltemp_diff_v,ltracer_diff_h,ltracer_diff_v
-  use effective_diff_coeffs, only: temp_diffusion_coeffs
+  use effective_diff_coeffs, only: temp_diffusion_coeffs,mass_diffusion_coeffs
   use gradient_operators,    only: grad
 
   implicit none
@@ -91,17 +91,17 @@ module explicit_scalar_tendencies
       if (j_constituent>no_of_condensed_constituents+1 .and. ltracer_diff_h) then
         diff_switch = 1
         ! firstly, we need to calculate the mass diffusion coeffcients
-        call temp_diffusion_coeffs(state,diag,irrev,grid)
+        call mass_diffusion_coeffs(state,diag,irrev,grid)
         ! The diffusion of the tracer density depends on its gradient.
         call grad(state%rho(:,:,:,j_constituent),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
         ! Now the diffusive mass flux density can be obtained.
         call scalar_times_vector_h(irrev%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
-        diag%flux_density_u,diag%flux_density_v)
+        diag%u_placeholder,diag%v_placeholder)
         ! The divergence of the diffusive mass flux density is the diffusive mass source rate.
-        call div_h(diag%flux_density_u,diag%flux_density_v,diag%scalar_placeholder,grid)
+        call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
         ! vertical mass diffusion
         if (ltracer_diff_v) then
-          call scalar_times_vector_v(irrev%scalar_diff_coeff_v,diag%w_placeholder,diag%flux_density_w)
+          call scalar_times_vector_v(irrev%scalar_diff_coeff_v,diag%w_placeholder,diag%w_placeholder)
           call add_vertical_div(diag%flux_density_w,diag%scalar_placeholder,grid)
         endif
       endif
