@@ -176,8 +176,8 @@ module effective_diff_coeffs
       
         do jk=2,ncols
           irrev%viscosity_coeff_curl_dual(1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl) &
-          *(0.25_wp*(density_gas(state,1,jk-1,jl) + density_gas(state,ncols,jk-1,jl) &
-          + density_gas(state,1,jk,jl) + density_gas(state,ncols,jk,jl)))
+          *(0.25_wp*(density_gas(state,1,jk-1,jl) + density_gas(state,nlins,jk-1,jl) &
+          + density_gas(state,1,jk,jl) + density_gas(state,nlins,jk,jl)))
           irrev%viscosity_coeff_curl_dual(nlins+1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl)
         enddo
         do ji=2,nlins
