@@ -504,9 +504,11 @@ module grid_generator
     
     ! setting dx
     !$OMP PARALLEL
-    !$OMP WORKSHARE
-    grid%dx = dx*(re + grid%z_u)/re
-    !$OMP END WORKSHARE
+    !$OMP DO PRIVATE(ji)
+    do ji=1,nlins
+      grid%dx(ji,:,:) = dx*cos(grid%lat_scalar(ji))*(re + grid%z_u(ji,:,:))/re
+    enddo
+    !$OMP END DO
     !$OMP END PARALLEL
     ! setting dy
     !$OMP PARALLEL
@@ -531,9 +533,15 @@ module grid_generator
     
     ! setting dx of the dual grid
     !$OMP PARALLEL
-    !$OMP WORKSHARE
-    grid%dx_dual = dx*(re + grid%z_v)/re
-    !$OMP END WORKSHARE
+    !$OMP DO PRIVATE(ji)
+    do ji=1,nlins+1
+      if (ji==nlins+1) then
+        grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji-1) - 0.5_wp*dlat)*(re + grid%z_u(ji,:,:))/re
+      else
+        grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji) + 0.5_wp*dlat)*(re + grid%z_u(ji,:,:))/re
+      endif
+    enddo
+    !$OMP END DO
     !$OMP END PARALLEL
     ! setting dy of the dual grid
     !$OMP PARALLEL
