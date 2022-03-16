@@ -536,9 +536,9 @@ module grid_generator
     !$OMP DO PRIVATE(ji)
     do ji=1,nlins+1
       if (ji==nlins+1) then
-        grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji-1) - 0.5_wp*dlat)*(re + grid%z_u(ji,:,:))/re
+        grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji-1) - 0.5_wp*dlat)*(re + grid%z_v(ji,:,:))/re
       else
-        grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji) + 0.5_wp*dlat)*(re + grid%z_u(ji,:,:))/re
+        grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji) + 0.5_wp*dlat)*(re + grid%z_v(ji,:,:))/re
       endif
     enddo
     !$OMP END DO
