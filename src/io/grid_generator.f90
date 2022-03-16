@@ -706,6 +706,10 @@ module grid_generator
             grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji) + 0.5_wp*dlat,dlon,dlat) &
             *(re + grid%z_area_dual_z(ji,jk,jl))**2/re**2
           endif
+          ! plane geometry
+          if (lplane) then
+            grid%area_dual_z(ji,jk,jl) = dx*dy
+          endif
           
         enddo
       enddo
@@ -892,7 +896,7 @@ module grid_generator
     if (lwrite_grid) then
       call write_grid(grid)
     endif
-  
+    
   end subroutine grid_setup
   
   subroutine bg_setup(grid)
