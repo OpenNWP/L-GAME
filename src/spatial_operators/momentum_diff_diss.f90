@@ -63,6 +63,8 @@ module momentum_diff_diss
     ! calculating the horizontal gradient of the divergence
     call grad_hor(diag%scalar_placeholder,irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
     
+    ! Computing the curl of vorticity component
+    ! -----------------------------------------
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
     do ji=1,nlins
