@@ -408,15 +408,15 @@ module column_solvers
                 ! for condensed constituents, a sink velocity must be added.
                 ! precipitation
                 ! snow
-                if (j_constituent<no_of_condensed_constituents/4) then
+                if (j_constituent<=no_of_condensed_constituents/4) then
                   vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - snow_velocity
                   vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - snow_velocity
                 ! rain
-                elseif (j_constituent<no_of_condensed_constituents/2) then
+                elseif (j_constituent<=no_of_condensed_constituents/2) then
                   vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - rain_velocity
                   vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - rain_velocity
                 ! clouds
-                elseif (j_constituent<no_of_condensed_constituents) then
+                elseif (j_constituent<=no_of_condensed_constituents) then
                   vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - cloud_droplets_velocity
                   vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - cloud_droplets_velocity
                 endif
@@ -462,15 +462,15 @@ module column_solvers
                   r_vector(jl) = r_vector(jl) - expl_weight*dtime*vertical_flux_vector_rhs(jl-1)/grid%volume(ji,jk,jl)
                   ! precipitation
                   ! snow
-                  if (j_constituent<no_of_condensed_constituents/4) then
+                  if (j_constituent<=no_of_condensed_constituents/4) then
                     r_vector(jl) = r_vector(jl) - snow_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
                     *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                   ! rain
-                  elseif (j_constituent<no_of_condensed_constituents/2) then
+                  elseif (j_constituent<=no_of_condensed_constituents/2) then
                     r_vector(jl) = r_vector(jl) - rain_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
                     *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                   ! clouds
-                  elseif (j_constituent<no_of_condensed_constituents) then
+                  elseif (j_constituent<=no_of_condensed_constituents) then
                     r_vector(jl) = r_vector(jl) - cloud_droplets_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
                     *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                   endif
