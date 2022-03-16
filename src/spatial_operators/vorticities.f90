@@ -484,6 +484,9 @@ module vorticities
           if (delta_z>0._wp .or. jl==nlays) then
             ind_shift = -1
           endif
+          if (jl==1) then
+            ind_shift = 1
+          endif
           vertical_gradient = (state%wind_v(j_i(jm),j_k(jm),jl) - state%wind_v(j_i(jm),j_k(jm),jl+ind_shift))/ &
           (grid%z_v(j_i(jm),j_k(jm),jl) - grid%z_v(j_i(jm),j_k(jm),jl+ind_shift))
           rel_vort_z_local = rel_vort_z_local + sign_vector(jm)*l_rescale*grid%dy(j_i(jm),j_k(jm),jl)* &
@@ -494,6 +497,9 @@ module vorticities
           ind_shift = 1
           if (delta_z>0._wp .or. jl==nlays) then
             ind_shift = -1
+          endif
+          if (jl==1) then
+            ind_shift = 1
           endif
           vertical_gradient = (state%wind_u(j_i(jm),j_k(jm),jl) - state%wind_u(j_i(jm),j_k(jm),jl+ind_shift))/ &
           (grid%z_u(j_i(jm),j_k(jm),jl) - grid%z_u(j_i(jm),j_k(jm),jl+ind_shift))
