@@ -470,9 +470,13 @@ module grid_generator
     
     ! setting the height of the v-vector points
     ! inner domain
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji)
     do ji=2,nlins
       grid%z_v(ji,:,:) = 0.5_wp*(grid%z_scalar(ji-1,:,:) + grid%z_scalar(ji,:,:))
     enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
     ! boundaries
     if (lperiodic) then
       !$OMP PARALLEL
