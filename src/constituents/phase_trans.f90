@@ -6,6 +6,7 @@ module phase_trans
   ! In this module, phase transition rates are being calculated.
   
   use run_nml,          only: nlins,ncols,nlays,dtime,wp
+  use surface_nml,      only: lsoil
   use constants,        only: T_0,EPSILON_SECURITY
   use definitions,      only: t_state,t_diag,t_irrev,t_grid
   use humidity,         only: saturation_pressure_over_ice,saturation_pressure_over_water
@@ -216,7 +217,7 @@ module phase_trans
         ! surface effects
 
         ! evaporation and latent heat rates
-        if (grid%is_land(ji,jk)==1) then
+        if (lsoil .and. grid%is_land(ji,jk)==0) then
           ! saturation pressure at surface temperature
           if (state%temperature_soil(ji,jk,1) >= T_0) then
             saturation_pressure_sfc = saturation_pressure_over_water(state%temperature_soil(ji,jk,1))
