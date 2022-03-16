@@ -58,8 +58,13 @@ module pressure_gradient
     diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w)
     
     ! the linear pressure gradient term
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    diag%scalar_placeholder = c_p*state%theta_pert
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     ! multiplying the background Exner pressure gradient by the perturbed potential temperature
-    call scalar_times_vector(c_p*state%theta_pert,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
+    call scalar_times_vector(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
     grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v,diag%p_grad_acc_neg_l_w)
     
     ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
