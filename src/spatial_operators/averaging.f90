@@ -34,14 +34,14 @@ module averaging
     vertical_contravariant_corr = 0._wp
     
     if (jl>=nlays-nlays_oro+1) then
-        ! highest level following orography
+      ! highest level following orography
       if (jl==nlays-nlays_oro+1) then
         vertical_contravariant_corr = vertical_contravariant_corr &
         - 0.5_wp*vector_field_x(ji,jk+1,jl)*grid%slope_x(ji,jk+1,jl)*grid%inner_product_weights(ji,jk,jl,1) &
         - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,2) &
         - 0.5_wp*vector_field_x(ji,jk,jl)*grid%slope_x(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,3) &
         - 0.5_wp*vector_field_y(ji+1,jk,jl)*grid%slope_y(ji+1,jk,jl)*grid%inner_product_weights(ji,jk,jl,4)
-      ! levels in between
+      ! levels below
       else
         vertical_contravariant_corr = vertical_contravariant_corr &
         - 0.5_wp*vector_field_x(ji,jk+1,jl-1)*grid%slope_x(ji,jk+1,jl-1)*grid%inner_product_weights(ji,jk,jl-1,1) &
