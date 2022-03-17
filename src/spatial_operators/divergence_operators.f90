@@ -6,7 +6,7 @@ module divergence_operators
   ! The calculation of the horizontal divergence operator is executed in this module.
 
   use definitions, only: wp,t_grid
-  use run_nml,     only: nlins,ncols,nlays,nlays_oro
+  use run_nml,     only: nlins,ncols,nlays,nlays_oro,dtime
   use averaging,   only: vertical_contravariant_corr
   
   implicit none
@@ -76,7 +76,7 @@ module divergence_operators
 
   end subroutine div_h
 
-  subroutine div_h_limited(vector_field_x,vector_field_y,result_field,grid)
+  subroutine div_h_limited(vector_field_x,vector_field_y,result_field,current_field,grid)
 
     ! This is a limited version of the horizontal divergence operator.
     
@@ -84,6 +84,7 @@ module divergence_operators
     real(wp),     intent(in)    :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
     real(wp),     intent(in)    :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
     real(wp),     intent(inout) :: result_field(:,:,:)   ! resulting scalar field
+    real(wp),     intent(in)    :: current_field(:,:,:)  ! field at the current timestep
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
@@ -98,8 +99,8 @@ module divergence_operators
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          if (result_field(ji,jk,jl)<0._wp) then
-            result_field(ji,jk,jl) = 0._wp
+          if (current_field(ji,jk,jl)-dtime*result_field(ji,jk,jl)<0._wp) then
+            result_field(ji,jk,jl) = current_field(ji,jk,jl)/dtime
           endif
         enddo
       enddo

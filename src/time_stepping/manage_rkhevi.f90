@@ -94,7 +94,7 @@ module manage_rkhevi
 
       ! 2.) Explicit component of the generalized density equations.
       ! ------------------------------------------------------------
-      call expl_scalar_tend(grid,state_new,tend,diag,irrev,rk_step)
+      call expl_scalar_tend(grid,state_new,state_old,tend,diag,irrev,rk_step)
       
       ! 3.) implicit dynamic vertical solver
       ! ------------------------------------
