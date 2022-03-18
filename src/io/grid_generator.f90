@@ -850,13 +850,25 @@ module grid_generator
     ! u
     do ji=1,nlins
       base_area = patch_area(grid%lat_scalar(ji),dlon,dlat)
-      grid%trsk_weights_u(ji,1) = (0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area) &
-      *dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)/(dx*cos(grid%lat_scalar(ji)))
-      grid%trsk_weights_u(ji,2) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area) &
-      *dy/(dx*cos(grid%lat_scalar(ji)))
+      grid%trsk_weights_u(ji,1) = (0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
+      if (lplane) then
+        grid%trsk_weights_u(ji,1) = grid%trsk_weights_u(ji,1)*dx/dx
+      else
+        grid%trsk_weights_u(ji,1) = grid%trsk_weights_u(ji,1)*dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)/(dx*cos(grid%lat_scalar(ji)))
+      endif
+      grid%trsk_weights_u(ji,2) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area)
+      if (lplane) then
+        grid%trsk_weights_u(ji,2) = grid%trsk_weights_u(ji,2)*dy/dx
+      else
+        grid%trsk_weights_u(ji,2) = grid%trsk_weights_u(ji,2)*dy/(dx*cos(grid%lat_scalar(ji)))
+      endif
       grid%trsk_weights_u(ji,3) = -(0.5_wp - (patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
-      + patch_area(grid%lat_scalar(ji)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat))/base_area) &
-      *dx*cos(grid%lat_scalar(ji)-0.5_wp*dlat)/(dx*cos(grid%lat_scalar(ji)))
+      + patch_area(grid%lat_scalar(ji)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat))/base_area)
+      if (lplane) then
+        grid%trsk_weights_u(ji,3) = grid%trsk_weights_u(ji,3)*dx/dx
+      else
+        grid%trsk_weights_u(ji,3) = grid%trsk_weights_u(ji,3)*dx*cos(grid%lat_scalar(ji)-0.5_wp*dlat)/(dx*cos(grid%lat_scalar(ji)))
+      endif
       grid%trsk_weights_u(ji,4) = grid%trsk_weights_u(ji,3)
       grid%trsk_weights_u(ji,5) = -grid%trsk_weights_u(ji,2)
       grid%trsk_weights_u(ji,6) = grid%trsk_weights_u(ji,1)
