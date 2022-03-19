@@ -24,7 +24,6 @@ ds.close()
 
 # preparations for the plot
 x_vector = lon_vector*6371000.789927
-print(z_array[0,0,0])
 x_array = np.zeros([len(z_array[:,0,0]), len(z_array[0,:,0])])
 for i in range(len(x_array[:, 0])):
 	x_array[i, :] = x_vector
