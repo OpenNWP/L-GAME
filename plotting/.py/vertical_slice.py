@@ -23,19 +23,17 @@ unit = ds[varname].Unit
 ds.close()
 
 # preparations for the plot
-semiminor = 6356752.314
-semimajor = 6378137.0
-re = (semimajor*semimajor*semiminor)**(1/3)
-x_vector = lon_vector*re
-x_array = np.zeros([len(z_array[:,0,1]), len(z_array[0,:,1])])
+x_vector = lon_vector*6371000.789927
+print(z_array[0,0,0])
+x_array = np.zeros([len(z_array[:,0,0]), len(z_array[0,:,0])])
 for i in range(len(x_array[:, 0])):
 	x_array[i, :] = x_vector
 
 # plotting
-delta = np.max(plot_array[:,:,1]) - np.min(plot_array[:,:,1])
-bounds=np.linspace(np.min(plot_array[:,:,1]) - 0.1*delta, np.max(plot_array[:,:,1]) + 0.1*delta, 1000)
+delta = np.max(plot_array[:,:,0]) - np.min(plot_array[:,:,0])
+bounds=np.linspace(np.min(plot_array[:,:,0]) - 0.1*delta, np.max(plot_array[:,:,0]) + 0.1*delta, 1000)
 fig = plt.figure()
-cf = plt.contourf(1e-3*x_array[:,50:150], 1e-3*z_array[:,50:150,1], plot_array[:,50:150,1], cmap = "jet", levels = bounds)
+cf = plt.contourf(1e-3*x_array[:,50:150], 1e-3*z_array[:,50:150,0], plot_array[:,50:150,0], cmap = "jet", levels = bounds)
 plt.colorbar(cf, label = unit)
 plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname)
 plt.ylim([0, 10])
