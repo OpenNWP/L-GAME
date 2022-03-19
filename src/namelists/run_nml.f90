@@ -72,7 +72,7 @@ module run_nml
     run_id = "ideal"
     llinear = .false.
     lcorio = .true.
-    impl_weight = 0.75_wp
+    impl_weight = 0.7143703373134328_wp
     partial_impl_weight = 0.5_wp
     lat_center = 0._wp
     lon_center = 0._wp

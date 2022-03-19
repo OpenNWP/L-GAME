@@ -12,7 +12,7 @@ cat > namelist.nml << EOF
 &run
 run_id="$run_id"
 nlins=1
-ncols=201
+ncols=401
 nlays=65
 nlays_oro=65
 toa=19500.0
