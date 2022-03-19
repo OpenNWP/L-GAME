@@ -82,13 +82,13 @@ module set_initial_state
         
         !$OMP PARALLEL
         !$OMP WORKSHARE
-        state%wind_u = 18.71_wp
+        state%wind_u = 10._wp
         state%wind_v = 0._wp
         !$OMP END WORKSHARE
         !$OMP END PARALLEL
        
-        n_squared = (0.01871_wp)**2
-        T_0 = 273.16_wp
+        n_squared = (0.01_wp)**2
+        T_0 = 288._wp
        
         ! background state not yet substracted here
        
