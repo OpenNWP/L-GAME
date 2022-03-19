@@ -30,10 +30,9 @@ for i in range(len(x_array[:, 0])):
 
 # plotting
 delta = np.max(plot_array[:,:,0]) - np.min(plot_array[:,:,0])
-bounds=np.linspace(np.min(plot_array[:,:,0]) - 0.1*delta, np.max(plot_array[:,:,0]) + 0.1*delta, 1000)
+bounds=np.arange(np.min(plot_array[:,:,0]) - 0.1*delta, np.max(plot_array[:,:,0]) + 0.1*delta, 0.05)
 fig = plt.figure()
-cf = plt.contourf(1e-3*x_array[:,50:150], 1e-3*z_array[:,50:150,0], plot_array[:,50:150,0], cmap = "jet", levels = bounds)
-plt.colorbar(cf, label = unit)
+cf = plt.contour(1e-3*x_array[:,50:150], 1e-3*z_array[:,50:150,0], plot_array[:,50:150,0], levels = bounds, colors = "black")
 plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname)
 plt.ylim([0, 10])
 plt.xlabel("x / km")
