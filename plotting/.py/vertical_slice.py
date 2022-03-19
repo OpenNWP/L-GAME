@@ -29,8 +29,7 @@ for i in range(len(x_array[:, 0])):
 	x_array[i, :] = x_vector
 
 # plotting
-delta = np.max(plot_array[:,:,0]) - np.min(plot_array[:,:,0])
-bounds=np.arange(np.min(plot_array[:,:,0]) - 0.1*delta, np.max(plot_array[:,:,0]) + 0.1*delta, 0.05)
+bounds=np.arange(np.floor(np.min(plot_array[:,:,0])), np.ceil(np.max(plot_array[:,:,0])), 0.05)
 fig = plt.figure()
 cf = plt.contour(1e-3*x_array[:,50:150], 1e-3*z_array[:,50:150,0], plot_array[:,50:150,0], levels = bounds, colors = "black")
 plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname)
