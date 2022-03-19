@@ -46,7 +46,6 @@ lsoil=.false.
 
 &bc
 lperiodic=.true.
-lyrigid=.true.
 /
 
 &rad

@@ -18,7 +18,7 @@ module manage_rkhevi
   use diff_nml,                   only: lmom_diff_v
   use surface_nml,                only: lsoil
   use planetary_boundary_layer,   only: update_sfc_turb_quantities
-  use bc_nml,                     only: lperiodic,lyrigid
+  use bc_nml,                     only: lperiodic
   use manage_radiation_calls,     only: call_radiation
 
   implicit none
@@ -81,15 +81,6 @@ module manage_rkhevi
       state_new%wind_v = state_old%wind_v + dtime*tend%wind_v
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
-      ! rigid boundary conditions
-      if (lyrigid) then
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
-        state_new%wind_v(1,:,:) = 0._wp
-        state_new%wind_v(nlins+1,:,:) = 0._wp
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
-      endif
       ! Horizontal velocity can be considered to be updated from now on.
 
       ! 2.) Explicit component of the generalized density equations.
