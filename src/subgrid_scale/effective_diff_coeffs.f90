@@ -121,10 +121,18 @@ module effective_diff_coeffs
       ! periodic boundary conditions
       if (lperiodic) then
       
-        irrev%viscosity_coeff_curl_dual(1,:,jl) = 0.5_wp*(irrev%viscosity_molecular(1,:,jl) + irrev%viscosity_molecular(nlins,:,jl))
-        irrev%viscosity_coeff_curl_dual(nlins+1,:,jl) = irrev%viscosity_coeff_curl_dual(1,:,jl)
-        irrev%viscosity_coeff_curl_dual(:,1,jl) = 0.5_wp*(irrev%viscosity_molecular(:,ncols,jl) + irrev%viscosity_molecular(:,1,jl))
-        irrev%viscosity_coeff_curl_dual(:,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(:,1,jl)
+        do jk=2,ncols
+          irrev%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
+          irrev%viscosity_molecular(1,jk-1,jl) + irrev%viscosity_molecular(nlins,jk-1,jl) &
+          + irrev%viscosity_molecular(1,jk,jl) + irrev%viscosity_molecular(nlins,jk,jl))
+          irrev%viscosity_coeff_curl_dual(nlins+1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl)
+        enddo
+        do ji=2,nlins
+          irrev%viscosity_coeff_curl_dual(ji,1,jl) = 0.25_wp*( &
+          irrev%viscosity_molecular(ji-1,ncols,jl) + irrev%viscosity_molecular(ji-1,1,jl) &
+          + irrev%viscosity_molecular(ji,ncols,jl) + irrev%viscosity_molecular(ji,1,jl))
+          irrev%viscosity_coeff_curl_dual(ji,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl)
+        enddo
       
         ! corners
         irrev%viscosity_coeff_curl_dual(1,1,jl) = 0.25*(irrev%viscosity_molecular(1,1,jl) + irrev%viscosity_molecular(nlins,1,jl) &
