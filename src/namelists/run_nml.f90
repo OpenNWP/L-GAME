@@ -93,7 +93,15 @@ module run_nml
     ! these are the leap seconds
     + 27
     
-    ! checking input data for correctness
+    ! sanity checks
+    if (nlins<3) then
+      write(*,*) "Error: nlins must be larger or equal than three. Aborting."
+      call exit(1)
+    endif
+    if (ncols<3) then
+      write(*,*) "Error: ncols must be larger or equal than three. Aborting."
+      call exit(1)
+    endif
     if (mod(nlins, 2)==0) then
       write(*,*) "Error: nlins must be odd. Aborting."
       call exit(1)
