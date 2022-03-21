@@ -4,7 +4,7 @@
 # Github repository: https://github.com/OpenNWP/L-GAME
 
 lgame_home_dir=~/code/L-GAME
-run_id=schaer
+run_id=advection
 export OMP_NUM_THREADS=2
 
 cat > namelist.nml << EOF
@@ -12,14 +12,14 @@ cat > namelist.nml << EOF
 &run
 run_id="$run_id"
 nlins=3
-ncols=401
-nlays=65
-nlays_oro=65
-toa=19500.0
-dy=500
-dx=500
-run_span_hr=6
-scenario="schaer"
+ncols=301
+nlays=50
+nlays_oro=50
+toa=25000.0
+dy=1000
+dx=1000
+run_span_hr=2
+scenario="advection"
 lcorio=.false.
 sigma=1.0
 lplane=.true.
@@ -36,8 +36,8 @@ ltracer_diff_v=.false.
 /
 
 &constituents
-no_of_gaseous_constituents=1
-no_of_condensed_constituents=0
+no_of_gaseous_constituents=2
+no_of_condensed_constituents=4
 /
 
 &surface
