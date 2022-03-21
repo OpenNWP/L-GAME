@@ -345,7 +345,7 @@ module grid_generator
         do jk=1,ncols
           x_coord = dx*jk - (ncols/2 + 1)*dx
           if (abs(x_coord)<=25e3_wp) then
-            grid%z_w(:,jk,nlays+1) = height_mountain*cos(M_PI*x_coord/25000._wp)**2*cos(M_PI*x_coord/3000._wp)**2
+            grid%z_w(:,jk,nlays+1) = height_mountain*cos(0.5_wp*M_PI*x_coord/25000._wp)**2*cos(M_PI*x_coord/3000._wp)**2
           else
             grid%z_w(:,jk,nlays+1) = 0._wp
           endif
