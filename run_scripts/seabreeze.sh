@@ -4,7 +4,7 @@
 # Github repository: https://github.com/OpenNWP/L-GAME
 
 lgame_home_dir=~/code/L-GAME
-run_id=schaer
+run_id=seabreeze
 export OMP_NUM_THREADS=2
 
 cat > namelist.nml << EOF
@@ -12,37 +12,29 @@ cat > namelist.nml << EOF
 &run
 run_id="$run_id"
 nlins=3
-ncols=401
-nlays=65
-nlays_oro=65
+ncols=51
+nlays=50
+nlays_oro=40
 toa=19500.0
-dy=500
-dx=500
-run_span_hr=6
-scenario="schaer"
+dy=2000
+dx=2000
+run_span_hr=24
+scenario="seabreeze"
 lcorio=.false.
 sigma=1.0
 lplane=.true.
 /
 
 &diff
-lmom_diff_h=.true.
-diff_h_smag_rot=0.0
-lmom_diff_v=.false.
-ltemp_diff_h=.true.
-ltemp_diff_v=.false.
-ltracer_diff_h=.false.
-ltracer_diff_v=.false.
 /
 
 &constituents
-no_of_gaseous_constituents=1
-no_of_condensed_constituents=0
+no_of_gaseous_constituents=2
+no_of_condensed_constituents=4
 /
 
 &surface
-orography_id=2
-lsoil=.false.
+orography_id=0
 /
 
 &bc
@@ -50,13 +42,12 @@ lperiodic=.true.
 /
 
 &rad
-lrad=.false.
 /
 
 &io
 lread_oro=.false.
 lread_land_sea=.false.
-dt_write_min=10
+dt_write_min=30
 /
 
 EOF
