@@ -138,7 +138,7 @@ module set_initial_state
               x_coord = dx*jk - (ncols/2 + 1)*dx
               r = (((x_coord-x_0)/A_x)**2 + ((grid%z_scalar(ji,jk,jl)-z_0)/A_z)**2)**0.5_wp
               if (r<=1._wp) then
-                state%rho(ji,jk,jl,no_of_condensed_constituents+2) = rho_0*cos(0.5_wp*M_PI/r)**2
+                state%rho(ji,jk,jl,no_of_condensed_constituents+2) = rho_0*cos(0.5_wp*M_PI*r)**2
               else
                 state%rho(ji,jk,jl,no_of_condensed_constituents+2) = 0._wp
               endif
