@@ -11,11 +11,18 @@ cat > namelist.nml << EOF
 
 &run
 run_id="$run_id"
+start_year=2022
+start_month=6
+start_day=30
+start_hour=0
+start_minute=0
+lat_center=0.7853981633974483
+lon_center=0.0
 nlins=3
-ncols=51
+ncols=101
 nlays=50
 nlays_oro=40
-toa=19500.0
+toa=20000.0
 dy=2000
 dx=2000
 run_span_hr=24
@@ -47,7 +54,7 @@ lperiodic=.true.
 &io
 lread_oro=.false.
 lread_land_sea=.false.
-dt_write_min=30
+dt_write_min=60
 /
 
 EOF
