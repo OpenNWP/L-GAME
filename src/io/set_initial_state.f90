@@ -51,7 +51,7 @@ module set_initial_state
       
     select case (trim(scenario))
     
-      case("standard")
+      case("standard","seabreeze")
       
         ! This test case is the standard atmosphere.
       
