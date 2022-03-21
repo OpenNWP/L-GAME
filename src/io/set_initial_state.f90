@@ -77,7 +77,7 @@ module set_initial_state
         !$OMP END DO
         !$OMP END PARALLEL
 
-      case("avection")
+      case("advection")
       
         ! This test case is the advection test from the SLEVE paper
         ! (Schär et al. (2001): A New Terrain-Following Vertical Coordinate Formulation for Atmospheric Prediction Models).
