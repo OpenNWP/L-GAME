@@ -7,7 +7,7 @@ module set_initial_state
 
   use definitions,      only: t_state,wp,t_diag,t_grid
   use netcdf
-  use run_nml,          only: nlins,ncols,nlays,scenario,run_id
+  use run_nml,          only: nlins,ncols,nlays,scenario,run_id,lplane
   use constituents_nml, only: no_of_condensed_constituents,no_of_constituents
   use dictionary,       only: specific_gas_constants,spec_heat_capacities_v_gas,spec_heat_capacities_p_gas
   use constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
@@ -363,7 +363,7 @@ module set_initial_state
     geopot = -gravity*re**2/(re+height)+gravity*re
     
     ! Schaer test case
-    if (trim(scenario)=="schaer") then
+    if (lplane) then
       geopot = gravity*height
     endif
   
