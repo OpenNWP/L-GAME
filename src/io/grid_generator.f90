@@ -347,11 +347,18 @@ module grid_generator
     c_p_water = 4184._wp
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$OMP DO PRIVATE(ji,jk,x_coord)
     do ji=1,nlins
       do jk=1,ncols
+		
+		! seabreeze land-sea mask
+        if (trim(scenario)=="seabreeze") then
+          if (jk>=ncols/4 .and. jk<=3*ncols/4) then
+            grid%is_land(ji,jk) = 1
+          endif
+        endif
 		    
-       grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
+        grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
             
         ! albedo of water
         grid%sfc_albedo(ji,jk) = 0.06_wp
