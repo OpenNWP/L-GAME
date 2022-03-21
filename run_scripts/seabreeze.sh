@@ -49,6 +49,7 @@ lperiodic=.true.
 /
 
 &rad
+dtime_rad=1800.0
 /
 
 &io
