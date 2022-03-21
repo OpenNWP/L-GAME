@@ -47,7 +47,6 @@ module grid_generator
     real(wp) :: base_area                    ! variable for calculating the vertical grid
     real(wp) :: lower_z,upper_z,lower_length ! variables needed for area calculations
     real(wp) :: height_mountain              ! height of Gaussian mountain (needed for test case)
-    real(wp) :: sigma_mountain               ! standard deviation of Gaussian mountain (needed for test case)
     real(wp) :: x_coord                      ! help variable needed for the Schär test
     real(wp) :: rescale_factor               ! soil grid rescaling factor
     real(wp) :: sigma_soil                   ! sigma of the soil grid
@@ -326,15 +325,30 @@ module grid_generator
           call smooth_hor_scalar(grid%z_w(:,:,nlays+1))
         endif
       
-      ! Schaer orography
+      ! Schaer wave test orography
       case(2)
         height_mountain = 250._wp
-        sigma_mountain = 5000._wp/sqrt(2._wp)
         !$OMP PARALLEL
         !$OMP DO PRIVATE(jk,x_coord)
         do jk=1,ncols
           x_coord = dx*jk - (ncols/2 + 1)*dx
-          grid%z_w(:,jk,nlays+1) = height_mountain*exp(-x_coord**2/(2._wp*sigma_mountain**2))*cos(M_PI*x_coord/4000._wp)**2
+          grid%z_w(:,jk,nlays+1) = height_mountain*exp(-x_coord**2/5000._wp**2)*cos(M_PI*x_coord/4000._wp)**2
+        enddo
+        !$OMP END DO
+        !$OMP END PARALLEL
+      
+      ! Schaer advection test orography
+      case(3)
+        height_mountain = 3000._wp
+        !$OMP PARALLEL
+        !$OMP DO PRIVATE(jk,x_coord)
+        do jk=1,ncols
+          x_coord = dx*jk - (ncols/2 + 1)*dx
+          if (abs(x_coord)<=25e3_wp) then
+            grid%z_w(:,jk,nlays+1) = height_mountain*cos(M_PI*x_coord/25000._wp)**2*cos(M_PI*x_coord/3000._wp)**2
+          else
+            grid%z_w(:,jk,nlays+1) = 0._wp
+          endif
         enddo
         !$OMP END DO
         !$OMP END PARALLEL

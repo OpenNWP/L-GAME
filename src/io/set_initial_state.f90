@@ -7,11 +7,11 @@ module set_initial_state
 
   use definitions,      only: t_state,wp,t_diag,t_grid
   use netcdf
-  use run_nml,          only: nlins,ncols,nlays,scenario,run_id,lplane
+  use run_nml,          only: nlins,ncols,nlays,scenario,run_id,lplane,dx
   use constituents_nml, only: no_of_condensed_constituents,no_of_constituents
   use dictionary,       only: specific_gas_constants,spec_heat_capacities_v_gas,spec_heat_capacities_p_gas
   use constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
-                              gravity,p_0_standard,re,t_grad_inv
+                              gravity,p_0_standard,re,t_grad_inv,M_PI
   use io_nml,           only: restart_filename
 
   implicit none
@@ -37,14 +37,15 @@ module set_initial_state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    real(wp) :: pres_lowest_layer(nlins,ncols) ! pressure in the lowest layer
-    real(wp) :: n_squared                      ! Brunt-Väisälä frequency for the Schär test case
-    real(wp) :: gravity_local                  ! gravity acceleration
-    real(wp) :: delta_z                        ! delta z
-    real(wp) :: T_0                            ! MSLP temperature variable
-    real(wp) :: r_d                            ! specific gas constant of dry air
-    real(wp) :: c_p                            ! specific heat capacity at const. pressure of dry air
-    integer  :: ji,jk,jl                       ! loop indices
+    real(wp) :: pres_lowest_layer(nlins,ncols)              ! pressure in the lowest layer
+    real(wp) :: n_squared                                   ! Brunt-Väisälä frequency for the Schär test case
+    real(wp) :: gravity_local                               ! gravity acceleration
+    real(wp) :: delta_z                                     ! delta z
+    real(wp) :: T_0                                         ! MSLP temperature variable
+    real(wp) :: r_d                                         ! specific gas constant of dry air
+    real(wp) :: c_p                                         ! specific heat capacity at const. pressure of dry air
+    integer  :: ji,jk,jl                                    ! loop indices
+    real(wp) :: u_0,z_1,z_2,r,rho_0,x_0,z_0,A_x,A_Z,x_coord ! variables needed for the advection test
     
     r_d = specific_gas_constants(0)
     c_p = spec_heat_capacities_p_gas(0)
@@ -71,6 +72,73 @@ module set_initial_state
               diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))
             enddo
             pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,nlays))
+          enddo
+        enddo
+        !$OMP END DO
+        !$OMP END PARALLEL
+
+      case("avection")
+      
+        ! This test case is the advection test from the SLEVE paper
+        ! (Schär et al. (2001): A New Terrain-Following Vertical Coordinate Formulation for Atmospheric Prediction Models).
+        
+        u_0 = 10._wp
+        z_1 = 4e3_wp
+        z_2 = 5e3_wp
+        A_x = 25e3_wp
+        A_z = 3e3_wp
+        x_0 = -50e3_wp
+        z_0 = 9e3_wp
+        rho_0 = 1e-3_wp
+        
+        ! horizontal wind
+        !$OMP PARALLEL
+        !$OMP DO PRIVATE(ji,jk,jl)
+        do ji=1,nlins
+          do jk=1,ncols+1
+            do jl=1,nlays
+              if (grid%z_u(ji,jk,jl)>=z_2) then
+                state%wind_u(ji,jk,jl) = u_0
+              elseif (z_1<=grid%z_u(ji,jk,jl) .and. grid%z_u(ji,jk,jl)<=z_2) then
+                state%wind_u(ji,jk,jl) = u_0*sin(0.5_wp*M_PI*(grid%z_u(ji,jk,jl)-z_1)/(z_2-z_1))**2
+              elseif (grid%z_u(ji,jk,jl)<=z_1) then
+                state%wind_u(ji,jk,jl) = 0._wp
+              endif
+            enddo
+          enddo
+        enddo
+        !$OMP END DO
+        !$OMP END PARALLEL
+        
+        !$OMP PARALLEL
+        !$OMP WORKSHARE
+        state%wind_v = 0._wp
+        !$OMP END WORKSHARE
+        !$OMP END PARALLEL
+        
+        !$OMP PARALLEL
+        !$OMP DO PRIVATE(ji,jk,jl)
+        do ji=1,nlins
+          do jk=1,ncols
+            do jl=1,nlays
+              diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))
+            enddo
+            pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,nlays))
+          enddo
+        enddo
+        !$OMP END DO
+        !$OMP END PARALLEL
+        
+        ! density anomaly
+        !$OMP PARALLEL
+        !$OMP DO PRIVATE(ji,jk,jl,r,x_coord)
+        do ji=1,nlins
+          do jk=1,ncols
+            do jl=1,nlays
+              x_coord = dx*jk - (ncols/2 + 1)*dx
+              r = (((x_coord-x_0)/A_x)**2 + ((grid%z_scalar(ji,jk,jl)-z_0)/A_z)**2)**0.5_wp
+              state%rho(ji,jk,jl,no_of_condensed_constituents+2) = rho_0*cos(0.5_wp*M_PI/r)**2
+            enddo
           enddo
         enddo
         !$OMP END DO
