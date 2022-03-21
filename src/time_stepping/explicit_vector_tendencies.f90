@@ -74,7 +74,7 @@ module explicit_vector_tendencies
       endif
       
       ! dissipation
-      if (lmom_diff_h .or. lmom_diff_v) then
+      if (lmom_diff_h) then
         call simple_dissipation_rate(state,irrev,grid)
       endif
     endif
