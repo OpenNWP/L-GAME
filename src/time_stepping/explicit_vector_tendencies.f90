@@ -14,7 +14,7 @@ module explicit_vector_tendencies
   use multiplications,    only: scalar_times_vector
   use vorticity_flux,     only: calc_vorticity_flux_term
   use diff_nml,           only: lmom_diff_h,lmom_diff_v
-  use momentum_diff_diss, only: mom_diff_h,simple_dissipation_rate
+  use momentum_diff_diss, only: mom_diff_h,mom_diff_v,simple_dissipation_rate
 
   implicit none
   
@@ -67,6 +67,10 @@ module explicit_vector_tendencies
       ! horizontal momentum diffusion
       if (lmom_diff_h) then
         call mom_diff_h(state,diag,irrev,grid)
+      endif
+      ! vertical momentum diffusion
+      if (lmom_diff_v) then
+        call mom_diff_v(state,diag,irrev,grid)
       endif
       
       ! dissipation
