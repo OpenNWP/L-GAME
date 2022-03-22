@@ -309,7 +309,6 @@ module momentum_diff_diss
     ! taking the second derivative to compute the diffusive tendency
     call grad_vert_cov(diag%scalar_placeholder,irrev%mom_diff_tend_z,grid)
 
-
     ! 3.) horizontal diffusion of vertical velocity
     ! ---------------------------------------------
     ! the diffusion coefficient is the same as the one for vertical diffusion of horizontal velocity
