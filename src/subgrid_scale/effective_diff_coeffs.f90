@@ -506,7 +506,8 @@ module effective_diff_coeffs
           c_g_v = spec_heat_cap_diagnostics_v(state,ji,jk,jl)
           ! horizontal diffusion coefficient
           irrev%scalar_diff_coeff_h(ji,jk,jl) = c_g_v &
-          *(irrev%viscosity_coeff_div(ji,jk,jl) + irrev%viscosity_coeff_curl(ji,jk,jl))
+          *(density_gas(state,ji,jk,jl)*irrev%viscosity_molecular(ji,jk,jl) &
+          + irrev%viscosity_coeff_div(ji,jk,jl) + irrev%viscosity_coeff_curl(ji,jk,jl))
           ! vertical diffusion coefficient
           irrev%scalar_diff_coeff_v(ji,jk,jl) &
           ! molecular component
@@ -565,7 +566,8 @@ module effective_diff_coeffs
         do jl=1,nlays
           ! horizontal diffusion coefficient
           irrev%scalar_diff_coeff_h(ji,jk,jl) &
-          = (irrev%viscosity_coeff_div(ji,jk,jl) + irrev%viscosity_coeff_curl(ji,jk,jl)) &
+          = irrev%viscosity_molecular(ji,jk,jl) &
+          + (irrev%viscosity_coeff_div(ji,jk,jl) + irrev%viscosity_coeff_curl(ji,jk,jl)) &
           /density_gas(state,ji,jk,jl)
           ! vertical diffusion coefficient
           irrev%scalar_diff_coeff_v(ji,jk,jl) &
