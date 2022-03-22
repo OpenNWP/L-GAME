@@ -84,7 +84,7 @@ module explicit_scalar_tendencies
       if (j_constituent==no_of_condensed_constituents+1) then
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
       else
-        call div_h_limited(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,state_old%rho(:,:,:,j_constituent),grid)
+        call div_h_limited(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,state_new%rho(:,:,:,j_constituent),grid)
       endif
 
       ! mass diffusion, only for gaseous tracers
