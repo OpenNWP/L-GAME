@@ -8,10 +8,10 @@ module write_out
   use definitions,       only: t_state,wp,t_diag,t_grid
   use netcdf
   use run_nml,           only: nlins,ncols,nlays,scenario,run_id
-  use constituents_nml,  only: no_of_condensed_constituents,no_of_constituents
+  use constituents_nml,  only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
   use dictionary,        only: specific_gas_constants,spec_heat_capacities_p_gas
-  use set_initial_state, only: bg_temp,bg_pres,geopot
-  use set_initial_state, only: nc_check
+  use set_initial_state, only: bg_temp,bg_pres,geopot,nc_check
+  use humidity,          only: rel_humidity
 
   implicit none
   
@@ -47,6 +47,7 @@ module write_out
     integer           :: varid_lon_center          ! variable ID of the longitude of the center
     integer           :: varid_z                   ! variable ID of the z coordinates
     integer           :: varid_rho                 ! variable ID of the 3D mass density fields
+    integer           :: varid_r                   ! variable ID of the 3D relative humidity
     integer           :: varid_t                   ! variable ID of the 3D temperature field
     integer           :: varid_u                   ! variable ID of the 3D u wind field
     integer           :: varid_v                   ! variable ID of the 3D v wind field
@@ -119,6 +120,12 @@ module write_out
     call nc_check(nf90_put_att(ncid,varid_rho,"Description","mass densities"))
     call nc_check(nf90_put_att(ncid,varid_rho,"Unit","kg/m^3"))
     
+    if (no_of_gaseous_constituents>1) then
+      call nc_check(nf90_def_var(ncid,"r",NF90_REAL,dimids_3d,varid_r))
+      call nc_check(nf90_put_att(ncid,varid_r,"Description","relative humidity"))
+      call nc_check(nf90_put_att(ncid,varid_r,"Unit","%"))
+    endif
+    
     call nc_check(nf90_def_var(ncid,"T",NF90_REAL,dimids_3d,varid_t))
     call nc_check(nf90_put_att(ncid,varid_t,"Description","air temperature"))
     call nc_check(nf90_put_att(ncid,varid_t,"Unit","K"))
@@ -153,9 +160,30 @@ module write_out
     call nc_check(nf90_put_var(ncid,varid_rho,state%rho))
     
     ! 3D temperature
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
     diag%scalar_placeholder = (grid%theta_bg + state%theta_pert) &
     *(grid%exner_bg + state%exner_pert)
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     call nc_check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder))
+    
+    if (no_of_gaseous_constituents>1) then
+      ! relative humidity
+      !$OMP PARALLEL
+      !$OMP DO PRIVATE(ji,jk,jl)
+      do ji=1,nlins
+        do jk=1,ncols
+          do jl=1,nlays
+            diag%scalar_placeholder(ji,jk,jl) = rel_humidity(state%rho(ji,jk,jl,no_of_condensed_constituents+2), &
+            diag%scalar_placeholder(ji,jk,jl))
+          enddo
+        enddo
+      enddo
+      !$OMP END DO
+      !$OMP END PARALLEL
+      call nc_check(nf90_put_var(ncid,varid_r,diag%scalar_placeholder))
+    endif
     
     ! 3D u wind
     !$OMP PARALLEL

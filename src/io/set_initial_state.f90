@@ -76,6 +76,16 @@ module set_initial_state
         enddo
         !$OMP END DO
         !$OMP END PARALLEL
+    
+        !$OMP PARALLEL
+        !$OMP WORKSHARE
+        ! humidity
+        state%rho(:,:,:,no_of_constituents) = 0._wp
+        ! condensates
+        state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
+        state%condensed_rho_t = 0._wp
+        !$OMP END WORKSHARE
+        !$OMP END PARALLEL
 
       case("advection")
       
@@ -147,6 +157,14 @@ module set_initial_state
         enddo
         !$OMP END DO
         !$OMP END PARALLEL
+    
+        !$OMP PARALLEL
+        !$OMP WORKSHARE
+        ! condensates
+        state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
+        state%condensed_rho_t = 0._wp
+        !$OMP END WORKSHARE
+        !$OMP END PARALLEL
 
       case("schaer")
       
@@ -213,18 +231,18 @@ module set_initial_state
         enddo
         !$OMP END DO
         !$OMP END PARALLEL
+    
+        !$OMP PARALLEL
+        !$OMP WORKSHARE
+        ! humidity
+        state%rho(:,:,:,no_of_constituents) = 0._wp
+        ! condensates
+        state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
+        state%condensed_rho_t = 0._wp
+        !$OMP END WORKSHARE
+        !$OMP END PARALLEL
         
     endselect
-    
-    ! humidity
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
-    state%rho(:,:,:,no_of_constituents) = 0._wp
-    ! condensates
-    state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
-    state%condensed_rho_t = 0._wp
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
     
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk)
