@@ -172,8 +172,8 @@ module planetary_boundary_layer
     + log(7._wp))
 
     ! limitting the result for security
-    if (scalar_flux_resistance<1._wp) then
-      scalar_flux_resistance = 1._wp
+    if (scalar_flux_resistance<50._wp) then
+      scalar_flux_resistance = 50._wp
     endif 
     
   end function 
@@ -200,8 +200,8 @@ module planetary_boundary_layer
     - psi_m(used_vertical_height,monin_obukhov_length_value))
 
     ! limitting the result for security
-    if (momentum_flux_resistance<1._wp) then
-      momentum_flux_resistance = 1._wp
+    if (momentum_flux_resistance<50._wp) then
+      momentum_flux_resistance = 50._wp
     endif
 
   end function momentum_flux_resistance
