@@ -99,8 +99,8 @@ module divergence_operators
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          if (current_field(ji,jk,jl)-dtime*result_field(ji,jk,jl)<0._wp) then
-            result_field(ji,jk,jl) = current_field(ji,jk,jl)/dtime
+          if (current_field(ji,jk,jl)-2.0_wp*dtime*result_field(ji,jk,jl)<0._wp) then
+            result_field(ji,jk,jl) = current_field(ji,jk,jl)/(2.0_wp*dtime)
           endif
         enddo
       enddo
