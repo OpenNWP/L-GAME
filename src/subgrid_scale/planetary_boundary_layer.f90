@@ -176,7 +176,7 @@ module planetary_boundary_layer
       scalar_flux_resistance = dtime/z_agl
     endif 
     
-  end function 
+  end function scalar_flux_resistance
 
   function momentum_flux_resistance(wind_h_lowest_layer,z_agl,roughness_length_value,monin_obukhov_length_value)
 
