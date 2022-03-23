@@ -359,7 +359,7 @@ module momentum_diff_diss
     ! -------------------------------------------------------
 
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,wind_speed_lowest_layer,layer_thickness,roughness_length,monin_obukhov_length_value, &
+    !$OMP DO PRIVATE(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
     !$OMP flux_resistance,wind_rescale_factor)
     do ji=1,nlins
         do jk=2,ncols
@@ -422,7 +422,7 @@ module momentum_diff_diss
     !$OMP END PARALLEL
 
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,wind_speed_lowest_layer,layer_thickness,roughness_length,monin_obukhov_length_value, &
+    !$OMP DO PRIVATE(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
     !$OMP flux_resistance,wind_rescale_factor)
     do jk=1,ncols
       do ji=2,nlins
