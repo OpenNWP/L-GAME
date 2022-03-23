@@ -148,12 +148,12 @@ module planetary_boundary_layer
   
   end function roughness_length_from_u10_sea
 
-  function scalar_flux_resistance(roughness_velocity_value,agl,roughness_length_value,monin_obukhov_length_value)
+  function scalar_flux_resistance(roughness_velocity_value,z_agl,roughness_length_value,monin_obukhov_length_value)
 
     ! This function returns the surface flux resistance for scalar quantities.
 
     ! input variables
-    real(wp), intent(in) :: roughness_velocity_value,agl,roughness_length_value,monin_obukhov_length_value
+    real(wp), intent(in) :: roughness_velocity_value,z_agl,roughness_length_value,monin_obukhov_length_value
     ! output variable
     real(wp)             :: scalar_flux_resistance
 
@@ -161,7 +161,7 @@ module planetary_boundary_layer
     real(wp) :: used_vertical_height
 
     ! height of the prandtl layer
-    used_vertical_height = min(agl,h_prandtl)
+    used_vertical_height = min(z_agl,h_prandtl)
 
     scalar_flux_resistance = 1._wp/(KARMAN*roughness_velocity_value) &
     ! neutral conditions
@@ -172,18 +172,18 @@ module planetary_boundary_layer
     + log(7._wp))
 
     ! limitting the result for security
-    if (scalar_flux_resistance<50._wp) then
-      scalar_flux_resistance = 50._wp
+    if (scalar_flux_resistance<dtime/z_agl) then
+      scalar_flux_resistance = dtime/z_agl
     endif 
     
   end function 
 
-  function momentum_flux_resistance(wind_h_lowest_layer,agl,roughness_length_value,monin_obukhov_length_value)
+  function momentum_flux_resistance(wind_h_lowest_layer,z_agl,roughness_length_value,monin_obukhov_length_value)
 
     ! This function returns the surface flux resistance for momentum.
 
     ! input variables
-    real(wp), intent(in) :: wind_h_lowest_layer,agl,roughness_length_value,monin_obukhov_length_value
+    real(wp), intent(in) :: wind_h_lowest_layer,z_agl,roughness_length_value,monin_obukhov_length_value
     ! output variable
     real(wp)             :: momentum_flux_resistance
 
@@ -191,28 +191,28 @@ module planetary_boundary_layer
     real(wp) :: used_vertical_height
 
     ! height of the prandtl layer
-    used_vertical_height = min(agl,h_prandtl)
+    used_vertical_height = min(z_agl,h_prandtl)
 
-    momentum_flux_resistance = 1._wp/(KARMAN*roughness_velocity(wind_h_lowest_layer,agl,roughness_length_value)) &
+    momentum_flux_resistance = 1._wp/(KARMAN*roughness_velocity(wind_h_lowest_layer,z_agl,roughness_length_value)) &
     ! neutral conditions
     *(log(used_vertical_height/roughness_length_value) &
     ! non-neutral conditions
     - psi_m(used_vertical_height,monin_obukhov_length_value))
 
     ! limitting the result for security
-    if (momentum_flux_resistance<50._wp) then
-      momentum_flux_resistance = 50._wp
+    if (momentum_flux_resistance<dtime/z_agl) then
+      momentum_flux_resistance = dtime/z_agl
     endif
 
   end function momentum_flux_resistance
 
-  function roughness_velocity(wind_speed,agl,roughness_length_value)
+  function roughness_velocity(wind_speed,z_agl,roughness_length_value)
 
     ! This function returns the roughness velocity.
 
     ! input variables
     real(wp), intent(in) :: wind_speed             ! wind speed at a certain height
-    real(wp), intent(in) :: agl                    ! height at which the wind speed is valid
+    real(wp), intent(in) :: z_agl                  ! height at which the wind speed is valid
     real(wp), intent(in) :: roughness_length_value ! roughness length at this point
     ! output variable
     real(wp)             :: roughness_velocity     ! the result
@@ -220,7 +220,7 @@ module planetary_boundary_layer
     ! local variables
     real(wp) :: denominator ! helper variable
 
-    denominator = log(agl/roughness_length_value)
+    denominator = log(z_agl/roughness_length_value)
 
     ! security
     if (abs(denominator)<EPSILON_SECURITY) then
