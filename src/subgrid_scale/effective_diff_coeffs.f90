@@ -565,6 +565,7 @@ module effective_diff_coeffs
         do jl=1,nlays
           ! horizontal diffusion coefficient
           irrev%scalar_diff_coeff_h(ji,jk,jl) &
+          ! 2.0 is an empirical coefficient here
           = 2.0_wp*(irrev%viscosity_coeff_div(ji,jk,jl) + irrev%viscosity_coeff_curl(ji,jk,jl)) &
           /density_gas(state,ji,jk,jl)
           ! vertical diffusion coefficient
