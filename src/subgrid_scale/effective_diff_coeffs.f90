@@ -420,7 +420,7 @@ module effective_diff_coeffs
   
   subroutine vert_vert_mom_viscosity(state,diag,irrev,grid)
   
-    ! This subroutine multiplies scalar_field_placeholder (containing dw/dz) by the diffusion coefficient acting on w because of w.
+    ! This subroutine multiplies scalar_placeholder (containing dw/dz) by the diffusion coefficient acting on w because of w.
    
     ! input arguments and output
     type(t_state), intent(in)    :: state ! state
@@ -445,7 +445,7 @@ module effective_diff_coeffs
           ! molecular viscosity
           = irrev%viscosity_molecular(ji,jk,jl) &
           ! turbulent component
-          + tke2vertical_diff_coeff(irrev%tke(ji,jk,jl))*abs(diag%scalar_placeholder(ji,jk,jl))
+          + tke2vertical_diff_coeff(irrev%tke(ji,jk,jl))
           ! stability criterion
           if (mom_diff_coeff>max_diff_v_coeff_turb) then
             mom_diff_coeff = max_diff_v_coeff_turb
