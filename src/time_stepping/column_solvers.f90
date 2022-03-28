@@ -31,7 +31,7 @@ module column_solvers
     type(t_state), intent(in)    :: state_old ! state at the old timestep
     type(t_state), intent(inout) :: state_new ! state at the new timestep
     type(t_diag),  intent(inout) :: diag      ! diagnostic quantities
-    type(t_tend),  intent(in)    :: tend      ! explicit tendencies
+    type(t_tend),  intent(inout) :: tend      ! explicit tendencies
     type(t_grid),  intent(in)    :: grid      ! model grid
     integer,       intent(in)    :: rk_step   ! Runge Kutta substep
 
