@@ -113,23 +113,31 @@ module multiplications
     real(wp), intent(inout) :: result_field_y(:,:,:) ! output vector field, y-component
   
     ! local variables
-    integer :: ji,jk ! loop indices
+    integer :: ji,jk,jl ! loop indices
     
     ! inner domain
     ! x
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(jk)
-    do jk=2,ncols
-      result_field_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk-1,:) + scalar_field(:,jk,:))*in_vector_x(:,jk,:)
+    !$OMP DO PRIVATE(ji,jk,jl)
+    do ji=1,nlins
+      do jk=2,ncols
+        do jl=1,nlays
+          result_field_x(ji,jk,jl) = 0.5_wp*(scalar_field(ji,jk-1,jl) + scalar_field(ji,jk,jl))*in_vector_x(ji,jk,jl)
+        enddo
+      enddo
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
     
     ! y
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$OMP DO PRIVATE(ji,jk,jl)
     do ji=2,nlins
-      result_field_y(ji,:,:) = 0.5_wp*(scalar_field(ji-1,:,:) + scalar_field(ji,:,:))*in_vector_y(ji,:,:)
+      do jk=1,ncols
+        do jl=1,nlays
+          result_field_y(ji,jk,jl) = 0.5_wp*(scalar_field(ji-1,jk,jl) + scalar_field(ji,jk,jl))*in_vector_y(ji,jk,jl)
+        enddo
+      enddo
     enddo
     !$OMP END DO
     !$OMP END PARALLEL
@@ -137,27 +145,43 @@ module multiplications
     ! periodic boundary conditions
     if (lperiodic) then
       !$OMP PARALLEL
-      !$OMP WORKSHARE
-      result_field_x(:,1,:) = 0.5_wp*(scalar_field(:,1,:) + scalar_field(:,ncols,:))*in_vector_x(:,1,:)
-      !$OMP END WORKSHARE
+      !$OMP DO PRIVATE(ji,jl)
+      do ji=1,nlins
+        do jl=1,nlays
+          result_field_x(ji,1,jl) = 0.5_wp*(scalar_field(ji,1,jl) + scalar_field(ji,ncols,jl))*in_vector_x(ji,1,jl)
+        enddo
+      enddo
+      !$OMP END DO
       !$OMP END PARALLEL
       
       !$OMP PARALLEL
-      !$OMP WORKSHARE
-      result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
-      !$OMP END WORKSHARE
+      !$OMP DO PRIVATE(ji,jl)
+      do ji=1,nlins
+        do jl=1,nlays
+          result_field_x(ji,ncols+1,jl) = result_field_x(ji,1,jl)
+        enddo
+      enddo
+      !$OMP END DO
       !$OMP END PARALLEL
       
       !$OMP PARALLEL
-      !$OMP WORKSHARE
-      result_field_y(1,:,:) = 0.5_wp*(scalar_field(1,:,:) + scalar_field(nlins,:,:))*in_vector_y(1,:,:)
-      !$OMP END WORKSHARE
+      !$OMP DO PRIVATE(jk,jl)
+      do jk=1,ncols
+        do jl=1,nlays
+          result_field_y(1,jk,jl) = 0.5_wp*(scalar_field(1,jk,jl) + scalar_field(nlins,jk,jl))*in_vector_y(1,jk,jl)
+        enddo
+      enddo
+      !$OMP END DO
       !$OMP END PARALLEL
       
       !$OMP PARALLEL
-      !$OMP WORKSHARE
-      result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
-      !$OMP END WORKSHARE
+      !$OMP DO PRIVATE(jk,jl)
+      do jk=1,ncols
+        do jl=1,nlays
+          result_field_y(nlins+1,jk,jl) = result_field_y(1,jk,jl)
+        enddo
+      enddo
+      !$OMP END DO
       !$OMP END PARALLEL
     endif
   
