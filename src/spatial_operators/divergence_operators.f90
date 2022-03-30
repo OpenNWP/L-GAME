@@ -15,7 +15,6 @@ module divergence_operators
   
   public :: div_h
   public :: add_vertical_div
-  public :: div_h_limited
   
   contains
 
@@ -75,40 +74,6 @@ module divergence_operators
     !$OMP END PARALLEL
 
   end subroutine div_h
-
-  subroutine div_h_limited(vector_field_x,vector_field_y,result_field,current_field,grid)
-
-    ! This is a limited version of the horizontal divergence operator.
-    
-    ! input arguments and output
-    real(wp),     intent(in)    :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
-    real(wp),     intent(in)    :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
-    real(wp),     intent(inout) :: result_field(:,:,:)   ! resulting scalar field
-    real(wp),     intent(in)    :: current_field(:,:,:)  ! field at the current timestep
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
-    
-    ! local variables
-    integer :: ji,jk,jl ! loop variables
-    
-    ! the normal divergence operator
-    call div_h(vector_field_x,vector_field_y,result_field,grid)
-
-    ! limiter
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
-        do jl=1,nlays
-          if (current_field(ji,jk,jl)-2.0_wp*dtime*result_field(ji,jk,jl)<0._wp) then
-            result_field(ji,jk,jl) = current_field(ji,jk,jl)/(2.0_wp*dtime)
-          endif
-        enddo
-      enddo
-    enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-
-  end subroutine div_h_limited
   
   subroutine add_vertical_div(in_field,out_field,grid)
 

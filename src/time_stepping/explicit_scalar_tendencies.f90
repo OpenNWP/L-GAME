@@ -7,7 +7,7 @@ module explicit_scalar_tendencies
 
   use definitions,           only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
   use multiplications,       only: scalar_times_vector_h,scalar_times_vector_v
-  use divergence_operators,  only: div_h,div_h_limited,add_vertical_div
+  use divergence_operators,  only: div_h,add_vertical_div
   use run_nml,               only: dtime
   use phase_trans,           only: calc_h2otracers_source_rates
   use constituents_nml,      only: no_of_condensed_constituents,no_of_constituents,lassume_lte
@@ -25,13 +25,12 @@ module explicit_scalar_tendencies
   
   contains
   
-  subroutine expl_scalar_tend(grid,state,state_old,tend,diag,irrev,rk_step)
+  subroutine expl_scalar_tend(grid,state,tend,diag,irrev,rk_step)
   
     ! This subroutine manages the calculation of the explicit part of the scalar tendencies.
   
     type(t_grid),  intent(in)    :: grid      ! model grid
     type(t_state), intent(in)    :: state     ! state with which to calculate the divergence
-    type(t_state), intent(in)    :: state_old ! state at the old timestep
     type(t_tend),  intent(inout) :: tend      ! state which will contain the tendencies
     type(t_diag),  intent(inout) :: diag      ! diagnostic quantities
     type(t_irrev), intent(inout) :: irrev     ! irreversible quantities
@@ -81,11 +80,7 @@ module explicit_scalar_tendencies
       ! calculating the mass flux density
       call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%flux_density_u,diag%flux_density_v)
       ! calculating the divergence of the mass flux density
-      if (j_constituent==no_of_condensed_constituents+1) then
-        call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
-      else
-        call div_h_limited(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,state_old%rho(:,:,:,j_constituent),grid)
-      endif
+      call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
 
       ! mass diffusion, only for gaseous tracers
       diff_switch = 0
