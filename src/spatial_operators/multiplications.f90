@@ -122,7 +122,11 @@ module multiplications
     do ji=1,nlins
       do jk=2,ncols
         do jl=1,nlays
-          result_field_x(ji,jk,jl) = 0.5_wp*(scalar_field(ji,jk-1,jl) + scalar_field(ji,jk,jl))*in_vector_x(ji,jk,jl)
+          if (in_vector_x(ji,jk,jl)>=0._wp) then
+            result_field_x(ji,jk,jl) = scalar_field(ji,jk-1,jl)*in_vector_x(ji,jk,jl)
+          else
+            result_field_x(ji,jk,jl) = scalar_field(ji,jk,jl)*in_vector_x(ji,jk,jl)
+          endif
         enddo
       enddo
     enddo
@@ -135,7 +139,11 @@ module multiplications
     do ji=2,nlins
       do jk=1,ncols
         do jl=1,nlays
-          result_field_y(ji,jk,jl) = 0.5_wp*(scalar_field(ji-1,jk,jl) + scalar_field(ji,jk,jl))*in_vector_y(ji,jk,jl)
+          if (in_vector_y(ji,jk,jl)>=0._wp) then
+            result_field_y(ji,jk,jl) = scalar_field(ji,jk,jl)*in_vector_y(ji,jk,jl)
+          else
+            result_field_y(ji,jk,jl) = scalar_field(ji-1,jk,jl)*in_vector_y(ji,jk,jl)
+          endif
         enddo
       enddo
     enddo
@@ -148,7 +156,11 @@ module multiplications
       !$OMP DO PRIVATE(ji,jl)
       do ji=1,nlins
         do jl=1,nlays
-          result_field_x(ji,1,jl) = 0.5_wp*(scalar_field(ji,1,jl) + scalar_field(ji,ncols,jl))*in_vector_x(ji,1,jl)
+          if (in_vector_x(ji,1,jl)>=0._wp) then
+            result_field_x(ji,1,jl) = scalar_field(ji,ncols,jl)*in_vector_x(ji,1,jl)
+          else
+            result_field_x(ji,1,jl) = scalar_field(ji,1,jl)*in_vector_x(ji,1,jl)
+          endif
         enddo
       enddo
       !$OMP END DO
@@ -164,7 +176,11 @@ module multiplications
       !$OMP DO PRIVATE(jk,jl)
       do jk=1,ncols
         do jl=1,nlays
-          result_field_y(1,jk,jl) = 0.5_wp*(scalar_field(1,jk,jl) + scalar_field(nlins,jk,jl))*in_vector_y(1,jk,jl)
+          if (in_vector_y(1,jk,jl)>=0._wp) then
+            result_field_y(1,jk,jl) = scalar_field(1,jk,jl)*in_vector_y(1,jk,jl)
+          else
+            result_field_y(1,jk,jl) = scalar_field(nlins,jk,jl)*in_vector_y(1,jk,jl)
+          endif
         enddo
       enddo
       !$OMP END DO
