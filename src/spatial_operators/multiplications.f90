@@ -155,13 +155,9 @@ module multiplications
       !$OMP END PARALLEL
       
       !$OMP PARALLEL
-      !$OMP DO PRIVATE(ji,jl)
-      do ji=1,nlins
-        do jl=1,nlays
-          result_field_x(ji,ncols+1,jl) = result_field_x(ji,1,jl)
-        enddo
-      enddo
-      !$OMP END DO
+      !$OMP WORKSHARE
+      result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
+      !$OMP END WORKSHARE
       !$OMP END PARALLEL
       
       !$OMP PARALLEL
@@ -175,13 +171,9 @@ module multiplications
       !$OMP END PARALLEL
       
       !$OMP PARALLEL
-      !$OMP DO PRIVATE(jk,jl)
-      do jk=1,ncols
-        do jl=1,nlays
-          result_field_y(nlins+1,jk,jl) = result_field_y(1,jk,jl)
-        enddo
-      enddo
-      !$OMP END DO
+      !$OMP WORKSHARE
+      result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
+      !$OMP END WORKSHARE
       !$OMP END PARALLEL
     endif
   
