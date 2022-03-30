@@ -436,17 +436,35 @@ module column_solvers
 
               ! filling up the original vectors
               do jl=1,nlays-1
-                c_vector(jl) = impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl+1)*vertical_flux_vector_impl(jl)
-                e_vector(jl) = -impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl)
+                if (vertical_flux_vector_impl(jl)>=0._wp) then
+                  c_vector(jl) = 0._wp
+                  e_vector(jl) = -impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl)
+                else
+                  c_vector(jl) = impl_weight*dtime/grid%volume(ji,jk,jl+1)*vertical_flux_vector_impl(jl)
+                  e_vector(jl) = 0._wp
+                endif
               enddo
               do jl=1,nlays
                 if (jl==1) then
-                  d_vector(jl) = 1._wp - impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(1)
+                  if (vertical_flux_vector_impl(1)>=0._wp) then
+                    d_vector(jl) = 1._wp
+                  else
+                    d_vector(jl) = 1._wp - impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(1)
+                  endif
                 elseif (jl==nlays) then
-                  d_vector(jl) = 1._wp + impl_weight*0.5_wp*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl-1)
+                  if (vertical_flux_vector_impl(jl-1)>=0._wp) then
+                    d_vector(jl) = 1._wp + impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl-1)
+                  else
+                    d_vector(jl) = 1._wp
+                  endif
                 else
-                  d_vector(jl) = 1._wp + impl_weight*dtime/grid%volume(ji,jk,jl) &
-                  *0.5_wp*(vertical_flux_vector_impl(jl-1) - vertical_flux_vector_impl(jl))
+                  d_vector(jl) = 1._wp
+                  if (vertical_flux_vector_impl(jl-1)>=0._wp) then
+                    d_vector(jl) = d_vector(jl) + impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl-1)
+                  endif
+                  if (vertical_flux_vector_impl(jl)<0._wp) then
+                    d_vector(jl) = d_vector(jl) - impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl)
+                  endif
                 endif
                 ! the explicit component
                 ! mass densities
