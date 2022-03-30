@@ -6,7 +6,7 @@ module explicit_scalar_tendencies
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
   use definitions,           only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
-  use multiplications,       only: scalar_times_vector_h,scalar_times_vector_v
+  use multiplications,       only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
   use divergence_operators,  only: div_h,add_vertical_div
   use run_nml,               only: dtime
   use phase_trans,           only: calc_h2otracers_source_rates
@@ -78,7 +78,12 @@ module explicit_scalar_tendencies
       ! explicit mass densities integration
       ! -----------------------------------
       ! calculating the mass flux density
-      call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%flux_density_u,diag%flux_density_v)
+      if (j_constituent==no_of_condensed_constituents+1) then
+        call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%flux_density_u,diag%flux_density_v)
+      else
+        call scalar_times_vector_h_upstream( &
+        state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%flux_density_u,diag%flux_density_v)
+      endif
       ! calculating the divergence of the mass flux density
       call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
 

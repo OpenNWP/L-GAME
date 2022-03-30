@@ -15,6 +15,7 @@ module multiplications
   
   public :: scalar_times_scalar
   public :: scalar_times_vector_h
+  public :: scalar_times_vector_h_upstream
   public :: scalar_times_vector
   public :: scalar_times_vector_v
   
@@ -99,6 +100,68 @@ module multiplications
     endif
   
   end subroutine scalar_times_vector_h
+  
+  subroutine scalar_times_vector_h_upstream(scalar_field,in_vector_x,in_vector_y, &
+                   result_field_x,result_field_y)
+  
+    ! This subroutine multiplies of a scalar with a vector field at horizontal points.
+    
+    real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
+    real(wp), intent(in)    :: in_vector_x(:,:,:)    ! input vector field, x-component
+    real(wp), intent(in)    :: in_vector_y(:,:,:)    ! input vector field, y-component
+    real(wp), intent(inout) :: result_field_x(:,:,:) ! output vector field, x-component
+    real(wp), intent(inout) :: result_field_y(:,:,:) ! output vector field, y-component
+  
+    ! local variables
+    integer :: ji,jk ! loop indices
+    
+    ! inner domain
+    ! x
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(jk)
+    do jk=2,ncols
+      result_field_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk-1,:) + scalar_field(:,jk,:))*in_vector_x(:,jk,:)
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+    ! y
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji)
+    do ji=2,nlins
+      result_field_y(ji,:,:) = 0.5_wp*(scalar_field(ji-1,:,:) + scalar_field(ji,:,:))*in_vector_y(ji,:,:)
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+
+    ! periodic boundary conditions
+    if (lperiodic) then
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      result_field_x(:,1,:) = 0.5_wp*(scalar_field(:,1,:) + scalar_field(:,ncols,:))*in_vector_x(:,1,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      result_field_y(1,:,:) = 0.5_wp*(scalar_field(1,:,:) + scalar_field(nlins,:,:))*in_vector_y(1,:,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+      
+      !$OMP PARALLEL
+      !$OMP WORKSHARE
+      result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
+    endif
+  
+  end subroutine scalar_times_vector_h_upstream
   
   subroutine scalar_times_vector_v(scalar_field,in_vector_z,result_field_z)
   
