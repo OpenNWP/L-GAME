@@ -424,8 +424,11 @@ module column_solvers
                 vertical_flux_vector_impl(jl) = grid%area_z(ji,jk,jl+1)*vertical_flux_vector_impl(jl)
                 vertical_flux_vector_rhs(jl) = grid%area_z(ji,jk,jl+1)*vertical_flux_vector_rhs(jl)
                 ! old density at the interface
-                density_old_at_interface = 0.5_wp*(state_old%rho(ji,jk,jl,j_constituent) &
-                + state_old%rho(ji,jk,jl+1,j_constituent))
+                if (vertical_flux_vector_rhs(jl)>=0._wp) then
+                  density_old_at_interface = state_old%rho(ji,jk,jl+1,j_constituent)
+                else
+                  density_old_at_interface = state_old%rho(ji,jk,jl,j_constituent)
+                endif
                 vertical_flux_vector_rhs(jl) = density_old_at_interface*vertical_flux_vector_rhs(jl)
               enddo
 
@@ -482,24 +485,6 @@ module column_solvers
 
               ! calling the algorithm to solve the system of linear equations
               call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,nlays)
-
-              ! limiter: none of the densities may be negative
-              do jl=1,nlays
-                if (solution_vector(jl)<0._wp) then
-                  added_mass = -solution_vector(jl)*grid%volume(ji,jk,jl)
-                  solution_vector(jl) = 0._wp
-                  if (jl==1) then
-                    solution_vector(jl+1) = solution_vector(jl+1) - added_mass/grid%volume(ji,jk,jl+1)
-                  elseif (jl==nlays) then
-                    if (j_constituent>no_of_condensed_constituents) then
-                      solution_vector(jl-1) = solution_vector(jl-1) - added_mass/grid%volume(ji,jk,jl-1)
-                    endif
-                  else
-                    solution_vector(jl-1) = solution_vector(jl-1) - 0.5_wp*added_mass/grid%volume(ji,jk,jl-1)
-                    solution_vector(jl+1) = solution_vector(jl+1) - 0.5_wp*added_mass/grid%volume(ji,jk,jl+1)
-                  endif
-                endif
-              enddo
       
               ! the final brute-force limiter
               do jl=1,nlays
