@@ -57,6 +57,9 @@ module phase_trans
       do jk=1,ncols
         do jl=1,nlays
         
+          ! Preparations
+          ! ------------
+          
           ! determining the temperature of the cloud ice
           if (state%rho(ji,jk,jl,3)<EPSILON_SECURITY) then
             solid_temperature = T_0
@@ -90,6 +93,9 @@ module phase_trans
           ! the amount of water vapour that the air can still take 
           diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diag%temperature_gas(ji,jk,jl))
 
+          ! Clouds
+          ! ------
+          
           ! the case where the air is not over-saturated
           if (diff_density>=0._wp) then
             ! temperature >= 0 °C
@@ -191,31 +197,47 @@ module phase_trans
             endif
           endif
 
-          ! creation of precipitation
+          ! Precipitation
+          ! -------------
+          irrev%mass_source_rates(ji,jk,jl,1) = 0._wp
+          irrev%mass_source_rates(ji,jk,jl,2) = 0._wp
           ! snow
-          irrev%mass_source_rates(ji,jk,jl,1) = max(state%rho(ji,jk,jl,3) &
-          - max_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/dtime_sat
-          ! the snow creation comes at the cost of cloud ice particles
-          irrev%mass_source_rates(ji,jk,jl,3) = irrev%mass_source_rates(ji,jk,jl,3) &
-          - irrev%mass_source_rates(ji,jk,jl,1)
+          ! this only happens if the air is saturated
+          if (diag%temperature_gas(ji,jk,jl)<T_0 .and. diff_density<=0._wp) then
+            irrev%mass_source_rates(ji,jk,jl,1) = max(state%rho(ji,jk,jl,3) &
+            - max_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/dtime_sat
+            ! the snow creation comes at the cost of cloud ice particles
+            irrev%mass_source_rates(ji,jk,jl,3) = irrev%mass_source_rates(ji,jk,jl,3) &
+            - irrev%mass_source_rates(ji,jk,jl,1)
+          endif
           ! rain
-          irrev%mass_source_rates(ji,jk,jl,2) = max(state%rho(ji,jk,jl,4) &
-          - max_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/dtime_sat
-          ! the rain creation comes at the cost of cloud water particles
-          irrev%mass_source_rates(ji,jk,jl,4) = irrev%mass_source_rates(ji,jk,jl,4) &
-          - irrev%mass_source_rates(ji,jk,jl,2)
+          if (diag%temperature_gas(ji,jk,jl)>=T_0 .and. diff_density<=0._wp) then
+            ! this only happens if the air is saturated
+            irrev%mass_source_rates(ji,jk,jl,2) = max(state%rho(ji,jk,jl,4) &
+            - max_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/dtime_sat
+            ! the rain creation comes at the cost of cloud water particles
+            irrev%mass_source_rates(ji,jk,jl,4) = irrev%mass_source_rates(ji,jk,jl,4) &
+            - irrev%mass_source_rates(ji,jk,jl,2)
+          endif
 
           ! turning of snow to rain
-          if (diag%temperature_gas(ji,jk,jl)>T_0 .and. state%rho(ji,jk,jl,1)>0._wp) then
+          if (diag%temperature_gas(ji,jk,jl)>=T_0 .and. state%rho(ji,jk,jl,1)>0._wp) then
             irrev%mass_source_rates(ji,jk,jl,1) = -state%rho(ji,jk,jl,1)/dtime_sat
             irrev%mass_source_rates(ji,jk,jl,2) = irrev%mass_source_rates(ji,jk,jl,2) &
             - irrev%mass_source_rates(ji,jk,jl,1)
           endif
+          ! turning of rain to snow
+          if (diag%temperature_gas(ji,jk,jl)<T_0 .and. state%rho(ji,jk,jl,2)>0._wp) then
+            irrev%mass_source_rates(ji,jk,jl,2) = -state%rho(ji,jk,jl,2)/dtime_sat
+            irrev%mass_source_rates(ji,jk,jl,1) = irrev%mass_source_rates(ji,jk,jl,1) &
+            - irrev%mass_source_rates(ji,jk,jl,2)
+          endif
           
         enddo
         
-        ! surface effects
-
+        ! Surface effects
+        ! ---------------
+        
         ! evaporation and latent heat rates
         if (lsoil .and. grid%is_land(ji,jk)==0) then
           ! saturation pressure at surface temperature
