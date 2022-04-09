@@ -14,13 +14,14 @@ module divergence_operators
   private
   
   public :: div_h
+  public :: div_h_tracers
   public :: add_vertical_div
   
   contains
 
   subroutine div_h(vector_field_x,vector_field_y,result_field,grid)
 
-    ! This subroutine computes the gradient of a scalar field.
+    ! This subroutine computes the divergence of a vector field.
     
     ! input arguments and output
     real(wp),     intent(in)    :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
@@ -74,6 +75,88 @@ module divergence_operators
     !$OMP END PARALLEL
 
   end subroutine div_h
+
+  subroutine div_h_tracers(vector_field_x,vector_field_y,density_field,wind_field_x,wind_field_y,result_field,grid)
+
+    ! This subroutine computes the divergence of a vector field for tracers.
+    
+    ! input arguments and output
+    real(wp),     intent(in)    :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
+    real(wp),     intent(in)    :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
+    real(wp),     intent(inout) :: result_field(:,:,:)   ! resulting scalar field
+    real(wp),     intent(in)    :: density_field(:,:,:)  ! density field at the current time step
+    real(wp),     intent(in)    :: wind_field_x(:,:,:)   ! x-component of horizontal wind field
+    real(wp),     intent(in)    :: wind_field_y(:,:,:)   ! y-component of horizontal wind field
+    type(t_grid), intent(in)    :: grid                  ! the grid properties
+    
+    ! local variables
+    integer  :: ji,jk,jl      ! loop variables
+    real(wp) :: comp_h        ! horizontal component of divergence
+    real(wp) :: comp_v        ! vertical component of divergence
+    real(wp) :: contra_upper  ! contravariant mass flux density resulting 
+                              ! from the horizontal vector components through the upper area
+    real(wp) :: contra_lower  ! contravariant mass flux density resulting
+                              ! from the horizontal vector components through the lower area
+    real(wp) :: density_upper ! density at the upper interface
+    real(wp) :: density_lower ! density at the lower interface
+
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v,density_upper,density_lower)
+    do ji=1,nlins
+      do jk=1,ncols
+        do jl=1,nlays
+          ! the horizontal component
+          comp_h = &
+          vector_field_x(ji,jk+1,jl)*grid%area_x(ji,jk+1,jl) &
+          + vector_field_y(ji,jk,jl)*grid%area_y(ji,jk,jl) &
+          - vector_field_x(ji,jk,jl)*grid%area_x(ji,jk,jl) &
+          - vector_field_y(ji+1,jk,jl)*grid%area_y(ji+1,jk,jl)
+          
+          ! the vertical component
+          comp_v = 0._wp
+          if (jl==nlays-nlays_oro) then
+            contra_lower = vertical_contravariant_corr(wind_field_x,wind_field_y,ji,jk,jl+1,grid)
+            if (contra_lower<=0._wp) then
+              density_lower = density_field(ji,jk,jl)
+            else
+              density_lower = density_field(ji,jk,jl+1)
+            endif
+            comp_v = -density_lower*contra_lower*grid%area_z(ji,jk,jl+1)
+          elseif (jl==nlays) then
+            contra_upper = vertical_contravariant_corr(wind_field_x,wind_field_y,ji,jk,jl,grid)
+            if (contra_upper<=0._wp) then
+              density_upper = density_field(ji,jk,jl-1)
+            else
+              density_upper = density_field(ji,jk,jl)
+            endif
+            comp_v = density_upper*contra_upper*grid%area_z(ji,jk,jl)
+          elseif (jl>nlays-nlays_oro) then
+            contra_upper = vertical_contravariant_corr(wind_field_x,wind_field_y,ji,jk,jl,grid)
+            if (contra_upper<=0._wp) then
+              density_upper = density_field(ji,jk,jl-1)
+            else
+              density_upper = density_field(ji,jk,jl)
+            endif
+            contra_lower = vertical_contravariant_corr(wind_field_x,wind_field_y,ji,jk,jl+1,grid)
+            if (contra_lower<=0._wp) then
+              density_lower = density_field(ji,jk,jl)
+            else
+              density_lower = density_field(ji,jk,jl+1)
+            endif
+            comp_v &
+            = density_upper*contra_upper*grid%area_z(ji,jk,jl) &
+            - density_lower*contra_lower*grid%area_z(ji,jk,jl+1)
+          endif
+          
+          ! adding the horizontal and the vertical component and dividing by the volume
+          result_field(ji,jk,jl) = (comp_h + comp_v)/grid%volume(ji,jk,jl)
+        enddo
+      enddo
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+
+  end subroutine div_h_tracers
   
   subroutine add_vertical_div(in_field,out_field,grid)
 
