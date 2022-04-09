@@ -225,12 +225,14 @@ module phase_trans
             irrev%mass_source_rates(ji,jk,jl,1) = -state%rho(ji,jk,jl,1)/dtime_sat
             irrev%mass_source_rates(ji,jk,jl,2) = irrev%mass_source_rates(ji,jk,jl,2) &
             - irrev%mass_source_rates(ji,jk,jl,1)
+            irrev%heat_source_rates(ji,jk,jl,1) = irrev%mass_source_rates(ji,jk,jl,1)*phase_trans_heat(2,T_0)
           endif
           ! turning of rain to snow
           if (diag%temperature_gas(ji,jk,jl)<T_0 .and. state%rho(ji,jk,jl,2)>0._wp) then
             irrev%mass_source_rates(ji,jk,jl,2) = -state%rho(ji,jk,jl,2)/dtime_sat
             irrev%mass_source_rates(ji,jk,jl,1) = irrev%mass_source_rates(ji,jk,jl,1) &
             - irrev%mass_source_rates(ji,jk,jl,2)
+            irrev%heat_source_rates(ji,jk,jl,1) = -irrev%mass_source_rates(ji,jk,jl,2)*phase_trans_heat(2,T_0)
           endif
           
         enddo
