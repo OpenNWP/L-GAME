@@ -199,7 +199,7 @@ module radiation
     ! calculating the number of scalars
     no_of_scalars = nlays*no_of_scalars_h
     
-    ! here,the names of the gases are written to the gas_concentrations object
+    ! here, the names of the gases are written to the gas_concentrations object
     call handle_error(gas_concentrations_sw%init(gases_lowercase))
     call handle_error(gas_concentrations_lw%init(gases_lowercase))
     
