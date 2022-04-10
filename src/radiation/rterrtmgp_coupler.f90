@@ -328,7 +328,7 @@ module radiation
         else
           ! just the arithmetic mean
           temperature_interface_rad(ji,jk) = 0.5_wp*(temperature_rad(ji,jk-1)+temperature_rad(ji,jk))
-          pressure_interface_rad   (ji,jk) = 0.5_wp*(pressure_rad   (ji,jk-1)+pressure_rad   (ji,jk))
+          pressure_interface_rad(ji,jk) = 0.5_wp*(pressure_rad(ji,jk-1)+pressure_rad(ji,jk))
         endif
       enddo
     enddo
@@ -366,7 +366,7 @@ module radiation
     do ji=1,no_of_scalars_h
       mu_0(ji) = coszenith(latitude_scalar(ji),longitude_scalar(ji),time_coord)
       if (mu_0(ji)>0._wp) then
-        j_day  = j_day+1
+        j_day = j_day+1
         day_indices(j_day) = ji
       endif
     enddo
