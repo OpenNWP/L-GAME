@@ -209,10 +209,10 @@ module radiation
     ! loading the long wave radiation properties
     call load_and_init(k_dist_lw,trim(rrtmgp_coefficients_file_lw),gas_concentrations_lw)
     
-    ! reading the SW spectrai properties of clouds
+    ! reading the SW spectral properties of clouds
     call load_cld_lutcoeff(cloud_optics_sw,trim(cloud_coefficients_file_sw))
     
-    ! reading the LW spectrai properties of clouds
+    ! reading the LW spectral properties of clouds
     call load_cld_lutcoeff(cloud_optics_lw,trim(cloud_coefficients_file_lw))
     !$omp end critical
     
@@ -228,7 +228,7 @@ module radiation
     do ji=1,no_of_scalars_h
       do jk=1,nlays
         temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
-        ! the pressure is diagnozed here,using the equation of state for ideal gases
+        ! the pressure is diagnozed here, using the equation of state for ideal gases
         pressure_rad(ji,jk) = specific_gas_constants(0) &
         *mass_densities(no_of_condensed_constituents*no_of_scalars &
         + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
@@ -313,7 +313,7 @@ module radiation
           ! times delta_z
           *(z_vector(ji)-z_scalar(ji+(jk-1)*no_of_scalars_h))
           ! pressure at TOA
-          ! here,the barometric height formula is used
+          ! here, the barometric height formula is used
           pressure_interface_rad   (ji,jk) = pressure_rad   (ji,jk) &
           *EXP(-(z_vector(ji)-z_scalar(ji+(jk-1)*no_of_scalars_h))/scale_height)
         ! values at the surface
