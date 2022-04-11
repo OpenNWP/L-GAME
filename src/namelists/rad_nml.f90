@@ -27,7 +27,7 @@ module rad_nml
     
     ! default values
     lrad = .true.
-    dtime_rad = 3600._wp
+    dtime_rad = 600._wp
     rrtmgp_coefficients_file_sw = "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g112-210809.nc"
     rrtmgp_coefficients_file_lw = "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g128-210809.nc"
     cloud_coefficients_file_sw = "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-sw.nc"
