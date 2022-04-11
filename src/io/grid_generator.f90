@@ -382,12 +382,13 @@ module grid_generator
 		
         ! will also not be used for water
         grid%sfc_rho_c(ji,jk) = density_water*c_p_water
-             
-        ! will only be used for land points
-        grid%t_conduc_soil(ji,jk) = 7.5e-7_wp
+        
+        grid%t_conduc_soil(ji,jk) = 1.4e-7_wp
 		
 		! land
         if (grid%is_land(ji,jk)==1) then
+        
+          grid%t_conduc_soil(ji,jk) = 7.5e-7_wp
         
           grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
           
