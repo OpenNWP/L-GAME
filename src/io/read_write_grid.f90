@@ -6,7 +6,7 @@ module read_write_grid
   ! This module reads the grid from a file or writes the grid to a file. This is useful for efficiency.
   
   use netcdf
-  use definitions,       only: t_grid
+  use definitions,       only: t_grid,wp
   use set_initial_state, only: nc_check
   use io_nml,            only: grid_filename,land_sea_filename
   use run_nml,           only: nlins,ncols,nlays
@@ -154,6 +154,12 @@ module read_write_grid
     
     ! reading the arrays
     call nc_check(nf90_get_var(ncid,varid_z_w,grid%z_w(:,:,nlays+1)))
+    
+    !$OMP PARALLEL
+    !$OMP WORKSHARE
+    grid%z_w(:,:,nlays+1) = merge(grid%z_w(:,:,nlays+1),0._wp,grid%z_w(:,:,nlays+1)>=0._wp)
+    !$OMP END WORKSHARE
+    !$OMP END PARALLEL
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
