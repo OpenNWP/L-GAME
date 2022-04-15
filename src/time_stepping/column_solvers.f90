@@ -518,7 +518,7 @@ module column_solvers
               ! calling the algorithm to solve the system of linear equations
               call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,nlays)
       
-              ! the final brute-force limiter
+              ! this should account for round-off errors only
               do jl=1,nlays
                 if (solution_vector(jl)<0._wp) then
                   solution_vector(jl) = 0._wp
