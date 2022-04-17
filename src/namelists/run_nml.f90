@@ -21,6 +21,7 @@ module run_nml
   real(wp)          :: toa                 ! top of atmosphere
   real(wp)          :: sigma               ! vertical grid stretching parameter
   integer           :: run_span_hr         ! run span in hours
+  integer           :: slow_fast_ratio     ! ratio between the horizontal diffusion time step and the dynamical core time step
   real              :: t_init              ! epoch time stamp of the initialization
   integer           :: start_year          ! year when to begin the model run
   integer           :: start_month         ! month when to begin the model run
@@ -57,6 +58,7 @@ module run_nml
     dy = 500._wp
     dx = 500._wp
     run_span_hr = 30
+    slow_fast_ratio = 5
     start_year = 2000
     start_month = 1
     start_day = 1

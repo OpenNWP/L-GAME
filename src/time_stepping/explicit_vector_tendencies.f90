@@ -8,7 +8,7 @@ module explicit_vector_tendencies
   use definitions,        only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
   use inner_product,      only: inner
   use gradient_operators, only: grad
-  use run_nml,            only: nlins,ncols,nlays,impl_weight,llinear,lcorio
+  use run_nml,            only: nlins,ncols,nlays,impl_weight,llinear,lcorio,slow_fast_ratio
   use constituents_nml,   only: no_of_condensed_constituents
   use vorticities,        only: calc_pot_vort
   use multiplications,    only: scalar_times_vector
@@ -65,7 +65,7 @@ module explicit_vector_tendencies
     ! momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
     if (rk_step==1) then
       ! horizontal momentum diffusion
-      if (lmom_diff_h) then
+      if (lmom_diff_h .and. mod(total_step_counter,slow_fast_ratio)==0) then
         call mom_diff_h(state,diag,irrev,grid)
       endif
       ! vertical momentum diffusion

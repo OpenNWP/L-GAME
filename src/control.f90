@@ -7,7 +7,7 @@ program control
 
   use run_nml,                   only: run_nml_setup,run_span_hr,dtime, &
                                        t_init,nlins,ncols,nlays,lrestart, &
-                                       lideal
+                                       lideal,slow_fast_ratio
   use io_nml,                    only: io_nml_setup,dt_write
   use constituents_nml,          only: constituents_nml_setup,no_of_condensed_constituents,no_of_constituents, &
                                        snow_velocity,rain_velocity,cloud_droplets_velocity
@@ -421,7 +421,7 @@ program control
   write(*,*) "Snow falling velocity set to", snow_velocity, "m/s."
   
   ! maximum horizontal diffusion coefficient  
-  irrev%max_diff_h_coeff_turb = 0.125_wp*grid%mean_velocity_area/dtime
+  irrev%max_diff_h_coeff_turb = 0.125_wp*grid%mean_velocity_area/dtime/slow_fast_ratio
   ! setting up the background state
   call bg_setup(grid)
   
