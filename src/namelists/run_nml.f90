@@ -54,8 +54,8 @@ module run_nml
     ncols = 25
     nlays = 50
     nlays_oro = 40
-    dy = 500._wp
-    dx = 500._wp
+    dy = 25e3_wp
+    dx = 25e3_wp
     run_span_hr = 30
     start_year = 2000
     start_month = 1
