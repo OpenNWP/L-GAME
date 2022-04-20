@@ -50,12 +50,12 @@ module run_nml
     ! local variables
     integer :: fileunit
     
-    nlins = 25
-    ncols = 25
+    nlins = 35
+    ncols = 35
     nlays = 50
     nlays_oro = 40
-    dy = 35e3_wp
-    dx = 35e3_wp
+    dy = 25e3_wp
+    dx = 25e3_wp
     run_span_hr = 84
     start_year = 2000
     start_month = 1
