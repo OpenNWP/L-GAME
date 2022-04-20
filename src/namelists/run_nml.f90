@@ -84,7 +84,7 @@ module run_nml
     close(fileunit)
     
     ! this calculates the time step using the CFL criterion
-    dtime           = 1.5_wp*min(dx,dy)/1000._wp
+    dtime           = 1.61_wp*sqrt(dx*dy)/1000._wp
     
     ! calculating the Unix time of the model start
     t_init = (start_year-1970)*365*24*3600 + leap_year_correction(start_year)*24*3600 &
