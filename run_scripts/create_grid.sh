@@ -17,8 +17,8 @@ nlins=25
 ncols=25
 nlays=50
 nlays_oro=40
-dy=500
-dx=500
+dy=25000
+dx=25000
 run_span_hr=0
 scenario="standard"
 /
