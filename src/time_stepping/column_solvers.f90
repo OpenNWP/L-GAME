@@ -115,7 +115,7 @@ module column_solvers
       
         ! determining wether soil needs to be calculated
         soil_switch = 0
-        if (lsoil_heat_conduction) then
+        if (lsoil_heat_conduction .and. grid%is_land(ji,jk)==1) then
           soil_switch=1
         endif
       
