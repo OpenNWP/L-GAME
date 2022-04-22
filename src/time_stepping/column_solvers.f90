@@ -11,7 +11,7 @@ module column_solvers
   use definitions,      only: t_grid,t_state,t_tend,t_diag
   use dictionary,       only: spec_heat_capacities_v_gas,spec_heat_capacities_p_gas,specific_gas_constants
   use diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
-  use surface_nml,      only: nsoillays,lsoil_heat_conduction
+  use surface_nml,      only: nsoillays,lsoil_heat_conduction,lsfc_sensible_heat_flux
   use constants,        only: M_PI
 
   implicit none
@@ -76,7 +76,7 @@ module column_solvers
     damping_start_height = klemp_begin_rel*toa
     
     ! calculating the sensible power flux density if soil is switched on
-    if (lsoil_heat_conduction) then
+    if (lsfc_sensible_heat_flux) then
       !$OMP PARALLEL
       !$OMP DO PRIVATE(ji,jk,t_gas_lowest_layer_old,t_gas_lowest_layer_new)
       do ji=1,nlins
