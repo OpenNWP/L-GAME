@@ -35,7 +35,7 @@ no_of_condensed_constituents=4
 
 &surface
 orography_id=3
-lsoil=.false.
+lsoil_heat_conduction=.false.
 /
 
 &bc

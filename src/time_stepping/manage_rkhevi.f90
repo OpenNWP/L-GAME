@@ -16,7 +16,7 @@ module manage_rkhevi
   use derived_quantities,         only: temperature_diagnostics
   use constituents_nml,           only: no_of_constituents
   use diff_nml,                   only: lmom_diff_v
-  use surface_nml,                only: lsoil
+  use surface_nml,                only: lsoil_heat_conduction
   use planetary_boundary_layer,   only: update_sfc_turb_quantities
   use bc_nml,                     only: lperiodic
   use manage_radiation_calls,     only: call_radiation
@@ -56,7 +56,7 @@ module manage_rkhevi
     endif
     
     ! updating surface-related turbulence quantities if it is necessary
-    if (lsoil .or. lmom_diff_v) then
+    if (lsoil_heat_conduction .or. lmom_diff_v) then
       call update_sfc_turb_quantities(state_old,diag,grid)
     endif
     

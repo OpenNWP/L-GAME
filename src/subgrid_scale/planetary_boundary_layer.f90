@@ -8,7 +8,7 @@ module planetary_boundary_layer
   use definitions, only: wp,t_state,t_grid,t_diag
   use run_nml,     only: nlins,ncols,nlays,dtime
   use constants,   only: EPSILON_SECURITY,M_PI,gravity
-  use surface_nml, only: lsoil
+  use surface_nml, only: lsoil_heat_conduction
   use diff_nml,    only: h_prandtl
   
   implicit none
@@ -101,7 +101,7 @@ module planetary_boundary_layer
     !$OMP END PARALLEL
 
     ! updating the surface flux resistance acting on scalar quantities (moisture and sensible heat)
-    if (lsoil) then
+    if (lsoil_heat_conduction) then
       !$OMP PARALLEL
       !$OMP DO PRIVATE(ji,jk)
       do ji=1,nlins

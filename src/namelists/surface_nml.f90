@@ -10,10 +10,10 @@ module surface_nml
   implicit none
   
   integer :: orography_id ! identifies which orography to use
-  logical :: lsoil        ! soil switch
+  logical :: lsoil_heat_conduction        ! soil switch
   integer :: nsoillays    ! number of soil layers
   
-  namelist /surface/orography_id,lsoil,nsoillays
+  namelist /surface/orography_id,lsoil_heat_conduction,nsoillays
   
   contains
   
@@ -24,7 +24,7 @@ module surface_nml
     
     ! default values
     orography_id = 1
-    lsoil = .true.
+    lsoil_heat_conduction = .true.
     nsoillays = 5
     
     ! Open and read Namelist file.
