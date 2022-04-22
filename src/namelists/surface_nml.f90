@@ -9,11 +9,12 @@ module surface_nml
   
   implicit none
   
-  integer :: orography_id ! identifies which orography to use
-  logical :: lsoil_heat_conduction        ! soil switch
-  integer :: nsoillays    ! number of soil layers
+  integer :: orography_id          ! identifies which orography to use
+  logical :: lsoil_heat_conduction ! soil heat conduction switch
+  logical :: lsfc_phase_trans      ! surface phase transitions switch
+  integer :: nsoillays             ! number of soil layers
   
-  namelist /surface/orography_id,lsoil_heat_conduction,nsoillays
+  namelist /surface/orography_id,lsoil_heat_conduction,nsoillays,lsfc_phase_trans
   
   contains
   
@@ -26,6 +27,7 @@ module surface_nml
     orography_id = 1
     lsoil_heat_conduction = .true.
     nsoillays = 5
+    lsfc_phase_trans = .true.
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)

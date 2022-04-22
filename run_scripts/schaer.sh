@@ -43,6 +43,7 @@ no_of_condensed_constituents=0
 &surface
 orography_id=2
 lsoil_heat_conduction=.false.
+lsfc_phase_trans=.false.
 /
 
 &bc
