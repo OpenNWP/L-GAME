@@ -5,11 +5,12 @@ module planetary_boundary_layer
 
   ! This module computes everything related to the planetary boundary layer.
   
-  use definitions, only: wp,t_state,t_grid,t_diag
+  use definitions, only: wp,t_state,t_grid,t_diag,t_irrev
   use run_nml,     only: nlins,ncols,nlays,dtime
   use constants,   only: EPSILON_SECURITY,M_PI,gravity
   use surface_nml, only: lsoil_heat_conduction
   use diff_nml,    only: h_prandtl
+  use bc_nml,      only: lperiodic
   
   implicit none
   
@@ -19,6 +20,7 @@ module planetary_boundary_layer
   
   public :: momentum_flux_resistance
   public :: update_sfc_turb_quantities
+  public :: pbl_wind_tendency
   
   contains
 
@@ -116,6 +118,147 @@ module planetary_boundary_layer
     endif
 
   end subroutine update_sfc_turb_quantities
+  
+  subroutine pbl_wind_tendency(state,diag,irrev,grid)
+  
+    ! This subroutine computes the interaction of the horizontal wind with the surface.
+    
+    type(t_state), intent(in)    :: state ! state with which to calculate the horizontal diffusion
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
+    
+    ! local variables
+    real(wp) :: flux_resistance,wind_speed_lowest_layer,z_agl,roughness_length ! variables needed for the surface friction
+    real(wp) :: layer_thickness,monin_obukhov_length_value,wind_rescale_factor ! variables needed for the surface friction
+    integer  :: ji,jk                                                          ! loop indices
+
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
+    !$OMP flux_resistance,wind_rescale_factor)
+    do ji=1,nlins
+        do jk=2,ncols
+
+          ! averaging some quantities to the vector point
+          wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji,jk-1,nlays)**0.5_wp + diag%v_squared(ji,jk,nlays)**0.5_wp)
+          z_agl = grid%z_u(ji,jk,nlays) - 0.5_wp*(grid%z_w(ji,jk-1,nlays+1) + grid%z_w(ji,jk,nlays+1))
+          layer_thickness = 0.5_wp*(grid%z_w(ji,jk-1,nlays) + grid%z_w(ji,jk,nlays)) &
+          - 0.5_wp*(grid%z_w(ji,jk-1,nlays+1) + grid%z_w(ji,jk,nlays+1))
+          roughness_length = 0.5_wp*(grid%roughness_length(ji,jk-1) + grid%roughness_length(ji,jk))
+          monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji,jk-1) &
+          + diag%monin_obukhov_length(ji,jk))
+
+          ! calculating the flux resistance at the vector point
+          flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer,z_agl,roughness_length,monin_obukhov_length_value)
+
+          ! rescaling the wind if the lowest wind vector is above the height of the Prandtl layer
+          wind_rescale_factor = 1.0_wp
+          if (z_agl>h_prandtl) then
+            wind_rescale_factor = log(h_prandtl/roughness_length)/log(z_agl/roughness_length)
+          endif
+
+          ! adding the momentum flux into the surface as an acceleration
+          irrev%mom_diff_tend_x(ji,jk,nlays) = irrev%mom_diff_tend_x(ji,jk,nlays) - &
+          wind_rescale_factor*state%wind_u(ji,jk,nlays)/flux_resistance/layer_thickness
+          
+        enddo
+        
+        ! periodic boundary conditions
+        if (lperiodic) then
+        
+          ! averaging some quantities to the vector point
+          wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji,ncols,nlays)**0.5_wp + diag%v_squared(ji,1,nlays)**0.5_wp)
+          z_agl = grid%z_u(ji,1,nlays) - 0.5_wp*(grid%z_w(ji,ncols,nlays+1) + grid%z_w(ji,1,nlays+1))
+          layer_thickness = 0.5_wp*(grid%z_w(ji,ncols,nlays) + grid%z_w(ji,1,nlays)) &
+          - 0.5_wp*(grid%z_w(ji,ncols,nlays+1) + grid%z_w(ji,1,nlays+1))
+          roughness_length = 0.5_wp*(grid%roughness_length(ji,ncols) + grid%roughness_length(ji,1))
+          monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji,ncols) &
+          + diag%monin_obukhov_length(ji,1))
+
+          ! calculating the flux resistance at the vector point
+          flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer,z_agl,roughness_length,monin_obukhov_length_value)
+
+          ! rescaling the wind if the lowest wind vector is above the height of the Prandtl layer
+          wind_rescale_factor = 1.0_wp
+          if (z_agl>h_prandtl) then
+            wind_rescale_factor = log(h_prandtl/roughness_length)/log(z_agl/roughness_length)
+          endif
+
+          ! adding the momentum flux into the surface as an acceleration
+          irrev%mom_diff_tend_x(ji,1,nlays) = irrev%mom_diff_tend_x(ji,1,nlays) - &
+          wind_rescale_factor*state%wind_u(ji,1,nlays)/flux_resistance/layer_thickness
+          
+          irrev%mom_diff_tend_x(ji,ncols+1,nlays) = irrev%mom_diff_tend_x(ji,1,nlays)
+          
+        endif
+        
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
+    !$OMP flux_resistance,wind_rescale_factor)
+    do jk=1,ncols
+      do ji=2,nlins
+
+          ! averaging some quantities to the vector point
+          wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji-1,jk,nlays)**0.5_wp + diag%v_squared(ji,jk,nlays)**0.5_wp)
+          z_agl = grid%z_v(ji,jk,nlays) - 0.5_wp*(grid%z_w(ji-1,jk,nlays+1) + grid%z_w(ji,jk,nlays+1))
+          layer_thickness = 0.5_wp*(grid%z_w(ji-1,jk,nlays) + grid%z_w(ji,jk,nlays)) &
+          - 0.5_wp*(grid%z_w(ji-1,jk,nlays+1) + grid%z_w(ji,jk,nlays+1))
+          roughness_length = 0.5_wp*(grid%roughness_length(ji-1,jk) + grid%roughness_length(ji,jk))
+          monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji-1,jk) &
+          + diag%monin_obukhov_length(ji,jk))
+
+          ! calculating the flux resistance at the vector point
+          flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer,z_agl,roughness_length,monin_obukhov_length_value)
+
+          ! rescaling the wind if the lowest wind vector is above the height of the Prandtl layer
+          wind_rescale_factor = 1.0_wp
+          if (z_agl>h_prandtl) then
+            wind_rescale_factor = log(h_prandtl/roughness_length)/log(z_agl/roughness_length)
+          endif
+
+          ! adding the momentum flux into the surface as an acceleration
+          irrev%mom_diff_tend_y(ji,jk,nlays) = irrev%mom_diff_tend_y(ji,jk,nlays) - &
+          wind_rescale_factor*state%wind_v(ji,jk,nlays)/flux_resistance/layer_thickness
+          
+        enddo
+
+        ! periodic boundary conditions
+        if (lperiodic) then
+          ! averaging some quantities to the vector point
+          wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(nlins,jk,nlays)**0.5_wp + diag%v_squared(1,jk,nlays)**0.5_wp)
+          z_agl = grid%z_v(1,jk,nlays) - 0.5_wp*(grid%z_w(nlins,jk,nlays+1) + grid%z_w(1,jk,nlays+1))
+          layer_thickness = 0.5_wp*(grid%z_w(nlins,jk,nlays) + grid%z_w(1,jk,nlays)) &
+          - 0.5_wp*(grid%z_w(nlins,jk,nlays+1) + grid%z_w(1,jk,nlays+1))
+          roughness_length = 0.5_wp*(grid%roughness_length(nlins,jk) + grid%roughness_length(1,jk))
+          monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(nlins,jk) &
+          + diag%monin_obukhov_length(1,jk))
+
+          ! calculating the flux resistance at the vector point
+          flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer,z_agl,roughness_length,monin_obukhov_length_value)
+
+          ! rescaling the wind if the lowest wind vector is above the height of the Prandtl layer
+          wind_rescale_factor = 1.0_wp
+          if (z_agl>h_prandtl) then
+            wind_rescale_factor = log(h_prandtl/roughness_length)/log(z_agl/roughness_length)
+          endif
+
+          ! adding the momentum flux into the surface as an acceleration
+          irrev%mom_diff_tend_y(1,jk,nlays) = irrev%mom_diff_tend_y(1,jk,nlays) - &
+          wind_rescale_factor*state%wind_v(1,jk,nlays)/flux_resistance/layer_thickness
+          
+          irrev%mom_diff_tend_y(nlins+1,jk,nlays) = irrev%mom_diff_tend_y(1,jk,nlays)
+          
+        endif
+        
+    enddo
+    !$OMP END DO
+    !$OMP END PARALLEL
+  
+  end subroutine pbl_wind_tendency
   
   function roughness_length_from_u10_sea(u10)
   
