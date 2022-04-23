@@ -5,16 +5,18 @@ module explicit_vector_tendencies
 
   ! This module manages the calculation of the explicit part of the wind tendencies.
 
-  use definitions,        only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
-  use inner_product,      only: inner
-  use gradient_operators, only: grad
-  use run_nml,            only: nlins,ncols,nlays,impl_weight,llinear,lcorio
-  use constituents_nml,   only: no_of_condensed_constituents
-  use vorticities,        only: calc_pot_vort
-  use multiplications,    only: scalar_times_vector
-  use vorticity_flux,     only: calc_vorticity_flux_term
-  use diff_nml,           only: lmom_diff_h,lmom_diff_v
-  use momentum_diff_diss, only: mom_diff_h,mom_diff_v,simple_dissipation_rate
+  use definitions,              only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
+  use inner_product,            only: inner
+  use gradient_operators,       only: grad
+  use run_nml,                  only: nlins,ncols,nlays,impl_weight,llinear,lcorio
+  use constituents_nml,         only: no_of_condensed_constituents
+  use vorticities,              only: calc_pot_vort
+  use multiplications,          only: scalar_times_vector
+  use vorticity_flux,           only: calc_vorticity_flux_term
+  use diff_nml,                 only: lmom_diff_h,lmom_diff_v
+  use momentum_diff_diss,       only: mom_diff_h,mom_diff_v,simple_dissipation_rate
+  use planetary_boundary_layer, only: pbl_wind_tendency
+  use surface_nml,              only: lpbl
 
   implicit none
   
@@ -73,8 +75,12 @@ module explicit_vector_tendencies
         call mom_diff_v(state,diag,irrev,grid)
       endif
       
+      if (lpbl) then
+        call pbl_wind_tendency(state,diag,irrev,grid)
+      endif
+      
       ! dissipation
-      if (lmom_diff_h) then
+      if (lmom_diff_h .or. lpbl) then
         call simple_dissipation_rate(state,irrev,grid)
       endif
     endif

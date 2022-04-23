@@ -29,6 +29,7 @@ lplane=.true.
 lmom_diff_h=.true.
 diff_h_smag_rot=0.0
 lmom_diff_v=.false.
+lpbl=.false.
 ltemp_diff_h=.true.
 ltemp_diff_v=.false.
 ltracer_diff_h=.false.

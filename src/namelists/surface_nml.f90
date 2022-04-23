@@ -11,11 +11,12 @@ module surface_nml
   
   integer :: orography_id            ! identifies which orography to use
   logical :: lsoil_heat_conduction   ! soil heat conduction switch
+  integer :: nsoillays               ! number of soil layers
   logical :: lsfc_sensible_heat_flux ! surface sensible heat flux switch
   logical :: lsfc_phase_trans        ! surface phase transitions switch
-  integer :: nsoillays               ! number of soil layers
+  logical :: lpbl                    ! planetary boundary layer switch
   
-  namelist /surface/orography_id,lsoil_heat_conduction,nsoillays,lsfc_phase_trans
+  namelist /surface/orography_id,lsoil_heat_conduction,nsoillays,lsfc_phase_trans,lpbl
   
   contains
   
@@ -30,6 +31,7 @@ module surface_nml
     nsoillays = 5
     lsfc_sensible_heat_flux = .true.
     lsfc_phase_trans = .true.
+    lpbl = .true.
     
     ! Open and read Namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
