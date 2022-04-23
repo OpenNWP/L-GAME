@@ -11,7 +11,7 @@ module column_solvers
   use definitions,      only: t_grid,t_state,t_tend,t_diag
   use dictionary,       only: spec_heat_capacities_v_gas,spec_heat_capacities_p_gas,specific_gas_constants
   use diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
-  use surface_nml,      only: nsoillays,lsoil_heat_conduction,lsfc_sensible_heat_flux
+  use surface_nml,      only: nsoillays,lprog_soil_temp,lsfc_sensible_heat_flux
   use constants,        only: M_PI
 
   implicit none
@@ -115,7 +115,7 @@ module column_solvers
       
         ! determining wether soil needs to be calculated
         soil_switch = 0
-        if (lsoil_heat_conduction .and. grid%is_land(ji,jk)==1) then
+        if (lprog_soil_temp .and. grid%is_land(ji,jk)==1) then
           soil_switch=1
         endif
       

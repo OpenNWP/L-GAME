@@ -35,7 +35,7 @@ no_of_condensed_constituents=4
 
 &surface
 orography_id=3
-lsoil_heat_conduction=.false.
+lprog_soil_temp=.false.
 lsfc_sensible_heat_flux=.false.
 lsfc_phase_trans=.false.
 /

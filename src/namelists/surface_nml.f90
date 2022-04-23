@@ -11,13 +11,13 @@ module surface_nml
   implicit none
   
   integer :: orography_id            ! identifies which orography to use
-  logical :: lsoil_heat_conduction   ! soil heat conduction switch
+  logical :: lprog_soil_temp         ! switch for prognostic soil temperature
   integer :: nsoillays               ! number of soil layers
   logical :: lsfc_sensible_heat_flux ! surface sensible heat flux switch
   logical :: lsfc_phase_trans        ! surface phase transitions switch
   logical :: lpbl                    ! planetary boundary layer switch
   
-  namelist /surface/orography_id,lsoil_heat_conduction,nsoillays,lsfc_phase_trans,lpbl
+  namelist /surface/orography_id,lprog_soil_temp,nsoillays,lsfc_phase_trans,lpbl
   
   contains
   
@@ -28,7 +28,7 @@ module surface_nml
     
     ! default values
     orography_id = 1
-    lsoil_heat_conduction = .true.
+    lprog_soil_temp = .true.
     nsoillays = 5
     lsfc_sensible_heat_flux = .true.
     lsfc_phase_trans = .true.
