@@ -6,6 +6,7 @@ module surface_nml
   ! This namelist defines the surface properties.
 
   use definitions, only: wp
+  use diff_nml,    only: lmom_diff_h
   
   implicit none
   
@@ -38,6 +39,12 @@ module surface_nml
     read(nml=surface, unit=fileunit)
         
     close(fileunit)
+  
+    ! sanity checks
+    if (lpbl .and. .not. lmom_diff_h) then
+      write(*,*) "Error: lmom_diff_h must be true is lpbl is true."
+      call exit(1)
+    endif
   
   end subroutine surface_nml_setup
 

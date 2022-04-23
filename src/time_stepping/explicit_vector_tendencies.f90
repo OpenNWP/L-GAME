@@ -75,6 +75,7 @@ module explicit_vector_tendencies
         call mom_diff_v(state,diag,irrev,grid)
       endif
       
+      ! planetary boundary layer
       if (lpbl) then
         call pbl_wind_tendency(state,diag,irrev,grid)
       endif
