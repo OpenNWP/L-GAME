@@ -5,7 +5,7 @@
 
 lgame_home_dir=~/code/L-GAME
 run_id=seabreeze
-export OMP_NUM_THREADS=2
+export OMP_NUM_THREADS=4
 
 cat > namelist.nml << EOF
 
