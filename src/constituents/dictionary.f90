@@ -210,9 +210,27 @@ module dictionary
     
     ! local variables
     real(wp)  :: temp_c ! temperature in degrees Celsius
-    
+
     temp_c = temperature - T_0
-    saturation_pressure_over_water = 100.0_wp*6.112_wp*exp(17.62_wp*temp_c/(243.12_wp+temp_c))
+    ! clipping too extreme values for this approximation
+    if (temp_c < -50._wp) then
+      temp_c = -50._wp
+    endif
+    if (temp_c > 50._wp) then
+      temp_c = 50._wp
+    endif
+    
+    saturation_pressure_over_water &
+    = 6.107799961_wp &
+    + 4.436518521e-1_wp*temp_c &
+    + 1.428945805e-2_wp*temp_c**2 &
+    + 2.650648471e-4_wp*temp_c**3 &
+    + 3.031240396e-6_wp*temp_c**4 &
+    + 2.034080948e-8_wp*temp_c**5 &
+    + 6.136820929e-11_wp*temp_c**6
+    
+    ! unit conversion
+    saturation_pressure_over_water = 100._wp*saturation_pressure_over_water
 
   end function saturation_pressure_over_water
 
@@ -229,8 +247,27 @@ module dictionary
     real(wp)             :: temp_c
 
     temp_c = temperature - T_0
-    saturation_pressure_over_ice = 100.0_wp*6.112_wp*exp(22.46_wp*temp_c/(272.62_wp+temp_c))
 
+    ! clipping too extreme values for this approximation
+    if (temp_c < -50._wp) then
+      temp_c = -50._wp
+    endif
+    if (temp_c > 0._wp) then
+      temp_c = 0._wp
+    endif
+    
+    saturation_pressure_over_ice &
+    = 6.10690449_wp &
+    + 5.02660639e-1_wp*temp_c &
+    + 1.87743264e-2_wp*temp_c**2 &
+    + 4.13476180e-4_wp*temp_c**3 &
+    + 5.72333773e-6_wp*temp_c**4 &
+    + 4.71651246e-8_wp*temp_c**5 &
+    + 1.78086695e-10_wp*temp_c**6
+
+    ! unit conversion
+    saturation_pressure_over_ice = 100._wp*saturation_pressure_over_ice
+    
   end function saturation_pressure_over_ice
 
   function rel_humidity(abs_humidity,temperature)
