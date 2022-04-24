@@ -122,21 +122,81 @@ module dictionary
     real(wp) :: phase_trans_heat
     
     ! directions:
-    ! 0:  gas to liquid
-    ! 1:  gas to solid
+    ! 0: gas to liquid
+    ! 1: gas to solid
     ! 2: liquid to solid
 
+    phase_trans_heat = 0._wp
     if (direction==0) then
-      phase_trans_heat = 2257000._wp
+      phase_trans_heat = enthalpy_evaporation(temperature)
     endif
     if (direction==1) then
-      phase_trans_heat = 2257000._wp + 333500._wp
+      phase_trans_heat = enthalpy_evaporation(temperature) + enthalpy_melting(temperature)
     endif
     if (direction==2) then
-      phase_trans_heat = 333500._wp
+      phase_trans_heat = enthalpy_melting(temperature)
     endif
     
   end function phase_trans_heat
+  
+  function enthalpy_evaporation(temperature)
+    
+    ! This function returns the enthalpy of evaporation depending on the temperature.
+    ! It follows Pruppacher and Klett (2010), p. 97, Eq. (3-24a).
+    
+    real(wp) :: temperature
+
+    real(wp) :: enthalpy_evaporation
+    ! local variable
+    real(wp) :: temp_c
+    
+    ! temperature in degrees Celsius
+    temp_c = temperature - T_0
+  
+    ! clipping values that are too extreme for these approximations
+    if (temp_c<-20._wp) then
+      temp_c = -20._wp
+    endif
+    if (temp_c>40._wp) then
+      temp_c = 40._wp
+    endif
+  
+    enthalpy_evaporation = 597.3_wp - 0.561_wp*temp_c
+    
+    ! unit conversion
+    enthalpy_evaporation = 4186.8_wp*enthalpy_evaporation
+
+  end function enthalpy_evaporation
+  
+  function enthalpy_melting(temperature)
+    
+    ! This function returns the enthalpy of melting depending on the temperature.
+    ! It follows Pruppacher and Klett (2010), p. 97, Eq. (3-26).
+    
+    real(wp) :: temperature
+
+    real(wp) :: enthalpy_melting
+    ! local variable
+    real(wp) :: temp_c
+    
+    ! temperature in degrees Celsius
+    temp_c = temperature - T_0
+    
+    ! clipping values that are too extreme for this approximation
+    if (temp_c<-44._wp) then
+      temp_c = -44._wp
+    endif
+    if (temp_c>0._wp) then
+      temp_c = 0._wp
+    endif
+    
+    enthalpy_melting = 79.7_wp - 0.12_wp*temp_c - 8.0481e-2_wp*temp_c**2 &
+    - 3.2376e-3_wp*temp_c**3 - 4.2553e-5_wp*temp_c**4
+    
+    ! unit conversion
+    enthalpy_melting = 4186.8_wp*enthalpy_melting
+  
+  end function enthalpy_melting
   
   real(wp) function calc_o3_vmr(height)
 
