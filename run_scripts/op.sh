@@ -5,7 +5,7 @@
 
 lgame_home_dir=~/code/L-GAME
 run_id=${BASH_ARGV[9]}
-export OMP_NUM_THREADS=4
+export OMP_NUM_THREADS=${BASH_ARGV[20]}
 
 cat > namelist.nml << EOF
 
