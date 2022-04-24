@@ -86,6 +86,8 @@ module phase_trans
           else
             saturation_pressure = saturation_pressure_over_ice(diag%temperature_gas(ji,jk,jl))
           endif
+          ! assuming clouds form at 101 % rel. humidity
+          saturation_pressure = 1.01_wp*saturation_pressure
 
           ! determining the water vapour pressure (using the EOS)
           water_vapour_pressure = state%rho(ji,jk,jl,6)*specific_gas_constants(1)*diag%temperature_gas(ji,jk,jl)
