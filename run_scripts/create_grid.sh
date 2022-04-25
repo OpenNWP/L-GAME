@@ -43,9 +43,12 @@ lset_oro=.true.
 EOF
 
 # That's it, here we go. Do not change anything below this line.
+if [ ! -f $lgame_home_dir/grids/phys_sfc_properties/etopo.nc ]
+then
 cd $lgame_home_dir/grids/phys_sfc_properties
 ./download_etopo.sh
 cd $lgame_home_dir
+fi
 
 source $lgame_home_dir/run_scripts/.sh/root_script.sh
 
