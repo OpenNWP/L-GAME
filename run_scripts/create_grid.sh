@@ -42,8 +42,19 @@ lset_oro=.true.
 
 EOF
 
-# That's it, here we go.
+# That's it, here we go. Do not change anything below this line.
+cd $lgame_home_dir/grids/phys_sfc_properties
+./download_etopo.sh
+cd $lgame_home_dir
+
 source $lgame_home_dir/run_scripts/.sh/root_script.sh
+
+cd $lgame_home_dir/grids/phys_sfc_properties
+echo "Creating land-sea mask ..."
+python3 is_land.py
+echo "Land-sea mask created."
+
+cd $lgame_home_dir
 
 
 
