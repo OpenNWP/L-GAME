@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.10.12)  10 MAR 2022 17:53
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.10.12)  6 MAY 2022 00:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1073,7 +1073,7 @@ e2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/max/.texlive
 xmf-dist/fonts/type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fon
 ts/type1/urw/ncntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw
 /ncntrsbk/uncri8a.pfb>
-Output written on handbook.pdf (9 pages, 87163 bytes).
+Output written on handbook.pdf (9 pages, 86943 bytes).
 PDF statistics:
  310 PDF objects out of 1000 (max. 8388607)
  199 compressed objects within 2 object streams
