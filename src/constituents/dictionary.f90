@@ -273,24 +273,18 @@ module dictionary
 
     temp_c = temperature - T_0
     ! clipping too extreme values for this approximation
-    if (temp_c < -50._wp) then
-      temp_c = -50._wp
+    if (temp_c<-60._wp) then
+      temp_c = -60._wp
     endif
-    if (temp_c > 50._wp) then
-      temp_c = 50._wp
+    if (temp_c>100._wp) then
+      temp_c = 100._wp
     endif
     
-    saturation_pressure_over_water &
-    = 6.107799961_wp &
-    + 4.436518521e-1_wp*temp_c &
-    + 1.428945805e-2_wp*temp_c**2 &
-    + 2.650648471e-4_wp*temp_c**3 &
-    + 3.031240396e-6_wp*temp_c**4 &
-    + 2.034080948e-8_wp*temp_c**5 &
-    + 6.136820929e-11_wp*temp_c**6
-    
-    ! unit conversion
-    saturation_pressure_over_water = 100._wp*saturation_pressure_over_water
+    if (temp_c>0._wp) then
+      saturation_pressure_over_water = exp(34.494_wp-4924.99_wp/(temp_c+237.1_wp))/(temp_c+105._wp)**1.57_wp
+    else
+      saturation_pressure_over_water = saturation_pressure_over_ice(temperature)
+    endif
 
   end function saturation_pressure_over_water
 
@@ -309,24 +303,14 @@ module dictionary
     temp_c = temperature - T_0
 
     ! clipping too extreme values for this approximation
-    if (temp_c < -50._wp) then
-      temp_c = -50._wp
+    if (temp_c<-60._wp) then
+      temp_c = -60._wp
     endif
-    if (temp_c > 0._wp) then
+    if (temp_c>0._wp) then
       temp_c = 0._wp
     endif
     
-    saturation_pressure_over_ice &
-    = 6.10690449_wp &
-    + 5.02660639e-1_wp*temp_c &
-    + 1.87743264e-2_wp*temp_c**2 &
-    + 4.13476180e-4_wp*temp_c**3 &
-    + 5.72333773e-6_wp*temp_c**4 &
-    + 4.71651246e-8_wp*temp_c**5 &
-    + 1.78086695e-10_wp*temp_c**6
-
-    ! unit conversion
-    saturation_pressure_over_ice = 100._wp*saturation_pressure_over_ice
+    saturation_pressure_over_ice = exp(43.494_wp-6545.8_wp/(temp_c+278._wp))/(temp_c+868._wp)**2
     
   end function saturation_pressure_over_ice
 
