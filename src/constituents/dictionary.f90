@@ -35,6 +35,7 @@ module dictionary
   public :: molar_fraction_in_dry_air
   public :: saturation_pressure_over_water
   public :: saturation_pressure_over_ice
+  public :: enhancement_factor
   public :: rel_humidity
   
   contains
@@ -262,6 +263,7 @@ module dictionary
   function saturation_pressure_over_water(temperature)
 
     ! This function returns the saturation pressure in Pa over liquid water as a function of the temperature in K.
+    ! It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
     
     ! input argument
     real(wp), intent(in) :: temperature
@@ -291,6 +293,7 @@ module dictionary
   function saturation_pressure_over_ice(temperature)
     
     ! This function returns the saturation pressure in Pa over ice as a function of the temperature in K.
+    ! It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
     
     ! input argument
     real(wp), intent(in) :: temperature
@@ -313,6 +316,25 @@ module dictionary
     saturation_pressure_over_ice = exp(43.494_wp-6545.8_wp/(temp_c+278._wp))/(temp_c+868._wp)**2
     
   end function saturation_pressure_over_ice
+  
+  function enhancement_factor(temperature,air_pressure)
+
+    ! This function calculates the enhancement factor, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
+    ! It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
+
+    ! input arguments
+    real(wp), intent(in) :: temperature
+    real(wp), intent(in) :: air_pressure
+    ! output argument
+    real(wp)             :: enhancement_factor
+    
+    if (temperature>T_0) then
+      enhancement_factor = 1.00071*exp(0.000000045*air_pressure)
+    else
+      enhancement_factor = 0.99882*exp(0.00000008*air_pressure)
+    endif
+
+    end function enhancement_factor
 
   function rel_humidity(abs_humidity,temperature)
     
