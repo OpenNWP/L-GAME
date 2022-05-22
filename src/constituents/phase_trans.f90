@@ -9,8 +9,8 @@ module phase_trans
   use surface_nml,      only: lsfc_phase_trans
   use constants,        only: T_0,EPSILON_SECURITY
   use definitions,      only: t_state,t_diag,t_irrev,t_grid
-  use humidity,         only: saturation_pressure_over_ice,saturation_pressure_over_water
-  use dictionary,       only: specific_gas_constants,phase_trans_heat
+  use dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water, &
+                              enhancement_factor,specific_gas_constants,phase_trans_heat,rel_humidity
   use constituents_nml, only: lassume_lte
   
   implicit none
@@ -40,6 +40,8 @@ module phase_trans
     real(wp) :: phase_trans_density     ! density of water that changes its phase
     real(wp) :: saturation_pressure     ! saturation pressure of the water vapour
     real(wp) :: water_vapour_pressure   ! actual water vapour pressure
+    real(wp) :: dry_pressure            ! pressure of dry air
+    real(wp) :: air_pressure            ! total air pressure
     real(wp) :: layer_thickness         ! thickness of the lowest layer
     real(wp) :: diff_density_sfc        ! density of water the air can still take above water surfaces
     real(wp) :: saturation_pressure_sfc ! saturation pressure at the surface
@@ -52,7 +54,8 @@ module phase_trans
   
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl,solid_temperature,liquid_temperature,diff_density,phase_trans_density, &
-    !$OMP saturation_pressure,water_vapour_pressure,layer_thickness,diff_density_sfc,saturation_pressure_sfc)
+    !$OMP saturation_pressure,water_vapour_pressure,dry_pressure,air_pressure,layer_thickness, &
+    !$OMP diff_density_sfc,saturation_pressure_sfc)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -86,11 +89,18 @@ module phase_trans
           else
             saturation_pressure = saturation_pressure_over_ice(diag%temperature_gas(ji,jk,jl))
           endif
-          ! assuming clouds form at 101 % rel. humidity
-          saturation_pressure = 1.01_wp*saturation_pressure
 
           ! determining the water vapour pressure (using the EOS)
           water_vapour_pressure = state%rho(ji,jk,jl,6)*specific_gas_constants(1)*diag%temperature_gas(ji,jk,jl)
+          
+          ! determining the dry air pressure
+          dry_pressure = state%rho(ji,jk,jl,5)*specific_gas_constants(0)*diag%temperature_gas(ji,jk,jl)
+          
+          ! calculating the total air pressure
+          air_pressure = water_vapour_pressure + dry_pressure
+          
+          ! multiplying the saturation pressure by the enhancement factor
+          saturation_pressure = enhancement_factor(diag%temperature_gas(ji,jk,jl),air_pressure)*saturation_pressure
 
           ! the amount of water vapour that the air can still take 
           diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diag%temperature_gas(ji,jk,jl))
@@ -250,6 +260,8 @@ module phase_trans
           else
             saturation_pressure_sfc = saturation_pressure_over_ice(state%temperature_soil(ji,jk,1))
           endif
+          ! multiplying the saturation pressure by the enhancement factor
+          saturation_pressure_sfc = enhancement_factor(state%temperature_soil(ji,jk,1),air_pressure)*saturation_pressure_sfc
           
           ! difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
           diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants(1)*state%temperature_soil(ji,jk,1)) &

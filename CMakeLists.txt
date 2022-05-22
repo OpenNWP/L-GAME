@@ -25,7 +25,6 @@ src/time_stepping/manage_rkhevi.f90
 src/time_stepping/pressure_gradient.f90
 src/constituents/derived_quantities.f90
 src/constituents/dictionary.f90
-src/constituents/humidity.f90
 src/constituents/phase_trans.f90
 src/subgrid_scale/effective_diff_coeffs.f90
 src/subgrid_scale/planetary_boundary_layer.f90
