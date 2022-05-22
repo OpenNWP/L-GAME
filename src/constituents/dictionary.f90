@@ -35,7 +35,8 @@ module dictionary
   public :: molar_fraction_in_dry_air
   public :: saturation_pressure_over_water
   public :: saturation_pressure_over_ice
-  public :: enhancement_factor
+  public :: enhancement_factor_over_water
+  public :: enhancement_factor_over_ice
   public :: rel_humidity
   
   contains
@@ -284,8 +285,20 @@ module dictionary
     
     if (temp_c>0._wp) then
       saturation_pressure_over_water = exp(34.494_wp-4924.99_wp/(temp_c+237.1_wp))/(temp_c+105._wp)**1.57_wp
+    ! For super-cooled water we use the formula cited in Pruppacher and Klett (2010), p. 854, Eq. (A.4-1).
     else
-      saturation_pressure_over_water = saturation_pressure_over_ice(temperature)
+      ! Clipping values that are too extreme for this approximation.
+      if (temp_c<-50.0) then
+        temp_c = -50.0
+      endif
+      saturation_pressure_over_water &
+      = 6.107799961 &
+      + 4.436518521e-1*temp_c &
+      + 1.428945805e-2*temp_c**2 &
+      + 2.650648471e-4*temp_c**3 &
+      + 3.031240396e-6*temp_c**4 &
+      + 2.034080948e-8*temp_c**5 &
+      + 6.136820929e-11*temp_c**6
     endif
 
   end function saturation_pressure_over_water
@@ -317,24 +330,33 @@ module dictionary
     
   end function saturation_pressure_over_ice
   
-  function enhancement_factor(temperature,air_pressure)
+  function enhancement_factor_over_water(air_pressure)
 
-    ! This function calculates the enhancement factor, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
+    ! This function calculates the enhancement factor over water, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
     ! It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 
     ! input arguments
-    real(wp), intent(in) :: temperature
     real(wp), intent(in) :: air_pressure
     ! output argument
-    real(wp)             :: enhancement_factor
+    real(wp)             :: enhancement_factor_over_water
     
-    if (temperature>T_0) then
-      enhancement_factor = 1.00071*exp(0.000000045*air_pressure)
-    else
-      enhancement_factor = 0.99882*exp(0.00000008*air_pressure)
-    endif
+    enhancement_factor_over_water = 0.99882*exp(0.00000008*air_pressure)
 
-    end function enhancement_factor
+    end function enhancement_factor_over_water
+  
+  function enhancement_factor_over_ice(air_pressure)
+
+    ! This function calculates the enhancement factor over ice, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
+    ! It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
+
+    ! input arguments
+    real(wp), intent(in) :: air_pressure
+    ! output argument
+    real(wp)             :: enhancement_factor_over_ice
+    
+    enhancement_factor_over_ice = 0.99882*exp(0.00000008*air_pressure)
+
+    end function enhancement_factor_over_ice
 
   function rel_humidity(abs_humidity,temperature)
     

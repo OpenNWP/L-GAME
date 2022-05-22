@@ -10,7 +10,8 @@ module phase_trans
   use constants,        only: T_0,EPSILON_SECURITY
   use definitions,      only: t_state,t_diag,t_irrev,t_grid
   use dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water, &
-                              enhancement_factor,specific_gas_constants,phase_trans_heat,rel_humidity
+                              enhancement_factor_over_water,enhancement_factor_over_ice, &
+                              specific_gas_constants,phase_trans_heat,rel_humidity
   use constituents_nml, only: lassume_lte
   
   implicit none
@@ -100,7 +101,12 @@ module phase_trans
           air_pressure = water_vapour_pressure + dry_pressure
           
           ! multiplying the saturation pressure by the enhancement factor
-          saturation_pressure = enhancement_factor(diag%temperature_gas(ji,jk,jl),air_pressure)*saturation_pressure
+          if (diag%temperature_gas(ji,jk,jl)>=T_0) then
+            saturation_pressure = enhancement_factor_over_water(air_pressure)*saturation_pressure
+          ! "negative" temperatures
+          else
+            saturation_pressure = enhancement_factor_over_ice(air_pressure)*saturation_pressure
+          endif
 
           ! the amount of water vapour that the air can still take 
           diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diag%temperature_gas(ji,jk,jl))
@@ -255,13 +261,13 @@ module phase_trans
         ! evaporation and latent heat rates
         if (lsfc_phase_trans .and. grid%is_land(ji,jk)==0) then
           ! saturation pressure at surface temperature
-          if (state%temperature_soil(ji,jk,1) >= T_0) then
+          if (state%temperature_soil(ji,jk,1)>=T_0) then
             saturation_pressure_sfc = saturation_pressure_over_water(state%temperature_soil(ji,jk,1))
+            saturation_pressure_sfc = enhancement_factor_over_water(air_pressure)*saturation_pressure_sfc
           else
             saturation_pressure_sfc = saturation_pressure_over_ice(state%temperature_soil(ji,jk,1))
+            saturation_pressure_sfc = enhancement_factor_over_ice(air_pressure)*saturation_pressure_sfc
           endif
-          ! multiplying the saturation pressure by the enhancement factor
-          saturation_pressure_sfc = enhancement_factor(state%temperature_soil(ji,jk,1),air_pressure)*saturation_pressure_sfc
           
           ! difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
           diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants(1)*state%temperature_soil(ji,jk,1)) &
