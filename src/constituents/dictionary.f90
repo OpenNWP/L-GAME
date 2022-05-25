@@ -20,7 +20,7 @@ module dictionary
   ! 11: N2O
 
   use definitions, only: wp
-  use constants,   only: T_0
+  use constants,   only: T_0,N_A
   
   implicit none
   
@@ -144,7 +144,6 @@ module dictionary
   function enthalpy_evaporation(temperature)
     
     ! This function returns the enthalpy of evaporation depending on the temperature.
-    ! It follows Pruppacher and Klett (2010), p. 97, Eq. (3-24a).
     
     real(wp) :: temperature
 
@@ -154,19 +153,26 @@ module dictionary
     
     ! temperature in degrees Celsius
     temp_c = temperature - T_0
-  
-    ! clipping values that are too extreme for these approximations
-    if (temp_c<-20._wp) then
-      temp_c = -20._wp
-    endif
-    if (temp_c>40._wp) then
-      temp_c = 40._wp
-    endif
-  
-    enthalpy_evaporation = 597.3_wp - 0.561_wp*temp_c
     
-    ! unit conversion
-    enthalpy_evaporation = 4186.8_wp*enthalpy_evaporation
+    if (temperature<T_0) then
+      ! This follows Eq. (9) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
+      ! QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
+      ! clipping values that are too extreme for these approximations
+      if (temperature<30._wp) then
+        temperature = 30._wp
+      endif
+      enthalpy_evaporation = 56579._wp - 42.212_wp*temperature + exp(0.1149_wp*(281.6_wp - temperature))
+      ! unit conversion from J/mol to J/kg
+      enthalpy_evaporation = enthalpy_evaporation/(N_A*mean_particle_masses_gas(1))
+    else
+      ! This follows the formula (Eq. (8)) cited by Huang:
+      ! A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
+      ! clipping values that are too extreme for these approximations
+      if (temperature>T_0+100._wp) then
+        temperature = T_0 + 100._wp
+      endif
+      enthalpy_evaporation = 3151378._wp - 2386._wp*temperature
+    endif
 
   end function enthalpy_evaporation
   

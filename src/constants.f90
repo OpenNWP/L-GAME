@@ -13,6 +13,7 @@ module constants
   
   real(wp) :: re = 6371000.789927_wp      ! Earth radius
   real(wp) :: k_B = 1.380649e-23_wp       ! Boltzmann's constant
+  real(wp) :: N_A =  6.02214076e23_wp     ! Avogadro's number
   real(wp) :: T_0 = 273.15_wp             ! 273.15 K
   real(wp) :: density_water = 1024._wp    ! typical density of water
   real(wp) :: p_0 = 100000._wp            ! reference pressure
