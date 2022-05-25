@@ -133,10 +133,10 @@ module dictionary
       phase_trans_heat = enthalpy_evaporation(temperature)
     endif
     if (direction==1) then
-      phase_trans_heat = enthalpy_evaporation(temperature) + enthalpy_melting(temperature)
+      phase_trans_heat = enthalpy_sublimation(temperature)
     endif
     if (direction==2) then
-      phase_trans_heat = enthalpy_melting(temperature)
+      phase_trans_heat = enthalpy_sublimation(temperature) - enthalpy_evaporation(temperature)
     endif
     
   end function phase_trans_heat
@@ -176,35 +176,32 @@ module dictionary
 
   end function enthalpy_evaporation
   
-  function enthalpy_melting(temperature)
+  function enthalpy_sublimation(temperature)
     
-    ! This function returns the enthalpy of melting depending on the temperature.
-    ! It follows Pruppacher and Klett (2010), p. 97, Eq. (3-26).
+	! This function returns the enthalpy of sublimation depending on the temperature.
+	! It follows Eq. (5) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
+	! QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
     
+    ! input
     real(wp) :: temperature
+    ! output
+    real(wp) :: enthalpy_sublimation
 
-    real(wp) :: enthalpy_melting
-    ! local variable
-    real(wp) :: temp_c
-    
-    ! temperature in degrees Celsius
-    temp_c = temperature - T_0
-    
     ! clipping values that are too extreme for this approximation
-    if (temp_c<-44._wp) then
-      temp_c = -44._wp
+    if (temperature<30.0) then
+      temperature = 30.0
     endif
-    if (temp_c>0._wp) then
-      temp_c = 0._wp
+    ! sublimation is not happening in thermodynamic equilibrium at temperatures > T_0
+    if (temperature>T_0) then
+      temperature = T_0
     endif
-    
-    enthalpy_melting = 79.7_wp - 0.12_wp*temp_c - 8.0481e-2_wp*temp_c**2 &
-    - 3.2376e-3_wp*temp_c**3 - 4.2553e-5_wp*temp_c**4
-    
-    ! unit conversion
-    enthalpy_melting = 4186.8_wp*enthalpy_melting
+
+    enthalpy_sublimation = 46782.5 + 35.8925*temperature - 0.07414*temperature**2 + 541.5*exp(-(temperature/123.75)**2)
+
+    ! unit conversion from J/mol to J/kg
+    enthalpy_sublimation = enthalpy_sublimation/(N_A*mean_particle_masses_gas(1))
   
-  end function enthalpy_melting
+  end function enthalpy_sublimation
   
   real(wp) function calc_o3_vmr(height)
 
