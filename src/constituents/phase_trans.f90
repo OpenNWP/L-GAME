@@ -12,7 +12,6 @@ module phase_trans
   use dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water, &
                               enhancement_factor_over_water,enhancement_factor_over_ice, &
                               specific_gas_constants,phase_trans_heat,rel_humidity
-  use constituents_nml, only: lassume_lte
   
   implicit none
   

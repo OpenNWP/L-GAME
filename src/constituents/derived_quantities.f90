@@ -10,7 +10,7 @@ module derived_quantities
                         specific_gas_constants
   use run_nml,          only: nlins,ncols,nlays
   use constants,        only: k_B,M_PI
-  use constituents_nml, only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents,lassume_lte
+  use constituents_nml, only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
   
   implicit none
   
@@ -69,17 +69,8 @@ module derived_quantities
     integer  :: j_constituent               ! constituent index
     real(wp) :: rho_g                       ! gas density
     
-    rho_g = 0._wp
-    no_of_relevant_constituents = 0
-    if (.not. lassume_lte) then
-      no_of_relevant_constituents = no_of_gaseous_constituents
-      rho_g = density_gas(state,ji,jk,jl)
-    endif
-    
-    if (lassume_lte) then
-      no_of_relevant_constituents = 1
-      rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
-    endif
+    no_of_relevant_constituents = 1
+    rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
     
     spec_heat_cap_diagnostics_v = 0._wp
     do j_constituent=1,no_of_relevant_constituents
@@ -105,18 +96,8 @@ module derived_quantities
     integer  :: j_constituent               ! constituent index
     real(wp) :: rho_g                       ! gas density
     
-    rho_g = 0._wp
-    no_of_relevant_constituents = 0
-    
-    if (.not. lassume_lte) then
-      no_of_relevant_constituents = no_of_gaseous_constituents
-      rho_g = density_gas(state,ji,jk,jl)
-    endif
-    
-    if (lassume_lte) then
-      no_of_relevant_constituents = 1
-      rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
-    endif
+    no_of_relevant_constituents = 1
+    rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
     
     spec_heat_cap_diagnostics_p = 0._wp
     do j_constituent=1,no_of_relevant_constituents
@@ -141,18 +122,8 @@ module derived_quantities
     integer  :: j_constituent               ! constituent index
     real(wp) :: rho_g                       ! gas density
     
-    rho_g = 0._wp
-    no_of_relevant_constituents = 0
-    
-    if (.not. lassume_lte) then
-      no_of_relevant_constituents = no_of_gaseous_constituents
-      rho_g = density_gas(state,ji,jk,jl)
-    endif
-    
-    if (lassume_lte) then
-      no_of_relevant_constituents = 1
-      rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
-    endif
+    no_of_relevant_constituents = 1
+    rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
     
     gas_constant_diagnostics = 0._wp
     

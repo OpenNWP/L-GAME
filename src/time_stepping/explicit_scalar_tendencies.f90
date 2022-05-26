@@ -10,7 +10,7 @@ module explicit_scalar_tendencies
   use divergence_operators,  only: div_h,div_h_tracers,add_vertical_div
   use run_nml,               only: dtime
   use phase_trans,           only: calc_h2otracers_source_rates
-  use constituents_nml,      only: no_of_condensed_constituents,no_of_constituents,lassume_lte
+  use constituents_nml,      only: no_of_condensed_constituents,no_of_constituents
   use dictionary,            only: spec_heat_capacities_p_gas
   use diff_nml,              only: ltemp_diff_h,ltemp_diff_v,ltracer_diff_h,ltracer_diff_v
   use effective_diff_coeffs, only: temp_diffusion_coeffs,mass_diffusion_coeffs
