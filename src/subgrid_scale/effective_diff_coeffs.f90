@@ -19,16 +19,16 @@ module effective_diff_coeffs
   
   private
   
-  public :: hori_div_viscosity
-  public :: hori_curl_viscosity
-  public :: vert_hori_mom_viscosity
+  public :: hor_div_viscosity
+  public :: hor_curl_viscosity
+  public :: vert_hor_mom_viscosity
   public :: vert_vert_mom_viscosity
   public :: temp_diffusion_coeffs
   public :: mass_diffusion_coeffs
   
   contains
   
-  subroutine hori_div_viscosity(state,diag,divergence_h,irrev,grid)
+  subroutine hor_div_viscosity(state,diag,divergence_h,irrev,grid)
   
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
     
@@ -86,9 +86,9 @@ module effective_diff_coeffs
     !$OMP END DO
     !$OMP END PARALLEL
   
-  end subroutine hori_div_viscosity
+  end subroutine hor_div_viscosity
   
-  subroutine hori_curl_viscosity(state,diag,irrev,grid)
+  subroutine hor_curl_viscosity(state,diag,irrev,grid)
   
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements.
   
@@ -222,9 +222,9 @@ module effective_diff_coeffs
     !$OMP END DO
     !$OMP END PARALLEL
   
-  end subroutine hori_curl_viscosity
+  end subroutine hor_curl_viscosity
   
-  subroutine vert_hori_mom_viscosity(state,diag,irrev,grid)
+  subroutine vert_hor_mom_viscosity(state,diag,irrev,grid)
   
     ! This subroutine computes the effective viscosity (Eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
 	! This quantity is located at the half level edges.
@@ -416,7 +416,7 @@ module effective_diff_coeffs
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
   
-  end subroutine vert_hori_mom_viscosity
+  end subroutine vert_hor_mom_viscosity
   
   subroutine vert_vert_mom_viscosity(state,diag,irrev,grid)
   
@@ -478,8 +478,8 @@ module effective_diff_coeffs
     if (.not. lmom_diff_h) then
     
       call div_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
-      call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
-      call hori_curl_viscosity(state,diag,irrev,grid)
+      call hor_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
+      call hor_curl_viscosity(state,diag,irrev,grid)
       call tke_update(state,diag,irrev,grid)
       
       ! molecular viscosity
@@ -538,8 +538,8 @@ module effective_diff_coeffs
     if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
     
       call div_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
-      call hori_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
-      call hori_curl_viscosity(state,diag,irrev,grid)
+      call hor_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
+      call hor_curl_viscosity(state,diag,irrev,grid)
       call tke_update(state,diag,irrev,grid)
       
       ! molecular viscosity
