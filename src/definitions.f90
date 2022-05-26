@@ -97,7 +97,6 @@ module definitions
     real(wp), allocatable :: rhotheta(:,:,:)                  ! potential temperature density
     real(wp), allocatable :: theta_pert(:,:,:)                ! potential temperature perturbation
     real(wp), allocatable :: exner_pert(:,:,:)                ! Exner pressure perturbation
-    real(wp), allocatable :: condensed_rho_t(:,:,:,:)         ! temperature densities of the condensates
     real(wp), allocatable :: wind_u(:,:,:)                    ! x-component of the wind
     real(wp), allocatable :: wind_v(:,:,:)                    ! y-component of the wind
     real(wp), allocatable :: wind_w(:,:,:)                    ! vertical wind
@@ -113,7 +112,6 @@ module definitions
     real(wp), allocatable :: wind_u(:,:,:)                    ! x-component of the wind
     real(wp), allocatable :: wind_v(:,:,:)                    ! y-component of the wind
     real(wp), allocatable :: wind_w(:,:,:)                    ! vertical wind
-    real(wp), allocatable :: condensed_rho_t(:,:,:,:)         ! temperature densities of the constituents
   
   end type t_tend
   
@@ -125,7 +123,6 @@ module definitions
     real(wp), allocatable :: wind_u(:,:,:,:)                  ! x-component of the wind
     real(wp), allocatable :: wind_v(:,:,:,:)                  ! y-component of the wind
     real(wp), allocatable :: wind_w(:,:,:,:)                  ! vertical wind
-    real(wp), allocatable :: condensed_rho_t(:,:,:,:,:)       ! temperature densities of the constituents
     real(wp), allocatable :: scalar_bc_factor(:,:)            ! boundary conditions factor for scalar fields
     real(wp), allocatable :: u_bc_factor(:,:)                 ! boundary conditions factor for u-vector fields
     real(wp), allocatable :: v_bc_factor(:,:)                 ! boundary conditions factor for v-vector fields

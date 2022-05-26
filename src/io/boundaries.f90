@@ -66,9 +66,6 @@ module boundaries
         do jl=1,nlays
           state%rho(ji,jk,jl,:) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rho(ji,jk,jl,:,bc%index_old) &
           + new_weight*bc%rho(ji,jk,jl,:,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rho(ji,jk,jl,:)
-          state%condensed_rho_t(ji,jk,jl,:) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%condensed_rho_t(ji,jk,jl,:,bc%index_old) &
-          + new_weight*bc%condensed_rho_t(ji,jk,jl,:,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk)) &
-          *state%condensed_rho_t(ji,jk,jl,:)
           state%rhotheta(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rhotheta(ji,jk,jl,bc%index_old) &
           + new_weight*bc%rhotheta(ji,jk,jl,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rhotheta(ji,jk,jl)
           state%wind_w(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%wind_w(ji,jk,jl,bc%index_old) &

@@ -367,184 +367,151 @@ module column_solvers
     impl_weight = 0.5_wp
     expl_weight = 1._wp - impl_weight
     
-    ! loop over the quantities, 1: mass density, 2: temperature density
-    do quantity_id=1,2
-    
-      ! firstly the number of relevant constituents needs to be determined
-      no_of_relevant_constituents = 0
-      ! mass densities
-      if (quantity_id==1) then
-        ! all constituents have a mass density
-        no_of_relevant_constituents = no_of_constituents ! the main gaseous constituent is excluded later
-      endif
-      ! density x temperature fields
-      if (quantity_id==2) then
-        ! in this case, all the condensed constituents have a density x temperature field
-        if (.not. lassume_lte) then
-          no_of_relevant_constituents = no_of_condensed_constituents
-        ! in this case, no density x temperature fields are taken into account
-        else
-          no_of_relevant_constituents = 0
-        endif
-      endif
+    ! firstly the number of relevant constituents needs to be determined
+    no_of_relevant_constituents = 0
+    ! mass densities
+    no_of_relevant_constituents = no_of_constituents ! the main gaseous constituent is excluded later
 
-      ! loop over all relevant constituents
-      do j_constituent=1,no_of_relevant_constituents
-        ! This is done do all tracers apart from the main gaseous constituent.
-        if (quantity_id/=1 .or. j_constituent/=no_of_condensed_constituents+1) then
+    ! loop over all relevant constituents
+    do j_constituent=1,no_of_relevant_constituents
+      ! This is done do all tracers apart from the main gaseous constituent.
+      if (j_constituent/=no_of_condensed_constituents+1) then
         
-          ! loop over all columns
-          !$OMP PARALLEL
-          !$OMP DO PRIVATE(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
-          !$OMP d_vector,e_vector,r_vector,solution_vector,added_mass)
-          do ji=1,nlins
-            do jk=1,ncols
+        ! loop over all columns
+        !$OMP PARALLEL
+        !$OMP DO PRIVATE(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
+        !$OMP d_vector,e_vector,r_vector,solution_vector,added_mass)
+        do ji=1,nlins
+          do jk=1,ncols
 
-              ! diagnozing the vertical fluxes
-              do jl=1,nlays-1
-                vertical_flux_vector_impl(jl) = state_old%wind_w(ji,jk,jl+1)
-                vertical_flux_vector_rhs(jl) = state_new%wind_w(ji,jk,jl+1)
+            ! diagnozing the vertical fluxes
+            do jl=1,nlays-1
+              vertical_flux_vector_impl(jl) = state_old%wind_w(ji,jk,jl+1)
+              vertical_flux_vector_rhs(jl) = state_new%wind_w(ji,jk,jl+1)
               
-                ! for condensed constituents, a sink velocity must be added.
+              ! for condensed constituents, a sink velocity must be added.
+              ! precipitation
+              ! snow
+              if (j_constituent<=no_of_condensed_constituents/4) then
+                vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - snow_velocity
+                vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - snow_velocity
+              ! rain
+              elseif (j_constituent<=no_of_condensed_constituents/2) then
+                vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - rain_velocity
+                vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - rain_velocity
+              ! clouds
+              elseif (j_constituent<=no_of_condensed_constituents) then
+                vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - cloud_droplets_velocity
+                vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - cloud_droplets_velocity
+              endif
+              ! multiplying the vertical velocity by the area
+              vertical_flux_vector_impl(jl) = grid%area_z(ji,jk,jl+1)*vertical_flux_vector_impl(jl)
+              vertical_flux_vector_rhs(jl) = grid%area_z(ji,jk,jl+1)*vertical_flux_vector_rhs(jl)
+              ! old density at the interface
+              if (vertical_flux_vector_rhs(jl)>=0._wp) then
+                density_old_at_interface = state_old%rho(ji,jk,jl+1,j_constituent)
+              else
+                density_old_at_interface = state_old%rho(ji,jk,jl,j_constituent)
+              endif
+              vertical_flux_vector_rhs(jl) = density_old_at_interface*vertical_flux_vector_rhs(jl)
+            enddo
+
+            ! Now we proceed to solving the vertical tridiagonal problems.
+
+            ! filling up the original vectors
+            do jl=1,nlays-1
+              if (vertical_flux_vector_impl(jl)>=0._wp) then
+                c_vector(jl) = 0._wp
+                e_vector(jl) = -impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl)
+              else
+                c_vector(jl) = impl_weight*dtime/grid%volume(ji,jk,jl+1)*vertical_flux_vector_impl(jl)
+                e_vector(jl) = 0._wp
+              endif
+            enddo
+            do jl=1,nlays
+              if (jl==1) then
+                if (vertical_flux_vector_impl(1)>=0._wp) then
+                  d_vector(jl) = 1._wp
+                else
+                  d_vector(jl) = 1._wp - impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(1)
+                endif
+              elseif (jl==nlays) then
+                if (vertical_flux_vector_impl(jl-1)>=0._wp) then
+                  d_vector(jl) = 1._wp + impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl-1)
+                else
+                  d_vector(jl) = 1._wp
+                endif
                 ! precipitation
                 ! snow
                 if (j_constituent<=no_of_condensed_constituents/4) then
-                  vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - snow_velocity
-                  vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - snow_velocity
+                  d_vector(jl) = d_vector(jl) + impl_weight*snow_velocity*dtime &
+                  *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                 ! rain
                 elseif (j_constituent<=no_of_condensed_constituents/2) then
-                  vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - rain_velocity
-                  vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - rain_velocity
+                  d_vector(jl) = d_vector(jl) + impl_weight*rain_velocity*dtime &
+                  *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                 ! clouds
                 elseif (j_constituent<=no_of_condensed_constituents) then
-                  vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - cloud_droplets_velocity
-                  vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - cloud_droplets_velocity
+                  d_vector(jl) = d_vector(jl) + impl_weight*cloud_droplets_velocity*dtime &
+                  *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                 endif
-                ! multiplying the vertical velocity by the area
-                vertical_flux_vector_impl(jl) = grid%area_z(ji,jk,jl+1)*vertical_flux_vector_impl(jl)
-                vertical_flux_vector_rhs(jl) = grid%area_z(ji,jk,jl+1)*vertical_flux_vector_rhs(jl)
-                ! old density at the interface
-                if (vertical_flux_vector_rhs(jl)>=0._wp) then
-                  density_old_at_interface = state_old%rho(ji,jk,jl+1,j_constituent)
-                else
-                  density_old_at_interface = state_old%rho(ji,jk,jl,j_constituent)
+              else
+                d_vector(jl) = 1._wp
+                if (vertical_flux_vector_impl(jl-1)>=0._wp) then
+                  d_vector(jl) = d_vector(jl) + impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl-1)
                 endif
-                vertical_flux_vector_rhs(jl) = density_old_at_interface*vertical_flux_vector_rhs(jl)
-              enddo
+                if (vertical_flux_vector_impl(jl)<0._wp) then
+                  d_vector(jl) = d_vector(jl) - impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl)
+                endif
+              endif
+              ! the explicit component
+              r_vector(jl) = state_old%rho(ji,jk,jl,j_constituent) + dtime*tend%rho(ji,jk,jl,j_constituent)
+              ! adding the explicit part of the vertical flux divergence
+              if (jl==1) then
+                r_vector(jl) = r_vector(jl) + expl_weight*dtime*vertical_flux_vector_rhs(jl)/grid%volume(ji,jk,jl)
+              elseif (jl==nlays) then
+                r_vector(jl) = r_vector(jl) - expl_weight*dtime*vertical_flux_vector_rhs(jl-1)/grid%volume(ji,jk,jl)
+                ! precipitation
+                ! snow
+                if (j_constituent<=no_of_condensed_constituents/4) then
+                  r_vector(jl) = r_vector(jl) - expl_weight*snow_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
+                  *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
+                ! rain
+                elseif (j_constituent<=no_of_condensed_constituents/2) then
+                  r_vector(jl) = r_vector(jl) - expl_weight*rain_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
+                  *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
+                ! clouds
+                elseif (j_constituent<=no_of_condensed_constituents) then
+                  r_vector(jl) = r_vector(jl) - expl_weight*cloud_droplets_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
+                  *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
+                endif
+              else
+                r_vector(jl) = r_vector(jl) + expl_weight*dtime*(-vertical_flux_vector_rhs(jl-1)+vertical_flux_vector_rhs(jl)) &
+                /grid%volume(ji,jk,jl)
+              endif
+            enddo
 
-              ! Now we proceed to solving the vertical tridiagonal problems.
-
-              ! filling up the original vectors
-              do jl=1,nlays-1
-                if (vertical_flux_vector_impl(jl)>=0._wp) then
-                  c_vector(jl) = 0._wp
-                  e_vector(jl) = -impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl)
-                else
-                  c_vector(jl) = impl_weight*dtime/grid%volume(ji,jk,jl+1)*vertical_flux_vector_impl(jl)
-                  e_vector(jl) = 0._wp
-                endif
-              enddo
-              do jl=1,nlays
-                if (jl==1) then
-                  if (vertical_flux_vector_impl(1)>=0._wp) then
-                    d_vector(jl) = 1._wp
-                  else
-                    d_vector(jl) = 1._wp - impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(1)
-                  endif
-                elseif (jl==nlays) then
-                  if (vertical_flux_vector_impl(jl-1)>=0._wp) then
-                    d_vector(jl) = 1._wp + impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl-1)
-                  else
-                    d_vector(jl) = 1._wp
-                  endif
-                  ! precipitation
-                  ! snow
-                  if (j_constituent<=no_of_condensed_constituents/4) then
-                    d_vector(jl) = d_vector(jl) + impl_weight*snow_velocity*dtime &
-                    *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
-                  ! rain
-                  elseif (j_constituent<=no_of_condensed_constituents/2) then
-                    d_vector(jl) = d_vector(jl) + impl_weight*rain_velocity*dtime &
-                    *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
-                  ! clouds
-                  elseif (j_constituent<=no_of_condensed_constituents) then
-                    d_vector(jl) = d_vector(jl) + impl_weight*cloud_droplets_velocity*dtime &
-                    *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
-                  endif
-                else
-                  d_vector(jl) = 1._wp
-                  if (vertical_flux_vector_impl(jl-1)>=0._wp) then
-                    d_vector(jl) = d_vector(jl) + impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl-1)
-                  endif
-                  if (vertical_flux_vector_impl(jl)<0._wp) then
-                    d_vector(jl) = d_vector(jl) - impl_weight*dtime/grid%volume(ji,jk,jl)*vertical_flux_vector_impl(jl)
-                  endif
-                endif
-                ! the explicit component
-                ! mass densities
-                if (quantity_id==1) then
-                  r_vector(jl) = state_old%rho(ji,jk,jl,j_constituent) + dtime*tend%rho(ji,jk,jl,j_constituent)
-                endif
-                ! density x temperatures
-                if (quantity_id==2) then
-                  r_vector(jl) = state_old%condensed_rho_t(ji,jk,jl,j_constituent) &
-                  + dtime*tend%condensed_rho_t(ji,jk,jl,j_constituent)
-                endif
-                ! adding the explicit part of the vertical flux divergence
-                if (jl==1) then
-                  r_vector(jl) = r_vector(jl) + expl_weight*dtime*vertical_flux_vector_rhs(jl)/grid%volume(ji,jk,jl)
-                elseif (jl==nlays) then
-                  r_vector(jl) = r_vector(jl) - expl_weight*dtime*vertical_flux_vector_rhs(jl-1)/grid%volume(ji,jk,jl)
-                  ! precipitation
-                  ! snow
-                  if (j_constituent<=no_of_condensed_constituents/4) then
-                    r_vector(jl) = r_vector(jl) - expl_weight*snow_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
-                    *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
-                  ! rain
-                  elseif (j_constituent<=no_of_condensed_constituents/2) then
-                    r_vector(jl) = r_vector(jl) - expl_weight*rain_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
-                    *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
-                  ! clouds
-                  elseif (j_constituent<=no_of_condensed_constituents) then
-                    r_vector(jl) = r_vector(jl) - expl_weight*cloud_droplets_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
-                    *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
-                  endif
-                else
-                  r_vector(jl) = r_vector(jl) + expl_weight*dtime*(-vertical_flux_vector_rhs(jl-1)+vertical_flux_vector_rhs(jl)) &
-                  /grid%volume(ji,jk,jl)
-                endif
-              enddo
-
-              ! calling the algorithm to solve the system of linear equations
-              call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,nlays)
+            ! calling the algorithm to solve the system of linear equations
+            call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,nlays)
       
-              ! this should account for round-off errors only
-              do jl=1,nlays
-                if (solution_vector(jl)<0._wp) then
-                  solution_vector(jl) = 0._wp
-                endif
-              enddo
+            ! this should account for round-off errors only
+            do jl=1,nlays
+              if (solution_vector(jl)<0._wp) then
+                solution_vector(jl) = 0._wp
+              endif
+            enddo
 
-              ! writing the result into the new state
-              do jl=1,nlays
-                ! mass densities
-                if (quantity_id==1) then
-                  state_new%rho(ji,jk,jl,j_constituent) = solution_vector(jl)
-                endif
-
-                ! density x temperature fields
-                if (quantity_id==2) then
-                  state_new%condensed_rho_t(ji,jk,jl,j_constituent) = solution_vector(jl)
-                endif
-              enddo
-            
-            enddo ! column index
-          enddo ! line index
-          !$OMP END DO
-          !$OMP END PARALLEL
-        endif
-      enddo ! constituent
-    enddo ! quantity
+            ! writing the result into the new state
+            do jl=1,nlays
+              state_new%rho(ji,jk,jl,j_constituent) = solution_vector(jl)
+            enddo
+          
+          enddo ! column index
+        enddo ! line index
+        !$OMP END DO
+        !$OMP END PARALLEL
+      endif
+    enddo ! constituent
   
   end subroutine three_band_solver_gen_densities
   

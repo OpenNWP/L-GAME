@@ -67,19 +67,15 @@ module phase_trans
           ! determining the temperature of the cloud ice
           if (state%rho(ji,jk,jl,3)<EPSILON_SECURITY) then
             solid_temperature = T_0
-          elseif (lassume_lte) then
-            solid_temperature = diag%temperature_gas(ji,jk,jl)
           else
-            solid_temperature = state%condensed_rho_t(ji,jk,jl,3)/state%rho(ji,jk,jl,3)
+            solid_temperature = diag%temperature_gas(ji,jk,jl)
           endif
 
           ! determining the temperature of the liquid cloud water
           if (state%rho(ji,jk,jl,4)<EPSILON_SECURITY) then
             liquid_temperature = T_0
-          else if (lassume_lte) then
-            liquid_temperature = diag%temperature_gas(ji,jk,jl)
           else
-            liquid_temperature = state%condensed_rho_t(ji,jk,jl,4)/state%rho(ji,jk,jl,4)
+            liquid_temperature = diag%temperature_gas(ji,jk,jl)
           endif
 
           ! determining the saturation pressure

@@ -194,8 +194,6 @@ program control
   state_old%theta_pert = 0._wp
   allocate(state_old%exner_pert(nlins,ncols,nlays))
   state_old%exner_pert = 0._wp
-  allocate(state_old%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
-  state_old%condensed_rho_t = 0._wp
   allocate(state_old%wind_u(nlins,ncols+1,nlays))
   state_old%wind_u = 0._wp
   allocate(state_old%wind_v(nlins+1,ncols,nlays))
@@ -213,8 +211,6 @@ program control
   state_new%theta_pert = 0._wp
   allocate(state_new%exner_pert(nlins,ncols,nlays))
   state_new%exner_pert = 0._wp
-  allocate(state_new%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
-  state_new%condensed_rho_t = 0._wp
   allocate(state_new%wind_u(nlins,ncols+1,nlays))
   state_new%wind_u = 0._wp
   allocate(state_new%wind_v(nlins+1,ncols,nlays))
@@ -234,8 +230,6 @@ program control
   tend%wind_v = 0._wp
   allocate(tend%wind_w(nlins,ncols,nlays+1))
   tend%wind_w = 0._wp
-  allocate(tend%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
-  tend%condensed_rho_t = 0._wp
   ! state containing the tendency of the boundary conditions
   allocate(bc%rho(nlins,ncols,nlays,no_of_constituents,2))
   bc%rho = 0._wp
@@ -247,8 +241,6 @@ program control
   bc%wind_v = 0._wp
   allocate(bc%wind_w(nlins,ncols,nlays+1,2))
   bc%wind_w = 0._wp
-  allocate(bc%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents,2))
-  bc%condensed_rho_t = 0._wp
   allocate(bc%scalar_bc_factor(nlins,ncols))
   bc%scalar_bc_factor = 0._wp
   allocate(bc%u_bc_factor(nlins,ncols+1))
@@ -266,8 +258,6 @@ program control
   state_write%theta_pert = 0._wp
   allocate(state_write%exner_pert(nlins,ncols,nlays))
   state_write%exner_pert = 0._wp
-  allocate(state_write%condensed_rho_t(nlins,ncols,nlays,no_of_condensed_constituents))
-  state_write%condensed_rho_t = 0._wp
   allocate(state_write%wind_u(nlins,ncols+1,nlays))
   state_write%wind_u = 0._wp
   allocate(state_write%wind_v(nlins+1,ncols,nlays))
@@ -545,7 +535,6 @@ program control
   deallocate(state_old%rhotheta)
   deallocate(state_old%theta_pert)
   deallocate(state_old%exner_pert)
-  deallocate(state_old%condensed_rho_t)
   deallocate(state_old%wind_u)
   deallocate(state_old%wind_v)
   deallocate(state_old%wind_w)
@@ -555,7 +544,6 @@ program control
   deallocate(state_new%rhotheta)
   deallocate(state_new%theta_pert)
   deallocate(state_new%exner_pert)
-  deallocate(state_new%condensed_rho_t)
   deallocate(state_new%wind_u)
   deallocate(state_new%wind_v)
   deallocate(state_new%wind_w)
@@ -566,14 +554,12 @@ program control
   deallocate(tend%wind_u)
   deallocate(tend%wind_v)
   deallocate(tend%wind_w)
-  deallocate(tend%condensed_rho_t)
   ! state containing the tendency of the boundary conditions
   deallocate(bc%rho)
   deallocate(bc%rhotheta)
   deallocate(bc%wind_u)
   deallocate(bc%wind_v)
   deallocate(bc%wind_w)
-  deallocate(bc%condensed_rho_t)
   deallocate(bc%scalar_bc_factor)
   deallocate(bc%u_bc_factor)
   deallocate(bc%v_bc_factor)
@@ -582,7 +568,6 @@ program control
   deallocate(state_write%rhotheta)
   deallocate(state_write%theta_pert)
   deallocate(state_write%exner_pert)
-  deallocate(state_write%condensed_rho_t)
   deallocate(state_write%wind_u)
   deallocate(state_write%wind_v)
   deallocate(state_write%wind_w)

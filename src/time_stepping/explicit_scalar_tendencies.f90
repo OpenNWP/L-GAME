@@ -143,22 +143,6 @@ module explicit_scalar_tendencies
         
       endif
       
-      ! explicit temperature density integration for condensates
-      ! --------------------------------------------------------
-      if (j_constituent<=no_of_condensed_constituents .and. (.not. lassume_lte)) then
-        call scalar_times_vector_h(state%condensed_rho_t(:,:,:,j_constituent),state%wind_u,state%wind_v,&
-        diag%u_placeholder,diag%v_placeholder)
-        call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
-        
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
-        tend%condensed_rho_t(:,:,:,j_constituent) = old_weight(j_constituent)*tend%condensed_rho_t(:,:,:,j_constituent) &
-        + new_weight(j_constituent)*(-diag%scalar_placeholder)
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
-        
-      endif
-      
     enddo
         
   end subroutine

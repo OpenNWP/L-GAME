@@ -83,7 +83,6 @@ module set_initial_state
         state%rho(:,:,:,no_of_constituents) = 0._wp
         ! condensates
         state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
-        state%condensed_rho_t = 0._wp
         !$OMP END WORKSHARE
         !$OMP END PARALLEL
 
@@ -162,7 +161,6 @@ module set_initial_state
         !$OMP WORKSHARE
         ! condensates
         state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
-        state%condensed_rho_t = 0._wp
         !$OMP END WORKSHARE
         !$OMP END PARALLEL
 
@@ -238,7 +236,6 @@ module set_initial_state
         state%rho(:,:,:,no_of_constituents) = 0._wp
         ! condensates
         state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
-        state%condensed_rho_t = 0._wp
         !$OMP END WORKSHARE
         !$OMP END PARALLEL
         
