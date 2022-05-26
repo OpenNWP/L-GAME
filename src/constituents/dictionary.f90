@@ -220,7 +220,7 @@ module dictionary
     ! calculation of the result
     sigma = fwhm/(8._wp*log(2._wp))**0.5_wp
     distance = height - max
-    calc_o3_vmr = max_vmr*exp(-distance**2/(2*sigma**2))
+    calc_o3_vmr = max_vmr*exp(-distance**2/(2._wp*sigma**2))
     
   end function calc_o3_vmr
 
