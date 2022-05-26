@@ -30,9 +30,6 @@ start_minute=${BASH_ARGV[14]}
 &diff
 /
 
-&constituents
-/
-
 &surface
 /
 

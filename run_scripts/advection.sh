@@ -28,11 +28,6 @@ lplane=.true.
 &diff
 /
 
-&constituents
-no_of_gaseous_constituents=2
-no_of_condensed_constituents=4
-/
-
 &surface
 orography_id=3
 lprog_soil_temp=.false.

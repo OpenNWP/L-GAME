@@ -10,7 +10,7 @@ program control
                                        lideal
   use io_nml,                    only: io_nml_setup,dt_write
   use constituents_nml,          only: constituents_nml_setup,no_of_condensed_constituents,no_of_constituents, &
-                                       snow_velocity,rain_velocity,cloud_droplets_velocity
+                                       snow_velocity,rain_velocity
   use diff_nml,                  only: diff_nml_setup
   use surface_nml,               only: surface_nml_setup,nsoillays
   use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_bc,t_irrev

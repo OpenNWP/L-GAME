@@ -23,6 +23,7 @@ scenario="schaer"
 lcorio=.false.
 sigma=1.0
 lplane=.true.
+lmoist=.false.
 /
 
 &diff
@@ -34,11 +35,6 @@ ltemp_diff_h=.true.
 ltemp_diff_v=.false.
 ltracer_diff_h=.false.
 ltracer_diff_v=.false.
-/
-
-&constituents
-no_of_gaseous_constituents=1
-no_of_condensed_constituents=0
 /
 
 &surface

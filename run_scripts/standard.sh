@@ -19,9 +19,6 @@ scenario="standard"
 &diff
 /
 
-&constituents
-/
-
 &surface
 /
 
