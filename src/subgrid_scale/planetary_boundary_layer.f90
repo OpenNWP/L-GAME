@@ -34,24 +34,24 @@ module planetary_boundary_layer
     type(t_grid),  intent(inout) :: grid  ! grid properties
 
     ! local variables
-    real(wp) :: u_lowest_layer        ! wind speed in the lowest model layer
-    real(wp) :: u10                   ! wind speed in 10 m height
-    real(wp) :: agl                   ! height above ground f the lowest model layer
-    real(wp) :: theta_lowest_layer    ! potential temperature in the lowest layer
-    real(wp) :: theta_second_layer    ! potential temperature in the second-lowest layer
-    real(wp) :: dz                    ! vertical grid point distance
-    real(wp) :: dtheta_dz             ! vertical gradient of the potential temperature
-    real(wp) :: w_pert                ! vertical velocity perturbation near the surface
-    real(wp) :: theta_pert            ! potential temperature perturbation near the surface
-    real(wp) :: w_pert_theta_pert_avg ! correlation between vertical velocity and potential temperature perturbations
-    real(wp) :: w_theta_corr          ! semi-empirical coefficient for computing w_pert_theta_pert_avg
-    integer  :: ji,jk                 ! loop variables
+    real(wp) :: u_lowest_layer          ! wind speed in the lowest model layer
+    real(wp) :: u10                     ! wind speed in 10 m height
+    real(wp) :: agl                     ! height above ground f the lowest model layer
+    real(wp) :: theta_v_lowest_layer    ! virtual potential temperature in the lowest layer
+    real(wp) :: theta_v_second_layer    ! virtual potential temperature in the second-lowest layer
+    real(wp) :: dz                      ! vertical grid point distance
+    real(wp) :: dtheta_v_dz             ! vertical gradient of the virtual potential temperature
+    real(wp) :: w_pert                  ! vertical velocity perturbation near the surface
+    real(wp) :: theta_v_pert            ! virtual potential temperature perturbation near the surface
+    real(wp) :: w_pert_theta_v_pert_avg ! correlation between vertical velocity and virtual potential temperature perturbations
+    real(wp) :: w_theta_v_corr          ! semi-empirical coefficient for computing w_pert_theta_v_pert_avg
+    integer  :: ji,jk                   ! loop variables
 
-    w_theta_corr = 0.2_wp
+    w_theta_v_corr = 0.2_wp
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,u_lowest_layer,u10,agl,theta_lowest_layer,theta_second_layer,dz,dtheta_dz, &
-    !$OMP w_pert,theta_pert,w_pert_theta_pert_avg)
+    !$OMP DO PRIVATE(ji,jk,u_lowest_layer,u10,agl,theta_v_lowest_layer,theta_v_second_layer,dz,dtheta_v_dz, &
+    !$OMP w_pert,theta_v_pert,w_pert_theta_v_pert_avg)
     do ji=1,nlins
       do jk=1,ncols
         agl = grid%z_scalar(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1)
@@ -71,31 +71,31 @@ module planetary_boundary_layer
         ! updating the roughness velocity
         diag%roughness_velocity(ji,jk) = roughness_velocity(u_lowest_layer,agl,grid%roughness_length(ji,jk))
 
-        ! theta in the lowest layer
-        theta_lowest_layer = grid%theta_bg(ji,jk,nlays) + state%theta_pert(ji,jk,nlays)
-        ! theta in the second-lowest layer
-        theta_second_layer = grid%theta_bg(ji,jk,nlays-1) + state%theta_pert(ji,jk,nlays-1)
+        ! theta_v in the lowest layer
+        theta_v_lowest_layer = grid%theta_v_bg(ji,jk,nlays) + state%theta_v_pert(ji,jk,nlays)
+        ! theta_v in the second-lowest layer
+        theta_v_second_layer = grid%theta_v_bg(ji,jk,nlays-1) + state%theta_v_pert(ji,jk,nlays-1)
 
         ! delta z
         dz = grid%z_scalar(ji,jk,nlays-1) - grid%z_scalar(ji,jk,nlays)
 
-        ! vertical gradient of theta
-        dtheta_dz = (theta_second_layer - theta_lowest_layer)/dz
+        ! vertical gradient of theta_v
+        dtheta_v_dz = (theta_v_second_layer - theta_v_lowest_layer)/dz
 
         ! the perturbation of the vertical velocity is assumed to be proportional to the 10 m wind speed
         ! times a stability-dependant factor
-        w_pert = u10*max(0.001_wp,0.02_wp*(1._wp - dtheta_dz/0.01_wp))
-        theta_pert = -0.2_wp*dtime*w_pert*dtheta_dz
-        w_pert_theta_pert_avg = w_theta_corr*w_pert*theta_pert
+        w_pert = u10*max(0.001_wp,0.02_wp*(1._wp - dtheta_v_dz/0.01_wp))
+        theta_v_pert = -0.2_wp*dtime*w_pert*dtheta_v_dz
+        w_pert_theta_v_pert_avg = w_theta_v_corr*w_pert*theta_v_pert
 
         ! security
-        if (abs(w_pert_theta_pert_avg)<EPSILON_SECURITY) then
-          w_pert_theta_pert_avg = EPSILON_SECURITY
+        if (abs(w_pert_theta_v_pert_avg)<EPSILON_SECURITY) then
+          w_pert_theta_v_pert_avg = EPSILON_SECURITY
         endif
 
         ! computing the Monin-Obukhov length
-        diag%monin_obukhov_length(ji,jk) = -theta_lowest_layer*diag%roughness_velocity(ji,jk)**3 &
-        /(KARMAN*gravity*w_pert_theta_pert_avg)
+        diag%monin_obukhov_length(ji,jk) = -theta_v_lowest_layer*diag%roughness_velocity(ji,jk)**3 &
+        /(KARMAN*gravity*w_pert_theta_v_pert_avg)
       
       enddo
     enddo 

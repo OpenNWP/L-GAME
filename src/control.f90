@@ -159,8 +159,8 @@ program control
   grid%trsk_weights_u = 0._wp
   allocate(grid%trsk_weights_v(nlins+1,4))
   grid%trsk_weights_v = 0._wp
-  allocate(grid%theta_bg(nlins,ncols,nlays))
-  grid%theta_bg = 0._wp
+  allocate(grid%theta_v_bg(nlins,ncols,nlays))
+  grid%theta_v_bg = 0._wp
   allocate(grid%exner_bg(nlins,ncols,nlays))
   grid%exner_bg = 0._wp
   allocate(grid%exner_bg_grad_u(nlins,ncols+1,nlays))
@@ -188,10 +188,10 @@ program control
   ! state at the old time step
   allocate(state_old%rho(nlins,ncols,nlays,no_of_constituents))
   state_old%rho = 0._wp
-  allocate(state_old%rhotheta(nlins,ncols,nlays))
-  state_old%rhotheta = 0._wp
-  allocate(state_old%theta_pert(nlins,ncols,nlays))
-  state_old%theta_pert = 0._wp
+  allocate(state_old%rhotheta_v(nlins,ncols,nlays))
+  state_old%rhotheta_v = 0._wp
+  allocate(state_old%theta_v_pert(nlins,ncols,nlays))
+  state_old%theta_v_pert = 0._wp
   allocate(state_old%exner_pert(nlins,ncols,nlays))
   state_old%exner_pert = 0._wp
   allocate(state_old%wind_u(nlins,ncols+1,nlays))
@@ -205,10 +205,10 @@ program control
   ! state at the new time step
   allocate(state_new%rho(nlins,ncols,nlays,no_of_constituents))
   state_new%rho = 0._wp
-  allocate(state_new%rhotheta(nlins,ncols,nlays))
-  state_new%rhotheta = 0._wp
-  allocate(state_new%theta_pert(nlins,ncols,nlays))
-  state_new%theta_pert = 0._wp
+  allocate(state_new%rhotheta_v(nlins,ncols,nlays))
+  state_new%rhotheta_v = 0._wp
+  allocate(state_new%theta_v_pert(nlins,ncols,nlays))
+  state_new%theta_v_pert = 0._wp
   allocate(state_new%exner_pert(nlins,ncols,nlays))
   state_new%exner_pert = 0._wp
   allocate(state_new%wind_u(nlins,ncols+1,nlays))
@@ -222,8 +222,8 @@ program control
   ! state containing the tendency
   allocate(tend%rho(nlins,ncols,nlays,no_of_constituents))
   tend%rho = 0._wp
-  allocate(tend%rhotheta(nlins,ncols,nlays))
-  tend%rhotheta = 0._wp
+  allocate(tend%rhotheta_v(nlins,ncols,nlays))
+  tend%rhotheta_v = 0._wp
   allocate(tend%wind_u(nlins,ncols+1,nlays))
   tend%wind_u = 0._wp
   allocate(tend%wind_v(nlins+1,ncols,nlays))
@@ -233,8 +233,8 @@ program control
   ! state containing the tendency of the boundary conditions
   allocate(bc%rho(nlins,ncols,nlays,no_of_constituents,2))
   bc%rho = 0._wp
-  allocate(bc%rhotheta(nlins,ncols,nlays,2))
-  bc%rhotheta = 0._wp
+  allocate(bc%rhotheta_v(nlins,ncols,nlays,2))
+  bc%rhotheta_v = 0._wp
   allocate(bc%wind_u(nlins,ncols+1,nlays,2))
   bc%wind_u = 0._wp
   allocate(bc%wind_v(nlins+1,ncols,nlays,2))
@@ -252,10 +252,10 @@ program control
   ! state to be written out
   allocate(state_write%rho(nlins,ncols,nlays,no_of_constituents))
   state_write%rho = 0._wp
-  allocate(state_write%rhotheta(nlins,ncols,nlays))
-  state_write%rhotheta = 0._wp
-  allocate(state_write%theta_pert(nlins,ncols,nlays))
-  state_write%theta_pert = 0._wp
+  allocate(state_write%rhotheta_v(nlins,ncols,nlays))
+  state_write%rhotheta_v = 0._wp
+  allocate(state_write%theta_v_pert(nlins,ncols,nlays))
+  state_write%theta_v_pert = 0._wp
   allocate(state_write%exner_pert(nlins,ncols,nlays))
   state_write%exner_pert = 0._wp
   allocate(state_write%wind_u(nlins,ncols+1,nlays))
@@ -517,7 +517,7 @@ program control
   deallocate(grid%fvec_z)
   deallocate(grid%trsk_weights_u)
   deallocate(grid%trsk_weights_v)
-  deallocate(grid%theta_bg)
+  deallocate(grid%theta_v_bg)
   deallocate(grid%exner_bg)
   deallocate(grid%exner_bg_grad_u)
   deallocate(grid%exner_bg_grad_v)
@@ -532,8 +532,8 @@ program control
   deallocate(grid%t_const_soil)
   ! state at the old time step
   deallocate(state_old%rho)
-  deallocate(state_old%rhotheta)
-  deallocate(state_old%theta_pert)
+  deallocate(state_old%rhotheta_v)
+  deallocate(state_old%theta_v_pert)
   deallocate(state_old%exner_pert)
   deallocate(state_old%wind_u)
   deallocate(state_old%wind_v)
@@ -541,8 +541,8 @@ program control
   deallocate(state_old%temperature_soil)
   ! state at the new time step
   deallocate(state_new%rho)
-  deallocate(state_new%rhotheta)
-  deallocate(state_new%theta_pert)
+  deallocate(state_new%rhotheta_v)
+  deallocate(state_new%theta_v_pert)
   deallocate(state_new%exner_pert)
   deallocate(state_new%wind_u)
   deallocate(state_new%wind_v)
@@ -550,13 +550,13 @@ program control
   deallocate(state_new%temperature_soil)
   ! state containing the tendency
   deallocate(tend%rho)
-  deallocate(tend%rhotheta)
+  deallocate(tend%rhotheta_v)
   deallocate(tend%wind_u)
   deallocate(tend%wind_v)
   deallocate(tend%wind_w)
   ! state containing the tendency of the boundary conditions
   deallocate(bc%rho)
-  deallocate(bc%rhotheta)
+  deallocate(bc%rhotheta_v)
   deallocate(bc%wind_u)
   deallocate(bc%wind_v)
   deallocate(bc%wind_w)
@@ -565,8 +565,8 @@ program control
   deallocate(bc%v_bc_factor)
   ! state to be written out
   deallocate(state_write%rho)
-  deallocate(state_write%rhotheta)
-  deallocate(state_write%theta_pert)
+  deallocate(state_write%rhotheta_v)
+  deallocate(state_write%theta_v_pert)
   deallocate(state_write%exner_pert)
   deallocate(state_write%wind_u)
   deallocate(state_write%wind_v)

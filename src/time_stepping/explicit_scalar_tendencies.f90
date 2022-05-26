@@ -117,23 +117,23 @@ module explicit_scalar_tendencies
       !$OMP END WORKSHARE
       !$OMP END PARALLEL
     
-      ! explicit potential temperature density integration
+      ! explicit virtual potential temperature density integration
       ! --------------------------------------------------
-      ! calculating the potential temperature density flux
+      ! calculating the virtual potential temperature density flux
       if (j_constituent==no_of_condensed_constituents+1) then
         !$OMP PARALLEL
         !$OMP WORKSHARE
-        diag%scalar_placeholder = grid%theta_bg + state%theta_pert
+        diag%scalar_placeholder = grid%theta_v_bg + state%theta_v_pert
         !$OMP END WORKSHARE
         !$OMP END PARALLEL
         call scalar_times_vector_h(diag%scalar_placeholder,diag%flux_density_u,diag%flux_density_v,&
         diag%flux_density_u,diag%flux_density_v)
-        ! calculating the divergence of the potential temperature flux density
+        ! calculating the divergence of the virtual potential temperature flux density
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
         
         !$OMP PARALLEL
         !$OMP WORKSHARE
-        tend%rhotheta = -diag%flux_density_div &
+        tend%rhotheta_v = -diag%flux_density_div &
         ! diabatic heating rates
         + (irrev%heating_diss + diag%radiation_tendency + sum(irrev%heat_source_rates,dim=4) &
         + irrev%temp_diff_heating) &

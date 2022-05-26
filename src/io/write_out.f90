@@ -161,7 +161,7 @@ module write_out
     ! 3D temperature
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    diag%scalar_placeholder = (grid%theta_bg + state%theta_pert) &
+    diag%scalar_placeholder = (grid%theta_v_bg + state%theta_v_pert) &
     *(grid%exner_bg + state%exner_pert)
     !$OMP END WORKSHARE
     !$OMP END PARALLEL

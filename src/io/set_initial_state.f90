@@ -189,15 +189,15 @@ module set_initial_state
             ! calculating the gravity
             gravity_local = geopot(grid%z_scalar(ji,jk,nlays))/delta_z
             
-            ! potential temperature in the lowest layer
-            state%theta_pert(ji,jk,nlays) = T_0 &
+            ! virtual potential temperature in the lowest layer
+            state%theta_v_pert(ji,jk,nlays) = T_0 &
             *(1._wp + n_squared*delta_z/(2._wp*gravity_local)) &
             /(1._wp - n_squared*delta_z/(2._wp*gravity_local))
             ! Exner pressure in the lowest layer
             state%exner_pert(ji,jk,nlays) = 1._wp &
-            - 2._wp*geopot(grid%z_scalar(ji,jk,nlays))/(c_p*(state%theta_pert(ji,jk,nlays) + T_0))
+            - 2._wp*geopot(grid%z_scalar(ji,jk,nlays))/(c_p*(state%theta_v_pert(ji,jk,nlays) + T_0))
             
-            ! stacking the potential temperature
+            ! stacking the virtual potential temperature
             do jl=nlays-1,1,-1
               ! calculating delta_z
               delta_z = grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1)
@@ -205,7 +205,7 @@ module set_initial_state
               gravity_local = (geopot(grid%z_scalar(ji,jk,jl))-geopot(grid%z_scalar(ji,jk,jl+1)))/delta_z
               
               ! result
-              state%theta_pert(ji,jk,jl) = state%theta_pert(ji,jk,jl+1) &
+              state%theta_v_pert(ji,jk,jl) = state%theta_v_pert(ji,jk,jl+1) &
               *(1._wp + n_squared*delta_z/(2._wp*gravity_local)) &
               /(1._wp - n_squared*delta_z/(2._wp*gravity_local))
             enddo
@@ -215,13 +215,13 @@ module set_initial_state
               ! result
               state%exner_pert(ji,jk,jl) = state%exner_pert(ji,jk,jl+1) &
               + 2._wp*(geopot(grid%z_scalar(ji,jk,jl+1)) - geopot(grid%z_scalar(ji,jk,jl))) &
-              /(c_p*(state%theta_pert(ji,jk,jl) + state%theta_pert(ji,jk,jl+1)))
+              /(c_p*(state%theta_v_pert(ji,jk,jl) + state%theta_v_pert(ji,jk,jl+1)))
             enddo
             
             ! filling up what's needed for the unessential_ideal_init routine
             ! temperature
             do jl=1,nlays
-              diag%scalar_placeholder(ji,jk,jl)=state%exner_pert(ji,jk,jl)*state%theta_pert(ji,jk,jl)
+              diag%scalar_placeholder(ji,jk,jl)=state%exner_pert(ji,jk,jl)*state%theta_v_pert(ji,jk,jl)
             enddo
             ! pressure in the lowest layer
             pres_lowest_layer(ji,jk)=p_0*state%exner_pert(ji,jk,nlays)**(c_p/r_d)
@@ -272,25 +272,25 @@ module set_initial_state
     
     filename = "../../real_weather/" // trim(restart_filename)
     
-    call read_from_nc(state%rho,state%rhotheta,state%wind_u,state%wind_v,state%wind_w,filename)
+    call read_from_nc(state%rho,state%rhotheta_v,state%wind_u,state%wind_v,state%wind_w,filename)
     
-    ! setting the potential temperature perturbation
+    ! setting the virtual potential temperature perturbation
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    state%theta_pert = state%rhotheta/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_bg
-    state%exner_pert = (r_d*state%rhotheta/p_0)**(r_d/c_v) - grid%exner_bg
+    state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_v_bg
+    state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_v) - grid%exner_bg
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
   
   end subroutine restart
   
-  subroutine read_from_nc(rho,rhotheta,wind_u,wind_v,wind_w,filename)
+  subroutine read_from_nc(rho,rhotheta_v,wind_u,wind_v,wind_w,filename)
   
     ! This subroutine reads a model state from a NetCDF file.
     
     ! input arguments and output
     real(wp),          intent(out) :: rho(:,:,:,:)    ! mass densities
-    real(wp),          intent(out) :: rhotheta(:,:,:) ! potential temperature density
+    real(wp),          intent(out) :: rhotheta_v(:,:,:) ! virtual potential temperature density
     real(wp),          intent(out) :: wind_u(:,:,:)   ! u-wind
     real(wp),          intent(out) :: wind_v(:,:,:)   ! v-wind
     real(wp),          intent(out) :: wind_w(:,:,:)   ! w-wind
@@ -299,7 +299,7 @@ module set_initial_state
     ! local variables
     integer :: ncid           ! ID of the NetCDF file
     integer :: varid_rho      ! variable ID of the densities
-    integer :: varid_rhotheta ! variable ID of the potential temperature density
+    integer :: varid_rhotheta_v ! variable ID of the virtual potential temperature density
     integer :: varid_u        ! variable ID of the u-wind
     integer :: varid_v        ! variable ID of the v-wind
     integer :: varid_w        ! variable ID of the w-wind
@@ -309,14 +309,14 @@ module set_initial_state
     
     ! reading the variable IDs
     call nc_check(nf90_inq_varid(ncid,"rho",varid_rho))
-    call nc_check(nf90_inq_varid(ncid,"rhotheta",varid_rhotheta))
+    call nc_check(nf90_inq_varid(ncid,"rhotheta_v",varid_rhotheta_v))
     call nc_check(nf90_inq_varid(ncid,"u",varid_u))
     call nc_check(nf90_inq_varid(ncid,"v",varid_v))
     call nc_check(nf90_inq_varid(ncid,"w",varid_w))
     
     ! reading the NetCDF fields
     call nc_check(nf90_get_var(ncid,varid_rho,rho))
-    call nc_check(nf90_get_var(ncid,varid_rhotheta,rhotheta))
+    call nc_check(nf90_get_var(ncid,varid_rhotheta_v,rhotheta_v))
     call nc_check(nf90_get_var(ncid,varid_u,wind_u))
     call nc_check(nf90_get_var(ncid,varid_v,wind_v))
     call nc_check(nf90_get_var(ncid,varid_w,wind_w))
@@ -366,8 +366,8 @@ module set_initial_state
             c = state%exner_pert(ji,jk,jl+1)**2*diag%scalar_placeholder(ji,jk,jl)/diag%scalar_placeholder(ji,jk,jl+1)
             state%exner_pert(ji,jk,jl) = b+sqrt(b**2+c)
           endif
-          ! this is the full potential temperature here
-          state%theta_pert(ji,jk,jl) = diag%scalar_placeholder(ji,jk,jl)/state%exner_pert(ji,jk,jl)
+          ! this is the full virtual potential temperature here
+          state%theta_v_pert(ji,jk,jl) = diag%scalar_placeholder(ji,jk,jl)/state%exner_pert(ji,jk,jl)
         enddo
       enddo
     enddo
@@ -379,10 +379,10 @@ module set_initial_state
     ! density
     state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert)**(c_p/r_d) &
     /(r_d*diag%scalar_placeholder)
-    ! potential temperature density
-    state%rhotheta = state%rho(:,:,:,no_of_condensed_constituents+1)*state%theta_pert
+    ! virtual potential temperature density
+    state%rhotheta_v = state%rho(:,:,:,no_of_condensed_constituents+1)*state%theta_v_pert
     ! substracting the background state
-    state%theta_pert = state%theta_pert - grid%theta_bg
+    state%theta_v_pert = state%theta_v_pert - grid%theta_v_bg
     state%exner_pert = state%exner_pert - grid%exner_bg
     !$OMP END WORKSHARE
     !$OMP END PARALLEL

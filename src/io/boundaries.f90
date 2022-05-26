@@ -66,8 +66,8 @@ module boundaries
         do jl=1,nlays
           state%rho(ji,jk,jl,:) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rho(ji,jk,jl,:,bc%index_old) &
           + new_weight*bc%rho(ji,jk,jl,:,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rho(ji,jk,jl,:)
-          state%rhotheta(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rhotheta(ji,jk,jl,bc%index_old) &
-          + new_weight*bc%rhotheta(ji,jk,jl,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rhotheta(ji,jk,jl)
+          state%rhotheta_v(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rhotheta_v(ji,jk,jl,bc%index_old) &
+          + new_weight*bc%rhotheta_v(ji,jk,jl,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rhotheta_v(ji,jk,jl)
           state%wind_w(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%wind_w(ji,jk,jl,bc%index_old) &
           + new_weight*bc%wind_w(ji,jk,jl,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%wind_w(ji,jk,jl)
         enddo
@@ -104,11 +104,11 @@ module boundaries
     !$OMP END DO
     !$OMP END PARALLEL
     
-    ! setting the potential temperature perturbation
+    ! setting the virtual potential temperature perturbation
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    state%theta_pert = state%rhotheta/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_bg
-    state%exner_pert = (r_d*state%rhotheta/p_0)**(r_d/c_v) - grid%exner_bg
+    state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_v_bg
+    state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_v) - grid%exner_bg
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     
@@ -133,7 +133,7 @@ module boundaries
     write(*,*) "Reading boundary conditions from file", trim(filename), "..."
       
     ! reading the boundary conditions from a the NetCDF file
-    call read_from_nc(bc%rho(:,:,:,:,timestep_index),bc%rhotheta(:,:,:,timestep_index), &
+    call read_from_nc(bc%rho(:,:,:,:,timestep_index),bc%rhotheta_v(:,:,:,timestep_index), &
     bc%wind_u(:,:,:,timestep_index),bc%wind_v(:,:,:,timestep_index),bc%wind_w(:,:,:,timestep_index),filename)
     
     write(*,*) "Boundary conditions read."

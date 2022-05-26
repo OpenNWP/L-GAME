@@ -47,23 +47,23 @@ module pressure_gradient
     ! the nonlinear pressure gradient term
     ! calculating the gradient of the perturbed Exner pressure
     call grad(state%exner_pert,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
-    ! calculating the full potential temperature
+    ! calculating the full virtual potential temperature
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    diag%scalar_placeholder = c_p*(grid%theta_bg + state%theta_pert)
+    diag%scalar_placeholder = c_p*(grid%theta_v_bg + state%theta_v_pert)
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
-    ! multiplying the perturbed Exner pressure gradient by the full potential temperature
+    ! multiplying the perturbed Exner pressure gradient by the full virtual potential temperature
     call scalar_times_vector(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
     diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w)
     
     ! the linear pressure gradient term
     !$OMP PARALLEL
     !$OMP WORKSHARE
-    diag%scalar_placeholder = c_p*state%theta_pert
+    diag%scalar_placeholder = c_p*state%theta_v_pert
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
-    ! multiplying the background Exner pressure gradient by the perturbed potential temperature
+    ! multiplying the background Exner pressure gradient by the perturbed virtual potential temperature
     call scalar_times_vector(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
     grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v,diag%p_grad_acc_neg_l_w)
     

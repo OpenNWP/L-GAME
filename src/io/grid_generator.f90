@@ -976,7 +976,7 @@ module grid_generator
             c = grid%exner_bg(ji,jk,jl+1)**2*bg_temp(grid%z_scalar(ji,jk,jl))/bg_temp(grid%z_scalar(ji,jk,jl+1))
             grid%exner_bg(ji,jk,jl) = b+sqrt(b**2+c)
           endif
-          grid%theta_bg(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))/grid%exner_bg(ji,jk,jl)
+          grid%theta_v_bg(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))/grid%exner_bg(ji,jk,jl)
         enddo
       enddo
     enddo

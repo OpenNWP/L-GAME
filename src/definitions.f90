@@ -73,7 +73,7 @@ module definitions
     real(wp), allocatable :: exner_bg_grad_u(:,:,:)           ! gradient of background exner pressure in x-direction
     real(wp), allocatable :: exner_bg_grad_v(:,:,:)           ! gradient of background exner pressure in y-direction
     real(wp), allocatable :: exner_bg_grad_w(:,:,:)           ! gradient of background exner pressure in z-direction
-    real(wp), allocatable :: theta_bg(:,:,:)                  ! background potential temperature
+    real(wp), allocatable :: theta_v_bg(:,:,:)                ! background virtual potential temperature
     real(wp), allocatable :: exner_bg(:,:,:)                  ! background Exner pressure
     real(wp), allocatable :: sfc_albedo(:,:)                  ! albedo of the surface
     real(wp), allocatable :: sfc_rho_c(:,:)                   ! volumetric heat capacity of the surface
@@ -94,8 +94,8 @@ module definitions
   
     ! type containing the state variables
     real(wp), allocatable :: rho(:,:,:,:)                     ! mass densities
-    real(wp), allocatable :: rhotheta(:,:,:)                  ! potential temperature density
-    real(wp), allocatable :: theta_pert(:,:,:)                ! potential temperature perturbation
+    real(wp), allocatable :: rhotheta_v(:,:,:)                ! virtual potential temperature density
+    real(wp), allocatable :: theta_v_pert(:,:,:)              ! virtual potential temperature perturbation
     real(wp), allocatable :: exner_pert(:,:,:)                ! Exner pressure perturbation
     real(wp), allocatable :: wind_u(:,:,:)                    ! x-component of the wind
     real(wp), allocatable :: wind_v(:,:,:)                    ! y-component of the wind
@@ -108,7 +108,7 @@ module definitions
   
     ! type containing tendencies
     real(wp), allocatable :: rho(:,:,:,:)                     ! mass densities
-    real(wp), allocatable :: rhotheta(:,:,:)                  ! potential temperature densities
+    real(wp), allocatable :: rhotheta_v(:,:,:)                ! virtual potential temperature densities
     real(wp), allocatable :: wind_u(:,:,:)                    ! x-component of the wind
     real(wp), allocatable :: wind_v(:,:,:)                    ! y-component of the wind
     real(wp), allocatable :: wind_w(:,:,:)                    ! vertical wind
@@ -119,7 +119,7 @@ module definitions
   
     ! type containing information on boundary conditions
     real(wp), allocatable :: rho(:,:,:,:,:)                   ! mass densities
-    real(wp), allocatable :: rhotheta(:,:,:,:)                ! potential temperature densities
+    real(wp), allocatable :: rhotheta_v(:,:,:,:)              ! virtual potential temperature densities
     real(wp), allocatable :: wind_u(:,:,:,:)                  ! x-component of the wind
     real(wp), allocatable :: wind_v(:,:,:,:)                  ! y-component of the wind
     real(wp), allocatable :: wind_w(:,:,:,:)                  ! vertical wind
