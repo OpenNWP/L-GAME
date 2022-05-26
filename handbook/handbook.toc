@@ -24,8 +24,6 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {4.3}Physics configuration}{5}{section.4.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.3.1}Local thermodynamic equilibrium option}{5}{subsection.4.3.1}%
-\defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {4.4}Coupling to the radiation field}{5}{section.4.4}%
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {4.5}Configuring Output}{5}{section.4.5}%
