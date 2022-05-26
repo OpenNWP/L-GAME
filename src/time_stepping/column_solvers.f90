@@ -361,7 +361,7 @@ module column_solvers
     real(wp) :: vertical_flux_vector_rhs(nlays-1)   ! vertical flux at the old timestep
     real(wp) :: solution_vector(nlays)              ! solution of the system of linear equations
     real(wp) :: density_old_at_interface,added_mass ! abbreviations
-    integer  :: quantity_id,j_constituent,ji,jk,jl  ! loop indices
+    integer  :: j_constituent,ji,jk,jl              ! loop indices
     
     ! setting the time stepping weights
     impl_weight = 0.5_wp
