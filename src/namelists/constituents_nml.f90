@@ -21,7 +21,7 @@ module constituents_nml
 
   subroutine constituents_nml_setup()
     
-    no_of_condensed_constituents = 4
+    no_of_condensed_constituents = 5
     no_of_gaseous_constituents = 2
     ! the dry case
     if (.not. lmoist) then
