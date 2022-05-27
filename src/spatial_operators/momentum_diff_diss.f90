@@ -11,7 +11,7 @@ module momentum_diff_diss
   use run_nml,                  only: nlins,ncols,nlays,wp
   use diff_nml,                 only: h_prandtl
   use inner_product,            only: inner
-  use derived_quantities,       only: density_gas
+  use derived_quantities,       only: density_gas,density_total
   use effective_diff_coeffs,    only: hor_div_viscosity,vert_vert_mom_viscosity,hor_curl_viscosity
   use multiplications,          only: scalar_times_scalar
   use bc_nml,                   only: lperiodic
@@ -127,13 +127,13 @@ module momentum_diff_diss
       do jl=1,nlays
         do jk=2,ncols
           irrev%mom_diff_tend_x(ji,jk,jl) = (irrev%mom_diff_tend_x(ji,jk,jl) + diag%u_placeholder(ji,jk,jl)) &
-          /(0.5_wp*(density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl)))
+          /(0.5_wp*(density_total(state,ji,jk-1,jl) + density_total(state,ji,jk,jl)))
         enddo
         
         ! periodic boundary conditions
         if (lperiodic) then
           irrev%mom_diff_tend_x(ji,1,jl) = (irrev%mom_diff_tend_x(ji,1,jl) + diag%u_placeholder(ji,1,jl)) &
-          /(0.5_wp*(density_gas(state,ji,ncols,jl) + density_gas(state,ji,1,jl)))
+          /(0.5_wp*(density_total(state,ji,ncols,jl) + density_total(state,ji,1,jl)))
         endif
         irrev%mom_diff_tend_x(ji,ncols+1,jl) = irrev%mom_diff_tend_x(ji,1,jl)
         
@@ -148,13 +148,13 @@ module momentum_diff_diss
       do jl=1,nlays
         do ji=2,nlins
           irrev%mom_diff_tend_y(ji,jk,jl) = (irrev%mom_diff_tend_y(ji,jk,jl) + diag%v_placeholder(ji,jk,jl)) &
-          /(0.5_wp*(density_gas(state,ji-1,jk,jl) + density_gas(state,ji,jk,jl)))
+          /(0.5_wp*(density_total(state,ji-1,jk,jl) + density_total(state,ji,jk,jl)))
         enddo
         
         ! periodic boundary conditions
         if (lperiodic) then
           irrev%mom_diff_tend_y(1,jk,jl) = (irrev%mom_diff_tend_y(1,jk,jl) + diag%v_placeholder(1,jk,jl)) &
-          /(0.5_wp*(density_gas(state,nlins,jk,jl) + density_gas(state,1,jk,jl)))
+          /(0.5_wp*(density_total(state,nlins,jk,jl) + density_total(state,1,jk,jl)))
         endif
         irrev%mom_diff_tend_y(nlins+1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl)
         
@@ -246,7 +246,7 @@ module momentum_diff_diss
           + (irrev%vert_hor_viscosity_u(ji,jk,jl)*diag%du_dz(ji,jk,jl) &
           - irrev%vert_hor_viscosity_u(ji,jk,jl+1)*diag%du_dz(ji,jk,jl+1)) &
           /(0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl) - grid%z_w(ji,jk-1,jl+1) - grid%z_w(ji,jk,jl+1))) &
-          /(0.5_wp*(density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl)))
+          /(0.5_wp*(density_total(state,ji,jk-1,jl) + density_total(state,ji,jk,jl)))
         enddo
       
         ! periodic boundary conditions
@@ -255,7 +255,7 @@ module momentum_diff_diss
           + (irrev%vert_hor_viscosity_u(ji,1,jl)*diag%du_dz(ji,1,jl) &
           - irrev%vert_hor_viscosity_u(ji,1,jl+1)*diag%du_dz(ji,1,jl+1)) &
           /(0.5_wp*(grid%z_w(ji,ncols,jl) + grid%z_w(ji,1,jl) - grid%z_w(ji,ncols,jl+1) - grid%z_w(ji,1,jl+1))) &
-          /(0.5_wp*(density_gas(state,ji,ncols,jl) + density_gas(state,ji,1,jl)))
+          /(0.5_wp*(density_total(state,ji,ncols,jl) + density_total(state,ji,1,jl)))
           irrev%mom_diff_tend_x(ji,ncols+1,jl) = irrev%mom_diff_tend_x(ji,1,jl)
         endif
       
@@ -273,7 +273,7 @@ module momentum_diff_diss
           + (irrev%vert_hor_viscosity_v(ji,jk,jl)*diag%dv_dz(ji,jk,jl) &
           - irrev%vert_hor_viscosity_v(ji,jk,jl+1)*diag%dv_dz(ji,jk,jl+1)) &
           /(0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl) - grid%z_w(ji-1,jk,jl+1) - grid%z_w(ji,jk,jl+1))) &
-          /(0.5_wp*(density_gas(state,ji-1,jk,jl) + density_gas(state,ji,jk,jl)))
+          /(0.5_wp*(density_total(state,ji-1,jk,jl) + density_total(state,ji,jk,jl)))
         enddo
       
         ! periodic boundary conditions
@@ -282,7 +282,7 @@ module momentum_diff_diss
           + (irrev%vert_hor_viscosity_v(1,jk,jl)*diag%dv_dz(1,jk,jl) &
           - irrev%vert_hor_viscosity_v(1,jk,jl+1)*diag%dv_dz(1,jk,jl+1)) &
           /(0.5_wp*(grid%z_w(nlins,jk,jl) + grid%z_w(1,jk,jl) - grid%z_w(nlins,jk,jl+1) - grid%z_w(1,jk,jl+1))) &
-          /(0.5_wp*(density_gas(state,nlins,jk,jl) + density_gas(state,1,jk,jl)))
+          /(0.5_wp*(density_total(state,nlins,jk,jl) + density_total(state,1,jk,jl)))
           irrev%mom_diff_tend_y(nlins+1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl)
         endif
       
@@ -345,7 +345,7 @@ module momentum_diff_diss
           0.5_wp*(diag%scalar_placeholder(ji,jk,jl-1) + diag%scalar_placeholder(ji,jk,jl))
           ! dividing by the density
           irrev%mom_diff_tend_z(ji,jk,jl) = irrev%mom_diff_tend_z(ji,jk,jl)/ &
-          (0.5_wp*(density_gas(state,ji,jk,jl-1) + density_gas(state,ji,jk,jl)))
+          (0.5_wp*(density_total(state,ji,jk,jl-1) + density_total(state,ji,jk,jl)))
         enddo
       enddo
     enddo
