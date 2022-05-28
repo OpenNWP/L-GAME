@@ -12,7 +12,7 @@ module explicit_scalar_tendencies
   use phase_trans,           only: calc_h2otracers_source_rates
   use constituents_nml,      only: no_of_condensed_constituents,no_of_constituents
   use dictionary,            only: spec_heat_capacities_p_gas
-  use diff_nml,              only: ltemp_diff_h,ltemp_diff_v,ltracer_diff_h,ltracer_diff_v
+  use diff_nml,              only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
   use effective_diff_coeffs, only: temp_diffusion_coeffs,mass_diffusion_coeffs
   use gradient_operators,    only: grad
 
@@ -90,13 +90,15 @@ module explicit_scalar_tendencies
         state%wind_u,state%wind_v,diag%flux_density_div,grid)
       endif
 
-      ! mass diffusion, only for gaseous tracers
+      ! mass diffusion
       diff_switch = 0
-      if (j_constituent>no_of_condensed_constituents+1 .and. ltracer_diff_h) then
+      if (lmass_diff_h) then
         diff_switch = 1
         ! firstly, we need to calculate the mass diffusion coeffcients
-        call mass_diffusion_coeffs(state,diag,irrev,grid)
-        ! The diffusion of the tracer density depends on its gradient.
+        if (j_constituent==1) then
+          call mass_diffusion_coeffs(state,diag,irrev,grid)
+        endif
+        ! The diffusion of the mass density depends on its gradient.
         call grad(state%rho(:,:,:,j_constituent),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
         ! Now the diffusive mass flux density can be obtained.
         call scalar_times_vector_h(irrev%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
@@ -104,7 +106,7 @@ module explicit_scalar_tendencies
         ! The divergence of the diffusive mass flux density is the diffusive mass source rate.
         call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
         ! vertical mass diffusion
-        if (ltracer_diff_v) then
+        if (lmass_diff_v) then
           call scalar_times_vector_v(irrev%scalar_diff_coeff_v,diag%w_placeholder,diag%w_placeholder)
           call add_vertical_div(diag%w_placeholder,diag%scalar_placeholder,grid)
         endif

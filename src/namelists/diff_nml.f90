@@ -18,12 +18,12 @@ module diff_nml
   real(wp) :: diff_h_smag_rot ! horizontal diffusion Smagorinsky factor acting on vortical movements
   logical  :: ltemp_diff_h    ! horizontal temperature diffusion switch
   logical  :: ltemp_diff_v    ! vertical temperature diffusion switch
-  logical  :: ltracer_diff_h  ! horizontal tracer diffusion switch
-  logical  :: ltracer_diff_v  ! vertical tracer diffusion switch
+  logical  :: lmass_diff_h    ! horizontal mass diffusion switch
+  logical  :: lmass_diff_v    ! vertical mass diffusion switch
   real(wp) :: h_prandtl       ! height of the Prandtl layer
   
   namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v,diff_h_smag_div,diff_h_smag_rot, &
-  ltemp_diff_h,ltemp_diff_v,ltracer_diff_h,ltracer_diff_v
+  ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
   
   contains
   
@@ -42,8 +42,8 @@ module diff_nml
     diff_h_smag_rot = 0.01_wp
     ltemp_diff_h = .true.
     ltemp_diff_v = .true.
-    ltracer_diff_h = .true.
-    ltracer_diff_v = .true.
+    lmass_diff_h = .true.
+    lmass_diff_v = .true.
     h_prandtl = 100._wp
     
     ! Open and read Namelist file.
