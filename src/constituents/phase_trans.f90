@@ -131,13 +131,13 @@ module phase_trans
               irrev%mass_source_rates(ji,jk,jl,5) = phase_trans_density/dtime_sat
 
               ! the heat source rates acting on the ice
-              irrev%heat_source_rates(ji,jk,jl,3) = irrev%mass_source_rates(ji,jk,jl,3) &
+              irrev%heat_source_rates(ji,jk,jl) = irrev%mass_source_rates(ji,jk,jl,3) &
               *phase_trans_heat(2,solid_temperature)
 
               ! the heat source rates acting on the liquid water
-              irrev%heat_source_rates(ji,jk,jl,4) = &
+              irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
               ! the evaporation
-              -phase_trans_density*phase_trans_heat(0,T_0)/dtime_sat
+              - phase_trans_density*phase_trans_heat(0,T_0)/dtime_sat
             ! temperature<0 °C
             else
               ! Everything that can sublimate will sublimate.
@@ -156,14 +156,11 @@ module phase_trans
               irrev%mass_source_rates(ji,jk,jl,5) = phase_trans_density/dtime_sat
 
               ! the heat source rates acting on the ice
-              irrev%heat_source_rates(ji,jk,jl,3) = ( &
+              irrev%heat_source_rates(ji,jk,jl) = ( &
               ! the freezing
               state%rho(ji,jk,jl,4)*phase_trans_heat(2,solid_temperature) &
               ! the sublimation
               - phase_trans_density*phase_trans_heat(1,solid_temperature))/dtime_sat
-
-              ! the heat source rates acting on the liquid water
-              irrev%heat_source_rates(ji,jk,jl,4) = 0._wp
             endif
           ! the case where the air is over-saturated
           else
@@ -181,12 +178,12 @@ module phase_trans
               irrev%mass_source_rates(ji,jk,jl,4) = (-diff_density + state%rho(ji,jk,jl,3))/dtime_sat
 
               ! the heat source rates acting on the ice
-              irrev%heat_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)*phase_trans_heat(2,solid_temperature)/dtime_sat
+              irrev%heat_source_rates(ji,jk,jl) = -state%rho(ji,jk,jl,3)*phase_trans_heat(2,solid_temperature)/dtime_sat
 
               ! the heat source rates acting on the liquid water
-              irrev%heat_source_rates(ji,jk,jl,4) = &
+              irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
               ! it is only affected by the condensation
-              -diff_density*phase_trans_heat(0,liquid_temperature)/dtime_sat
+              - diff_density*phase_trans_heat(0,liquid_temperature)/dtime_sat
               ! temperature<0 °C
             else
               ! The source rate for the ice consists of two terms:
@@ -199,14 +196,12 @@ module phase_trans
               irrev%mass_source_rates(ji,jk,jl,4) = -state%rho(ji,jk,jl,4)/dtime_sat
 
               ! the heat source rates acting on the ice
-              irrev%heat_source_rates(ji,jk,jl,3) = &
+              irrev%heat_source_rates(ji,jk,jl) = &
               ! the component through the resublimation
               (-diff_density*phase_trans_heat(1,solid_temperature) &
               ! the component through freezing
               + state%rho(ji,jk,jl,4)*phase_trans_heat(2,solid_temperature))/dtime_sat
-
-              ! the heat source rates acting on the liquid water
-              irrev%heat_source_rates(ji,jk,jl,4) = 0._wp
+              
             endif
           endif
 
@@ -238,14 +233,16 @@ module phase_trans
             irrev%mass_source_rates(ji,jk,jl,1) = -state%rho(ji,jk,jl,1)/dtime_sat
             irrev%mass_source_rates(ji,jk,jl,2) = irrev%mass_source_rates(ji,jk,jl,2) &
             - irrev%mass_source_rates(ji,jk,jl,1)
-            irrev%heat_source_rates(ji,jk,jl,1) = irrev%mass_source_rates(ji,jk,jl,1)*phase_trans_heat(2,T_0)
+            irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
+            + irrev%mass_source_rates(ji,jk,jl,1)*phase_trans_heat(2,T_0)
           endif
           ! turning of rain to snow
           if (diag%temperature_gas(ji,jk,jl)<T_0 .and. state%rho(ji,jk,jl,2)>0._wp) then
             irrev%mass_source_rates(ji,jk,jl,2) = -state%rho(ji,jk,jl,2)/dtime_sat
             irrev%mass_source_rates(ji,jk,jl,1) = irrev%mass_source_rates(ji,jk,jl,1) &
             - irrev%mass_source_rates(ji,jk,jl,2)
-            irrev%heat_source_rates(ji,jk,jl,1) = -irrev%mass_source_rates(ji,jk,jl,2)*phase_trans_heat(2,T_0)
+            irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
+            - irrev%mass_source_rates(ji,jk,jl,2)*phase_trans_heat(2,T_0)
           endif
           
         enddo

@@ -388,7 +388,7 @@ program control
   irrev%heating_diss = 0._wp
   allocate(irrev%mass_source_rates(nlins,ncols,nlays,no_of_condensed_constituents+1))
   irrev%mass_source_rates = 0._wp
-  allocate(irrev%heat_source_rates(nlins,ncols,nlays,no_of_condensed_constituents))
+  allocate(irrev%heat_source_rates(nlins,ncols,nlays))
   irrev%heat_source_rates = 0._wp
   allocate(irrev%temp_diff_heating(nlins,ncols,nlays))
   irrev%temp_diff_heating = 0._wp

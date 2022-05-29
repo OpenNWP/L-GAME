@@ -137,7 +137,7 @@ module explicit_scalar_tendencies
         !$OMP WORKSHARE
         tend%rhotheta_v = -diag%flux_density_div &
         ! diabatic heating rates
-        + (irrev%heating_diss + diag%radiation_tendency + sum(irrev%heat_source_rates,dim=4) &
+        + (irrev%heating_diss + diag%radiation_tendency + irrev%heat_source_rates &
         + irrev%temp_diff_heating) &
         /(c_p*(grid%exner_bg+state%exner_pert))
         !$OMP END WORKSHARE
