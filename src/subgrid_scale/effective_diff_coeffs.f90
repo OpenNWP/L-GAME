@@ -66,13 +66,6 @@ module effective_diff_coeffs
     !$OMP END WORKSHARE
     !$OMP END PARALLEL
     
-    ! restricting the values to a maximum to ensure stability
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
-    irrev%viscosity_coeff_div = min(irrev%viscosity_coeff_div,irrev%max_diff_h_coeff_turb)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
-    
     ! multiplying by the density
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
@@ -161,13 +154,6 @@ module effective_diff_coeffs
     !$OMP END DO
     !$OMP END PARALLEL
     
-    ! restriction for stability
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
-    irrev%viscosity_coeff_curl_dual = min(irrev%viscosity_coeff_curl_dual,irrev%max_diff_h_coeff_turb)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
-    
     ! multiplication by the density
     !$OMP PARALLEL
     !$OMP DO PRIVATE(ji,jk,jl)
@@ -237,14 +223,13 @@ module effective_diff_coeffs
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    real(wp) :: max_diff_v_coeff_turb ! the maximum vertical diffusion coefficient
     integer :: ji,jk,jl               ! loop indices
 	
 	!  updating the TKE
     call tke_update(state,diag,irrev,grid)
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,max_diff_v_coeff_turb)
+    !$OMP DO PRIVATE(ji,jk,jl)
     do ji=1,nlins
       do jl=2,nlays
         do jk=2,ncols
@@ -259,10 +244,6 @@ module effective_diff_coeffs
           tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk,jl-1)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk-1,jl)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk,jl)))
-          
-          max_diff_v_coeff_turb = 0.125_wp*(grid%z_u(ji,jk,jl-1)-grid%z_u(ji,jk,jl))**2/dtime
-          irrev%vert_hor_viscosity_u(ji,jk,jl) = min(irrev%vert_hor_viscosity_u(ji,jk,jl), &
-          max_diff_v_coeff_turb)
           
         enddo
         
@@ -280,10 +261,6 @@ module effective_diff_coeffs
           tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,ncols,jl)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,1,jl)))
           
-          max_diff_v_coeff_turb = 0.125_wp*(grid%z_u(ji,1,jl-1)-grid%z_u(ji,1,jl))**2/dtime
-          irrev%vert_hor_viscosity_u(ji,1,jl) = min(irrev%vert_hor_viscosity_u(ji,1,jl), &
-          max_diff_v_coeff_turb)
-          
           irrev%vert_hor_viscosity_u(ji,ncols+1,jl) = irrev%vert_hor_viscosity_u(ji,1,jl)
           
         endif
@@ -294,7 +271,7 @@ module effective_diff_coeffs
     !$OMP END PARALLEL
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,max_diff_v_coeff_turb)
+    !$OMP DO PRIVATE(ji,jk,jl)
     do jk=1,ncols
       do jl=2,nlays
         do ji=2,nlins
@@ -309,10 +286,6 @@ module effective_diff_coeffs
           tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk,jl-1)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(ji-1,jk,jl)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,jk,jl)))
-          
-          max_diff_v_coeff_turb = 0.125_wp*(grid%z_v(ji,jk,jl-1)-grid%z_v(ji,jk,jl))**2/dtime
-          irrev%vert_hor_viscosity_v(ji,jk,jl) = min(irrev%vert_hor_viscosity_v(ji,jk,jl), &
-          max_diff_v_coeff_turb)
           
         enddo
         
@@ -329,10 +302,6 @@ module effective_diff_coeffs
           tke2vertical_diff_coeff(irrev%viscosity_molecular(1,jk,jl-1)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(nlins,jk,jl)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(1,jk,jl)))
-          
-          max_diff_v_coeff_turb = 0.125_wp*(grid%z_v(1,jk,jl-1)-grid%z_v(1,jk,jl))**2/dtime
-          irrev%vert_hor_viscosity_v(1,jk,jl) = min(irrev%vert_hor_viscosity_v(1,jk,jl), &
-          max_diff_v_coeff_turb)
           
           irrev%vert_hor_viscosity_v(nlins+1,jk,jl) = irrev%vert_hor_viscosity_v(1,jk,jl)
           
@@ -418,7 +387,7 @@ module effective_diff_coeffs
   
   end subroutine vert_hor_mom_viscosity
   
-  subroutine vert_vert_mom_viscosity(state,diag,irrev,grid)
+  subroutine vert_vert_mom_viscosity(state,diag,irrev)
   
     ! This subroutine multiplies scalar_placeholder (containing dw/dz) by the diffusion coefficient acting on w because of w.
    
@@ -426,30 +395,22 @@ module effective_diff_coeffs
     type(t_state), intent(in)    :: state ! state
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_irrev), intent(inout) :: irrev ! irreversible quantities
-    type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
     real(wp) :: mom_diff_coeff        ! the diffusion coefficient
-    real(wp) :: max_diff_v_coeff_turb ! the maximum vertical diffusion coefficient
     integer  :: ji,jk,jl              ! loop indices
     
     !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,max_diff_v_coeff_turb,mom_diff_coeff)
+    !$OMP DO PRIVATE(ji,jk,jl,mom_diff_coeff)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-    
-          max_diff_v_coeff_turb = 0.125_wp*(grid%z_w(ji,jk,jl)-grid%z_w(ji,jk,jl+1))**2/dtime
     
           mom_diff_coeff &
           ! molecular viscosity
           = irrev%viscosity_molecular(ji,jk,jl) &
           ! turbulent component
           + tke2vertical_diff_coeff(irrev%tke(ji,jk,jl))
-          ! stability criterion
-          if (mom_diff_coeff>max_diff_v_coeff_turb) then
-            mom_diff_coeff = max_diff_v_coeff_turb
-          endif
 
           diag%scalar_placeholder(ji,jk,jl) = density_gas(state,ji,jk,jl)*mom_diff_coeff*diag%scalar_placeholder(ji,jk,jl)
         enddo

@@ -410,8 +410,6 @@ program control
   write(*,*) "Rain falling velocity set to", rain_velocity, "m/s."
   write(*,*) "Snow falling velocity set to", snow_velocity, "m/s."
   
-  ! maximum horizontal diffusion coefficient  
-  irrev%max_diff_h_coeff_turb = 0.125_wp*grid%mean_velocity_area/dtime
   ! setting up the background state
   call bg_setup(grid)
   

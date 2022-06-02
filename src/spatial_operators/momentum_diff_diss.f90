@@ -302,7 +302,7 @@ module momentum_diff_diss
     ! computing something like dw/dz
     call add_vertical_div(state%wind_w,diag%scalar_placeholder,grid)
     ! computing and multiplying by the respective diffusion coefficient
-    call vert_vert_mom_viscosity(state,diag,irrev,grid)
+    call vert_vert_mom_viscosity(state,diag,irrev)
     ! taking the second derivative to compute the diffusive tendency
     call grad_vert_cov(diag%scalar_placeholder,irrev%mom_diff_tend_z,grid)
 
