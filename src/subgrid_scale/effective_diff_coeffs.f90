@@ -51,7 +51,7 @@ module effective_diff_coeffs
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature_gas(ji,jk,jl), &
+          irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
           state%rho(ji,jk,jl,no_of_condensed_constituents+1))
         enddo
       enddo
@@ -449,7 +449,7 @@ module effective_diff_coeffs
       do ji=1,nlins
         do jk=1,ncols
           do jl=1,nlays
-            irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature_gas(ji,jk,jl), &
+            irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
             state%rho(ji,jk,jl,no_of_condensed_constituents+1))
           enddo
         enddo
@@ -509,7 +509,7 @@ module effective_diff_coeffs
       do ji=1,nlins
         do jk=1,ncols
           do jl=1,nlays
-            irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature_gas(ji,jk,jl), &
+            irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
             state%rho(ji,jk,jl,no_of_condensed_constituents+1))
           enddo
         enddo

@@ -59,7 +59,7 @@ module explicit_scalar_tendencies
       ! Now we need to calculate the temperature diffusion coefficients.
       call temp_diffusion_coeffs(state,diag,irrev,grid)
       ! The diffusion of the temperature depends on its gradient.
-      call grad(diag%temperature_gas,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
+      call grad(diag%temperature,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
       ! Now the diffusive temperature flux density can be obtained.
       call scalar_times_vector_h(irrev%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
       diag%flux_density_u,diag%flux_density_v)

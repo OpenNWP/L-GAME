@@ -151,7 +151,7 @@ module definitions
     real(wp), allocatable :: pot_vort_tend_y(:,:,:)           ! tendency due to the vorticity flux term in y-direction
     real(wp), allocatable :: pot_vort_tend_z(:,:,:)           ! tendency due to the vorticity flux term in z-direction
     real(wp), allocatable :: scalar_placeholder(:,:,:)        ! placeholder for scalar fields
-    real(wp), allocatable :: temperature_gas(:,:,:)           ! temperature of the gas phase
+    real(wp), allocatable :: temperature(:,:,:)               ! temperature
     real(wp), allocatable :: u_placeholder(:,:,:)             ! placeholder for vector fields in x-direction
     real(wp), allocatable :: v_placeholder(:,:,:)             ! placeholder for vector fields in y-direction
     real(wp), allocatable :: w_placeholder(:,:,:)             ! placeholder for vector fields in z-direction

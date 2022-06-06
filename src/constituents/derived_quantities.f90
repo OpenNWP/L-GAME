@@ -43,7 +43,7 @@ module derived_quantities
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
-          diag%temperature_gas(ji,jk,jl) = (grid%theta_v_bg(ji,jk,jl) + state%theta_v_pert(ji,jk,jl)) &
+          diag%temperature(ji,jk,jl) = (grid%theta_v_bg(ji,jk,jl) + state%theta_v_pert(ji,jk,jl)) &
           *(grid%exner_bg(ji,jk,jl) + state%exner_pert(ji,jk,jl))
         enddo
       enddo

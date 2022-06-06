@@ -62,7 +62,7 @@ module radiation
   end subroutine radiation_init
   
   subroutine calc_radiative_flux_convergence(latitude_scalar,longitude_scalar, &
-  z_scalar,z_vector,mass_densities,temperature_gas,radiation_tendency, &
+  z_scalar,z_vector,mass_densities,temperature,radiation_tendency, &
   temp_sfc,sfc_sw_in,sfc_lw_out,sfc_albedo,no_of_scalars_h,time_coord)
   
     ! This is the function that is called by the dynamical core. The dycore hands over
@@ -84,7 +84,7 @@ module radiation
     ! the mass densities of the model atmosphere
     real(wp), intent(in)    :: mass_densities(no_of_constituents*nlays*no_of_scalars_h)
     ! the temperature of the model atmosphere
-    real(wp), intent(in)    :: temperature_gas(nlays*no_of_scalars_h)
+    real(wp), intent(in)    :: temperature(nlays*no_of_scalars_h)
     ! the result (in W/m^3)
     real(wp), intent(inout) :: radiation_tendency(nlays*no_of_scalars_h)
     ! surface temperature
@@ -227,7 +227,7 @@ module radiation
     ! reformatting the thermodynamical state of the gas phase for RTE+RRTMGP
     do ji=1,no_of_scalars_h
       do jk=1,nlays
-        temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
+        temperature_rad(ji,jk) = temperature((jk-1)*no_of_scalars_h+ji)
         ! the pressure is diagnozed here, using the equation of state for ideal gases
         pressure_rad(ji,jk) = specific_gas_constants(0) &
         *mass_densities(no_of_condensed_constituents*no_of_scalars &

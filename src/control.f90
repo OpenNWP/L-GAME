@@ -301,8 +301,8 @@ program control
   diag%pot_vort_tend_z = 0._wp
   allocate(diag%scalar_placeholder(nlins,ncols,nlays))
   diag%scalar_placeholder = 0._wp
-  allocate(diag%temperature_gas(nlins,ncols,nlays))
-  diag%temperature_gas = 0._wp
+  allocate(diag%temperature(nlins,ncols,nlays))
+  diag%temperature = 0._wp
   allocate(diag%u_placeholder(nlins,ncols+1,nlays))
   diag%u_placeholder = 0._wp
   allocate(diag%v_placeholder(nlins+1,ncols,nlays))
@@ -588,7 +588,7 @@ program control
   deallocate(diag%pot_vort_tend_y)
   deallocate(diag%pot_vort_tend_z)
   deallocate(diag%scalar_placeholder)
-  deallocate(diag%temperature_gas)
+  deallocate(diag%temperature)
   deallocate(diag%u_placeholder)
   deallocate(diag%v_placeholder)
   deallocate(diag%w_placeholder)

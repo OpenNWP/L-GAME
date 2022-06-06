@@ -67,36 +67,36 @@ module phase_trans
           if (state%rho(ji,jk,jl,3)<EPSILON_SECURITY) then
             solid_temperature = T_0
           else
-            solid_temperature = diag%temperature_gas(ji,jk,jl)
+            solid_temperature = diag%temperature(ji,jk,jl)
           endif
 
           ! determining the temperature of the liquid cloud water
           if (state%rho(ji,jk,jl,4)<EPSILON_SECURITY) then
             liquid_temperature = T_0
           else
-            liquid_temperature = diag%temperature_gas(ji,jk,jl)
+            liquid_temperature = diag%temperature(ji,jk,jl)
           endif
 
           ! determining the saturation pressure
           ! "positive" temperatures (the saturation pressure is different over water compared to over ice)
-          if (diag%temperature_gas(ji,jk,jl)>=T_0) then
-            saturation_pressure = saturation_pressure_over_water(diag%temperature_gas(ji,jk,jl))
+          if (diag%temperature(ji,jk,jl)>=T_0) then
+            saturation_pressure = saturation_pressure_over_water(diag%temperature(ji,jk,jl))
           ! "negative" temperatures
           else
-            saturation_pressure = saturation_pressure_over_ice(diag%temperature_gas(ji,jk,jl))
+            saturation_pressure = saturation_pressure_over_ice(diag%temperature(ji,jk,jl))
           endif
 
           ! determining the water vapour pressure (using the EOS)
-          water_vapour_pressure = state%rho(ji,jk,jl,6)*specific_gas_constants(1)*diag%temperature_gas(ji,jk,jl)
+          water_vapour_pressure = state%rho(ji,jk,jl,6)*specific_gas_constants(1)*diag%temperature(ji,jk,jl)
           
           ! determining the dry air pressure
-          dry_pressure = state%rho(ji,jk,jl,5)*specific_gas_constants(0)*diag%temperature_gas(ji,jk,jl)
+          dry_pressure = state%rho(ji,jk,jl,5)*specific_gas_constants(0)*diag%temperature(ji,jk,jl)
           
           ! calculating the total air pressure
           air_pressure = water_vapour_pressure + dry_pressure
           
           ! multiplying the saturation pressure by the enhancement factor
-          if (diag%temperature_gas(ji,jk,jl)>=T_0) then
+          if (diag%temperature(ji,jk,jl)>=T_0) then
             saturation_pressure = enhancement_factor_over_water(air_pressure)*saturation_pressure
           ! "negative" temperatures
           else
@@ -104,7 +104,7 @@ module phase_trans
           endif
 
           ! the amount of water vapour that the air can still take 
-          diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diag%temperature_gas(ji,jk,jl))
+          diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diag%temperature(ji,jk,jl))
 
           ! Clouds
           ! ------
@@ -112,7 +112,7 @@ module phase_trans
           ! the case where the air is not over-saturated
           if (diff_density>=0._wp) then
             ! temperature >= 0 °C
-            if (diag%temperature_gas(ji,jk,jl)>=T_0) then
+            if (diag%temperature(ji,jk,jl)>=T_0) then
               ! It is assumed that the still present ice vanishes within one time step.
               irrev%mass_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)/dtime_sat
 
@@ -167,7 +167,7 @@ module phase_trans
             ! the vanishing of water vapour through the phase transition
             irrev%mass_source_rates(ji,jk,jl,5) = diff_density/dtime_sat
             ! temperature >= 0._wp °C
-            if (diag%temperature_gas(ji,jk,jl)>=T_0) then
+            if (diag%temperature(ji,jk,jl)>=T_0) then
               ! It is assumed that the still present ice vanishes within one time step.
               irrev%mass_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)/dtime_sat
 
@@ -211,7 +211,7 @@ module phase_trans
           irrev%mass_source_rates(ji,jk,jl,2) = 0._wp
           ! snow
           ! this only happens if the air is saturated
-          if (diag%temperature_gas(ji,jk,jl)<T_0 .and. diff_density<=0._wp) then
+          if (diag%temperature(ji,jk,jl)<T_0 .and. diff_density<=0._wp) then
             irrev%mass_source_rates(ji,jk,jl,1) = max(state%rho(ji,jk,jl,3) &
             - max_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/dtime_sat
             ! the snow creation comes at the cost of cloud ice particles
@@ -219,7 +219,7 @@ module phase_trans
             - irrev%mass_source_rates(ji,jk,jl,1)
           endif
           ! rain
-          if (diag%temperature_gas(ji,jk,jl)>=T_0 .and. diff_density<=0._wp) then
+          if (diag%temperature(ji,jk,jl)>=T_0 .and. diff_density<=0._wp) then
             ! this only happens if the air is saturated
             irrev%mass_source_rates(ji,jk,jl,2) = max(state%rho(ji,jk,jl,4) &
             - max_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/dtime_sat
@@ -229,7 +229,7 @@ module phase_trans
           endif
 
           ! turning of snow to rain
-          if (diag%temperature_gas(ji,jk,jl)>=T_0 .and. state%rho(ji,jk,jl,1)>0._wp) then
+          if (diag%temperature(ji,jk,jl)>=T_0 .and. state%rho(ji,jk,jl,1)>0._wp) then
             irrev%mass_source_rates(ji,jk,jl,1) = -state%rho(ji,jk,jl,1)/dtime_sat
             irrev%mass_source_rates(ji,jk,jl,2) = irrev%mass_source_rates(ji,jk,jl,2) &
             - irrev%mass_source_rates(ji,jk,jl,1)
@@ -237,7 +237,7 @@ module phase_trans
             + irrev%mass_source_rates(ji,jk,jl,1)*phase_trans_heat(2,T_0)
           endif
           ! turning of rain to snow
-          if (diag%temperature_gas(ji,jk,jl)<T_0 .and. state%rho(ji,jk,jl,2)>0._wp) then
+          if (diag%temperature(ji,jk,jl)<T_0 .and. state%rho(ji,jk,jl,2)>0._wp) then
             irrev%mass_source_rates(ji,jk,jl,2) = -state%rho(ji,jk,jl,2)/dtime_sat
             irrev%mass_source_rates(ji,jk,jl,1) = irrev%mass_source_rates(ji,jk,jl,1) &
             - irrev%mass_source_rates(ji,jk,jl,2)
