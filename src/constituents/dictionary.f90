@@ -279,9 +279,6 @@ module dictionary
 
     temp_c = temperature - T_0
     ! clipping too extreme values for this approximation
-    if (temp_c<-60._wp) then
-      temp_c = -60._wp
-    endif
     if (temp_c>100._wp) then
       temp_c = 100._wp
     endif
