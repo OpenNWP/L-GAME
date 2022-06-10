@@ -42,7 +42,7 @@ module effective_diff_coeffs
     ! local variables
     integer :: ji,jk,jl ! loop indices
     
-    ! computing the Eddy viscosity
+    ! computing the eddy viscosity
     irrev%viscosity_coeff_div = diff_h_smag_div*grid%mean_velocity_area*abs(divergence_h)
     
     ! calculation of the molecular diffusion coefficient
@@ -212,7 +212,7 @@ module effective_diff_coeffs
   
   subroutine vert_hor_mom_viscosity(state,diag,irrev,grid)
   
-    ! This subroutine computes the effective viscosity (Eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
+    ! This subroutine computes the effective viscosity (eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
 	! This quantity is located at the half level edges.
 	! To obey the symmetry of the stress tensor, the same coefficient must be used for the horizontal diffusion of vertical velocity.
   
@@ -549,7 +549,7 @@ module effective_diff_coeffs
     ! input
     real(wp), intent(in) :: tke                     ! specific turbulent kinetic energy (TKE)
     ! output
-    real(wp)             :: tke2vertical_diff_coeff ! the result (vertical Eddy viscosity im m^2/s)
+    real(wp)             :: tke2vertical_diff_coeff ! the result (vertical eddy viscosity im m^2/s)
     
     ! local variable
     real(wp) :: prop_constant ! semi-empirical constant
