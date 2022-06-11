@@ -359,6 +359,8 @@ program control
   diag%du_dz = 0._wp
   allocate(diag%dv_dz(nlins+1,ncols,nlays+1))
   diag%dv_dz = 0._wp
+  allocate(diag%n_squared(nlins,ncols,nlays))
+  diag%n_squared = 0._wp
   ! type containing irreversible quantities
   allocate(irrev%tke(nlins,ncols,nlays))
   irrev%tke = 0._wp
@@ -617,6 +619,7 @@ program control
   deallocate(diag%flux_density_div)
   deallocate(diag%du_dz)
   deallocate(diag%dv_dz)
+  deallocate(diag%n_squared)
   ! type containing irreversible quantities
   deallocate(irrev%tke)
   deallocate(irrev%viscosity_molecular)

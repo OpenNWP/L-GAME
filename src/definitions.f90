@@ -180,7 +180,7 @@ module definitions
     real(wp), allocatable :: flux_density_div(:,:,:)          ! placeholder for flux density divergences
     real(wp), allocatable :: du_dz(:,:,:)                     ! verticl gradient of u
     real(wp), allocatable :: dv_dz(:,:,:)                     ! verticl gradient of v
-  
+    real(wp), allocatable :: n_squared(:,:,:)                 ! squared Brunt-Väisälä frequency
   
   end type t_diag
   
