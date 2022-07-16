@@ -18,7 +18,7 @@ L-GAME is a numerical weather prediction (NWP) model. It is the application of t
 
 Everything is easy and quick to install.
 
-	sudo apt-get install gfortran make cmake wget python3-pip llibnetcdff-dev
+	sudo apt-get install gfortran make cmake wget python3-pip libnetcdff-dev
 
 * Clone our fork of the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp`
 * `pip3 install global-land-mask`
@@ -40,7 +40,7 @@ cd L-GAME
 
 ## Execution
 
-For example:
+Modify the variable lgame_home_dir in the run scripts (files in the directory run_scripts). Then you can use these files to execute certain model runs, for example:
 
 ```
 ./run_scripts/schaer.sh
