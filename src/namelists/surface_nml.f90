@@ -17,7 +17,7 @@ module surface_nml
   logical :: lsfc_phase_trans        ! surface phase transitions switch
   logical :: lpbl                    ! planetary boundary layer switch
   
-  namelist /surface/orography_id,lprog_soil_temp,nsoillays,lsfc_phase_trans,lpbl
+  namelist /surface/orography_id,lprog_soil_temp,nsoillays,lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl
   
   contains
   
