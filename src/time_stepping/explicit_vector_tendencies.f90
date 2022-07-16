@@ -95,8 +95,7 @@ module explicit_vector_tendencies
     ! adding up the explicit wind tendencies
     
     ! x-direction
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     tend%wind_u = old_weight*tend%wind_u &
     + new_weight*( &
     ! old time step pressure gradient component
@@ -107,12 +106,10 @@ module explicit_vector_tendencies
     - 0.5_wp*diag%v_squared_grad_x + diag%pot_vort_tend_x & 
     ! momentum diffusion
     + irrev%mom_diff_tend_x)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! y-direction
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     tend%wind_v = old_weight*tend%wind_v &
     + new_weight*( &
     ! old time step pressure gradient component
@@ -123,12 +120,10 @@ module explicit_vector_tendencies
     - 0.5_wp*diag%v_squared_grad_y + diag%pot_vort_tend_y &
     ! momentum diffusion
     + irrev%mom_diff_tend_y)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! z-direction
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     tend%wind_w = old_weight*tend%wind_w &
     + new_weight*( &
     ! old time step component of the pressure gradient acceleration
@@ -138,8 +133,7 @@ module explicit_vector_tendencies
     - 0.5_wp*diag%v_squared_grad_z + diag%pot_vort_tend_z &
     ! momentum diffusion
     + irrev%mom_diff_tend_z)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
   end subroutine expl_vector_tend
 

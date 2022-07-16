@@ -33,8 +33,7 @@ module vorticities
     integer :: ji,jk,jl ! loop indices
     
     ! calculating the relative vorticity in x-direction
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do jk=1,ncols
       do jl=2,nlays
         do ji=2,nlins
@@ -64,24 +63,18 @@ module vorticities
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     diag%zeta_x(:,:,1) = diag%zeta_x(:,:,2)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     ! dividing by the area
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     diag%zeta_x = diag%zeta_x/grid%area_dual_x
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! calculating the relative vorticity in y-direction
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jl=2,nlays
         do jk=2,ncols
@@ -112,24 +105,18 @@ module vorticities
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     diag%zeta_y(:,:,1) = diag%zeta_y(:,:,2)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     ! dividing by the area
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     diag%zeta_y = diag%zeta_y/grid%area_dual_y
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
       
     ! calculating the relative vorticity in z-direction
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins+1
       do jk=1,ncols+1
         do jl=1,nlays
@@ -137,8 +124,7 @@ module vorticities
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
       
   end subroutine rel_vort
   
@@ -157,54 +143,43 @@ module vorticities
     if (.not. llinear) then
       call rel_vort(state,diag,grid)
     else
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       diag%zeta_x = 0._wp
       diag%zeta_y = 0._wp
       diag%zeta_z = 0._wp
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
     ! adding the Coriolis vector to the relative vorticity to obtain the absolute vorticity
     if (lcorio) then
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(jl)
+      !$omp parallel do private(jl)
       do jl=1,nlays+1
         diag%eta_x(:,:,jl) = diag%zeta_x(:,:,jl) + grid%fvec_x(:,:)
         diag%eta_y(:,:,jl) = diag%zeta_y(:,:,jl) + grid%fvec_y(:,:)
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(jl)
+      !$omp end parallel do
+      !$omp parallel do private(jl)
       do jl=1,nlays
         diag%eta_z(:,:,jl) = diag%zeta_z(:,:,jl) + grid%fvec_z(:,:)
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+      !$omp end parallel do
     else
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(jl)
+      !$omp parallel do private(jl)
       do jl=1,nlays+1
         diag%eta_x(:,:,jl) = diag%zeta_x(:,:,jl)
         diag%eta_y(:,:,jl) = diag%zeta_y(:,:,jl)
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(jl)
+      !$omp end parallel do
+      !$omp parallel do private(jl)
       do jl=1,nlays
         diag%eta_z(:,:,jl) = diag%zeta_z(:,:,jl)
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+      !$omp end parallel do
     endif
     
     ! dividing by the averaged density to obtain the "potential vorticity"
     ! horizontal vorticity in x-direction
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do jk=1,ncols
       do jl=1,nlays+1
         do ji=2,nlins
@@ -272,12 +247,10 @@ module vorticities
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
     ! horizontal vorticity in y-direction
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jl=1,nlays+1
         do jk=2,ncols
@@ -345,12 +318,10 @@ module vorticities
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! vertical vorticity
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do ji=2,nlins
       do jk=2,ncols
         diag%eta_z(ji,jk,:) = diag%eta_z(ji,jk,:)/(0.25_wp*(state%rho(ji,jk-1,:,no_of_condensed_constituents+1) &
@@ -367,35 +338,30 @@ module vorticities
       endif
       
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! periodic boundary conditions
     if (lperiodic) then
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(jk)
+      !$omp parallel do private(jk)
       do jk=2,ncols
         diag%eta_z(1,jk,:) = diag%eta_z(1,jk,:)/(0.25_wp*(state%rho(1,jk-1,:,no_of_condensed_constituents+1) &
         +state%rho(1,jk,:,no_of_condensed_constituents+1) &
         +state%rho(nlins,jk,:,no_of_condensed_constituents+1)+state%rho(nlins,jk-1,:,no_of_condensed_constituents+1)))
         diag%eta_z(nlins+1,jk,:) = diag%eta_z(1,jk,:)
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+      !$omp end parallel do
     endif
     
     ! corners under periodic boundary conditions
     if (lperiodic) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       diag%eta_z(1,1,:) = diag%eta_z(1,1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
       +state%rho(1,1,:,no_of_condensed_constituents+1) &
       +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
       diag%eta_z(1,ncols+1,:) = diag%eta_z(1,1,:)
       diag%eta_z(nlins+1,1,:) = diag%eta_z(1,1,:)
       diag%eta_z(nlins+1,ncols+1,:) = diag%eta_z(1,1,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
   end subroutine calc_pot_vort

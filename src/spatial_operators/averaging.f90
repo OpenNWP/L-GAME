@@ -70,8 +70,7 @@ module averaging
     integer :: ji,jk,jl ! loop indices
     
     ! correction to the x-component
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays
@@ -80,12 +79,10 @@ module averaging
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! correction to the y-component
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
@@ -94,8 +91,7 @@ module averaging
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine hor_cov_to_con
   

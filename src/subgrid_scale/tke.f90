@@ -39,8 +39,7 @@ module tke
     call inner(state%wind_u,state%wind_v,state%wind_w,diag%u_placeholder,diag%v_placeholder, &
     diag%w_placeholder,diag%scalar_placeholder,grid)
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,decay_constant)
+    !$omp parallel do private(ji,jk,jl,decay_constant)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -65,8 +64,7 @@ module tke
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine tke_update
   

@@ -35,47 +35,39 @@ module pressure_gradient
   
     ! saving the old pressure gradient acceleration before it is overwritten with the new one
     if (.not. lfirst) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - diag%p_grad_acc_neg_l_u
       diag%p_grad_acc_old_v = -diag%p_grad_acc_neg_nl_v - diag%p_grad_acc_neg_l_v
       diag%p_grad_acc_old_w = -diag%p_grad_acc_neg_nl_w - diag%p_grad_acc_neg_l_w
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
     ! the nonlinear pressure gradient term
     ! calculating the gradient of the perturbed Exner pressure
     call grad(state%exner_pert,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
     ! calculating the full virtual potential temperature
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     diag%scalar_placeholder = c_p*(grid%theta_v_bg + state%theta_v_pert)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     ! multiplying the perturbed Exner pressure gradient by the full virtual potential temperature
     call scalar_times_vector(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
     diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w)
     
     ! the linear pressure gradient term
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     diag%scalar_placeholder = c_p*state%theta_v_pert
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     ! multiplying the background Exner pressure gradient by the perturbed virtual potential temperature
     call scalar_times_vector(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
     grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v,diag%p_grad_acc_neg_l_w)
     
     ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
     if (lfirst) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - diag%p_grad_acc_neg_l_u
       diag%p_grad_acc_old_v = -diag%p_grad_acc_neg_nl_v - diag%p_grad_acc_neg_l_v
       diag%p_grad_acc_old_w = -diag%p_grad_acc_neg_nl_w - diag%p_grad_acc_neg_l_w
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
   end subroutine manage_pressure_gradient

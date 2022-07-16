@@ -46,8 +46,7 @@ module effective_diff_coeffs
     irrev%viscosity_coeff_div = diff_h_smag_div*grid%mean_velocity_area*abs(divergence_h)
     
     ! calculation of the molecular diffusion coefficient
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -56,19 +55,15 @@ module effective_diff_coeffs
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! adding the molecular diffusion coefficient
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     irrev%viscosity_coeff_div = irrev%viscosity_molecular + irrev%viscosity_coeff_div
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! multiplying by the density
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -76,8 +71,7 @@ module effective_diff_coeffs
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine hor_div_viscosity
   
@@ -95,15 +89,12 @@ module effective_diff_coeffs
     integer :: ji,jk,jl ! loop indices
     
     ! initialization with zeros
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
      irrev%viscosity_coeff_curl_dual = 0._wp
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! molecular component
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do jl=1,nlays
       do ji=2,nlins
         do jk=2,ncols
@@ -137,12 +128,10 @@ module effective_diff_coeffs
       endif
     
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! turbulent component
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins+1
       do jk=1,ncols+1
         do jl=1,nlays
@@ -151,12 +140,10 @@ module effective_diff_coeffs
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! multiplication by the density
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do jl=1,nlays
       do ji=2,nlins
         do jk=2,ncols
@@ -192,12 +179,10 @@ module effective_diff_coeffs
       endif
     
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! averaging the curl diffusion coefficient to the cell centers
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -205,8 +190,7 @@ module effective_diff_coeffs
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine hor_curl_viscosity
   
@@ -228,8 +212,7 @@ module effective_diff_coeffs
 	!  updating the TKE
     call tke_update(state,diag,irrev,grid)
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jl=2,nlays
         do jk=2,ncols
@@ -267,11 +250,9 @@ module effective_diff_coeffs
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do jk=1,ncols
       do jl=2,nlays
         do ji=2,nlins
@@ -309,12 +290,10 @@ module effective_diff_coeffs
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! multiplication by the density
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jl=2,nlays
         do jk=2,ncols
@@ -337,11 +316,9 @@ module effective_diff_coeffs
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do jk=1,ncols
       do jl=2,nlays
         do ji=2,nlins
@@ -365,25 +342,20 @@ module effective_diff_coeffs
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     ! for now, we set the vertical diffusion coefficient at the TOA equal to the vertical diffusion coefficient in the layer below
     irrev%vert_hor_viscosity_u(:,:,1) = irrev%vert_hor_viscosity_u(:,:,2)
     ! for now, we set the vertical diffusion coefficient at the surface equal to the vertical diffusion coefficient in the layer above
     irrev%vert_hor_viscosity_u(:,:,nlays+1) = irrev%vert_hor_viscosity_u(:,:,nlays)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp end parallel workshare
+    !$omp parallel workshare
     ! for now, we set the vertical diffusion coefficient at the TOA equal to the vertical diffusion coefficient in the layer below
     irrev%vert_hor_viscosity_v(:,:,1) = irrev%vert_hor_viscosity_v(:,:,2)
     ! for now, we set the vertical diffusion coefficient at the surface equal to the vertical diffusion coefficient in the layer above
     irrev%vert_hor_viscosity_v(:,:,nlays+1) = irrev%vert_hor_viscosity_v(:,:,nlays)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
   
   end subroutine vert_hor_mom_viscosity
   
@@ -400,8 +372,7 @@ module effective_diff_coeffs
     real(wp) :: mom_diff_coeff        ! the diffusion coefficient
     integer  :: ji,jk,jl              ! loop indices
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,mom_diff_coeff)
+    !$omp parallel do private(ji,jk,jl,mom_diff_coeff)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -416,8 +387,7 @@ module effective_diff_coeffs
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine vert_vert_mom_viscosity
   
@@ -444,8 +414,7 @@ module effective_diff_coeffs
       call tke_update(state,diag,irrev,grid)
       
       ! molecular viscosity
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(ji,jk,jl)
+      !$omp parallel do private(ji,jk,jl)
       do ji=1,nlins
         do jk=1,ncols
           do jl=1,nlays
@@ -454,13 +423,11 @@ module effective_diff_coeffs
           enddo
         enddo
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+      !$omp end parallel do
     
     endif
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,c_g_v)
+    !$omp parallel do private(ji,jk,jl,c_g_v)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -477,8 +444,7 @@ module effective_diff_coeffs
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine temp_diffusion_coeffs
   
@@ -504,8 +470,7 @@ module effective_diff_coeffs
       call tke_update(state,diag,irrev,grid)
       
       ! molecular viscosity
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(ji,jk,jl)
+      !$omp parallel do private(ji,jk,jl)
       do ji=1,nlins
         do jk=1,ncols
           do jl=1,nlays
@@ -514,13 +479,11 @@ module effective_diff_coeffs
           enddo
         enddo
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+      !$omp end parallel do
     
     endif
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -537,8 +500,7 @@ module effective_diff_coeffs
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
   end subroutine mass_diffusion_coeffs
   

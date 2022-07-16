@@ -46,10 +46,9 @@ module phase_trans
     
     max_cloud_water_content = 0.2e-3
   
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,diff_density,phase_trans_density, &
-    !$OMP saturation_pressure,water_vapour_pressure,dry_pressure,air_pressure,layer_thickness, &
-    !$OMP diff_density_sfc,saturation_pressure_sfc)
+    !$omp parallel do private(ji,jk,jl,diff_density,phase_trans_density, &
+    !$omp saturation_pressure,water_vapour_pressure,dry_pressure,air_pressure,layer_thickness, &
+    !$omp diff_density_sfc,saturation_pressure_sfc)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -264,8 +263,7 @@ module phase_trans
           
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine calc_h2otracers_source_rates
 

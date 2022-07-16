@@ -112,36 +112,30 @@ module explicit_scalar_tendencies
         endif
       endif
       
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
       + new_weight(j_constituent)*(-diag%flux_density_div)+diff_switch*diag%scalar_placeholder
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     
       ! explicit virtual potential temperature density integration
       ! --------------------------------------------------
       ! calculating the virtual potential temperature density flux
       if (j_constituent==no_of_condensed_constituents+1) then
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
+        !$omp parallel workshare
         diag%scalar_placeholder = grid%theta_v_bg + state%theta_v_pert
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
+        !$omp end parallel workshare
         call scalar_times_vector_h(diag%scalar_placeholder,diag%flux_density_u,diag%flux_density_v,&
         diag%flux_density_u,diag%flux_density_v)
         ! calculating the divergence of the virtual potential temperature flux density
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
         
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
+        !$omp parallel workshare
         tend%rhotheta_v = -diag%flux_density_div &
         ! diabatic heating rates
         + (irrev%heating_diss + diag%radiation_tendency + irrev%heat_source_rates &
         + irrev%temp_diff_heating) &
         /(c_p*(grid%exner_bg+state%exner_pert))
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
+        !$omp end parallel workshare
         
       endif
       
@@ -164,20 +158,16 @@ module explicit_scalar_tendencies
       call calc_h2otracers_source_rates(state,diag,irrev,grid)
       
       ! condensates
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       state%rho(:,:,:,1:no_of_condensed_constituents) = state%rho(:,:,:,1:no_of_condensed_constituents) &
       + dtime*irrev%mass_source_rates(:,:,:,1:no_of_condensed_constituents)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
       
       ! water vapour
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       state%rho(:,:,:,no_of_constituents) = state%rho(:,:,:,no_of_constituents) &
       + dtime*irrev%mass_source_rates(:,:,:,no_of_constituents-1)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
       
     endif
   

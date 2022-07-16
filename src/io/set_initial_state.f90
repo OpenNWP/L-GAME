@@ -57,15 +57,12 @@ module set_initial_state
         ! This test case is the standard atmosphere.
       
         ! There is no horizontal wind in this case
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
+        !$omp parallel workshare
         state%wind_u = 0._wp
         state%wind_v = 0._wp
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
+        !$omp end parallel workshare
         
-        !$OMP PARALLEL
-        !$OMP DO PRIVATE(ji,jk,jl)
+        !$omp parallel do private(ji,jk,jl)
         do ji=1,nlins
           do jk=1,ncols
             do jl=1,nlays
@@ -74,17 +71,14 @@ module set_initial_state
             pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,nlays))
           enddo
         enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
+        !$omp end parallel do
     
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
+        !$omp parallel workshare
         ! humidity
         state%rho(:,:,:,no_of_constituents) = 0._wp
         ! condensates
         state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
+        !$omp end parallel workshare
 
       case("advection")
       
@@ -101,8 +95,7 @@ module set_initial_state
         rho_0 = 1e-3_wp
         
         ! horizontal wind
-        !$OMP PARALLEL
-        !$OMP DO PRIVATE(ji,jk,jl)
+        !$omp parallel do private(ji,jk,jl)
         do ji=1,nlins
           do jk=1,ncols+1
             do jl=1,nlays
@@ -116,17 +109,13 @@ module set_initial_state
             enddo
           enddo
         enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
+        !$omp end parallel do
         
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
+        !$omp parallel workshare
         state%wind_v = 0._wp
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
+        !$omp end parallel workshare
         
-        !$OMP PARALLEL
-        !$OMP DO PRIVATE(ji,jk,jl)
+        !$omp parallel do private(ji,jk,jl)
         do ji=1,nlins
           do jk=1,ncols
             do jl=1,nlays
@@ -135,12 +124,10 @@ module set_initial_state
             pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,nlays))
           enddo
         enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
+        !$omp end parallel do
         
         ! density anomaly
-        !$OMP PARALLEL
-        !$OMP DO PRIVATE(ji,jk,jl,r,x_coord)
+        !$omp parallel do private(ji,jk,jl,r,x_coord)
         do ji=1,nlins
           do jk=1,ncols
             do jl=1,nlays
@@ -154,34 +141,28 @@ module set_initial_state
             enddo
           enddo
         enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
+        !$omp end parallel do
     
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
+        !$omp parallel workshare
         ! condensates
         state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
+        !$omp end parallel workshare
 
       case("schaer")
       
         ! Schär et al. (2001): A New Terrain-Following Vertical Coordinate Formulation for Atmospheric Prediction Models
         
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
+        !$omp parallel workshare
         state%wind_u = 10._wp
         state%wind_v = 0._wp
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
+        !$omp end parallel workshare
        
         n_squared = (0.01_wp)**2
         T_0 = 288._wp
        
         ! background state not yet substracted here
        
-        !$OMP PARALLEL
-        !$OMP DO PRIVATE(ji,jk,jl,delta_z,gravity_local)
+        !$omp parallel do private(ji,jk,jl,delta_z,gravity_local)
         do ji=1,nlins
           do jk=1,ncols
             ! calculating delta_z
@@ -227,29 +208,24 @@ module set_initial_state
             pres_lowest_layer(ji,jk)=p_0*state%exner_pert(ji,jk,nlays)**(c_p/r_d)
           enddo
         enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
+        !$omp end parallel do
     
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
+        !$omp parallel workshare
         ! humidity
         state%rho(:,:,:,no_of_constituents) = 0._wp
         ! condensates
         state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
+        !$omp end parallel workshare
         
     endselect
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do ji=1,nlins
       do jk=1,ncols
         state%temperature_soil(ji,jk,:) = 280._wp
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     call unessential_ideal_init(state,diag,grid,pres_lowest_layer)
     
@@ -275,12 +251,10 @@ module set_initial_state
     call read_from_nc(state%rho,state%rhotheta_v,state%wind_u,state%wind_v,state%wind_w,filename)
     
     ! setting the virtual potential temperature perturbation
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_v_bg
     state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_v) - grid%exner_bg
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
   
   end subroutine restart
   
@@ -347,8 +321,7 @@ module set_initial_state
     c_p = spec_heat_capacities_p_gas(0)
     
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,b,c,pressure)
+    !$omp parallel do private(ji,jk,jl,b,c,pressure)
     do ji=1,nlins
       do jk=1,ncols  
         ! integrating from bottom to top
@@ -371,11 +344,9 @@ module set_initial_state
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     ! density
     state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert)**(c_p/r_d) &
     /(r_d*diag%scalar_placeholder)
@@ -384,15 +355,12 @@ module set_initial_state
     ! substracting the background state
     state%theta_v_pert = state%theta_v_pert - grid%theta_v_bg
     state%exner_pert = state%exner_pert - grid%exner_bg
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! vertical wind velocity is always set to zero
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     state%wind_w = 0._wp
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
   end subroutine unessential_ideal_init
   

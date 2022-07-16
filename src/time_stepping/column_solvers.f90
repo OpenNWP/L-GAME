@@ -77,8 +77,7 @@ module column_solvers
     
     ! calculating the sensible power flux density if soil is switched on
     if (lsfc_sensible_heat_flux) then
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(ji,jk,t_gas_lowest_layer_old,t_gas_lowest_layer_new)
+      !$omp parallel do private(ji,jk,t_gas_lowest_layer_old,t_gas_lowest_layer_new)
       do ji=1,nlins
         do jk=1,ncols
 
@@ -101,15 +100,13 @@ module column_solvers
           
         enddo
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+      !$omp end parallel do
     endif
 	
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,c_vector,d_vector,e_vector,r_vector,solution_vector, &
-    !$OMP rho_expl,rhotheta_v_expl,exner_pert_expl,theta_v_pert_expl,rho_int_old, &
-    !$OMP rho_int_expl,theta_v_int_new,rho_int_new,alpha_old,beta_old,gamma_old,alpha_new, &
-    !$OMP beta_new,gamma_new,alpha,beta,gammaa,damping_coeff,above_damping,soil_switch)
+    !$omp parallel do private(ji,jk,jl,c_vector,d_vector,e_vector,r_vector,solution_vector, &
+    !$omp rho_expl,rhotheta_v_expl,exner_pert_expl,theta_v_pert_expl,rho_int_old, &
+    !$omp rho_int_expl,theta_v_int_new,rho_int_new,alpha_old,beta_old,gamma_old,alpha_new, &
+    !$omp beta_new,gamma_new,alpha,beta,gammaa,damping_coeff,above_damping,soil_switch)
     do ji=1,nlins
       do jk=1,ncols
       
@@ -326,16 +323,13 @@ module column_solvers
 		
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! virtual potential temperature perturbation at the new time step
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     state_new%theta_v_pert(:,:,:) = state_new%rhotheta_v(:,:,:)/state_new%rho(:,:,:,no_of_condensed_constituents+1) &
     - grid%theta_v_bg(:,:,:)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
 
   end subroutine three_band_solver_ver
   
@@ -378,9 +372,8 @@ module column_solvers
       if (j_constituent/=no_of_condensed_constituents+1) then
         
         ! loop over all columns
-        !$OMP PARALLEL
-        !$OMP DO PRIVATE(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
-        !$OMP d_vector,e_vector,r_vector,solution_vector,added_mass)
+        !$omp parallel do private(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
+        !$omp d_vector,e_vector,r_vector,solution_vector,added_mass)
         do ji=1,nlins
           do jk=1,ncols
 
@@ -508,8 +501,7 @@ module column_solvers
           
           enddo ! column index
         enddo ! line index
-        !$OMP END DO
-        !$OMP END PARALLEL
+        !$omp end parallel do
       endif
     enddo ! constituent
   

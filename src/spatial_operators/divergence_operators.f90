@@ -38,8 +38,7 @@ module divergence_operators
     real(wp) :: contra_lower ! contravariant mass flux density resulting
                              ! from the horizontal vector components through the lower area
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v)
+    !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -71,8 +70,7 @@ module divergence_operators
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
   end subroutine div_h
 
@@ -100,8 +98,7 @@ module divergence_operators
     real(wp) :: density_upper ! density at the upper interface
     real(wp) :: density_lower ! density at the lower interface
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v,density_upper,density_lower)
+    !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v,density_upper,density_lower)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -153,8 +150,7 @@ module divergence_operators
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
   end subroutine div_h_tracers
   
@@ -170,8 +166,7 @@ module divergence_operators
     integer  :: ji,jk,jl                         ! loop indices
     real(wp) :: contra_upper,contra_lower,comp_v ! kinematic quantities for computing the vertical divergence
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,contra_upper,contra_lower,comp_v)
+    !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_v)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -190,8 +185,7 @@ module divergence_operators
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
   end subroutine add_vertical_div
 

@@ -30,8 +30,7 @@ module vorticity_flux
     
     ! horizontal velocity tendency due to vertical vorticity and horizontal wind (TRSK)
     ! u
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do ji=1,nlins
       do jk=2,ncols
         diag%pot_vort_tend_x(ji,jk,:) = &
@@ -68,11 +67,9 @@ module vorticity_flux
       endif
       
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     ! v
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do jk=1,ncols
       do ji=2,nlins
         diag%pot_vort_tend_y(ji,jk,:) = &
@@ -101,13 +98,11 @@ module vorticity_flux
       endif
       
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! horizontal velocity tendency due to horizontal vorticity and vertical wind
     ! u
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jl=1,nlays
         do jk=2,ncols
@@ -130,11 +125,9 @@ module vorticity_flux
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     ! v
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do jk=1,ncols
       do jl=1,nlays
         do ji=2,nlins
@@ -157,12 +150,10 @@ module vorticity_flux
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! vertical velocity tendency due to horizontal vorticity and horizontal wind
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=2,nlays
@@ -178,8 +169,7 @@ module vorticity_flux
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine calc_vorticity_flux_term
 

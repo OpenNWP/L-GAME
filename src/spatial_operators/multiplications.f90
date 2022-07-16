@@ -31,11 +31,9 @@ module multiplications
     real(wp), intent(inout) :: scalar_field_out(:,:,:) ! the result
     
     ! actual calculation
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     scalar_field_out = scalar_field_1*scalar_field_2
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
   
   end subroutine scalar_times_scalar
 
@@ -55,48 +53,36 @@ module multiplications
     
     ! inner domain
     ! x
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jk)
+    !$omp parallel do private(jk)
     do jk=2,ncols
       result_field_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk-1,:) + scalar_field(:,jk,:))*in_vector_x(:,jk,:)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! y
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp parallel do private(ji)
     do ji=2,nlins
       result_field_y(ji,:,:) = 0.5_wp*(scalar_field(ji-1,:,:) + scalar_field(ji,:,:))*in_vector_y(ji,:,:)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
     ! periodic boundary conditions
     if (lperiodic) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       result_field_x(:,1,:) = 0.5_wp*(scalar_field(:,1,:) + scalar_field(:,ncols,:))*in_vector_x(:,1,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
       
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
       
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       result_field_y(1,:,:) = 0.5_wp*(scalar_field(1,:,:) + scalar_field(nlins,:,:))*in_vector_y(1,:,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
       
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
   
   end subroutine scalar_times_vector_h
@@ -117,8 +103,7 @@ module multiplications
     
     ! inner domain
     ! x
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=2,ncols
         do jl=1,nlays
@@ -130,12 +115,10 @@ module multiplications
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! y
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=2,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -147,13 +130,11 @@ module multiplications
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
     ! periodic boundary conditions
     if (lperiodic) then
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(ji,jl)
+      !$omp parallel do private(ji,jl)
       do ji=1,nlins
         do jl=1,nlays
           if (in_vector_x(ji,1,jl)>=0._wp) then
@@ -163,17 +144,13 @@ module multiplications
           endif
         enddo
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+      !$omp end parallel do
       
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
       
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(jk,jl)
+      !$omp parallel do private(jk,jl)
       do jk=1,ncols
         do jl=1,nlays
           if (in_vector_y(1,jk,jl)>=0._wp) then
@@ -183,14 +160,11 @@ module multiplications
           endif
         enddo
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+      !$omp end parallel do
       
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
   
   end subroutine scalar_times_vector_h_upstream
@@ -206,13 +180,11 @@ module multiplications
     ! local variables
     integer :: jl ! loop index
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$omp parallel do private(jl)
     do jl=2,nlays
       result_field_z(:,:,jl) = 0.5_wp*(scalar_field(:,:,jl-1) + scalar_field(:,:,jl))*in_vector_z(:,:,jl)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine scalar_times_vector_v
   

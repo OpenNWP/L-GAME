@@ -81,29 +81,24 @@ module grid_generator
     dlon = dx/re
     lat_left_upper = (nlins-1._wp)/2._wp*dlat
     lon_left_upper = -(ncols-1._wp)/2._wp*dlon
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp parallel do private(ji)
     do ji=1,nlins
       grid%lat_scalar(ji) = lat_left_upper - dlat*(ji-1._wp)
       ! this will be modified later
       grid%lat_geo_scalar(ji,:) = grid%lat_scalar(ji)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jk)
+    !$omp parallel do private(jk)
     do jk=1,ncols
       grid%lon_scalar(jk) = lon_left_upper + dlon*(jk-1._wp)
       ! this will be modified later
       grid%lon_geo_scalar(:,jk) = grid%lon_scalar(jk)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! this will be modified later
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do ji=1,nlins
       do jk=1,ncols+1
         grid%lat_geo_u(ji,jk) = grid%lat_scalar(ji)
@@ -114,12 +109,10 @@ module grid_generator
         endif
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! this will be modified later
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do ji=1,nlins+1
       do jk=1,ncols
         if (ji==nlins+1) then
@@ -130,29 +123,22 @@ module grid_generator
         grid%lon_geo_v(ji,jk) =  grid%lon_scalar(jk)
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! this will be modified later
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     grid%dir_geo_u(:,:) = 0._wp
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! this will be modified later
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     grid%dir_geo_v(:,:) = 0.5_wp*M_PI
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! this will be modified later
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     grid%dir_geo_u_scalar(:,:) = 0._wp
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! performing the rotation
     ! setting up the rotation matrix
@@ -178,8 +164,7 @@ module grid_generator
 	
 	! calculating the geographic coordinates of the gridpoints
 	! scalar points
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
+    !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
     do ji=1,nlins
       do jk=1,ncols
         ! calculating the local i-vector before the rotation
@@ -199,12 +184,10 @@ module grid_generator
         grid%dir_geo_u_scalar(ji,jk) = atan2(y_basis_local,x_basis_local)
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! u-vector points, including directions
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
+    !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
     do ji=1,nlins
       do jk=1,ncols+1
         ! calculating the local i-vector before the rotation
@@ -225,12 +208,10 @@ module grid_generator
         grid%dir_geo_u(ji,jk) = atan2(y_basis_local,x_basis_local)
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 	
     ! v-vector points, including directions
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
+    !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
     do ji=1,nlins+1
       do jk=1,ncols
         ! calculating the local j-vector before the rotation
@@ -251,32 +232,26 @@ module grid_generator
         grid%dir_geo_v(ji,jk) = atan2(y_basis_local,x_basis_local)
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! setting the Coriolis vector
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,y_basis_local)
+    !$omp parallel do private(ji,jk,y_basis_local)
     do ji=1,nlins+1
       do jk=1,ncols
         y_basis_local = sin(grid%dir_geo_v(ji,jk) - 0.5_wp*M_PI)
         grid%fvec_x(ji,jk) = 2._wp*omega*cos(grid%lat_geo_v(ji,jk))*y_basis_local
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,y_basis_local)
+    !$omp end parallel do
+    !$omp parallel do private(ji,jk,y_basis_local)
     do ji=1,nlins
       do jk=1,ncols+1
         y_basis_local = sin(grid%dir_geo_u(ji,jk) + 0.5_wp*M_PI)
         grid%fvec_y(ji,jk) = 2._wp*omega*cos(grid%lat_geo_u(ji,jk))*y_basis_local
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,lat_local,lon_local,r_old,r_new)
+    !$omp end parallel do
+    !$omp parallel do private(ji,jk,lat_local,lon_local,r_old,r_new)
     do ji=1,nlins+1
       do jk=1,ncols+1
         if (ji==nlins+1) then
@@ -295,8 +270,7 @@ module grid_generator
         grid%fvec_z(ji,jk) = 2._wp*omega*sin(lat_local)
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! Physical grid properties
     ! ------------------------
@@ -310,11 +284,9 @@ module grid_generator
     
       ! no orography
       case(0)
-        !$OMP PARALLEL
-        !$OMP WORKSHARE
+        !$omp parallel workshare
         grid%z_w(:,:,nlays+1) = 0._wp
-        !$OMP END WORKSHARE
-        !$OMP END PARALLEL
+        !$omp end parallel workshare
       
       ! real orography
       case(1)
@@ -328,20 +300,17 @@ module grid_generator
       ! Schaer wave test orography
       case(2)
         height_mountain = 250._wp
-        !$OMP PARALLEL
-        !$OMP DO PRIVATE(jk,x_coord)
+        !$omp parallel do private(jk,x_coord)
         do jk=1,ncols
           x_coord = dx*jk - (ncols/2 + 1)*dx
           grid%z_w(:,jk,nlays+1) = height_mountain*exp(-x_coord**2/5000._wp**2)*cos(M_PI*x_coord/4000._wp)**2
         enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
+        !$omp end parallel do
       
       ! Schaer advection test orography
       case(3)
         height_mountain = 3000._wp
-        !$OMP PARALLEL
-        !$OMP DO PRIVATE(jk,x_coord)
+        !$omp parallel do private(jk,x_coord)
         do jk=1,ncols
           x_coord = dx*jk - (ncols/2 + 1)*dx
           if (abs(x_coord)<=25e3_wp) then
@@ -350,8 +319,7 @@ module grid_generator
             grid%z_w(:,jk,nlays+1) = 0._wp
           endif
         enddo
-        !$OMP END DO
-        !$OMP END PARALLEL
+        !$omp end parallel do
     
     endselect
     
@@ -360,8 +328,7 @@ module grid_generator
     c_p_soil = 830._wp
     c_p_water = 4184._wp
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,x_coord)
+    !$omp parallel do private(ji,jk,x_coord)
     do ji=1,nlins
       do jk=1,ncols
 		
@@ -411,16 +378,14 @@ module grid_generator
       
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! Vertical grid
     ! -------------
     
     ! calculating the vertical positions of the scalar points
     ! the heights are defined according to k = A_k + B_k*surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,z_rel,sigma_z,A,B,vertical_vector_pre,max_oro)
+    !$omp parallel do private(ji,jk,jl,z_rel,sigma_z,A,B,vertical_vector_pre,max_oro)
     do ji=1,nlins
       do jk=1,ncols
         ! filling up vertical_vector_pre
@@ -453,109 +418,79 @@ module grid_generator
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! setting the height of the u-vector points
     ! inner domain
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jk)
+    !$omp parallel do private(jk)
     do jk=2,ncols
       grid%z_u(:,jk,:) = 0.5_wp*(grid%z_scalar(:,jk-1,:) + grid%z_scalar(:,jk,:))
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     ! boundaries
     if (lperiodic) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       grid%z_u(:,1,:) = 0.5_wp*(grid%z_scalar(:,1,:) + grid%z_scalar(:,ncols,:))
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp end parallel workshare
+      !$omp parallel workshare
       grid%z_u(:,ncols+1,:) = grid%z_u(:,1,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     else
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       grid%z_u(:,1,:) = grid%z_scalar(:,1,:) + 0.5_wp*(grid%z_scalar(:,1,:) - grid%z_scalar(:,2,:))
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp end parallel workshare
+      !$omp parallel workshare
       grid%z_u(:,ncols+1,:) = grid%z_scalar(:,ncols,:) + 0.5_wp*(grid%z_scalar(:,ncols,:) - grid%z_scalar(:,ncols-1,:))
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
     ! setting the height of the v-vector points
     ! inner domain
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp parallel do private(ji)
     do ji=2,nlins
       grid%z_v(ji,:,:) = 0.5_wp*(grid%z_scalar(ji-1,:,:) + grid%z_scalar(ji,:,:))
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     ! boundaries
     if (lperiodic) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       grid%z_v(1,:,:) = 0.5_wp*(grid%z_scalar(1,:,:) + grid%z_scalar(nlins,:,:))
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp end parallel workshare
+      !$omp parallel workshare
       grid%z_v(nlins+1,:,:) = grid%z_v(1,:,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     else
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       grid%z_v(1,:,:) = grid%z_scalar(1,:,:) + 0.5_wp*(grid%z_scalar(1,:,:) - grid%z_scalar(2,:,:))
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp end parallel workshare
+      !$omp parallel workshare
       grid%z_v(nlins+1,:,:) = grid%z_scalar(nlins,:,:) + 0.5_wp*(grid%z_scalar(nlins,:,:) - grid%z_scalar(nlins-1,:,:))
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
     ! setting dx
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp parallel do private(ji)
     do ji=1,nlins
       grid%dx(ji,:,:) = dx*cos(grid%lat_scalar(ji))*(re + grid%z_u(ji,:,:))/re
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     ! setting dy
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     grid%dy = dy*(re + grid%z_v)/re
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! plane geometry grid distances
     if (lplane) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       grid%dx = dx
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp end parallel workshare
+      !$omp parallel workshare
       grid%dy = dy
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
     ! setting dx of the dual grid
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp parallel do private(ji)
     do ji=1,nlins+1
       if (ji==nlins+1) then
         grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji-1) - 0.5_wp*dlat)*(re + grid%z_v(ji,:,:))/re
@@ -563,35 +498,27 @@ module grid_generator
         grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji) + 0.5_wp*dlat)*(re + grid%z_v(ji,:,:))/re
       endif
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     ! setting dy of the dual grid
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     grid%dy_dual = dy*(re + grid%z_u)/re
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! plane geometry dual grid distances
     if (lplane) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       grid%dx_dual = dx
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp end parallel workshare
+      !$omp parallel workshare
       grid%dy_dual = dy
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
     ! calculating the coordinate slopes
     call grad_hor_cov(grid%z_scalar,grid%slope_x,grid%slope_y,grid)
     
     ! setting the z coordinates of the vertical vector points
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$omp parallel do private(jl)
     do jl=1,nlays
       if (jl==1) then
         grid%z_w(:,:,jl) = toa
@@ -599,12 +526,10 @@ module grid_generator
         grid%z_w(:,:,jl) = 0.5_wp*(grid%z_scalar(:,:,jl-1) + grid%z_scalar(:,:,jl))
       endif
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! setting the vertical distances between the scalar data points
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$omp parallel do private(jl)
     do jl=1,nlays+1
       if (jl==1) then
         grid%dz(:,:,jl) = 2._wp*(toa - grid%z_scalar(:,:,jl))
@@ -614,45 +539,37 @@ module grid_generator
         grid%dz(:,:,jl) = grid%z_scalar(:,:,jl-1) - grid%z_scalar(:,:,jl)
       endif
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! setting the horizontal areas at the surface
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do ji=1,nlins
       do jk=1,ncols
         grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(re + grid%z_w(ji,jk,nlays+1))**2/re**2
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
     ! setting the horizontal areas at the higher points (above the surface)
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$omp parallel do private(jl)
     do jl=1,nlays
       grid%area_z(:,:,jl) = grid%area_z(:,:,nlays+1)*(re + grid%z_w(:,:,jl))**2 &
       /(re + grid%z_w(:,:,nlays+1))**2
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! plane geometry horizontal areas
     if (lplane) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       grid%area_z(:,:,:) = dx*dy
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
     ! the mean velocity area can be set now
     grid%mean_velocity_area = 2._wp*sum(grid%area_z(:,:,nlays+1))/size(grid%area_z(:,:,nlays+1))
     
     ! setting the vertical areas in x-direction
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,lower_z,upper_z,lower_length)
+    !$omp parallel do private(ji,jk,jl,lower_z,upper_z,lower_length)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays
@@ -678,12 +595,10 @@ module grid_generator
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! setting the vertical areas in y-direction
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,lower_z,upper_z,lower_length)
+    !$omp parallel do private(ji,jk,jl,lower_z,upper_z,lower_length)
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
@@ -713,12 +628,10 @@ module grid_generator
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! setting the horizontal dual areas
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins+1
       do jk=1,ncols+1
         do jl=1,nlays
@@ -748,12 +661,10 @@ module grid_generator
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! setting the vertical dual areas in x-direction
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,lower_z,lower_length,upper_z)
+    !$omp parallel do private(ji,jk,jl,lower_z,lower_length,upper_z)
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays+1
@@ -789,12 +700,10 @@ module grid_generator
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! setting the vertical dual areas in y-direction
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,lower_z,lower_length,upper_z)
+    !$omp parallel do private(ji,jk,jl,lower_z,lower_length,upper_z)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays+1
@@ -830,12 +739,10 @@ module grid_generator
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
     ! setting the volume of the grid boxes
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$omp parallel do private(jl)
     do jl=1,nlays
       grid%volume(:,:,jl) = 1._wp/3._wp*((re + grid%z_w(:,:,jl))**3 - (re + grid%z_w(:,:,jl+1))**3) &
       /(re + grid%z_w(:,:,jl+1))**2*grid%area_z(:,:,jl+1)
@@ -844,15 +751,13 @@ module grid_generator
         grid%volume(:,:,jl) = grid%area_z(:,:,jl+1)*(grid%z_w(:,:,jl) - grid%z_w(:,:,jl+1))
       endif
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! Derived quantities
     ! ------------------
     
     ! setting the inner product weights
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -865,8 +770,7 @@ module grid_generator
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! setting the TRSK weights
     ! u
@@ -957,8 +861,7 @@ module grid_generator
     integer  :: ji,jk,jl ! index variables
     
     ! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,b,c,pressure)
+    !$omp parallel do private(ji,jk,jl,b,c,pressure)
     do ji=1,nlins
       do jk=1,ncols
         ! integrating from bottom to top
@@ -980,8 +883,7 @@ module grid_generator
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! calculating the gradient of the background Exner pressure (only needs to be done once)
     call grad(grid%exner_bg,grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
@@ -1091,15 +993,13 @@ module grid_generator
     original_array = array
     
     ! inner domin
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do ji=2,nlins-1
       do jk=2,ncols-1
         array(ji,jk) = sum(original_array(ji-1:ji+1,jk-1:jk+1))/9._wp
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! corners
     array(1,1) = sum(original_array(1:2,1:2))/4._wp
@@ -1108,34 +1008,26 @@ module grid_generator
     array(nlins,ncols) = sum(original_array(nlins-1:nlins,ncols-1:ncols))/4._wp
   
     ! boundaries
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jk)
+    !$omp parallel do private(jk)
     do jk=2,ncols-1
       array(1,jk) = sum(original_array(1:2,jk-1:jk+1))/6._wp
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jk)
+    !$omp end parallel do
+    !$omp parallel do private(jk)
     do jk=2,ncols-1
       array(nlins,jk) = sum(original_array(nlins-1:nlins,jk-1:jk+1))/6._wp
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp end parallel do
+    !$omp parallel do private(ji)
     do ji=2,nlins-1
       array(ji,1) = sum(original_array(ji-1:ji+1,1:2))/6._wp
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp end parallel do
+    !$omp parallel do private(ji)
     do ji=2,nlins-1
       array(ji,ncols) = sum(original_array(ji-1:ji+1,ncols-1:ncols))/6._wp
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine smooth_hor_scalar
   

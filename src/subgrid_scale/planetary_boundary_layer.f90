@@ -49,9 +49,8 @@ module planetary_boundary_layer
 
     w_theta_v_corr = 0.2_wp
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,u_lowest_layer,u10,agl,theta_v_lowest_layer,theta_v_second_layer,dz,dtheta_v_dz, &
-    !$OMP w_pert,theta_v_pert,w_pert_theta_v_pert_avg)
+    !$omp parallel do private(ji,jk,u_lowest_layer,u10,agl,theta_v_lowest_layer,theta_v_second_layer,dz,dtheta_v_dz, &
+    !$omp w_pert,theta_v_pert,w_pert_theta_v_pert_avg)
     do ji=1,nlins
       do jk=1,ncols
         agl = grid%z_scalar(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1)
@@ -99,13 +98,11 @@ module planetary_boundary_layer
       
       enddo
     enddo 
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
     ! updating the surface flux resistance acting on scalar quantities (moisture and sensible heat)
     if (lprog_soil_temp) then
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(ji,jk)
+      !$omp parallel do private(ji,jk)
       do ji=1,nlins
         do jk=1,ncols
           diag%scalar_flux_resistance(ji,jk) = scalar_flux_resistance(diag%roughness_velocity(ji,jk), &
@@ -113,8 +110,7 @@ module planetary_boundary_layer
           grid%roughness_length(ji,jk),diag%monin_obukhov_length(ji,jk))
         enddo
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+      !$omp end parallel do
     endif
 
   end subroutine update_sfc_turb_quantities
@@ -133,9 +129,8 @@ module planetary_boundary_layer
     real(wp) :: layer_thickness,monin_obukhov_length_value,wind_rescale_factor ! variables needed for the surface friction
     integer  :: ji,jk                                                          ! loop indices
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
-    !$OMP flux_resistance,wind_rescale_factor)
+    !$omp parallel do private(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
+    !$omp flux_resistance,wind_rescale_factor)
     do ji=1,nlins
         do jk=2,ncols
 
@@ -193,12 +188,10 @@ module planetary_boundary_layer
         endif
         
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
-    !$OMP flux_resistance,wind_rescale_factor)
+    !$omp parallel do private(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
+    !$omp flux_resistance,wind_rescale_factor)
     do jk=1,ncols
       do ji=2,nlins
 
@@ -255,8 +248,7 @@ module planetary_boundary_layer
         endif
         
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine pbl_wind_tendency
   

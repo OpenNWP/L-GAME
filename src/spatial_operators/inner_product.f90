@@ -33,8 +33,7 @@ module inner_product
     ! local variables
     integer :: ji,jk,jl ! loop indices
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -48,8 +47,7 @@ module inner_product
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine inner
 

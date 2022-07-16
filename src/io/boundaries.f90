@@ -59,8 +59,7 @@ module boundaries
     new_weight = 1._wp - old_weight
     
     ! linear combination of the model state and the boundary conditions
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -75,11 +74,9 @@ module boundaries
         + new_weight*bc%wind_w(ji,jk,nlays+1,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%wind_w(ji,jk,nlays+1)
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays
@@ -88,11 +85,9 @@ module boundaries
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
@@ -101,16 +96,13 @@ module boundaries
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! setting the virtual potential temperature perturbation
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_v_bg
     state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_v) - grid%exner_bg
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
   end subroutine update_boundaries
   
@@ -153,8 +145,7 @@ module boundaries
     integer  :: ji,jk              ! loop indices
     
     ! rescale factor for scalar fields
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do ji=1,nlins
       do jk=1,ncols
         dist_from_boundary = min(ji-1,jk-1,nlins-ji,ncols-jk)
@@ -162,12 +153,10 @@ module boundaries
         bc%scalar_bc_factor(ji,jk) = sin(0.5_wp*M_PI*bc%scalar_bc_factor(ji,jk))**2
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! u rescale factor
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do ji=1,nlins
       do jk=1,ncols+1
         dist_from_boundary = min(ji-1,jk-1,nlins-ji,ncols+1-jk)
@@ -175,12 +164,10 @@ module boundaries
         bc%u_bc_factor(ji,jk) = sin(0.5_wp*M_PI*bc%u_bc_factor(ji,jk))**2
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! v rescale factor
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk)
+    !$omp parallel do private(ji,jk)
     do ji=1,nlins+1
       do jk=1,ncols
         dist_from_boundary = min(ji-1,jk-1,nlins+1-ji,ncols-jk)
@@ -188,8 +175,7 @@ module boundaries
         bc%v_bc_factor(ji,jk) = sin(0.5_wp*M_PI*bc%v_bc_factor(ji,jk))**2
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine setup_bc_factor
   

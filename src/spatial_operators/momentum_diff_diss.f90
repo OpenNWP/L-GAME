@@ -64,8 +64,7 @@ module momentum_diff_diss
     
     ! Computing the curl of vorticity component
     ! -----------------------------------------
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
+    !$omp parallel do private(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
     do ji=1,nlins
       do jk=1,ncols+1
         do jl=1,nlays
@@ -89,11 +88,9 @@ module momentum_diff_diss
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
+    !$omp parallel do private(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
     do ji=1,nlins+1
       do jk=1,ncols
         do jl=1,nlays
@@ -117,12 +114,10 @@ module momentum_diff_diss
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! adding up the two components and dividing by the averaged density
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jl=1,nlays
         do jk=2,ncols
@@ -139,11 +134,9 @@ module momentum_diff_diss
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do jk=1,ncols
       do jl=1,nlays
         do ji=2,nlins
@@ -160,8 +153,7 @@ module momentum_diff_diss
         
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine mom_diff_h
 
@@ -180,65 +172,52 @@ module momentum_diff_diss
     ! 1.) vertical diffusion of horizontal velocity
     ! ---------------------------------------------
     ! calculating the vertical gradients of the velocity components
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$omp parallel do private(jl)
     do jl=2,nlays
       diag%du_dz(:,:,jl) = (state%wind_u(:,:,jl-1) - state%wind_u(:,:,jl))/(grid%z_u(:,:,jl-1) - grid%z_u(:,:,jl))
       diag%dv_dz(:,:,jl) = (state%wind_v(:,:,jl-1) - state%wind_v(:,:,jl))/(grid%z_v(:,:,jl-1) - grid%z_v(:,:,jl))
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     ! extrapolation to the TOA
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     diag%du_dz(:,:,1) = diag%du_dz(:,:,2)
     diag%dv_dz(:,:,1) = diag%dv_dz(:,:,2)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     ! calculation at the surface
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jk)
+    !$omp parallel do private(jk)
     do jk=2,ncols
       diag%du_dz(:,jk,nlays+1) = state%wind_u(:,jk,nlays)/(grid%z_u(:,jk,nlays) &
       - 0.5_wp*(grid%z_w(:,jk-1,nlays+1)+grid%z_w(:,jk,nlays+1)))
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! periodic boundary conditions
     if (lperiodic) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       diag%du_dz(:,1,nlays+1) = state%wind_u(:,1,nlays)/(grid%z_u(:,1,nlays) &
       - 0.5_wp*(grid%z_w(:,ncols,nlays+1)+grid%z_w(:,1,nlays+1)))
       diag%du_dz(:,ncols+1,nlays+1) = diag%du_dz(:,1,nlays+1)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp parallel do private(ji)
     do ji=2,nlins
       diag%dv_dz(ji,:,nlays+1) = state%wind_v(ji,:,nlays)/(grid%z_v(ji,:,nlays) &
       - 0.5_wp*(grid%z_w(ji-1,:,nlays+1)+grid%z_w(ji,:,nlays+1)))
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! periodic boundary conditions
     if (lperiodic) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       diag%dv_dz(1,:,nlays+1) = state%wind_v(1,:,nlays)/(grid%z_v(1,:,nlays) &
       - 0.5_wp*(grid%z_w(nlins,:,nlays+1)+grid%z_w(1,:,nlays+1)))
       diag%dv_dz(nlins+1,:,nlays+1) = diag%dv_dz(1,:,nlays+1)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
     
     ! calculating the acceleration
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jl=1,nlays
         do jk=2,ncols
@@ -261,11 +240,9 @@ module momentum_diff_diss
       
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do jk=1,ncols
       do jl=1,nlays
         do ji=2,nlins
@@ -288,17 +265,14 @@ module momentum_diff_diss
       
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! 2.) vertical diffusion of vertical velocity
     ! -------------------------------------------
     ! resetting the placeholder field
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     diag%scalar_placeholder = 0._wp
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     ! computing something like dw/dz
     call add_vertical_div(state%wind_w,diag%scalar_placeholder,grid)
     ! computing and multiplying by the respective diffusion coefficient
@@ -310,34 +284,29 @@ module momentum_diff_diss
     ! ---------------------------------------------
     ! the diffusion coefficient is the same as the one for vertical diffusion of horizontal velocity
     ! averaging the vertical velocity vertically to cell centers, using the inner product weights
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$omp parallel do private(jl)
     do jl=1,nlays
       diag%scalar_placeholder(:,:,jl) = &
       grid%inner_product_weights(:,:,jl,5)*state%wind_w(:,:,jl) &
       + grid%inner_product_weights(:,:,jl,6)*state%wind_w(:,:,jl+1)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     ! computing the horizontal gradient of the vertical velocity field
     call grad_hor(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
     ! multiplying by the already computed diffusion coefficient
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$omp parallel do private(jl)
     do jl=1,nlays
       diag%u_placeholder(:,:,jl) = 0.5_wp*(irrev%vert_hor_viscosity_u(:,:,jl) + irrev%vert_hor_viscosity_u(:,:,jl+1)) &
       *diag%u_placeholder(:,:,jl)
       diag%v_placeholder(:,:,jl) = 0.5_wp*(irrev%vert_hor_viscosity_v(:,:,jl) + irrev%vert_hor_viscosity_v(:,:,jl+1)) &
       *diag%v_placeholder(:,:,jl)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     ! the divergence of the diffusive flux density results in the diffusive acceleration
     call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
     ! vertically averaging the divergence to half levels and dividing by the density
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=2,nlays
@@ -349,8 +318,7 @@ module momentum_diff_diss
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
   end subroutine mom_diff_v
   
@@ -370,8 +338,7 @@ module momentum_diff_diss
     call inner(state%wind_u,state%wind_v,state%wind_w, &
     irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,irrev%heating_diss,grid)
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji,jk,jl)
+    !$omp parallel do private(ji,jk,jl)
     do ji=1,nlins
       do jk=1,ncols
         do jl=1,nlays
@@ -379,8 +346,7 @@ module momentum_diff_diss
         enddo
       enddo
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
   
   end subroutine simple_dissipation_rate
 

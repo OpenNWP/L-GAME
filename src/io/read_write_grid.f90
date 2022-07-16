@@ -155,11 +155,9 @@ module read_write_grid
     ! reading the arrays
     call nc_check(nf90_get_var(ncid,varid_z_w,grid%z_w(:,:,nlays+1)))
     
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     grid%z_w(:,:,nlays+1) = merge(grid%z_w(:,:,nlays+1),0._wp,grid%z_w(:,:,nlays+1)>=0._wp)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))

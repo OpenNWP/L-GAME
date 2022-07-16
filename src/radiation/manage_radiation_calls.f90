@@ -31,16 +31,14 @@ module manage_radiation_calls
     
     write(*,*) "Starting update of radiative fluxes ..."
     
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp parallel do private(ji)
     do ji=1,nlins
       call calc_radiative_flux_convergence(grid%lat_geo_scalar(ji,:),grid%lon_geo_scalar(ji,:), &
       grid%z_scalar(ji,:,:),grid%z_w(ji,:,:),state%rho(ji,:,:,:),diag%temperature(ji,:,:),diag%radiation_tendency(ji,:,:), &
       state%temperature_soil(ji,:,1),diag%sfc_sw_in(ji,:),diag%sfc_lw_out(ji,:),grid%sfc_albedo(ji,:), &
       ncols,time_coordinate)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     
     write(*,*) "Update of radiative fluxes completed."
     

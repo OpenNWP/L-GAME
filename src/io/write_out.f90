@@ -159,18 +159,15 @@ module write_out
     call nc_check(nf90_put_var(ncid,varid_rho,state%rho))
     
     ! 3D temperature
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     diag%scalar_placeholder = (grid%theta_v_bg + state%theta_v_pert) &
     *(grid%exner_bg + state%exner_pert)
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
     call nc_check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder))
     
     if (no_of_gaseous_constituents>1) then
       ! relative humidity
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE(ji,jk,jl)
+      !$omp parallel do private(ji,jk,jl)
       do ji=1,nlins
         do jk=1,ncols
           do jl=1,nlays
@@ -179,42 +176,35 @@ module write_out
           enddo
         enddo
       enddo
-      !$OMP END DO
-      !$OMP END PARALLEL
+      !$omp end parallel do
       call nc_check(nf90_put_var(ncid,varid_r,diag%scalar_placeholder))
     endif
     
     ! 3D u wind
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jk)
+    !$omp parallel do private(jk)
     do jk=1,ncols
       diag%scalar_placeholder(:,jk,:) = 0.5_wp*(state%wind_u(:,jk,:)+state%wind_u(:,jk+1,:))
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     call nc_check(nf90_put_var(ncid,varid_u,diag%scalar_placeholder))
     
     ! 3D v wind
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp parallel do private(ji)
     do ji=1,nlins
       diag%scalar_placeholder(ji,:,:) = 0.5_wp*(state%wind_v(ji,:,:)+state%wind_v(ji+1,:,:))
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     call nc_check(nf90_put_var(ncid,varid_v,diag%scalar_placeholder))
     
     ! 3D w wind
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl,upper_weight)
+    !$omp parallel do private(jl,upper_weight)
     do jl=1,nlays
       upper_weight = (grid%z_scalar(:,:,jl) -&
       grid%z_w(:,:,jl+1))/(grid%z_w(:,:,jl) - grid%z_w(:,:,jl+1))
       diag%scalar_placeholder(:,:,jl) = &
       upper_weight*state%wind_w(:,:,jl)+(1._wp-upper_weight)*state%wind_w(:,:,jl+1)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
     call nc_check(nf90_put_var(ncid,varid_w,diag%scalar_placeholder))
     
     ! closing the NetCDF file

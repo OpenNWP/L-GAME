@@ -36,47 +36,35 @@ module gradient_operators
 
     ! inner domain
     ! calculating the x-component of the gradient
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jk)
+    !$omp parallel do private(jk)
     do jk=2,ncols
       result_field_x(:,jk,:) = (scalar_field(:,jk,:) - scalar_field(:,jk-1,:))/grid%dx(:,jk,:)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
     ! calculating the y-component of the gradient
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(ji)
+    !$omp parallel do private(ji)
     do ji=2,nlins
       result_field_y(ji,:,:) = (scalar_field(ji-1,:,:) - scalar_field(ji,:,:))/grid%dy(ji,:,:)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
     ! periodic boundary conditions
     if (lperiodic) then
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       result_field_x(:,1,:) = (scalar_field(:,1,:) - scalar_field(:,ncols,:))/grid%dx(:,1,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
       
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
       
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp parallel workshare
       result_field_y(1,:,:) = (scalar_field(nlins,:,:) - scalar_field(1,:,:))/grid%dy(1,:,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
-      !$OMP PARALLEL
-      !$OMP WORKSHARE
+      !$omp end parallel workshare
+      !$omp parallel workshare
       result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
-      !$OMP END WORKSHARE
-      !$OMP END PARALLEL
+      !$omp end parallel workshare
     endif
 
   end subroutine grad_hor_cov
@@ -94,13 +82,11 @@ module gradient_operators
     integer :: jl ! loop variables
 
     ! calculating the vertical gradient in the inner levels
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE(jl)
+    !$omp parallel do private(jl)
     do jl=2,nlays
       result_field(:,:,jl) = (scalar_field(:,:,jl-1) - scalar_field(:,:,jl))/grid%dz(:,:,jl)
     enddo
-    !$OMP END DO
-    !$OMP END PARALLEL
+    !$omp end parallel do
 
   end subroutine grad_vert_cov
   
@@ -152,11 +138,9 @@ module gradient_operators
     ! calling the gradient
     call grad(scalar_field,result_field_x,result_field_y,result_field_z,grid)
     ! setting the vertical component to zero
-    !$OMP PARALLEL
-    !$OMP WORKSHARE
+    !$omp parallel workshare
     result_field_z = 0._wp
-    !$OMP END WORKSHARE
-    !$OMP END PARALLEL
+    !$omp end parallel workshare
   
   end subroutine grad_hor
 
