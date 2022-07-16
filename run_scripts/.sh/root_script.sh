@@ -8,7 +8,7 @@ run_dir=$lgame_home_dir/output/$run_id
 
 if [ -d $run_dir ]
 then
-rm -r $run_dir
+	rm -r $run_dir
 fi
 mkdir $run_dir
 
@@ -18,14 +18,14 @@ cd $run_dir
 
 if [ ! -f ../../build/lgame ]
 then
-echo "Executable lgame missing. Compile first. Aborting run."
-cd - > /dev/null
-exit 1
+	echo "Executable lgame missing. Compile first. Aborting run."
+	cd - > /dev/null
+	exit 1
 fi
 
 if [ -f lgame ]
 then
-rm lgame
+	rm lgame
 fi
 
 cp ../../build/lgame .
