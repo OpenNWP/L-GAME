@@ -21,7 +21,7 @@ src/io/read_write_grid.f90
 src/time_stepping/column_solvers.f90
 src/time_stepping/explicit_vector_tendencies.f90
 src/time_stepping/explicit_scalar_tendencies.f90
-src/time_stepping/manage_rkhevi.f90
+src/time_stepping/manage_pchevi.f90
 src/time_stepping/pressure_gradient.f90
 src/constituents/derived_quantities.f90
 src/constituents/dictionary.f90
