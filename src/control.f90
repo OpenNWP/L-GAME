@@ -17,7 +17,7 @@ program control
   use grid_generator,            only: grid_setup,bg_setup
   use set_initial_state,         only: restart,ideal_init
   use write_out,                 only: write_output
-  use manage_rkhevi,             only: rkhevi
+  use manage_pchevi,             only: pchevi
   use linear_combine_two_states, only: lin_combination,interpolation_t
   use bc_nml,                    only: bc_nml_setup,lperiodic,t_latest_bc,dtime_bc
   use rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
@@ -462,7 +462,7 @@ program control
     endif
 
     ! this is the RKHEVI routine performing the time stepping
-    call rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,timestep_counter,lrad_update,t_0)
+    call pchevi(state_old,state_new,tend,bc,grid,diag,irrev,timestep_counter,lrad_update,t_0)
     
     ! managing the calls to the output routine
     if (t_0+dtime>=t_write) then

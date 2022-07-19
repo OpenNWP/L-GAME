@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module manage_rkhevi
+module manage_pchevi
 
   ! In this module, the RKHEVI time stepping is managed.
 
@@ -25,13 +25,13 @@ module manage_rkhevi
   
   private
   
-  public :: rkhevi
+  public :: pchevi
 
   contains
   
-  subroutine rkhevi(state_old,state_new,tend,bc,grid,diag,irrev,total_step_counter,lrad_update,t_0)
+  subroutine pchevi(state_old,state_new,tend,bc,grid,diag,irrev,total_step_counter,lrad_update,t_0)
   
-    ! This subroutine manages the RKHEVI time stepping.
+    ! This subroutine manages the predictor-corrector HEVI time stepping.
     
     type(t_state), intent(inout) :: state_old          ! the state at the old timestep
     type(t_state), intent(inout) :: state_new          ! the state at the new timestep
@@ -107,9 +107,9 @@ module manage_rkhevi
       call update_boundaries(state_new,bc,(total_step_counter+1)*dtime,grid)
     endif
     
-  end subroutine rkhevi
+  end subroutine pchevi
 
-end module manage_rkhevi
+end module manage_pchevi
 
 
 
