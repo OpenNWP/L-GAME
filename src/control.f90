@@ -5,7 +5,7 @@ program control
 
   ! This controls the model run from the beginning to the end.
 
-  use run_nml,                   only: run_nml_setup,run_span_hr,dtime, &
+  use run_nml,                   only: run_nml_setup,run_span_min,dtime, &
                                        t_init,nlins,ncols,nlays,lrestart, &
                                        lideal
   use io_nml,                    only: io_nml_setup,dt_write
@@ -447,7 +447,7 @@ program control
   
   ! the loop over the time steps
   t_write = t_0 + dt_write
-  run_span = 3600._wp*run_span_hr
+  run_span = 3600._wp*run_span_min
   timestep_counter = 0
   do while (t_0<t_init+run_span+300._wp .and. run_span/=0)
     

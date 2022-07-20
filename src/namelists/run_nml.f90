@@ -20,7 +20,7 @@ module run_nml
   real(wp)          :: dtime               ! time step
   real(wp)          :: toa                 ! top of atmosphere
   real(wp)          :: sigma               ! vertical grid stretching parameter
-  integer           :: run_span_hr         ! run span in hours
+  integer           :: run_span_min        ! run span in minutes
   real              :: t_init              ! epoch time stamp of the initialization
   integer           :: start_year          ! year when to begin the model run
   integer           :: start_month         ! month when to begin the model run
@@ -40,7 +40,7 @@ module run_nml
   real(wp)          :: lat_center          ! latitude of the center of the model domain
   real(wp)          :: lon_center          ! longitude of the center of the model domain
   
-  namelist /run/nlins,ncols,nlays,dy,dx,run_span_hr,sigma, &
+  namelist /run/nlins,ncols,nlays,dy,dx,run_span_min,sigma, &
   toa,scenario,llinear,run_id,lcorio,nlays_oro,lat_center,lon_center, &
   start_year,start_month,start_day,start_hour,start_minute,lplane,lmoist
 
@@ -57,7 +57,7 @@ module run_nml
     nlays_oro = 40
     dy = 25e3_wp
     dx = 25e3_wp
-    run_span_hr = 84
+    run_span_min = 1440
     start_year = 2000
     start_month = 1
     start_day = 1
