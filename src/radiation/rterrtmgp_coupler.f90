@@ -5,7 +5,8 @@ module radiation
 
   ! This module is a coupler to RTE+RRTMGP.
   
-  use mo_rte_kind,                only: wp
+  use definitions,                only: wp
+  use constants,                  only: EPSILON_SECURITY
   use mo_rrtmgp_util_string,      only: lower_case
   use mo_gas_optics_rrtmgp,       only: ty_gas_optics_rrtmgp
   use mo_load_coefficients,       only: load_and_init
@@ -193,8 +194,6 @@ module radiation
     real(wp)                              :: ice_cloud_weight
     ! liquid cloud particles weight
     real(wp)                              :: liquid_cloud_weight
-    ! security margin
-    real(wp)                              :: security_margin = 1e-10
     
     ! calculating the number of scalars
     no_of_scalars = nlays*no_of_scalars_h
@@ -246,13 +245,13 @@ module radiation
         do jk=1,nlays
           base_index = (jk-1)*no_of_scalars_h
           ! the solid condensates' effective radius
-          ice_precip_weight = mass_densities(base_index+ji)+security_margin
-          ice_cloud_weight = mass_densities(2*no_of_scalars+base_index+ji)+security_margin
+          ice_precip_weight = mass_densities(base_index+ji)+EPSILON_SECURITY
+          ice_cloud_weight = mass_densities(2*no_of_scalars+base_index+ji)+EPSILON_SECURITY
           ice_eff_radius_value = (ice_precip_weight*ice_precip_radius+ice_cloud_weight*ice_cloud_radius) &
           /(ice_precip_weight+ice_cloud_weight)
           ! the liquid condensates' effective radius
-          liquid_precip_weight = mass_densities(no_of_scalars+base_index+ji)+security_margin
-          liquid_cloud_weight = mass_densities(3*no_of_scalars+base_index+ji)+security_margin
+          liquid_precip_weight = mass_densities(no_of_scalars+base_index+ji)+EPSILON_SECURITY
+          liquid_cloud_weight = mass_densities(3*no_of_scalars+base_index+ji)+EPSILON_SECURITY
           liquid_eff_radius_value = (liquid_precip_weight*liquid_precip_radius+liquid_cloud_weight*liquid_cloud_radius) &
           /(liquid_precip_weight+liquid_cloud_weight)
           ! thickness of the gridbox
