@@ -7,7 +7,7 @@ module vorticities
 
   use definitions,      only: t_state,t_diag,t_grid,wp
   use run_nml,          only: nlins,ncols,nlays,nlays_oro,toa,lcorio,llinear
-  use constants,        only: re
+  use constants,        only: r_e
   use constituents_nml, only: no_of_condensed_constituents
   use averaging,        only: horizontal_covariant_x,horizontal_covariant_y
   use bc_nml,           only: lperiodic
@@ -444,7 +444,7 @@ module vorticities
     else
       do jm=1,4
         if (jm==1 .or. jm==3) then
-          l_rescale = (re + grid%z_area_dual_z(ji,jk,jl))/(re + grid%z_v(j_i(jm),j_k(jm),jl))
+          l_rescale = (r_e + grid%z_area_dual_z(ji,jk,jl))/(r_e + grid%z_v(j_i(jm),j_k(jm),jl))
           delta_z = grid%z_area_dual_z(ji,jk,jl) - grid%z_v(j_i(jm),j_k(jm),jl)
           ind_shift = 1
           if (delta_z>0._wp .or. jl==nlays) then
@@ -458,7 +458,7 @@ module vorticities
           rel_vort_z_local = rel_vort_z_local + sign_vector(jm)*l_rescale*grid%dy(j_i(jm),j_k(jm),jl)* &
           (state%wind_v(j_i(jm),j_k(jm),jl) + delta_z*vertical_gradient)
         else
-          l_rescale = (re + grid%z_area_dual_z(ji,jk,jl))/(re + grid%z_u(j_i(jm),j_k(jm),jl))
+          l_rescale = (r_e + grid%z_area_dual_z(ji,jk,jl))/(r_e + grid%z_u(j_i(jm),j_k(jm),jl))
           delta_z = grid%z_area_dual_z(ji,jk,jl) - grid%z_u(j_i(jm),j_k(jm),jl)
           ind_shift = 1
           if (delta_z>0._wp .or. jl==nlays) then

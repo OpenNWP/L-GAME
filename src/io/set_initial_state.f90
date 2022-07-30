@@ -11,7 +11,7 @@ module set_initial_state
   use constituents_nml, only: no_of_condensed_constituents,no_of_constituents
   use dictionary,       only: specific_gas_constants,spec_heat_capacities_v_gas,spec_heat_capacities_p_gas
   use constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
-                              gravity,p_0_standard,re,t_grad_inv,M_PI
+                              gravity,p_0_standard,r_e,t_grad_inv,M_PI
   use io_nml,           only: restart_filename
 
   implicit none
@@ -415,7 +415,7 @@ module set_initial_state
     ! output
     real(wp)             :: geopot
     
-    geopot = -gravity*re**2/(re+height)+gravity*re
+    geopot = -gravity*r_e**2/(r_e+height)+gravity*r_e
     
     ! Schaer test case
     if (lplane) then

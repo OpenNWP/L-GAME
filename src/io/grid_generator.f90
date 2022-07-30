@@ -9,7 +9,7 @@ module grid_generator
   use definitions,        only: wp,t_grid
   use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
                                 lon_center,lplane
-  use constants,          only: re,density_water,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
+  use constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv
   use surface_nml,        only: nsoillays,orography_id
   use gradient_operators, only: grad,grad_hor_cov
@@ -77,8 +77,8 @@ module grid_generator
     
     ! setting the latitude and longitude coordinates of the scalar grid points
     ! setting the dy of the model grid
-    dlat = dy/re
-    dlon = dx/re
+    dlat = dy/r_e
+    dlon = dx/r_e
     lat_left_upper = (nlins-1._wp)/2._wp*dlat
     lon_left_upper = -(ncols-1._wp)/2._wp*dlon
     !$omp parallel do private(ji)
@@ -348,7 +348,7 @@ module grid_generator
         grid%roughness_length(ji,jk) = 0.08_wp
 		
         ! will also not be used for water
-        grid%sfc_rho_c(ji,jk) = density_water*c_p_water
+        grid%sfc_rho_c(ji,jk) = rho_h2o*c_p_water
         
         grid%t_conduc_soil(ji,jk) = 1.4e-7_wp
 		
@@ -471,12 +471,12 @@ module grid_generator
     ! setting dx
     !$omp parallel do private(ji)
     do ji=1,nlins
-      grid%dx(ji,:,:) = dx*cos(grid%lat_scalar(ji))*(re + grid%z_u(ji,:,:))/re
+      grid%dx(ji,:,:) = dx*cos(grid%lat_scalar(ji))*(r_e + grid%z_u(ji,:,:))/r_e
     enddo
     !$omp end parallel do
     ! setting dy
     !$omp parallel workshare
-    grid%dy = dy*(re + grid%z_v)/re
+    grid%dy = dy*(r_e + grid%z_v)/r_e
     !$omp end parallel workshare
     
     ! plane geometry grid distances
@@ -493,15 +493,15 @@ module grid_generator
     !$omp parallel do private(ji)
     do ji=1,nlins+1
       if (ji==nlins+1) then
-        grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji-1) - 0.5_wp*dlat)*(re + grid%z_v(ji,:,:))/re
+        grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji-1) - 0.5_wp*dlat)*(r_e + grid%z_v(ji,:,:))/r_e
       else
-        grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji) + 0.5_wp*dlat)*(re + grid%z_v(ji,:,:))/re
+        grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji) + 0.5_wp*dlat)*(r_e + grid%z_v(ji,:,:))/r_e
       endif
     enddo
     !$omp end parallel do
     ! setting dy of the dual grid
     !$omp parallel workshare
-    grid%dy_dual = dy*(re + grid%z_u)/re
+    grid%dy_dual = dy*(r_e + grid%z_u)/r_e
     !$omp end parallel workshare
     
     ! plane geometry dual grid distances
@@ -545,7 +545,7 @@ module grid_generator
     !$omp parallel do private(ji,jk)
     do ji=1,nlins
       do jk=1,ncols
-        grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(re + grid%z_w(ji,jk,nlays+1))**2/re**2
+        grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(r_e + grid%z_w(ji,jk,nlays+1))**2/r_e**2
       enddo
     enddo
     !$omp end parallel do
@@ -553,8 +553,8 @@ module grid_generator
     ! setting the horizontal areas at the higher points (above the surface)
     !$omp parallel do private(jl)
     do jl=1,nlays
-      grid%area_z(:,:,jl) = grid%area_z(:,:,nlays+1)*(re + grid%z_w(:,:,jl))**2 &
-      /(re + grid%z_w(:,:,nlays+1))**2
+      grid%area_z(:,:,jl) = grid%area_z(:,:,nlays+1)*(r_e + grid%z_w(:,:,jl))**2 &
+      /(r_e + grid%z_w(:,:,nlays+1))**2
     enddo
     !$omp end parallel do
     
@@ -586,7 +586,7 @@ module grid_generator
             lower_z = 0.5_wp*(grid%z_w(ji,jk-1,jl+1) + grid%z_w(ji,jk,jl+1))
             upper_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
           endif
-          lower_length = dy*(re+lower_z)/re
+          lower_length = dy*(r_e+lower_z)/r_e
           ! plane geometry
           if (lplane) then
             lower_length = dy
@@ -616,9 +616,9 @@ module grid_generator
             upper_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
           endif
           if (ji==nlins+1) then
-            lower_length = dx*cos(grid%lat_scalar(ji-1)-0.5_wp*dlat)*(re+lower_z)/re
+            lower_length = dx*cos(grid%lat_scalar(ji-1)-0.5_wp*dlat)*(r_e+lower_z)/r_e
           else
-            lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)*(re+lower_z)/re
+            lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)*(r_e+lower_z)/r_e
           endif
           ! plane geometry
           if (lplane) then
@@ -648,10 +648,10 @@ module grid_generator
           ! setting the area itself
           if (ji==nlins+1) then
             grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji-1) - 0.5_wp*dlat,dlon,dlat) &
-            *(re + grid%z_area_dual_z(ji,jk,jl))**2/re**2
+            *(r_e + grid%z_area_dual_z(ji,jk,jl))**2/r_e**2
           else
             grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji) + 0.5_wp*dlat,dlon,dlat) &
-            *(re + grid%z_area_dual_z(ji,jk,jl))**2/re**2
+            *(r_e + grid%z_area_dual_z(ji,jk,jl))**2/r_e**2
           endif
           ! plane geometry
           if (lplane) then
@@ -676,7 +676,7 @@ module grid_generator
             else
               lower_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
             endif
-            lower_length = grid%dy(ji,jk,nlays)*(re + lower_z)/(re + grid%z_v(ji,jk,nlays))
+            lower_length = grid%dy(ji,jk,nlays)*(r_e + lower_z)/(r_e + grid%z_v(ji,jk,nlays))
           else
             lower_z = grid%z_v(ji,jk,jl)
             lower_length = grid%dy(ji,jk,jl)
@@ -715,7 +715,7 @@ module grid_generator
             else
               lower_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
             endif
-            lower_length = grid%dx(ji,jk,nlays)*(re + lower_z)/(re + grid%z_u(ji,jk,nlays))
+            lower_length = grid%dx(ji,jk,nlays)*(r_e + lower_z)/(r_e + grid%z_u(ji,jk,nlays))
           else
             lower_z = grid%z_u(ji,jk,jl)
             lower_length = grid%dx(ji,jk,jl)
@@ -744,8 +744,8 @@ module grid_generator
     ! setting the volume of the grid boxes
     !$omp parallel do private(jl)
     do jl=1,nlays
-      grid%volume(:,:,jl) = 1._wp/3._wp*((re + grid%z_w(:,:,jl))**3 - (re + grid%z_w(:,:,jl+1))**3) &
-      /(re + grid%z_w(:,:,jl+1))**2*grid%area_z(:,:,jl+1)
+      grid%volume(:,:,jl) = 1._wp/3._wp*((r_e + grid%z_w(:,:,jl))**3 - (r_e + grid%z_w(:,:,jl+1))**3) &
+      /(r_e + grid%z_w(:,:,jl+1))**2*grid%area_z(:,:,jl+1)
       ! plane geometry
       if (lplane) then
         grid%volume(:,:,jl) = grid%area_z(:,:,jl+1)*(grid%z_w(:,:,jl) - grid%z_w(:,:,jl+1))
@@ -1066,11 +1066,11 @@ module grid_generator
     real(wp) :: patch_area  ! the result
   
     ! computing the result
-    patch_area = re**2*dx_as_angle*(sin(center_lat + 0.5_wp*dy_as_angle) - sin(center_lat - 0.5_wp*dy_as_angle))
+    patch_area = r_e**2*dx_as_angle*(sin(center_lat + 0.5_wp*dy_as_angle) - sin(center_lat - 0.5_wp*dy_as_angle))
     
     ! plane geometry
     if (lplane) then
-      patch_area = re**2*dx_as_angle*dy_as_angle
+      patch_area = r_e**2*dx_as_angle*dy_as_angle
     endif
   
   end function patch_area
@@ -1086,8 +1086,8 @@ module grid_generator
     ! output
     real(wp) :: vertical_face_area ! the result
     
-    vertical_face_area = 0.5_wp*lower_length*(re + upper_z + re + lower_z) &
-    /(re + lower_z)*(upper_z - lower_z)
+    vertical_face_area = 0.5_wp*lower_length*(r_e + upper_z + r_e + lower_z) &
+    /(r_e + lower_z)*(upper_z - lower_z)
     
     ! plane geometry
     if (lplane) then
