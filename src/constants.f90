@@ -11,6 +11,8 @@ module constants
   
   public
   
+  ! physical constants
+  ! ------------------
   real(wp) :: r_e = 6371000.789927_wp ! Earth radius
   real(wp) :: k_b = 1.380649e-23_wp   ! Boltzmann's constant
   real(wp) :: n_a =  6.02214076e23_wp ! Avogadro's number
