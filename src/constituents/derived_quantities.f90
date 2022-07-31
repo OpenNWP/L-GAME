@@ -7,8 +7,9 @@ module derived_quantities
   
   use definitions,      only: wp,t_grid,t_state,t_diag
   use run_nml,          only: ny,nx,nlays
-  use constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v
+  use constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0
   use constituents_nml, only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
+  use dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water
   
   implicit none
   
@@ -21,6 +22,7 @@ module derived_quantities
   public :: density_total
   public :: density_gas
   public :: calc_diffusion_coeff
+  public :: rel_humidity
   
   contains
 
@@ -183,6 +185,31 @@ module derived_quantities
     enddo
     
   end function density_gas
+
+  function rel_humidity(abs_humidity,temperature)
+    
+    ! This function returns the relative humidity as a function of the absolute humidity in kg/m^3 and the temperature in K.
+    
+    real(wp), intent(in) :: abs_humidity,temperature
+    real(wp)             :: rel_humidity
+    
+    ! local variables
+    real(wp)             :: vapour_pressure     ! actual water vapour pressure
+    real(wp)             :: saturation_pressure ! saturation water vapour pressure
+    
+    ! calculation of the water vapour pressure according to the equation of state
+    vapour_pressure = abs_humidity*r_v*temperature
+    
+    if (temperature>t_0) then
+      saturation_pressure = saturation_pressure_over_water(temperature)
+    endif
+    if (temperature<=t_0) then
+      saturation_pressure = saturation_pressure_over_ice(temperature)
+    endif
+    
+    rel_humidity = vapour_pressure/saturation_pressure
+    
+  end function rel_humidity
 
   function calc_diffusion_coeff(temperature,density)
   

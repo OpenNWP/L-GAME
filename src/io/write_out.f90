@@ -5,12 +5,12 @@ module write_out
 
   ! This module handles everything dealing with IO.
 
-  use definitions,       only: t_state,wp,t_diag,t_grid
+  use definitions,        only: t_state,wp,t_diag,t_grid
   use netcdf
-  use run_nml,           only: ny,nx,nlays,scenario,run_id
-  use constituents_nml,  only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
-  use dictionary,        only: rel_humidity
-  use set_initial_state, only: bg_temp,bg_pres,geopot,nc_check
+  use run_nml,            only: ny,nx,nlays,scenario,run_id
+  use constituents_nml,   only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
+  use derived_quantities, only: rel_humidity
+  use set_initial_state,  only: bg_temp,bg_pres,geopot,nc_check
 
   implicit none
   

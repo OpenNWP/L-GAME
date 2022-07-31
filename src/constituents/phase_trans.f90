@@ -5,13 +5,14 @@ module phase_trans
 
   ! In this module, phase transition rates are being calculated.
   
-  use run_nml,          only: ny,nx,nlays,dtime,wp
-  use surface_nml,      only: lsfc_phase_trans
-  use constants,        only: t_0,EPSILON_SECURITY,r_d,r_v
-  use definitions,      only: t_state,t_diag,t_irrev,t_grid
-  use dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water, &
-                              enhancement_factor_over_water,enhancement_factor_over_ice, &
-                              phase_trans_heat,rel_humidity
+  use run_nml,            only: ny,nx,nlays,dtime,wp
+  use surface_nml,        only: lsfc_phase_trans
+  use constants,          only: t_0,EPSILON_SECURITY,r_d,r_v
+  use definitions,        only: t_state,t_diag,t_irrev,t_grid
+  use dictionary,         only: saturation_pressure_over_ice,saturation_pressure_over_water, &
+                                enhancement_factor_over_water,enhancement_factor_over_ice, &
+                                phase_trans_heat
+  use derived_quantities, only: rel_humidity
   
   implicit none
   

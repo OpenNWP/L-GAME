@@ -33,7 +33,6 @@ module dictionary
   public :: saturation_pressure_over_ice
   public :: enhancement_factor_over_water
   public :: enhancement_factor_over_ice
-  public :: rel_humidity
   
   contains
 
@@ -280,31 +279,6 @@ module dictionary
     enhancement_factor_over_ice = 0.99882_wp*exp(0.00000008_wp*air_pressure)
 
     end function enhancement_factor_over_ice
-
-  function rel_humidity(abs_humidity,temperature)
-    
-    ! This function returns the relative humidity as a function of the absolute humidity in kg/m^3 and the temperature in K.
-    
-    real(wp), intent(in) :: abs_humidity,temperature
-    real(wp)             :: rel_humidity
-    
-    ! local variables
-    real(wp)             :: vapour_pressure     ! actual water vapour pressure
-    real(wp)             :: saturation_pressure ! saturation water vapour pressure
-    
-    ! calculation of the water vapour pressure according to the equation of state
-    vapour_pressure = abs_humidity*r_v*temperature
-    
-    if (temperature>t_0) then
-      saturation_pressure = saturation_pressure_over_water(temperature)
-    endif
-    if (temperature<=t_0) then
-      saturation_pressure = saturation_pressure_over_ice(temperature)
-    endif
-    
-    rel_humidity = vapour_pressure/saturation_pressure
-    
-  end function rel_humidity
 
 end module dictionary
 
