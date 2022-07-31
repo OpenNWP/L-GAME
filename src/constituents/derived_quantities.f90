@@ -188,21 +188,18 @@ module derived_quantities
   
     ! This function calculates the molecular diffusion coefficient.
   
-    ! input arguments
     real(wp) :: temperature,density
-    ! output
     real(wp) :: calc_diffusion_coeff
     
     ! local variables
-    real(wp) :: particle_radius,particle_mass,thermal_velocity,particle_density,cross_section,mean_free_path ! some
-    ! thermodynamic quantities
+    real(wp) :: particle_radius,particle_mass,thermal_velocity,particle_density,cross_section,mean_free_path
 
     ! these things are hardly ever modified
     particle_radius = 130e-12_wp
     particle_mass = m_d/n_a
     
     ! actual calculation
-    thermal_velocity = sqrt(8.0_wp*k_B*temperature/(M_PI*particle_mass))
+    thermal_velocity = sqrt(8.0_wp*k_b*temperature/(M_PI*particle_mass))
     particle_density = density/particle_mass
     cross_section = 4.0_wp*M_PI*particle_radius**2
     mean_free_path = 1.0_wp/(sqrt(2.0_wp)*particle_density*cross_section)
