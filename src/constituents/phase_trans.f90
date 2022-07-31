@@ -7,11 +7,11 @@ module phase_trans
   
   use run_nml,          only: ny,nx,nlays,dtime,wp
   use surface_nml,      only: lsfc_phase_trans
-  use constants,        only: T_0,EPSILON_SECURITY
+  use constants,        only: t_0,EPSILON_SECURITY,r_d,r_v
   use definitions,      only: t_state,t_diag,t_irrev,t_grid
   use dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water, &
                               enhancement_factor_over_water,enhancement_factor_over_ice, &
-                              specific_gas_constants,phase_trans_heat,rel_humidity
+                              phase_trans_heat,rel_humidity
   
   implicit none
   
@@ -58,7 +58,7 @@ module phase_trans
 
           ! determining the saturation pressure
           ! "positive" temperatures (the saturation pressure is different over water compared to over ice)
-          if (diag%temperature(ji,jk,jl)>=T_0) then
+          if (diag%temperature(ji,jk,jl)>=t_0) then
             saturation_pressure = saturation_pressure_over_water(diag%temperature(ji,jk,jl))
           ! "negative" temperatures
           else
@@ -66,16 +66,16 @@ module phase_trans
           endif
 
           ! determining the water vapour pressure (using the EOS)
-          water_vapour_pressure = state%rho(ji,jk,jl,6)*specific_gas_constants(1)*diag%temperature(ji,jk,jl)
+          water_vapour_pressure = state%rho(ji,jk,jl,6)*r_v*diag%temperature(ji,jk,jl)
           
           ! determining the dry air pressure
-          dry_pressure = state%rho(ji,jk,jl,5)*specific_gas_constants(0)*diag%temperature(ji,jk,jl)
+          dry_pressure = state%rho(ji,jk,jl,5)*r_d*diag%temperature(ji,jk,jl)
           
           ! calculating the total air pressure
           air_pressure = water_vapour_pressure + dry_pressure
           
           ! multiplying the saturation pressure by the enhancement factor
-          if (diag%temperature(ji,jk,jl)>=T_0) then
+          if (diag%temperature(ji,jk,jl)>=t_0) then
             saturation_pressure = enhancement_factor_over_water(air_pressure)*saturation_pressure
           ! "negative" temperatures
           else
@@ -83,7 +83,7 @@ module phase_trans
           endif
 
           ! the amount of water vapour that the air can still take 
-          diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diag%temperature(ji,jk,jl))
+          diff_density = (saturation_pressure - water_vapour_pressure)/(r_v*diag%temperature(ji,jk,jl))
 
           ! Clouds
           ! ------
@@ -91,7 +91,7 @@ module phase_trans
           ! the case where the air is not over-saturated
           if (diff_density>=0._wp) then
             ! temperature >= 0 °C
-            if (diag%temperature(ji,jk,jl)>=T_0) then
+            if (diag%temperature(ji,jk,jl)>=t_0) then
               ! It is assumed that the still present ice vanishes within one time step.
               irrev%mass_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)/dtime
 
@@ -116,7 +116,7 @@ module phase_trans
               ! the heat source rates acting on the liquid water
               irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
               ! the evaporation
-              - phase_trans_density*phase_trans_heat(0,T_0)/dtime
+              - phase_trans_density*phase_trans_heat(0,t_0)/dtime
             ! temperature<0 °C
             else
               ! Everything that can sublimate will sublimate.
@@ -146,7 +146,7 @@ module phase_trans
             ! the vanishing of water vapour through the phase transition
             irrev%mass_source_rates(ji,jk,jl,5) = diff_density/dtime
             ! temperature >= 0._wp °C
-            if (diag%temperature(ji,jk,jl)>=T_0) then
+            if (diag%temperature(ji,jk,jl)>=t_0) then
               ! It is assumed that the still present ice vanishes within one time step.
               irrev%mass_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)/dtime
 
@@ -190,7 +190,7 @@ module phase_trans
           irrev%mass_source_rates(ji,jk,jl,2) = 0._wp
           ! snow
           ! this only happens if the air is saturated
-          if (diag%temperature(ji,jk,jl)<T_0 .and. diff_density<=0._wp) then
+          if (diag%temperature(ji,jk,jl)<t_0 .and. diff_density<=0._wp) then
             irrev%mass_source_rates(ji,jk,jl,1) = max(state%rho(ji,jk,jl,3) &
             - max_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/dtime
             ! the snow creation comes at the cost of cloud ice particles
@@ -198,7 +198,7 @@ module phase_trans
             - irrev%mass_source_rates(ji,jk,jl,1)
           endif
           ! rain
-          if (diag%temperature(ji,jk,jl)>=T_0 .and. diff_density<=0._wp) then
+          if (diag%temperature(ji,jk,jl)>=t_0 .and. diff_density<=0._wp) then
             ! this only happens if the air is saturated
             irrev%mass_source_rates(ji,jk,jl,2) = max(state%rho(ji,jk,jl,4) &
             - max_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/dtime
@@ -208,20 +208,20 @@ module phase_trans
           endif
 
           ! turning of snow to rain
-          if (diag%temperature(ji,jk,jl)>=T_0 .and. state%rho(ji,jk,jl,1)>0._wp) then
+          if (diag%temperature(ji,jk,jl)>=t_0 .and. state%rho(ji,jk,jl,1)>0._wp) then
             irrev%mass_source_rates(ji,jk,jl,1) = -state%rho(ji,jk,jl,1)/dtime
             irrev%mass_source_rates(ji,jk,jl,2) = irrev%mass_source_rates(ji,jk,jl,2) &
             - irrev%mass_source_rates(ji,jk,jl,1)
             irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
-            + irrev%mass_source_rates(ji,jk,jl,1)*phase_trans_heat(2,T_0)
+            + irrev%mass_source_rates(ji,jk,jl,1)*phase_trans_heat(2,t_0)
           endif
           ! turning of rain to snow
-          if (diag%temperature(ji,jk,jl)<T_0 .and. state%rho(ji,jk,jl,2)>0._wp) then
+          if (diag%temperature(ji,jk,jl)<t_0 .and. state%rho(ji,jk,jl,2)>0._wp) then
             irrev%mass_source_rates(ji,jk,jl,2) = -state%rho(ji,jk,jl,2)/dtime
             irrev%mass_source_rates(ji,jk,jl,1) = irrev%mass_source_rates(ji,jk,jl,1) &
             - irrev%mass_source_rates(ji,jk,jl,2)
             irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
-            - irrev%mass_source_rates(ji,jk,jl,2)*phase_trans_heat(2,T_0)
+            - irrev%mass_source_rates(ji,jk,jl,2)*phase_trans_heat(2,t_0)
           endif
           
         enddo
@@ -232,7 +232,7 @@ module phase_trans
         ! evaporation and latent heat rates
         if (lsfc_phase_trans .and. grid%is_land(ji,jk)==0) then
           ! saturation pressure at surface temperature
-          if (state%temperature_soil(ji,jk,1)>=T_0) then
+          if (state%temperature_soil(ji,jk,1)>=t_0) then
             saturation_pressure_sfc = saturation_pressure_over_water(state%temperature_soil(ji,jk,1))
             saturation_pressure_sfc = enhancement_factor_over_water(air_pressure)*saturation_pressure_sfc
           else
@@ -241,7 +241,7 @@ module phase_trans
           endif
           
           ! difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
-          diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants(1)*state%temperature_soil(ji,jk,1)) &
+          diff_density_sfc = saturation_pressure_sfc/(r_v*state%temperature_soil(ji,jk,1)) &
           - state%rho(ji,jk,nlays,6)
 
           ! the thickness of the lowest model layer (we need it as a result of Guass' theorem)
@@ -252,7 +252,7 @@ module phase_trans
           + max(0._wp,diff_density_sfc/diag%scalar_flux_resistance(ji,jk))/layer_thickness
 
           ! calculating the latent heat flux density affecting the surface
-          if (state%temperature_soil(ji,jk,1)>=T_0) then
+          if (state%temperature_soil(ji,jk,1)>=t_0) then
             diag%power_flux_density_latent(ji,jk) = -phase_trans_heat(0,state%temperature_soil(ji,jk,1)) &
             *max(0._wp,diff_density_sfc/diag%scalar_flux_resistance(ji,jk))
           else

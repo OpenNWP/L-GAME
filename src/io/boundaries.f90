@@ -8,9 +8,8 @@ module boundaries
   use definitions,       only: t_state,t_bc,t_grid,wp
   use run_nml,           only: ny,nx,nlays,t_init
   use bc_nml,            only: n_swamp,bc_root_filename,bc_root_filename,dtime_bc,t_latest_bc
-  use constants,         only: M_PI,p_0
+  use constants,         only: M_PI,p_0,r_d,c_d_v
   use constituents_nml,  only: no_of_condensed_constituents
-  use dictionary,        only: spec_heat_capacities_v_gas,specific_gas_constants
   use set_initial_state, only: read_from_nc
 
   implicit none
@@ -35,12 +34,7 @@ module boundaries
     
     ! local variables
     real(wp) :: old_weight,new_weight ! time interpolation weights
-    real(wp) :: c_v                   ! specific heat capacity at constant volume
-    real(wp) :: r_d                   ! individual gas constant of dry air
     integer  :: ji,jk,jl              ! loop indicies
-    
-    c_v = spec_heat_capacities_v_gas(0)
-    r_d = specific_gas_constants(0)
     
     ! setting the time interpolation weights
     old_weight = 1._wp - (t_now-t_latest_bc)/dtime_bc
@@ -101,7 +95,7 @@ module boundaries
     ! setting the virtual potential temperature perturbation
     !$omp parallel workshare
     state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_v_bg
-    state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_v) - grid%exner_bg
+    state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_d_v) - grid%exner_bg
     !$omp end parallel workshare
     
   end subroutine update_boundaries

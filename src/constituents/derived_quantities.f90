@@ -6,10 +6,8 @@ module derived_quantities
   ! In this module, more complex thermodynamic quantities are being calculated.
   
   use definitions,      only: wp,t_grid,t_state,t_diag
-  use dictionary,       only: mean_particle_masses_gas,spec_heat_capacities_p_gas,spec_heat_capacities_v_gas, &
-                        specific_gas_constants
   use run_nml,          only: ny,nx,nlays
-  use constants,        only: k_B,M_PI
+  use constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v
   use constituents_nml, only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
   
   implicit none
@@ -66,9 +64,13 @@ module derived_quantities
     integer  :: no_of_relevant_constituents ! the number of relevant constituents for this calculation
     integer  :: j_constituent               ! constituent index
     real(wp) :: rho_g                       ! gas density
+    real(wp) :: spec_heat_capacities_v_gas(2)
     
     no_of_relevant_constituents = 1
     rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
+    
+    spec_heat_capacities_v_gas(1) = c_d_v
+    spec_heat_capacities_v_gas(2) = c_v_v
     
     spec_heat_cap_diagnostics_v = 0._wp
     do j_constituent=1,no_of_relevant_constituents
@@ -93,9 +95,13 @@ module derived_quantities
     integer  :: no_of_relevant_constituents ! the number of relevant constituents for this calculation
     integer  :: j_constituent               ! constituent index
     real(wp) :: rho_g                       ! gas density
+    real(wp) :: spec_heat_capacities_p_gas(2)
     
     no_of_relevant_constituents = 1
     rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
+    
+    spec_heat_capacities_p_gas(1) = c_d_p
+    spec_heat_capacities_p_gas(2) = c_v_p
     
     spec_heat_cap_diagnostics_p = 0._wp
     do j_constituent=1,no_of_relevant_constituents
@@ -119,11 +125,15 @@ module derived_quantities
     integer  :: no_of_relevant_constituents ! the number of relevant constituents for this calculation
     integer  :: j_constituent               ! constituent index
     real(wp) :: rho_g                       ! gas density
+    real(wp) :: specific_gas_constants(2)
     
     no_of_relevant_constituents = 1
     rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
     
     gas_constant_diagnostics = 0._wp
+    
+    specific_gas_constants(1) = r_d
+    specific_gas_constants(2) = r_v
     
     do j_constituent=1,no_of_relevant_constituents
       gas_constant_diagnostics = gas_constant_diagnostics + state%rho(ji,jk,jl,no_of_condensed_constituents+j_constituent) &
@@ -189,7 +199,7 @@ module derived_quantities
 
     ! these things are hardly ever modified
     particle_radius = 130e-12_wp
-    particle_mass = mean_particle_masses_gas(0)
+    particle_mass = m_d/n_a
     
     ! actual calculation
     thermal_velocity = sqrt(8.0_wp*k_B*temperature/(M_PI*particle_mass))

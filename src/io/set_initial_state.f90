@@ -9,9 +9,8 @@ module set_initial_state
   use netcdf
   use run_nml,          only: ny,nx,nlays,scenario,run_id,lplane,dx
   use constituents_nml, only: no_of_condensed_constituents,no_of_constituents
-  use dictionary,       only: specific_gas_constants,spec_heat_capacities_v_gas,spec_heat_capacities_p_gas
   use constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
-                              gravity,p_0_standard,r_e,t_grad_inv,M_PI
+                              gravity,p_0_standard,r_e,t_grad_inv,M_PI,r_d,c_d_p,c_d_v
   use io_nml,           only: restart_filename
 
   implicit none
@@ -42,13 +41,8 @@ module set_initial_state
     real(wp) :: gravity_local                               ! gravity acceleration
     real(wp) :: delta_z                                     ! delta z
     real(wp) :: T_0                                         ! MSLP temperature variable
-    real(wp) :: r_d                                         ! specific gas constant of dry air
-    real(wp) :: c_p                                         ! specific heat capacity at const. pressure of dry air
     integer  :: ji,jk,jl                                    ! loop indices
     real(wp) :: u_0,z_1,z_2,r,rho_0,x_0,z_0,A_x,A_Z,x_coord ! variables needed for the advection test
-    
-    r_d = specific_gas_constants(0)
-    c_p = spec_heat_capacities_p_gas(0)
       
     select case (trim(scenario))
     
@@ -176,7 +170,7 @@ module set_initial_state
             /(1._wp - n_squared*delta_z/(2._wp*gravity_local))
             ! Exner pressure in the lowest layer
             state%exner_pert(ji,jk,nlays) = 1._wp &
-            - 2._wp*geopot(grid%z_scalar(ji,jk,nlays))/(c_p*(state%theta_v_pert(ji,jk,nlays) + T_0))
+            - 2._wp*geopot(grid%z_scalar(ji,jk,nlays))/(c_d_p*(state%theta_v_pert(ji,jk,nlays) + T_0))
             
             ! stacking the virtual potential temperature
             do jl=nlays-1,1,-1
@@ -196,7 +190,7 @@ module set_initial_state
               ! result
               state%exner_pert(ji,jk,jl) = state%exner_pert(ji,jk,jl+1) &
               + 2._wp*(geopot(grid%z_scalar(ji,jk,jl+1)) - geopot(grid%z_scalar(ji,jk,jl))) &
-              /(c_p*(state%theta_v_pert(ji,jk,jl) + state%theta_v_pert(ji,jk,jl+1)))
+              /(c_d_p*(state%theta_v_pert(ji,jk,jl) + state%theta_v_pert(ji,jk,jl+1)))
             enddo
             
             ! filling up what's needed for the unessential_ideal_init routine
@@ -205,7 +199,7 @@ module set_initial_state
               diag%scalar_placeholder(ji,jk,jl)=state%exner_pert(ji,jk,jl)*state%theta_v_pert(ji,jk,jl)
             enddo
             ! pressure in the lowest layer
-            pres_lowest_layer(ji,jk)=p_0*state%exner_pert(ji,jk,nlays)**(c_p/r_d)
+            pres_lowest_layer(ji,jk)=p_0*state%exner_pert(ji,jk,nlays)**(c_d_p/r_d)
           enddo
         enddo
         !$omp end parallel do
@@ -240,11 +234,6 @@ module set_initial_state
   
     ! local variables
     character(len=64) :: filename ! file to read the initial state from
-    real(wp)          :: c_v      ! specific heat capacity at constant volume
-    real(wp)          :: r_d      ! individual gas constant of dry air
-    
-    c_v = spec_heat_capacities_v_gas(0)
-    r_d = specific_gas_constants(0)
     
     filename = "../../real_weather/" // trim(restart_filename)
     
@@ -253,7 +242,7 @@ module set_initial_state
     ! setting the virtual potential temperature perturbation
     !$omp parallel workshare
     state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_v_bg
-    state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_v) - grid%exner_bg
+    state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_d_v) - grid%exner_bg
     !$omp end parallel workshare
   
   end subroutine restart
@@ -313,12 +302,7 @@ module set_initial_state
     ! local variables
     real(wp) :: b,c         ! abbreviations needed for the hydrostatic initialization routine
     real(wp) :: pressure    ! single pressure value
-    real(wp) :: r_d         ! specific gas constant of dry air
-    real(wp) :: c_p         ! specific heat capacity at const. pressure of dry air
     integer  :: ji,jk,jl    ! loop indices
-    
-    r_d = specific_gas_constants(0)
-    c_p = spec_heat_capacities_p_gas(0)
     
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
     !$omp parallel do private(ji,jk,jl,b,c,pressure)
@@ -329,13 +313,13 @@ module set_initial_state
           ! lowest layer
           if (jl==nlays) then
             pressure = pres_lowest_layer(ji,jk)
-            state%exner_pert(ji,jk,jl) = (pressure/p_0)**(r_d/c_p)
+            state%exner_pert(ji,jk,jl) = (pressure/p_0)**(r_d/c_d_p)
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
             b = -0.5_wp*state%exner_pert(ji,jk,jl+1)/diag%scalar_placeholder(ji,jk,jl+1) &
             *(diag%scalar_placeholder(ji,jk,jl) - diag%scalar_placeholder(ji,jk,jl+1) + 2.0_wp/ &
-            c_p*(geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1))))
+            c_d_p*(geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1))))
             c = state%exner_pert(ji,jk,jl+1)**2*diag%scalar_placeholder(ji,jk,jl)/diag%scalar_placeholder(ji,jk,jl+1)
             state%exner_pert(ji,jk,jl) = b+sqrt(b**2+c)
           endif
@@ -348,7 +332,7 @@ module set_initial_state
     
     !$omp parallel workshare
     ! density
-    state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert)**(c_p/r_d) &
+    state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert)**(c_d_p/r_d) &
     /(r_d*diag%scalar_placeholder)
     ! virtual potential temperature density
     state%rhotheta_v = state%rho(:,:,:,no_of_condensed_constituents+1)*state%theta_v_pert
@@ -394,10 +378,10 @@ module set_initial_state
     real(wp)             :: bg_pres ! the result
 
     if (height<inv_height) then  
-      bg_pres = p_0_standard*(1 - lapse_rate*height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate))
+      bg_pres = p_0_standard*(1 - lapse_rate*height/surface_temp)**(gravity/(r_d*lapse_rate))
     elseif (height<tropo_height) then
-      bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(specific_gas_constants(0)*lapse_rate)) &
-      *exp(-gravity*(height - tropo_height)/(specific_gas_constants(0)*(surface_temp - lapse_rate*tropo_height)))
+      bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(r_d*lapse_rate)) &
+      *exp(-gravity*(height - tropo_height)/(r_d*(surface_temp - lapse_rate*tropo_height)))
     else
       write(*,*) "Argument of bg_pres is above the inversion height. This is unrealistic in the lowest layer."
       write(*,*) "Aborting."

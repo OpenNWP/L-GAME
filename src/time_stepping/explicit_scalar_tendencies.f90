@@ -5,13 +5,13 @@ module explicit_scalar_tendencies
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
+  use constants,             only: c_d_p
   use definitions,           only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
   use multiplications,       only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
   use divergence_operators,  only: div_h,div_h_tracers,add_vertical_div
   use run_nml,               only: dtime
   use phase_trans,           only: calc_h2otracers_source_rates
   use constituents_nml,      only: no_of_condensed_constituents,no_of_constituents
-  use dictionary,            only: spec_heat_capacities_p_gas
   use diff_nml,              only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
   use effective_diff_coeffs, only: temp_diffusion_coeffs,mass_diffusion_coeffs
   use gradient_operators,    only: grad
@@ -40,10 +40,7 @@ module explicit_scalar_tendencies
     integer  :: j_constituent                  ! loop variable
     real(wp) :: old_weight(no_of_constituents) ! time stepping weight
     real(wp) :: new_weight(no_of_constituents) ! time stepping weight
-    real(wp) :: c_p                            ! as usual
     integer  :: diff_switch                    ! diffusion switch
-    
-    c_p = spec_heat_capacities_p_gas(0)
     
     ! setting the time stepping weights
     do j_constituent=1,no_of_constituents
@@ -134,7 +131,7 @@ module explicit_scalar_tendencies
         ! diabatic heating rates
         + (irrev%heating_diss + diag%radiation_tendency + irrev%heat_source_rates &
         + irrev%temp_diff_heating) &
-        /(c_p*(grid%exner_bg+state%exner_pert))
+        /(c_d_p*(grid%exner_bg+state%exner_pert))
         !$omp end parallel workshare
         
       endif

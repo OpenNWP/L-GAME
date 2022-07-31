@@ -6,7 +6,7 @@ module radiation
   ! This module is a coupler to RTE+RRTMGP.
   
   use definitions,                only: wp
-  use constants,                  only: EPSILON_SECURITY
+  use constants,                  only: EPSILON_SECURITY,r_d,r_v
   use mo_rrtmgp_util_string,      only: lower_case
   use mo_gas_optics_rrtmgp,       only: ty_gas_optics_rrtmgp
   use mo_load_coefficients,       only: load_and_init
@@ -20,7 +20,7 @@ module radiation
                                   ty_optical_props_arry
   use mo_cloud_optics,            only: ty_cloud_optics
   use mo_load_cloud_coefficients, only: load_cld_lutcoeff,load_cld_padecoeff
-  use dictionary,                 only: specific_gas_constants,calc_o3_vmr,molar_fraction_in_dry_air
+  use dictionary,                 only: molar_fraction_in_dry_air,calc_o3_vmr
   use rad_nml,                    only: rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
                                         cloud_coefficients_file_sw,cloud_coefficients_file_lw
   use constituents_nml,           only: no_of_condensed_constituents,no_of_constituents
@@ -228,7 +228,7 @@ module radiation
       do jk=1,nlays
         temperature_rad(ji,jk) = temperature((jk-1)*no_of_scalars_h+ji)
         ! the pressure is diagnozed here, using the equation of state for ideal gases
-        pressure_rad(ji,jk) = specific_gas_constants(0) &
+        pressure_rad(ji,jk) = r_d &
         *mass_densities(no_of_condensed_constituents*no_of_scalars &
         + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
       enddo
@@ -756,9 +756,9 @@ module radiation
               do jl=1,nlays
                 vol_mix_ratio(jk,jl) = & 
                 mass_densities((no_of_condensed_constituents+1)*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h) &
-                *specific_gas_constants(1)/ &
+                *r_v/ &
                 (mass_densities(no_of_condensed_constituents*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h) &
-                *specific_gas_constants(0))
+                *r_d)
               enddo
             enddo
           ! in the long wave case,all points matter
@@ -766,10 +766,8 @@ module radiation
             do jk=1,no_of_scalars_h
               do jl=1,nlays
                 vol_mix_ratio(jk,jl) = & 
-                mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
-                *specific_gas_constants(1)/ &
-                (mass_densities(no_of_condensed_constituents*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
-                *specific_gas_constants(0))
+                mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h)*r_v/ &
+                (mass_densities(no_of_condensed_constituents*no_of_scalars+jk+(jl-1)*no_of_scalars_h)*r_d)
               enddo
             enddo
           endif

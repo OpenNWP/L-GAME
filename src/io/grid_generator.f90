@@ -10,10 +10,10 @@ module grid_generator
   use run_nml,            only: ny,nx,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
                                 lon_center,lplane
   use constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
-                                lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv
+                                lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv, &
+                                r_d,c_d_p
   use surface_nml,        only: nsoillays,orography_id
   use gradient_operators, only: grad,grad_hor_cov
-  use dictionary,         only: specific_gas_constants,spec_heat_capacities_p_gas
   use io_nml,             only: lwrite_grid,lread_oro,lread_land_sea,lset_oro, &
                                 oro_raw_filename
   use read_write_grid,    only: write_grid,read_oro,read_land_sea
@@ -869,13 +869,13 @@ module grid_generator
           ! lowest layer
           if (jl==nlays) then
             pressure = bg_pres(grid%z_scalar(ji,jk,jl))
-            grid%exner_bg(ji,jk,jl) = (pressure/p_0)**(specific_gas_constants(0)/spec_heat_capacities_p_gas(0))
+            grid%exner_bg(ji,jk,jl) = (pressure/p_0)**(r_d/c_d_p)
           ! other layers
           else
             ! solving a quadratic equation for the Exner pressure
             b = -0.5_wp*grid%exner_bg(ji,jk,jl+1)/bg_temp(grid%z_scalar(ji,jk,jl+1)) &
             *(bg_temp(grid%z_scalar(ji,jk,jl)) - bg_temp(grid%z_scalar(ji,jk,jl+1)) + 2.0_wp/ &
-            spec_heat_capacities_p_gas(0)*(geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1))))
+            c_d_p*(geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1))))
             c = grid%exner_bg(ji,jk,jl+1)**2*bg_temp(grid%z_scalar(ji,jk,jl))/bg_temp(grid%z_scalar(ji,jk,jl+1))
             grid%exner_bg(ji,jk,jl) = b+sqrt(b**2+c)
           endif

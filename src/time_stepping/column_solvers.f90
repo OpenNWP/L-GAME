@@ -9,10 +9,9 @@ module column_solvers
   use constituents_nml, only: no_of_condensed_constituents,no_of_constituents, &
                               snow_velocity,rain_velocity,cloud_droplets_velocity
   use definitions,      only: t_grid,t_state,t_tend,t_diag
-  use dictionary,       only: spec_heat_capacities_v_gas,spec_heat_capacities_p_gas,specific_gas_constants
   use diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
   use surface_nml,      only: nsoillays,lprog_soil_temp,lsfc_sensible_heat_flux
-  use constants,        only: M_PI
+  use constants,        only: M_PI,r_d,c_d_v,c_d_p
 
   implicit none
   
@@ -58,9 +57,6 @@ module column_solvers
     real(wp) :: alpha(nlays)                       ! alpha
     real(wp) :: beta(nlays)                        ! beta
     real(wp) :: gammaa(nlays)                      ! gamma
-    real(wp) :: c_v                                ! specific heat capacity at constant volume
-    real(wp) :: c_p                                ! specific heat capacity at constant pressure
-    real(wp) :: r_d                                ! individual gas constant of dry air
     real(wp) :: damping_start_height               ! lower boundary height of the Klemp layer
     real(wp) :: damping_coeff                      ! damping coefficient of the Klemp layer
     real(wp) :: above_damping                      ! height above the lower boundary of the damping height
@@ -69,10 +65,7 @@ module column_solvers
     real(wp) :: heat_flux_density_expl(nsoillays)  ! explicit heat_flux_density in the soil
     real(wp) :: solution_vector(nlays-1+nsoillays) ! vector containing the solution of the linear problem to solve here
     integer  :: ji,jk,jl                           ! loop variables
-
-    c_v = spec_heat_capacities_v_gas(0)
-    c_p = spec_heat_capacities_p_gas(0)
-    r_d = specific_gas_constants(0)
+    
     damping_start_height = klemp_begin_rel*toa
     
     ! calculating the sensible power flux density if soil is switched on
@@ -88,7 +81,7 @@ module column_solvers
           *(grid%theta_v_bg(ji,jk,nlays)+state_new%theta_v_pert(ji,jk,nlays))
 
           ! the sensible power flux density
-          diag%power_flux_density_sensible(ji,jk) = 0.5_wp*c_v*(state_new%rho(ji,jk,nlays,no_of_condensed_constituents+1) &
+          diag%power_flux_density_sensible(ji,jk) = 0.5_wp*c_d_v*(state_new%rho(ji,jk,nlays,no_of_condensed_constituents+1) &
           *(t_gas_lowest_layer_old - state_old%temperature_soil(ji,jk,1)) &
           + state_old%rho(ji,jk,nlays,no_of_condensed_constituents+1) &
           *(t_gas_lowest_layer_new - state_new%temperature_soil(ji,jk,1)))/diag%scalar_flux_resistance(ji,jk)
@@ -96,7 +89,7 @@ module column_solvers
           ! contribution of sensible heat to rhotheta_v
           tend%rhotheta_v(ji,jk,nlays) = tend%rhotheta_v(ji,jk,nlays) &
           -grid%area_z(ji,jk,nlays+1)*diag%power_flux_density_sensible(ji,jk) &
-          /((grid%exner_bg(ji,jk,nlays)+state_new%exner_pert(ji,jk,nlays))*c_p)/grid%volume(ji,jk,nlays)
+          /((grid%exner_bg(ji,jk,nlays)+state_new%exner_pert(ji,jk,nlays))*c_d_p)/grid%volume(ji,jk,nlays)
           
         enddo
       enddo
@@ -128,18 +121,18 @@ module column_solvers
             alpha(jl) = -state_old%rhotheta_v(ji,jk,jl)/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)**2 &
             /grid%volume(ji,jk,jl)
             beta(jl)  = 1._wp/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)/grid%volume(ji,jk,jl)
-            gammaa(jl) = r_d/(c_v*state_old%rhotheta_v(ji,jk,jl))* &
+            gammaa(jl) = r_d/(c_d_v*state_old%rhotheta_v(ji,jk,jl))* &
             (grid%exner_bg(ji,jk,jl)+state_old%exner_pert(ji,jk,jl))/grid%volume(ji,jk,jl)
           else
             ! old time step partial derivatives of theta_v and Pi
             alpha_old(jl) = -state_old%rhotheta_v(ji,jk,jl)/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)**2
             beta_old(jl)  = 1._wp/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)
-            gamma_old(jl) = r_d/(c_v*state_old%rhotheta_v(ji,jk,jl))* &
+            gamma_old(jl) = r_d/(c_d_v*state_old%rhotheta_v(ji,jk,jl))* &
             (grid%exner_bg(ji,jk,jl)+state_old%exner_pert(ji,jk,jl))
             ! new time step partial derivatives of theta_v and Pi
             alpha_new(jl) = -state_new%rhotheta_v(ji,jk,jl)/state_new%rho(ji,jk,jl,no_of_condensed_constituents+1)**2
             beta_new(jl)  = 1._wp/state_new%rho(ji,jk,jl,no_of_condensed_constituents+1)
-            gamma_new(jl) = r_d/(c_v*state_new%rhotheta_v(ji,jk,jl)) &
+            gamma_new(jl) = r_d/(c_d_v*state_new%rhotheta_v(ji,jk,jl)) &
             *(grid%exner_bg(ji,jk,jl)+state_new%exner_pert(ji,jk,jl))
             ! interpolation of partial derivatives of theta_v and Pi (divided by the volume)
             alpha(jl) = ((1._wp - partial_impl_weight)*alpha_old(jl)+partial_impl_weight*alpha_new(jl))/grid%volume(ji,jk,jl)
@@ -169,16 +162,16 @@ module column_solvers
           d_vector(jl) = -theta_v_int_new(jl)**2*(gammaa(jl)+gammaa(jl+1)) &
           + 0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)-alpha(jl)+theta_v_int_new(jl)*(beta(jl+1)-beta(jl))) &
-          - (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime**2*c_p*rho_int_old(jl)) &
+          - (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime**2*c_d_p*rho_int_old(jl)) &
           *(2._wp/grid%area_z(ji,jk,jl+1)+dtime*state_old%wind_w(ji,jk,jl+1)*0.5_wp &
           *(-1._wp/grid%volume(ji,jk,jl)+1._wp/grid%volume(ji,jk,jl+1)))
           ! right hand side
           r_vector(jl) = -(state_old%wind_w(ji,jk,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
           (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1)) &
-          /(impl_weight*dtime**2*c_p) &
+          /(impl_weight*dtime**2*c_d_p) &
           + theta_v_int_new(jl)*(exner_pert_expl(jl)-exner_pert_expl(jl+1))/dtime &
           + 0.5_wp/dtime*(theta_v_pert_expl(jl)+theta_v_pert_expl(jl+1))*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
-          - (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime**2*c_p) &
+          - (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime**2*c_d_p) &
           *state_old%wind_w(ji,jk,jl+1)*rho_int_expl(jl)/rho_int_old(jl)
         enddo
         
@@ -187,13 +180,13 @@ module column_solvers
           c_vector(jl) = theta_v_int_new(jl+1)*gammaa(jl+1)*theta_v_int_new(jl) &
           + 0.5_wp*(grid%exner_bg(ji,jk,jl+1)-grid%exner_bg(ji,jk,jl+2)) &
           *(alpha(jl+1)+beta(jl+1)*theta_v_int_new(jl)) &
-          - (grid%z_scalar(ji,jk,jl+1)-grid%z_scalar(ji,jk,jl+2))/(impl_weight*dtime*c_p)*0.5_wp &
+          - (grid%z_scalar(ji,jk,jl+1)-grid%z_scalar(ji,jk,jl+2))/(impl_weight*dtime*c_d_p)*0.5_wp &
           *state_old%wind_w(ji,jk,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))
           ! upper diagonal
           e_vector(jl) = theta_v_int_new(jl)*gammaa(jl+1)*theta_v_int_new(jl+1) &
           - 0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)+beta(jl+1)*theta_v_int_new(jl+1)) &
-          + (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime*c_p)*0.5_wp &
+          + (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_weight*dtime*c_d_p)*0.5_wp &
           *state_old%wind_w(ji,jk,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
         enddo
 	

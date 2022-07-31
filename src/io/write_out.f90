@@ -9,7 +9,7 @@ module write_out
   use netcdf
   use run_nml,           only: ny,nx,nlays,scenario,run_id
   use constituents_nml,  only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
-  use dictionary,        only: specific_gas_constants,spec_heat_capacities_p_gas,rel_humidity
+  use dictionary,        only: rel_humidity
   use set_initial_state, only: bg_temp,bg_pres,geopot,nc_check
 
   implicit none

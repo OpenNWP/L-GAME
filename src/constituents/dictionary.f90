@@ -20,16 +20,12 @@ module dictionary
   ! 11: N2O
 
   use definitions, only: wp
-  use constants,   only: T_0,N_A
+  use constants,   only: t_0,n_a,r_v,m_v
   
   implicit none
   
   private
   
-  public :: spec_heat_capacities_v_gas
-  public :: spec_heat_capacities_p_gas
-  public :: specific_gas_constants
-  public :: mean_particle_masses_gas
   public :: phase_trans_heat
   public :: calc_o3_vmr
   public :: molar_fraction_in_dry_air
@@ -40,78 +36,6 @@ module dictionary
   public :: rel_humidity
   
   contains
-
-  function mean_particle_masses_gas(gas_constituent_id)
-  
-    ! mean particle masses of the constituents of the gas phase
-    
-    integer, intent(in) :: gas_constituent_id ! number of the gas constituent
-    ! the result
-    real(wp)            :: mean_particle_masses_gas
-  
-    if (gas_constituent_id==0) then
-      mean_particle_masses_gas = 0.004810e-23;
-    endif
-  
-    if (gas_constituent_id==1) then
-      mean_particle_masses_gas = 0.002991e-23
-    endif
-  
-  end function mean_particle_masses_gas
-
-  function spec_heat_capacities_v_gas(gas_constituent_id)
-    
-    ! specific heat capacity at constant volume
-    
-    integer, intent(in) :: gas_constituent_id ! number of the gas constituent
-    ! the result
-    real(wp) :: spec_heat_capacities_v_gas
-    
-    if (gas_constituent_id==0) then
-      spec_heat_capacities_v_gas = 717.942189_wp
-    endif
-    
-    if (gas_constituent_id==1) then
-      spec_heat_capacities_v_gas = 1396.475121_wp
-    endif
-    
-  end function spec_heat_capacities_v_gas
-
-  function spec_heat_capacities_p_gas(gas_constituent_id)
-    
-    ! specific heat capacity at constant pressure
-    
-    integer, intent(in) :: gas_constituent_id ! number of the gas constituent
-    ! the result
-    real(wp) :: spec_heat_capacities_p_gas
-    
-    if (gas_constituent_id==0) then
-      spec_heat_capacities_p_gas = 1005.0_wp
-    endif
-    
-    if (gas_constituent_id==1) then
-      spec_heat_capacities_p_gas = 1858.0_wp
-    endif
-    
-  end function spec_heat_capacities_p_gas
-  
-  function specific_gas_constants(gas_constituent_id)
-    
-    ! specific gas constants
-    
-    integer, intent(in) :: gas_constituent_id ! number of the gas constituent
-    ! the result
-    real(wp) :: specific_gas_constants
-    
-    if (gas_constituent_id==0) then
-      specific_gas_constants = 287.057811_wp
-    endif
-    
-    if (gas_constituent_id==1) then
-      specific_gas_constants = 461.524879_wp
-    endif
-    
-  end function specific_gas_constants
 
   function phase_trans_heat(direction,temperature)
     
@@ -163,7 +87,7 @@ module dictionary
       endif
       enthalpy_evaporation = 56579._wp - 42.212_wp*temperature + exp(0.1149_wp*(281.6_wp - temperature))
       ! unit conversion from J/mol to J/kg
-      enthalpy_evaporation = enthalpy_evaporation/(N_A*mean_particle_masses_gas(1))
+      enthalpy_evaporation = enthalpy_evaporation/m_v
     else
       ! This follows the formula (Eq. (8)) cited by Huang:
       ! A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
@@ -199,7 +123,7 @@ module dictionary
     enthalpy_sublimation = 46782.5 + 35.8925*temperature - 0.07414*temperature**2 + 541.5*exp(-(temperature/123.75)**2)
 
     ! unit conversion from J/mol to J/kg
-    enthalpy_sublimation = enthalpy_sublimation/(N_A*mean_particle_masses_gas(1))
+    enthalpy_sublimation = enthalpy_sublimation/m_v
   
   end function enthalpy_sublimation
   
@@ -372,12 +296,12 @@ module dictionary
     real(wp)             :: saturation_pressure ! saturation water vapour pressure
     
     ! calculation of the water vapour pressure according to the equation of state
-    vapour_pressure = abs_humidity*specific_gas_constants(1)*temperature
+    vapour_pressure = abs_humidity*r_v*temperature
     
-    if (temperature>T_0) then
+    if (temperature>t_0) then
       saturation_pressure = saturation_pressure_over_water(temperature)
     endif
-    if (temperature<=T_0) then
+    if (temperature<=t_0) then
       saturation_pressure = saturation_pressure_over_ice(temperature)
     endif
     
