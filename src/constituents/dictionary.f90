@@ -26,9 +26,9 @@ module dictionary
   
   private
   
-  public :: phase_trans_heat
-  public :: calc_o3_vmr
   public :: molar_fraction_in_dry_air
+  public :: calc_o3_vmr
+  public :: phase_trans_heat
   public :: saturation_pressure_over_water
   public :: saturation_pressure_over_ice
   public :: enhancement_factor_over_water
@@ -37,6 +37,69 @@ module dictionary
   
   contains
 
+  function molar_fraction_in_dry_air(gas_number)
+    
+    ! This function returns the molar fraction of certain gases in dry air.
+    
+    integer, intent(in) :: gas_number
+    real(wp)            :: molar_fraction_in_dry_air
+  
+    if (gas_number==2) then
+      molar_fraction_in_dry_air = 0.7809_wp
+    endif
+    if (gas_number==3) then
+      molar_fraction_in_dry_air = 0.2095_wp
+    endif
+    if (gas_number==4) then
+      molar_fraction_in_dry_air = 0.0093_wp
+    endif
+    if (gas_number==5) then
+      molar_fraction_in_dry_air = 0.0003_wp
+    endif
+    if (gas_number==6) then
+      molar_fraction_in_dry_air = 1.8e-5_wp
+    endif
+    if (gas_number==7) then
+      molar_fraction_in_dry_air = 5.2e-6_wp
+    endif
+    if (gas_number==8) then
+      molar_fraction_in_dry_air = 1.5e-6_wp
+    endif
+    if (gas_number==9) then
+      molar_fraction_in_dry_air = 1.0e-7_wp
+    endif
+    if (gas_number==10) then
+      molar_fraction_in_dry_air = 1e-6_wp
+    endif
+    if (gas_number==11) then
+	  ! https://www.epa.gov/climate-indicators/climate-change-indicators-atmospheric-concentrations-greenhouse-gases
+      molar_fraction_in_dry_air = 0.3e-6_wp
+    endif
+  
+  end function molar_fraction_in_dry_air
+  
+  function calc_o3_vmr(height)
+
+    ! This function calculates the ozone VMR as a function of height.
+    ! assumes a Gaussian distribution
+    
+    real(wp), intent(in) :: height ! height above MSL
+    real(wp)             :: calc_o3_vmr
+    
+    ! local variables
+    real(wp) :: fwhm = 20e3_wp      ! full width at half maximum
+    real(wp) :: max = 34e3_wp       ! height of the maximum of the distribution
+    real(wp) :: max_vmr = 8.5e-6_wp ! maximum volume mixing ratio
+    real(wp) :: sigma               ! standard deviation
+    real(wp) :: distance            ! distance from the maximum
+    
+    ! calculation of the result
+    sigma = fwhm/(8._wp*log(2._wp))**0.5_wp
+    distance = height - max
+    calc_o3_vmr = max_vmr*exp(-distance**2/(2._wp*sigma**2))
+    
+  end function calc_o3_vmr
+  
   function phase_trans_heat(direction,temperature)
     
     ! This function calculates the phase transition heat.
@@ -76,9 +139,9 @@ module dictionary
     real(wp) :: temp_c
     
     ! temperature in degrees Celsius
-    temp_c = temperature - T_0
+    temp_c = temperature - t_0
     
-    if (temperature<T_0) then
+    if (temperature<t_0) then
       ! This follows Eq. (9) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
       ! QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
       ! clipping values that are too extreme for these approximations
@@ -92,8 +155,8 @@ module dictionary
       ! This follows the formula (Eq. (8)) cited by Huang:
       ! A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
       ! clipping values that are too extreme for these approximations
-      if (temperature>T_0+100._wp) then
-        temperature = T_0 + 100._wp
+      if (temperature>t_0+100._wp) then
+        temperature = t_0 + 100._wp
       endif
       enthalpy_evaporation = 3151378._wp - 2386._wp*temperature
     endif
@@ -115,9 +178,9 @@ module dictionary
     if (temperature<30.0) then
       temperature = 30.0
     endif
-    ! sublimation is not happening in thermodynamic equilibrium at temperatures > T_0
-    if (temperature>T_0) then
-      temperature = T_0
+    ! sublimation is not happening in thermodynamic equilibrium at temperatures > t_0
+    if (temperature>t_0) then
+      temperature = t_0
     endif
 
     enthalpy_sublimation = 46782.5 + 35.8925*temperature - 0.07414*temperature**2 + 541.5*exp(-(temperature/123.75)**2)
@@ -126,67 +189,6 @@ module dictionary
     enthalpy_sublimation = enthalpy_sublimation/m_v
   
   end function enthalpy_sublimation
-  
-  real(wp) function calc_o3_vmr(height)
-
-    ! This function calculates the ozone VMR as a function of height.
-    ! assumes a Gaussian distribution
-    
-    real(wp) :: height ! height above MSL
-    
-    ! local variables
-    real(wp) :: fwhm = 20e3_wp      ! full width at half maximum
-    real(wp) :: max = 34e3_wp       ! height of the maximum of the distribution
-    real(wp) :: max_vmr = 8.5e-6_wp ! maximum volume mixing ratio
-    real(wp) :: sigma               ! standard deviation
-    real(wp) :: distance            ! distance from the maximum
-    
-    ! calculation of the result
-    sigma = fwhm/(8._wp*log(2._wp))**0.5_wp
-    distance = height - max
-    calc_o3_vmr = max_vmr*exp(-distance**2/(2._wp*sigma**2))
-    
-  end function calc_o3_vmr
-
-  real(wp) function molar_fraction_in_dry_air(gas_number)
-    
-    ! This function returns the molar fraction of certain gases in dry air.
-    
-    integer :: gas_number
-  
-    if (gas_number==2) then
-      molar_fraction_in_dry_air = 0.7809_wp
-    endif
-    if (gas_number==3) then
-      molar_fraction_in_dry_air = 0.2095_wp
-    endif
-    if (gas_number==4) then
-      molar_fraction_in_dry_air = 0.0093_wp
-    endif
-    if (gas_number==5) then
-      molar_fraction_in_dry_air = 0.0003_wp
-    endif
-    if (gas_number==6) then
-      molar_fraction_in_dry_air = 1.8e-5_wp
-    endif
-    if (gas_number==7) then
-      molar_fraction_in_dry_air = 5.2e-6_wp
-    endif
-    if (gas_number==8) then
-      molar_fraction_in_dry_air = 1.5e-6_wp
-    endif
-    if (gas_number==9) then
-      molar_fraction_in_dry_air = 1.0e-7_wp
-    endif
-    if (gas_number==10) then
-      molar_fraction_in_dry_air = 1e-6_wp
-    endif
-    if (gas_number==11) then
-	  ! https://www.epa.gov/climate-indicators/climate-change-indicators-atmospheric-concentrations-greenhouse-gases
-      molar_fraction_in_dry_air = 0.3e-6_wp
-    endif
-  
-  end function molar_fraction_in_dry_air
 	
   function saturation_pressure_over_water(temperature)
 
@@ -201,7 +203,7 @@ module dictionary
     ! local variables
     real(wp)  :: temp_c ! temperature in degrees Celsius
 
-    temp_c = temperature - T_0
+    temp_c = temperature - t_0
     ! clipping too extreme values for this approximation
     if (temp_c>100._wp) then
       temp_c = 100._wp
@@ -240,7 +242,7 @@ module dictionary
     ! local variables
     real(wp)             :: temp_c
 
-    temp_c = temperature - T_0
+    temp_c = temperature - t_0
 
     ! clipping too extreme values for this approximation
     if (temp_c<-70._wp) then
