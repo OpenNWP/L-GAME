@@ -105,8 +105,8 @@ module dictionary
     ! This function calculates the phase transition heat.
 
     ! input arguments
-    integer  :: direction
-    real(wp) :: temperature
+    integer, intent(in)  :: direction
+    real(wp), intent(in) :: temperature
 
     real(wp) :: phase_trans_heat
     
@@ -132,33 +132,32 @@ module dictionary
     
     ! This function returns the enthalpy of evaporation depending on the temperature.
     
-    real(wp) :: temperature
-
+    real(wp), intent(in) :: temperature
     real(wp) :: enthalpy_evaporation
-    ! local variable
-    real(wp) :: temp_c
     
-    ! temperature in degrees Celsius
-    temp_c = temperature - t_0
+    ! local variables
+    real(wp) :: temperature_local
     
-    if (temperature<t_0) then
+    temperature_local = temperature
+    
+    if (temperature_local<t_0) then
       ! This follows Eq. (9) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
       ! QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
       ! clipping values that are too extreme for these approximations
-      if (temperature<30._wp) then
-        temperature = 30._wp
+      if (temperature_local<30._wp) then
+        temperature_local = 30._wp
       endif
-      enthalpy_evaporation = 56579._wp - 42.212_wp*temperature + exp(0.1149_wp*(281.6_wp - temperature))
+      enthalpy_evaporation = 56579._wp - 42.212_wp*temperature_local + exp(0.1149_wp*(281.6_wp - temperature_local))
       ! unit conversion from J/mol to J/kg
       enthalpy_evaporation = enthalpy_evaporation/m_v
     else
       ! This follows the formula (Eq. (8)) cited by Huang:
       ! A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
       ! clipping values that are too extreme for these approximations
-      if (temperature>t_0+100._wp) then
-        temperature = t_0 + 100._wp
+      if (temperature_local>t_0+100._wp) then
+        temperature_local = t_0 + 100._wp
       endif
-      enthalpy_evaporation = 3151378._wp - 2386._wp*temperature
+      enthalpy_evaporation = 3151378._wp - 2386._wp*temperature_local
     endif
 
   end function enthalpy_evaporation
@@ -169,21 +168,25 @@ module dictionary
 	! It follows Eq. (5) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
 	! QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
     
-    ! input
-    real(wp) :: temperature
-    ! output
-    real(wp) :: enthalpy_sublimation
+    real(wp), intent(in) :: temperature
+    real(wp)             :: enthalpy_sublimation
+
+    ! local variables
+    real(wp) :: temperature_local
+    
+    temperature_local = temperature
 
     ! clipping values that are too extreme for this approximation
-    if (temperature<30.0) then
-      temperature = 30.0
+    if (temperature_local<30._wp) then
+      temperature_local = 30._wp
     endif
     ! sublimation is not happening in thermodynamic equilibrium at temperatures > t_0
-    if (temperature>t_0) then
-      temperature = t_0
+    if (temperature_local>t_0) then
+      temperature_local = t_0
     endif
 
-    enthalpy_sublimation = 46782.5 + 35.8925*temperature - 0.07414*temperature**2 + 541.5*exp(-(temperature/123.75)**2)
+    enthalpy_sublimation = 46782.5_wp + 35.8925_wp*temperature_local - 0.07414_wp*temperature_local**2 &
+    + 541.5_wp*exp(-(temperature_local/123.75_wp)**2)
 
     ! unit conversion from J/mol to J/kg
     enthalpy_sublimation = enthalpy_sublimation/m_v
@@ -195,9 +198,7 @@ module dictionary
     ! This function returns the saturation pressure in Pa over liquid water as a function of the temperature in K.
     ! It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
     
-    ! input argument
     real(wp), intent(in) :: temperature
-    ! output argument
     real(wp)             :: saturation_pressure_over_water
     
     ! local variables
@@ -214,17 +215,17 @@ module dictionary
     ! For super-cooled water we use the formula cited in Pruppacher and Klett (2010), p. 854, Eq. (A.4-1).
     else
       ! Clipping values that are too extreme for this approximation.
-      if (temp_c<-50.0) then
-        temp_c = -50.0
+      if (temp_c<-50._wp) then
+        temp_c = -50._wp
       endif
       saturation_pressure_over_water &
-      = 6.107799961 &
-      + 4.436518521e-1*temp_c &
-      + 1.428945805e-2*temp_c**2 &
-      + 2.650648471e-4*temp_c**3 &
-      + 3.031240396e-6*temp_c**4 &
-      + 2.034080948e-8*temp_c**5 &
-      + 6.136820929e-11*temp_c**6
+      = 6.107799961_wp &
+      + 4.436518521e-1_wp*temp_c &
+      + 1.428945805e-2_wp*temp_c**2 &
+      + 2.650648471e-4_wp*temp_c**3 &
+      + 3.031240396e-6_wp*temp_c**4 &
+      + 2.034080948e-8_wp*temp_c**5 &
+      + 6.136820929e-11_wp*temp_c**6
     endif
 
   end function saturation_pressure_over_water
@@ -234,9 +235,7 @@ module dictionary
     ! This function returns the saturation pressure in Pa over ice as a function of the temperature in K.
     ! It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
     
-    ! input argument
     real(wp), intent(in) :: temperature
-    ! output argument
     real(wp)             :: saturation_pressure_over_ice
     
     ! local variables
@@ -266,7 +265,7 @@ module dictionary
     ! output argument
     real(wp)             :: enhancement_factor_over_water
     
-    enhancement_factor_over_water = 0.99882*exp(0.00000008*air_pressure)
+    enhancement_factor_over_water = 0.99882_wp*exp(0.00000008_wp*air_pressure)
 
     end function enhancement_factor_over_water
   
@@ -275,12 +274,10 @@ module dictionary
     ! This function calculates the enhancement factor over ice, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
     ! It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 
-    ! input arguments
     real(wp), intent(in) :: air_pressure
-    ! output argument
     real(wp)             :: enhancement_factor_over_ice
     
-    enhancement_factor_over_ice = 0.99882*exp(0.00000008*air_pressure)
+    enhancement_factor_over_ice = 0.99882_wp*exp(0.00000008_wp*air_pressure)
 
     end function enhancement_factor_over_ice
 
@@ -288,9 +285,7 @@ module dictionary
     
     ! This function returns the relative humidity as a function of the absolute humidity in kg/m^3 and the temperature in K.
     
-    ! input arguments
     real(wp), intent(in) :: abs_humidity,temperature
-    ! output argument
     real(wp)             :: rel_humidity
     
     ! local variables
