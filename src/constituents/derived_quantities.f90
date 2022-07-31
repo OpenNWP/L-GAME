@@ -8,7 +8,7 @@ module derived_quantities
   use definitions,      only: wp,t_grid,t_state,t_diag
   use dictionary,       only: mean_particle_masses_gas,spec_heat_capacities_p_gas,spec_heat_capacities_v_gas, &
                         specific_gas_constants
-  use run_nml,          only: nlins,ncols,nlays
+  use run_nml,          only: ny,nx,nlays
   use constants,        only: k_B,M_PI
   use constituents_nml, only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
   
@@ -39,8 +39,8 @@ module derived_quantities
     integer :: ji,jk,jl ! loop indices
     
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           diag%temperature(ji,jk,jl) = (grid%theta_v_bg(ji,jk,jl) + state%theta_v_pert(ji,jk,jl)) &
           *(grid%exner_bg(ji,jk,jl) + state%exner_pert(ji,jk,jl))

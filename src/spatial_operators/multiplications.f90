@@ -6,7 +6,7 @@ module multiplications
   ! This module is a collection of various multiplications of vector and/or scalar fields.
   
   use definitions, only: wp
-  use run_nml,     only: nlins,ncols,nlays
+  use run_nml,     only: ny,nx,nlays
   use bc_nml,      only: lperiodic
   
   implicit none
@@ -54,14 +54,14 @@ module multiplications
     ! inner domain
     ! x
     !$omp parallel do private(jk)
-    do jk=2,ncols
+    do jk=2,nx
       result_field_x(:,jk,:) = 0.5_wp*(scalar_field(:,jk-1,:) + scalar_field(:,jk,:))*in_vector_x(:,jk,:)
     enddo
     !$omp end parallel do
     
     ! y
     !$omp parallel do private(ji)
-    do ji=2,nlins
+    do ji=2,ny
       result_field_y(ji,:,:) = 0.5_wp*(scalar_field(ji-1,:,:) + scalar_field(ji,:,:))*in_vector_y(ji,:,:)
     enddo
     !$omp end parallel do
@@ -69,19 +69,19 @@ module multiplications
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel workshare
-      result_field_x(:,1,:) = 0.5_wp*(scalar_field(:,1,:) + scalar_field(:,ncols,:))*in_vector_x(:,1,:)
+      result_field_x(:,1,:) = 0.5_wp*(scalar_field(:,1,:) + scalar_field(:,nx,:))*in_vector_x(:,1,:)
       !$omp end parallel workshare
       
       !$omp parallel workshare
-      result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
+      result_field_x(:,nx+1,:) = result_field_x(:,1,:)
       !$omp end parallel workshare
       
       !$omp parallel workshare
-      result_field_y(1,:,:) = 0.5_wp*(scalar_field(1,:,:) + scalar_field(nlins,:,:))*in_vector_y(1,:,:)
+      result_field_y(1,:,:) = 0.5_wp*(scalar_field(1,:,:) + scalar_field(ny,:,:))*in_vector_y(1,:,:)
       !$omp end parallel workshare
       
       !$omp parallel workshare
-      result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
+      result_field_y(ny+1,:,:) = result_field_y(1,:,:)
       !$omp end parallel workshare
     endif
   
@@ -104,8 +104,8 @@ module multiplications
     ! inner domain
     ! x
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=2,ncols
+    do ji=1,ny
+      do jk=2,nx
         do jl=1,nlays
           if (in_vector_x(ji,jk,jl)>=0._wp) then
             result_field_x(ji,jk,jl) = scalar_field(ji,jk-1,jl)*in_vector_x(ji,jk,jl)
@@ -119,8 +119,8 @@ module multiplications
     
     ! y
     !$omp parallel do private(ji,jk,jl)
-    do ji=2,nlins
-      do jk=1,ncols
+    do ji=2,ny
+      do jk=1,nx
         do jl=1,nlays
           if (in_vector_y(ji,jk,jl)>=0._wp) then
             result_field_y(ji,jk,jl) = scalar_field(ji,jk,jl)*in_vector_y(ji,jk,jl)
@@ -135,10 +135,10 @@ module multiplications
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel do private(ji,jl)
-      do ji=1,nlins
+      do ji=1,ny
         do jl=1,nlays
           if (in_vector_x(ji,1,jl)>=0._wp) then
-            result_field_x(ji,1,jl) = scalar_field(ji,ncols,jl)*in_vector_x(ji,1,jl)
+            result_field_x(ji,1,jl) = scalar_field(ji,nx,jl)*in_vector_x(ji,1,jl)
           else
             result_field_x(ji,1,jl) = scalar_field(ji,1,jl)*in_vector_x(ji,1,jl)
           endif
@@ -147,23 +147,23 @@ module multiplications
       !$omp end parallel do
       
       !$omp parallel workshare
-      result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
+      result_field_x(:,nx+1,:) = result_field_x(:,1,:)
       !$omp end parallel workshare
       
       !$omp parallel do private(jk,jl)
-      do jk=1,ncols
+      do jk=1,nx
         do jl=1,nlays
           if (in_vector_y(1,jk,jl)>=0._wp) then
             result_field_y(1,jk,jl) = scalar_field(1,jk,jl)*in_vector_y(1,jk,jl)
           else
-            result_field_y(1,jk,jl) = scalar_field(nlins,jk,jl)*in_vector_y(1,jk,jl)
+            result_field_y(1,jk,jl) = scalar_field(ny,jk,jl)*in_vector_y(1,jk,jl)
           endif
         enddo
       enddo
       !$omp end parallel do
       
       !$omp parallel workshare
-      result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
+      result_field_y(ny+1,:,:) = result_field_y(1,:,:)
       !$omp end parallel workshare
     endif
   

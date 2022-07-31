@@ -5,7 +5,7 @@ module inner_product
 
   ! The calculation of the inner product is executed in this module.
 
-  use run_nml,     only: nlins,ncols,nlays
+  use run_nml,     only: ny,nx,nlays
   use definitions, only: t_grid,wp
   
   implicit none
@@ -34,8 +34,8 @@ module inner_product
     integer :: ji,jk,jl ! loop indices
     
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           output_scalar(ji,jk,jl) = &
           grid%inner_product_weights(ji,jk,jl,1)*u_vector_1(ji,jk+1,jl)*u_vector_2(ji,jk+1,jl) &

@@ -9,7 +9,7 @@ module read_write_grid
   use definitions,       only: t_grid,wp
   use set_initial_state, only: nc_check
   use io_nml,            only: grid_filename,land_sea_filename
-  use run_nml,           only: nlins,ncols,nlays
+  use run_nml,           only: ny,nx,nlays
   
   implicit none
   
@@ -57,10 +57,10 @@ module read_write_grid
     call nc_check(nf90_put_att(ncid,NF90_GLOBAL,"Description","This is a grid of L-GAME."))
     
     ! defining the dimensions
-    call nc_check(nf90_def_dim(ncid,"lon_model",ncols,x_dimid))
-    call nc_check(nf90_def_dim(ncid,"lat_model",nlins,y_dimid))
-    call nc_check(nf90_def_dim(ncid,"lon_model_plus1",ncols+1,x_dimidp1))
-    call nc_check(nf90_def_dim(ncid,"lat_model_plus1",nlins+1,y_dimidp1))
+    call nc_check(nf90_def_dim(ncid,"lon_model",nx,x_dimid))
+    call nc_check(nf90_def_dim(ncid,"lat_model",ny,y_dimid))
+    call nc_check(nf90_def_dim(ncid,"lon_model_plus1",nx+1,x_dimidp1))
+    call nc_check(nf90_def_dim(ncid,"lat_model_plus1",ny+1,y_dimidp1))
 
     ! setting the dimension ID arrays
     ! 2D

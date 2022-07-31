@@ -8,7 +8,7 @@ module explicit_vector_tendencies
   use definitions,              only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
   use inner_product,            only: inner
   use gradient_operators,       only: grad
-  use run_nml,                  only: nlins,ncols,nlays,impl_weight,llinear,lcorio
+  use run_nml,                  only: ny,nx,nlays,impl_weight,llinear,lcorio
   use constituents_nml,         only: no_of_condensed_constituents
   use vorticities,              only: calc_pot_vort
   use multiplications,          only: scalar_times_vector

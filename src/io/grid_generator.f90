@@ -7,7 +7,7 @@ module grid_generator
 
   use netcdf
   use definitions,        only: wp,t_grid
-  use run_nml,            only: nlins,ncols,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
+  use run_nml,            only: ny,nx,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
                                 lon_center,lplane
   use constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                 lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv
@@ -79,10 +79,10 @@ module grid_generator
     ! setting the dy of the model grid
     dlat = dy/r_e
     dlon = dx/r_e
-    lat_left_upper = (nlins-1._wp)/2._wp*dlat
-    lon_left_upper = -(ncols-1._wp)/2._wp*dlon
+    lat_left_upper = (ny-1._wp)/2._wp*dlat
+    lon_left_upper = -(nx-1._wp)/2._wp*dlon
     !$omp parallel do private(ji)
-    do ji=1,nlins
+    do ji=1,ny
       grid%lat_scalar(ji) = lat_left_upper - dlat*(ji-1._wp)
       ! this will be modified later
       grid%lat_geo_scalar(ji,:) = grid%lat_scalar(ji)
@@ -90,7 +90,7 @@ module grid_generator
     !$omp end parallel do
     
     !$omp parallel do private(jk)
-    do jk=1,ncols
+    do jk=1,nx
       grid%lon_scalar(jk) = lon_left_upper + dlon*(jk-1._wp)
       ! this will be modified later
       grid%lon_geo_scalar(:,jk) = grid%lon_scalar(jk)
@@ -99,10 +99,10 @@ module grid_generator
     
     ! this will be modified later
     !$omp parallel do private(ji,jk)
-    do ji=1,nlins
-      do jk=1,ncols+1
+    do ji=1,ny
+      do jk=1,nx+1
         grid%lat_geo_u(ji,jk) = grid%lat_scalar(ji)
-        if (jk==ncols+1) then
+        if (jk==nx+1) then
           grid%lon_geo_u(ji,jk) = grid%lon_scalar(jk-1) + 0.5_wp*dlon
         else
           grid%lon_geo_u(ji,jk) = grid%lon_scalar(jk) - 0.5_wp*dlon
@@ -113,9 +113,9 @@ module grid_generator
     
     ! this will be modified later
     !$omp parallel do private(ji,jk)
-    do ji=1,nlins+1
-      do jk=1,ncols
-        if (ji==nlins+1) then
+    do ji=1,ny+1
+      do jk=1,nx
+        if (ji==ny+1) then
           grid%lat_geo_v(ji,jk) = grid%lat_scalar(ji-1) - 0.5_wp*dlat
         else
           grid%lat_geo_v(ji,jk) = grid%lat_scalar(ji) + 0.5_wp*dlat
@@ -165,8 +165,8 @@ module grid_generator
 	! calculating the geographic coordinates of the gridpoints
 	! scalar points
     !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         ! calculating the local i-vector before the rotation
         call calc_local_i(grid%lon_geo_scalar(ji,jk),basis_old)
         call find_global_normal(grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk),r_old)
@@ -188,8 +188,8 @@ module grid_generator
     
     ! u-vector points, including directions
     !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
-    do ji=1,nlins
-      do jk=1,ncols+1
+    do ji=1,ny
+      do jk=1,nx+1
         ! calculating the local i-vector before the rotation
         call calc_local_i(grid%lon_geo_u(ji,jk),basis_old)
         ! rotating the gridpoint itself
@@ -212,8 +212,8 @@ module grid_generator
 	
     ! v-vector points, including directions
     !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
-    do ji=1,nlins+1
-      do jk=1,ncols
+    do ji=1,ny+1
+      do jk=1,nx
         ! calculating the local j-vector before the rotation
         call calc_local_j(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),basis_old)
         ! rotating the gridpoint itself
@@ -236,30 +236,30 @@ module grid_generator
     
     ! setting the Coriolis vector
     !$omp parallel do private(ji,jk,y_basis_local)
-    do ji=1,nlins+1
-      do jk=1,ncols
+    do ji=1,ny+1
+      do jk=1,nx
         y_basis_local = sin(grid%dir_geo_v(ji,jk) - 0.5_wp*M_PI)
         grid%fvec_x(ji,jk) = 2._wp*omega*cos(grid%lat_geo_v(ji,jk))*y_basis_local
       enddo
     enddo
     !$omp end parallel do
     !$omp parallel do private(ji,jk,y_basis_local)
-    do ji=1,nlins
-      do jk=1,ncols+1
+    do ji=1,ny
+      do jk=1,nx+1
         y_basis_local = sin(grid%dir_geo_u(ji,jk) + 0.5_wp*M_PI)
         grid%fvec_y(ji,jk) = 2._wp*omega*cos(grid%lat_geo_u(ji,jk))*y_basis_local
       enddo
     enddo
     !$omp end parallel do
     !$omp parallel do private(ji,jk,lat_local,lon_local,r_old,r_new)
-    do ji=1,nlins+1
-      do jk=1,ncols+1
-        if (ji==nlins+1) then
+    do ji=1,ny+1
+      do jk=1,nx+1
+        if (ji==ny+1) then
           lat_local = grid%lat_scalar(ji-1) - 0.5*dlat
         else
           lat_local = grid%lat_scalar(ji) + 0.5*dlat
         endif
-        if (jk==ncols+1) then
+        if (jk==nx+1) then
           lon_local = grid%lon_scalar(jk-1) + 0.5*dlon
         else
           lon_local = grid%lon_scalar(jk) - 0.5*dlon
@@ -301,8 +301,8 @@ module grid_generator
       case(2)
         height_mountain = 250._wp
         !$omp parallel do private(jk,x_coord)
-        do jk=1,ncols
-          x_coord = dx*jk - (ncols/2 + 1)*dx
+        do jk=1,nx
+          x_coord = dx*jk - (nx/2 + 1)*dx
           grid%z_w(:,jk,nlays+1) = height_mountain*exp(-x_coord**2/5000._wp**2)*cos(M_PI*x_coord/4000._wp)**2
         enddo
         !$omp end parallel do
@@ -311,8 +311,8 @@ module grid_generator
       case(3)
         height_mountain = 3000._wp
         !$omp parallel do private(jk,x_coord)
-        do jk=1,ncols
-          x_coord = dx*jk - (ncols/2 + 1)*dx
+        do jk=1,nx
+          x_coord = dx*jk - (nx/2 + 1)*dx
           if (abs(x_coord)<=25e3_wp) then
             grid%z_w(:,jk,nlays+1) = height_mountain*cos(0.5_wp*M_PI*x_coord/25000._wp)**2*cos(M_PI*x_coord/8000._wp)**2
           else
@@ -329,12 +329,12 @@ module grid_generator
     c_p_water = 4184._wp
     
     !$omp parallel do private(ji,jk,x_coord)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
 		
 		! seabreeze land-sea mask
         if (trim(scenario)=="seabreeze") then
-          if (jk>=ncols/4 .and. jk<=3*ncols/4) then
+          if (jk>=nx/4 .and. jk<=3*nx/4) then
             grid%is_land(ji,jk) = 1
           endif
         endif
@@ -386,8 +386,8 @@ module grid_generator
     ! calculating the vertical positions of the scalar points
     ! the heights are defined according to k = A_k + B_k*surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
     !$omp parallel do private(ji,jk,jl,z_rel,sigma_z,A,B,vertical_vector_pre,max_oro)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         ! filling up vertical_vector_pre
         do jl=1,nlays+1
           z_rel = 1._wp-(jl-1._wp)/nlays ! z/toa
@@ -423,54 +423,54 @@ module grid_generator
     ! setting the height of the u-vector points
     ! inner domain
     !$omp parallel do private(jk)
-    do jk=2,ncols
+    do jk=2,nx
       grid%z_u(:,jk,:) = 0.5_wp*(grid%z_scalar(:,jk-1,:) + grid%z_scalar(:,jk,:))
     enddo
     !$omp end parallel do
     ! boundaries
     if (lperiodic) then
       !$omp parallel workshare
-      grid%z_u(:,1,:) = 0.5_wp*(grid%z_scalar(:,1,:) + grid%z_scalar(:,ncols,:))
+      grid%z_u(:,1,:) = 0.5_wp*(grid%z_scalar(:,1,:) + grid%z_scalar(:,nx,:))
       !$omp end parallel workshare
       !$omp parallel workshare
-      grid%z_u(:,ncols+1,:) = grid%z_u(:,1,:)
+      grid%z_u(:,nx+1,:) = grid%z_u(:,1,:)
       !$omp end parallel workshare
     else
       !$omp parallel workshare
       grid%z_u(:,1,:) = grid%z_scalar(:,1,:) + 0.5_wp*(grid%z_scalar(:,1,:) - grid%z_scalar(:,2,:))
       !$omp end parallel workshare
       !$omp parallel workshare
-      grid%z_u(:,ncols+1,:) = grid%z_scalar(:,ncols,:) + 0.5_wp*(grid%z_scalar(:,ncols,:) - grid%z_scalar(:,ncols-1,:))
+      grid%z_u(:,nx+1,:) = grid%z_scalar(:,nx,:) + 0.5_wp*(grid%z_scalar(:,nx,:) - grid%z_scalar(:,nx-1,:))
       !$omp end parallel workshare
     endif
     
     ! setting the height of the v-vector points
     ! inner domain
     !$omp parallel do private(ji)
-    do ji=2,nlins
+    do ji=2,ny
       grid%z_v(ji,:,:) = 0.5_wp*(grid%z_scalar(ji-1,:,:) + grid%z_scalar(ji,:,:))
     enddo
     !$omp end parallel do
     ! boundaries
     if (lperiodic) then
       !$omp parallel workshare
-      grid%z_v(1,:,:) = 0.5_wp*(grid%z_scalar(1,:,:) + grid%z_scalar(nlins,:,:))
+      grid%z_v(1,:,:) = 0.5_wp*(grid%z_scalar(1,:,:) + grid%z_scalar(ny,:,:))
       !$omp end parallel workshare
       !$omp parallel workshare
-      grid%z_v(nlins+1,:,:) = grid%z_v(1,:,:)
+      grid%z_v(ny+1,:,:) = grid%z_v(1,:,:)
       !$omp end parallel workshare
     else
       !$omp parallel workshare
       grid%z_v(1,:,:) = grid%z_scalar(1,:,:) + 0.5_wp*(grid%z_scalar(1,:,:) - grid%z_scalar(2,:,:))
       !$omp end parallel workshare
       !$omp parallel workshare
-      grid%z_v(nlins+1,:,:) = grid%z_scalar(nlins,:,:) + 0.5_wp*(grid%z_scalar(nlins,:,:) - grid%z_scalar(nlins-1,:,:))
+      grid%z_v(ny+1,:,:) = grid%z_scalar(ny,:,:) + 0.5_wp*(grid%z_scalar(ny,:,:) - grid%z_scalar(ny-1,:,:))
       !$omp end parallel workshare
     endif
     
     ! setting dx
     !$omp parallel do private(ji)
-    do ji=1,nlins
+    do ji=1,ny
       grid%dx(ji,:,:) = dx*cos(grid%lat_scalar(ji))*(r_e + grid%z_u(ji,:,:))/r_e
     enddo
     !$omp end parallel do
@@ -491,8 +491,8 @@ module grid_generator
     
     ! setting dx of the dual grid
     !$omp parallel do private(ji)
-    do ji=1,nlins+1
-      if (ji==nlins+1) then
+    do ji=1,ny+1
+      if (ji==ny+1) then
         grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji-1) - 0.5_wp*dlat)*(r_e + grid%z_v(ji,:,:))/r_e
       else
         grid%dx_dual(ji,:,:) = dx*cos(grid%lat_scalar(ji) + 0.5_wp*dlat)*(r_e + grid%z_v(ji,:,:))/r_e
@@ -543,8 +543,8 @@ module grid_generator
     
     ! setting the horizontal areas at the surface
     !$omp parallel do private(ji,jk)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         grid%area_z(ji,jk,nlays+1) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(r_e + grid%z_w(ji,jk,nlays+1))**2/r_e**2
       enddo
     enddo
@@ -570,17 +570,17 @@ module grid_generator
     
     ! setting the vertical areas in x-direction
     !$omp parallel do private(ji,jk,jl,lower_z,upper_z,lower_length)
-    do ji=1,nlins
-      do jk=1,ncols+1
+    do ji=1,ny
+      do jk=1,nx+1
         do jl=1,nlays
           ! left boundary
           if (jk==1) then
             lower_z = grid%z_w(ji,1,jl+1)+0.5_wp*(grid%z_w(ji,1,jl+1)-grid%z_w(ji,2,jl+1))
             upper_z = grid%z_w(ji,1,jl)+0.5_wp*(grid%z_w(ji,1,jl)-grid%z_w(ji,2,jl))
           ! right boundary
-          elseif (jk==ncols+1) then
-            lower_z = grid%z_w(ji,ncols,jl+1)+0.5_wp*(grid%z_w(ji,ncols,jl+1)-grid%z_w(ji,ncols-1,jl+1))
-            upper_z = grid%z_w(ji,ncols,jl)+0.5_wp*(grid%z_w(ji,ncols,jl)-grid%z_w(ji,ncols-1,jl))
+          elseif (jk==nx+1) then
+            lower_z = grid%z_w(ji,nx,jl+1)+0.5_wp*(grid%z_w(ji,nx,jl+1)-grid%z_w(ji,nx-1,jl+1))
+            upper_z = grid%z_w(ji,nx,jl)+0.5_wp*(grid%z_w(ji,nx,jl)-grid%z_w(ji,nx-1,jl))
           ! inner domain
           else
             lower_z = 0.5_wp*(grid%z_w(ji,jk-1,jl+1) + grid%z_w(ji,jk,jl+1))
@@ -599,23 +599,23 @@ module grid_generator
     
     ! setting the vertical areas in y-direction
     !$omp parallel do private(ji,jk,jl,lower_z,upper_z,lower_length)
-    do ji=1,nlins+1
-      do jk=1,ncols
+    do ji=1,ny+1
+      do jk=1,nx
         do jl=1,nlays
           ! upper boundary
           if (ji==1) then
             lower_z = grid%z_w(1,jk,jl+1)+0.5_wp*(grid%z_w(1,jk,jl+1)-grid%z_w(2,jk,jl+1))
             upper_z = grid%z_w(1,jk,jl)+0.5_wp*(grid%z_w(1,jk,jl)-grid%z_w(2,jk,jl))
           ! lower boundary
-          elseif (ji==nlins+1) then
-            lower_z = grid%z_w(nlins,jk,jl+1)+0.5_wp*(grid%z_w(nlins,jk,jl+1)-grid%z_w(nlins-1,jk,jl+1))
-            upper_z = grid%z_w(nlins,jk,jl)+0.5_wp*(grid%z_w(nlins,jk,jl)-grid%z_w(nlins-1,jk,jl))
+          elseif (ji==ny+1) then
+            lower_z = grid%z_w(ny,jk,jl+1)+0.5_wp*(grid%z_w(ny,jk,jl+1)-grid%z_w(ny-1,jk,jl+1))
+            upper_z = grid%z_w(ny,jk,jl)+0.5_wp*(grid%z_w(ny,jk,jl)-grid%z_w(ny-1,jk,jl))
           ! inner domain
           else
             lower_z = 0.5_wp*(grid%z_w(ji-1,jk,jl+1) + grid%z_w(ji,jk,jl+1))
             upper_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
           endif
-          if (ji==nlins+1) then
+          if (ji==ny+1) then
             lower_length = dx*cos(grid%lat_scalar(ji-1)-0.5_wp*dlat)*(r_e+lower_z)/r_e
           else
             lower_length = dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)*(r_e+lower_z)/r_e
@@ -632,21 +632,21 @@ module grid_generator
     
     ! setting the horizontal dual areas
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins+1
-      do jk=1,ncols+1
+    do ji=1,ny+1
+      do jk=1,nx+1
         do jl=1,nlays
         
           ! setting the vertical position of the areas
           if (jk==1) then
             grid%z_area_dual_z(ji,jk,jl) = grid%z_v(ji,1,jl) + 0.5_wp*(grid%z_v(ji,1,jl)-grid%z_v(ji,2,jl))
-          elseif (jk==ncols+1) then
-            grid%z_area_dual_z(ji,jk,jl) = grid%z_v(ji,ncols,jl) + 0.5_wp*(grid%z_v(ji,ncols,jl)-grid%z_v(ji,ncols-1,jl))
+          elseif (jk==nx+1) then
+            grid%z_area_dual_z(ji,jk,jl) = grid%z_v(ji,nx,jl) + 0.5_wp*(grid%z_v(ji,nx,jl)-grid%z_v(ji,nx-1,jl))
           else
             grid%z_area_dual_z(ji,jk,jl) = 0.5_wp*(grid%z_v(ji,jk-1,jl)+grid%z_v(ji,jk,jl))
           endif
           
           ! setting the area itself
-          if (ji==nlins+1) then
+          if (ji==ny+1) then
             grid%area_dual_z(ji,jk,jl) = patch_area(grid%lat_scalar(ji-1) - 0.5_wp*dlat,dlon,dlat) &
             *(r_e + grid%z_area_dual_z(ji,jk,jl))**2/r_e**2
           else
@@ -665,14 +665,14 @@ module grid_generator
     
     ! setting the vertical dual areas in x-direction
     !$omp parallel do private(ji,jk,jl,lower_z,lower_length,upper_z)
-    do ji=1,nlins+1
-      do jk=1,ncols
+    do ji=1,ny+1
+      do jk=1,nx
         do jl=1,nlays+1
           if (jl==nlays+1) then
             if (ji==1) then
               lower_z = grid%z_w(1,jk,jl) + 0.5_wp*(grid%z_w(1,jk,jl)-grid%z_w(2,jk,jl))
-            elseif (ji==nlins+1) then
-              lower_z = grid%z_w(nlins,jk,jl) + 0.5_wp*(grid%z_w(nlins,jk,jl)-grid%z_w(nlins-1,jk,jl))
+            elseif (ji==ny+1) then
+              lower_z = grid%z_w(ny,jk,jl) + 0.5_wp*(grid%z_w(ny,jk,jl)-grid%z_w(ny-1,jk,jl))
             else
               lower_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
             endif
@@ -684,8 +684,8 @@ module grid_generator
           if (jl==1) then
             if (ji==1) then
               upper_z = grid%z_w(1,jk,jl) + 0.5_wp*(grid%z_w(1,jk,jl)-grid%z_w(2,jk,jl))
-            elseif (ji==nlins+1) then
-              upper_z = grid%z_w(nlins,jk,jl) + 0.5_wp*(grid%z_w(nlins,jk,jl)-grid%z_w(nlins-1,jk,jl))
+            elseif (ji==ny+1) then
+              upper_z = grid%z_w(ny,jk,jl) + 0.5_wp*(grid%z_w(ny,jk,jl)-grid%z_w(ny-1,jk,jl))
             else
               upper_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
             endif
@@ -704,14 +704,14 @@ module grid_generator
     
     ! setting the vertical dual areas in y-direction
     !$omp parallel do private(ji,jk,jl,lower_z,lower_length,upper_z)
-    do ji=1,nlins
-      do jk=1,ncols+1
+    do ji=1,ny
+      do jk=1,nx+1
         do jl=1,nlays+1
           if (jl==nlays+1) then
             if (jk==1) then
               lower_z = grid%z_w(ji,1,jl) + 0.5_wp*(grid%z_w(ji,1,jl)-grid%z_w(ji,2,jl))
-            elseif (jk==ncols+1) then
-              lower_z = grid%z_w(ji,ncols,jl) + 0.5_wp*(grid%z_w(ji,ncols,jl)-grid%z_w(ji,ncols-1,jl))
+            elseif (jk==nx+1) then
+              lower_z = grid%z_w(ji,nx,jl) + 0.5_wp*(grid%z_w(ji,nx,jl)-grid%z_w(ji,nx-1,jl))
             else
               lower_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
             endif
@@ -723,8 +723,8 @@ module grid_generator
           if (jl==1) then
             if (jk==1) then
               upper_z = grid%z_w(ji,1,jl) + 0.5_wp*(grid%z_w(ji,1,jl)-grid%z_w(ji,2,jl))
-            elseif (jk==ncols+1) then
-              upper_z = grid%z_w(ji,ncols,jl) + 0.5_wp*(grid%z_w(ji,ncols,jl)-grid%z_w(ji,ncols-1,jl))
+            elseif (jk==nx+1) then
+              upper_z = grid%z_w(ji,nx,jl) + 0.5_wp*(grid%z_w(ji,nx,jl)-grid%z_w(ji,nx-1,jl))
             else
               upper_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
             endif
@@ -758,8 +758,8 @@ module grid_generator
     
     ! setting the inner product weights
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           grid%inner_product_weights(ji,jk,jl,1) = grid%area_x(ji,jk+1,jl)*grid%dx(ji,jk+1,jl)/(2._wp*grid%volume(ji,jk,jl))
           grid%inner_product_weights(ji,jk,jl,2) = grid%area_y(ji,jk,jl)*grid%dy(ji,jk,jl)/(2._wp*grid%volume(ji,jk,jl))
@@ -774,7 +774,7 @@ module grid_generator
     
     ! setting the TRSK weights
     ! u
-    do ji=1,nlins
+    do ji=1,ny
       base_area = patch_area(grid%lat_scalar(ji),dlon,dlat)
       grid%trsk_weights_u(ji,1) = (0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
       if (lplane) then
@@ -800,9 +800,9 @@ module grid_generator
       grid%trsk_weights_u(ji,6) = grid%trsk_weights_u(ji,1)
     enddo
     ! v
-    do ji=1,nlins+1
-      if (ji==nlins+1) then
-        lat_lower_center = grid%lat_scalar(nlins)-dlat
+    do ji=1,ny+1
+      if (ji==ny+1) then
+        lat_lower_center = grid%lat_scalar(ny)-dlat
       else
         lat_lower_center = grid%lat_scalar(ji)
       endif
@@ -862,8 +862,8 @@ module grid_generator
     
     ! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
     !$omp parallel do private(ji,jk,jl,b,c,pressure)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         ! integrating from bottom to top
         do jl=nlays,1,-1
           ! lowest layer
@@ -944,8 +944,8 @@ module grid_generator
     allocate(lon_distance_vector(no_of_lon_points))
 
     ! setting the unfiltered orography
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         ! default
         grid%z_w(ji,jk,nlays+1) = 0._wp
     
@@ -983,10 +983,10 @@ module grid_generator
   
     ! This subroutine smoothes a scalar field on one layer.
     
-    real(wp), intent(inout) :: array(nlins,ncols) ! The field to smooth.
+    real(wp), intent(inout) :: array(ny,nx) ! The field to smooth.
     
     ! local variables
-    real(wp) :: original_array(nlins,ncols) ! the unsmoothed input array
+    real(wp) :: original_array(ny,nx) ! the unsmoothed input array
     integer  :: ji,jk                       ! loop indices
     
     ! copying the original array
@@ -994,8 +994,8 @@ module grid_generator
     
     ! inner domin
     !$omp parallel do private(ji,jk)
-    do ji=2,nlins-1
-      do jk=2,ncols-1
+    do ji=2,ny-1
+      do jk=2,nx-1
         array(ji,jk) = sum(original_array(ji-1:ji+1,jk-1:jk+1))/9._wp
       enddo
     enddo
@@ -1003,29 +1003,29 @@ module grid_generator
     
     ! corners
     array(1,1) = sum(original_array(1:2,1:2))/4._wp
-    array(1,ncols) = sum(original_array(1:2,ncols-1:ncols))/4._wp
-    array(nlins,1) = sum(original_array(nlins-1:nlins,1:2))/4._wp
-    array(nlins,ncols) = sum(original_array(nlins-1:nlins,ncols-1:ncols))/4._wp
+    array(1,nx) = sum(original_array(1:2,nx-1:nx))/4._wp
+    array(ny,1) = sum(original_array(ny-1:ny,1:2))/4._wp
+    array(ny,nx) = sum(original_array(ny-1:ny,nx-1:nx))/4._wp
   
     ! boundaries
     !$omp parallel do private(jk)
-    do jk=2,ncols-1
+    do jk=2,nx-1
       array(1,jk) = sum(original_array(1:2,jk-1:jk+1))/6._wp
     enddo
     !$omp end parallel do
     !$omp parallel do private(jk)
-    do jk=2,ncols-1
-      array(nlins,jk) = sum(original_array(nlins-1:nlins,jk-1:jk+1))/6._wp
+    do jk=2,nx-1
+      array(ny,jk) = sum(original_array(ny-1:ny,jk-1:jk+1))/6._wp
     enddo
     !$omp end parallel do
     !$omp parallel do private(ji)
-    do ji=2,nlins-1
+    do ji=2,ny-1
       array(ji,1) = sum(original_array(ji-1:ji+1,1:2))/6._wp
     enddo
     !$omp end parallel do
     !$omp parallel do private(ji)
-    do ji=2,nlins-1
-      array(ji,ncols) = sum(original_array(ji-1:ji+1,ncols-1:ncols))/6._wp
+    do ji=2,ny-1
+      array(ji,nx) = sum(original_array(ji-1:ji+1,nx-1:nx))/6._wp
     enddo
     !$omp end parallel do
   

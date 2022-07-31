@@ -6,7 +6,7 @@ module divergence_operators
   ! The calculation of the horizontal divergence operator is executed in this module.
 
   use definitions, only: wp,t_grid
-  use run_nml,     only: nlins,ncols,nlays,nlays_oro,dtime
+  use run_nml,     only: ny,nx,nlays,nlays_oro,dtime
   use averaging,   only: vertical_contravariant_corr
   
   implicit none
@@ -39,8 +39,8 @@ module divergence_operators
                              ! from the horizontal vector components through the lower area
 
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           ! the horizontal component
           comp_h = &
@@ -99,8 +99,8 @@ module divergence_operators
     real(wp) :: density_lower ! density at the lower interface
 
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v,density_upper,density_lower)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           ! the horizontal component
           comp_h = &
@@ -167,8 +167,8 @@ module divergence_operators
     real(wp) :: contra_upper,contra_lower,comp_v ! kinematic quantities for computing the vertical divergence
     
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_v)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           if (jl==0) then
             contra_upper = 0._wp

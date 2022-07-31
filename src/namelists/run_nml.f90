@@ -11,8 +11,8 @@ module run_nml
   
   implicit none
 
-  integer           :: nlins               ! number of lines
-  integer           :: ncols               ! number of columns
+  integer           :: ny                  ! number of gridpoints in y-direction
+  integer           :: nx                  ! number of gridpoints in x-direction
   integer           :: nlays               ! number of layers
   integer           :: nlays_oro           ! number of levels following the orography
   real(wp)          :: dy                  ! mesh size in y direction at sea level
@@ -40,7 +40,7 @@ module run_nml
   real(wp)          :: lat_center          ! latitude of the center of the model domain
   real(wp)          :: lon_center          ! longitude of the center of the model domain
   
-  namelist /run/nlins,ncols,nlays,dy,dx,run_span_min,sigma, &
+  namelist /run/ny,nx,nlays,dy,dx,run_span_min,sigma, &
   toa,scenario,llinear,run_id,lcorio,nlays_oro,lat_center,lon_center, &
   start_year,start_month,start_day,start_hour,start_minute,lplane,lmoist
 
@@ -51,8 +51,8 @@ module run_nml
     ! local variables
     integer :: fileunit
     
-    nlins = 35
-    ncols = 35
+    ny = 35
+    nx = 35
     nlays = 50
     nlays_oro = 40
     dy = 25e3_wp
@@ -96,20 +96,20 @@ module run_nml
     + 27
     
     ! sanity checks
-    if (nlins<3) then
-      write(*,*) "Error: nlins must be larger or equal than three. Aborting."
+    if (ny<3) then
+      write(*,*) "Error: ny must be larger or equal than three. Aborting."
       call exit(1)
     endif
-    if (ncols<3) then
-      write(*,*) "Error: ncols must be larger or equal than three. Aborting."
+    if (nx<3) then
+      write(*,*) "Error: nx must be larger or equal than three. Aborting."
       call exit(1)
     endif
-    if (mod(nlins, 2)==0) then
-      write(*,*) "Error: nlins must be odd. Aborting."
+    if (mod(ny, 2)==0) then
+      write(*,*) "Error: ny must be odd. Aborting."
       call exit(1)
     endif
-    if (mod(ncols, 2)==0) then
-      write(*,*) "Error: ncols must be odd. Aborting."
+    if (mod(nx, 2)==0) then
+      write(*,*) "Error: nx must be odd. Aborting."
       call exit(1)
     endif
     if (toa <= 0) then

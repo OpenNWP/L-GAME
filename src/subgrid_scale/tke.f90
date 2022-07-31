@@ -6,7 +6,7 @@ module tke
   ! This module computes everything related to the turbulent kinetic energy (TKE).
   
   use definitions,        only: wp,t_state,t_diag,t_irrev,t_grid
-  use run_nml,            only: nlins,ncols,nlays,dtime
+  use run_nml,            only: ny,nx,nlays,dtime
   use derived_quantities, only: density_gas
   use constants,          only: M_PI
   use gradient_operators, only: grad
@@ -40,8 +40,8 @@ module tke
     diag%w_placeholder,diag%scalar_placeholder,grid)
     
     !$omp parallel do private(ji,jk,jl,decay_constant)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           ! calculating the decay constant
           decay_constant = 8._wp*M_PI**2/grid%mean_velocity_area*(irrev%viscosity_coeff_div(ji,jk,jl) &

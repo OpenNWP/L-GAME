@@ -6,7 +6,7 @@ module gradient_operators
   ! This module is a collection of gradient operators.
 
   use definitions, only: t_grid,wp
-  use run_nml,     only: nlins,ncols,nlays,toa
+  use run_nml,     only: ny,nx,nlays,toa
   use averaging,   only: hor_cov_to_con
   use bc_nml,      only: lperiodic
     
@@ -37,14 +37,14 @@ module gradient_operators
     ! inner domain
     ! calculating the x-component of the gradient
     !$omp parallel do private(jk)
-    do jk=2,ncols
+    do jk=2,nx
       result_field_x(:,jk,:) = (scalar_field(:,jk,:) - scalar_field(:,jk-1,:))/grid%dx(:,jk,:)
     enddo
     !$omp end parallel do
 
     ! calculating the y-component of the gradient
     !$omp parallel do private(ji)
-    do ji=2,nlins
+    do ji=2,ny
       result_field_y(ji,:,:) = (scalar_field(ji-1,:,:) - scalar_field(ji,:,:))/grid%dy(ji,:,:)
     enddo
     !$omp end parallel do
@@ -52,18 +52,18 @@ module gradient_operators
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel workshare
-      result_field_x(:,1,:) = (scalar_field(:,1,:) - scalar_field(:,ncols,:))/grid%dx(:,1,:)
+      result_field_x(:,1,:) = (scalar_field(:,1,:) - scalar_field(:,nx,:))/grid%dx(:,1,:)
       !$omp end parallel workshare
       
       !$omp parallel workshare
-      result_field_x(:,ncols+1,:) = result_field_x(:,1,:)
+      result_field_x(:,nx+1,:) = result_field_x(:,1,:)
       !$omp end parallel workshare
       
       !$omp parallel workshare
-      result_field_y(1,:,:) = (scalar_field(nlins,:,:) - scalar_field(1,:,:))/grid%dy(1,:,:)
+      result_field_y(1,:,:) = (scalar_field(ny,:,:) - scalar_field(1,:,:))/grid%dy(1,:,:)
       !$omp end parallel workshare
       !$omp parallel workshare
-      result_field_y(nlins+1,:,:) = result_field_y(1,:,:)
+      result_field_y(ny+1,:,:) = result_field_y(1,:,:)
       !$omp end parallel workshare
     endif
 

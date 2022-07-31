@@ -5,7 +5,7 @@ module phase_trans
 
   ! In this module, phase transition rates are being calculated.
   
-  use run_nml,          only: nlins,ncols,nlays,dtime,wp
+  use run_nml,          only: ny,nx,nlays,dtime,wp
   use surface_nml,      only: lsfc_phase_trans
   use constants,        only: T_0,EPSILON_SECURITY
   use definitions,      only: t_state,t_diag,t_irrev,t_grid
@@ -49,8 +49,8 @@ module phase_trans
     !$omp parallel do private(ji,jk,jl,diff_density,phase_trans_density, &
     !$omp saturation_pressure,water_vapour_pressure,dry_pressure,air_pressure,layer_thickness, &
     !$omp diff_density_sfc,saturation_pressure_sfc)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
         
           ! Preparations

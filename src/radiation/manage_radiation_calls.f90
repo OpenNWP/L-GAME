@@ -6,7 +6,7 @@ module manage_radiation_calls
   ! This manages the calls to RTE+RRTMGP.
 
   use definitions, only: t_grid,t_state,t_diag,t_irrev
-  use run_nml,     only: nlins,ncols,nlays,wp
+  use run_nml,     only: ny,nx,nlays,wp
   use radiation,   only: calc_radiative_flux_convergence
   
   implicit none
@@ -32,11 +32,11 @@ module manage_radiation_calls
     write(*,*) "Starting update of radiative fluxes ..."
     
     !$omp parallel do private(ji)
-    do ji=1,nlins
+    do ji=1,ny
       call calc_radiative_flux_convergence(grid%lat_geo_scalar(ji,:),grid%lon_geo_scalar(ji,:), &
       grid%z_scalar(ji,:,:),grid%z_w(ji,:,:),state%rho(ji,:,:,:),diag%temperature(ji,:,:),diag%radiation_tendency(ji,:,:), &
       state%temperature_soil(ji,:,1),diag%sfc_sw_in(ji,:),diag%sfc_lw_out(ji,:),grid%sfc_albedo(ji,:), &
-      ncols,time_coordinate)
+      nx,time_coordinate)
     enddo
     !$omp end parallel do
     

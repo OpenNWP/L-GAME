@@ -6,7 +6,7 @@ module boundaries
   ! This module handles everything dealing with boundary conditions.
 
   use definitions,       only: t_state,t_bc,t_grid,wp
-  use run_nml,           only: nlins,ncols,nlays,t_init
+  use run_nml,           only: ny,nx,nlays,t_init
   use bc_nml,            only: n_swamp,bc_root_filename,bc_root_filename,dtime_bc,t_latest_bc
   use constants,         only: M_PI,p_0
   use constituents_nml,  only: no_of_condensed_constituents
@@ -60,8 +60,8 @@ module boundaries
     
     ! linear combination of the model state and the boundary conditions
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           state%rho(ji,jk,jl,:) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rho(ji,jk,jl,:,bc%index_old) &
           + new_weight*bc%rho(ji,jk,jl,:,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rho(ji,jk,jl,:)
@@ -77,8 +77,8 @@ module boundaries
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols+1
+    do ji=1,ny
+      do jk=1,nx+1
         do jl=1,nlays
           state%wind_u(ji,jk,jl) = bc%u_bc_factor(ji,jk)*(old_weight*bc%wind_u(ji,jk,jl,bc%index_old) &
           + new_weight*bc%wind_u(ji,jk,jl,bc%index_new)) + (1._wp - bc%u_bc_factor(ji,jk))*state%wind_u(ji,jk,jl)
@@ -88,8 +88,8 @@ module boundaries
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins+1
-      do jk=1,ncols
+    do ji=1,ny+1
+      do jk=1,nx
         do jl=1,nlays
           state%wind_v(ji,jk,jl) = bc%v_bc_factor(ji,jk)*(old_weight*bc%wind_v(ji,jk,jl,bc%index_old) &
           + new_weight*bc%wind_v(ji,jk,jl,bc%index_new)) + (1._wp - bc%v_bc_factor(ji,jk))*state%wind_v(ji,jk,jl)
@@ -146,9 +146,9 @@ module boundaries
     
     ! rescale factor for scalar fields
     !$omp parallel do private(ji,jk)
-    do ji=1,nlins
-      do jk=1,ncols
-        dist_from_boundary = min(ji-1,jk-1,nlins-ji,ncols-jk)
+    do ji=1,ny
+      do jk=1,nx
+        dist_from_boundary = min(ji-1,jk-1,ny-ji,nx-jk)
         bc%scalar_bc_factor(ji,jk) = max(1._wp - dist_from_boundary/n_swamp,0._wp)
         bc%scalar_bc_factor(ji,jk) = sin(0.5_wp*M_PI*bc%scalar_bc_factor(ji,jk))**2
       enddo
@@ -157,9 +157,9 @@ module boundaries
     
     ! u rescale factor
     !$omp parallel do private(ji,jk)
-    do ji=1,nlins
-      do jk=1,ncols+1
-        dist_from_boundary = min(ji-1,jk-1,nlins-ji,ncols+1-jk)
+    do ji=1,ny
+      do jk=1,nx+1
+        dist_from_boundary = min(ji-1,jk-1,ny-ji,nx+1-jk)
         bc%u_bc_factor(ji,jk) = max(1._wp - dist_from_boundary/n_swamp,0._wp)
         bc%u_bc_factor(ji,jk) = sin(0.5_wp*M_PI*bc%u_bc_factor(ji,jk))**2
       enddo
@@ -168,9 +168,9 @@ module boundaries
     
     ! v rescale factor
     !$omp parallel do private(ji,jk)
-    do ji=1,nlins+1
-      do jk=1,ncols
-        dist_from_boundary = min(ji-1,jk-1,nlins+1-ji,ncols-jk)
+    do ji=1,ny+1
+      do jk=1,nx
+        dist_from_boundary = min(ji-1,jk-1,ny+1-ji,nx-jk)
         bc%v_bc_factor(ji,jk) = max(1._wp - dist_from_boundary/n_swamp,0._wp)
         bc%v_bc_factor(ji,jk) = sin(0.5_wp*M_PI*bc%v_bc_factor(ji,jk))**2
       enddo

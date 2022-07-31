@@ -7,7 +7,7 @@ module write_out
 
   use definitions,       only: t_state,wp,t_diag,t_grid
   use netcdf
-  use run_nml,           only: nlins,ncols,nlays,scenario,run_id
+  use run_nml,           only: ny,nx,nlays,scenario,run_id
   use constituents_nml,  only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
   use dictionary,        only: specific_gas_constants,spec_heat_capacities_p_gas,rel_humidity
   use set_initial_state, only: bg_temp,bg_pres,geopot,nc_check
@@ -54,7 +54,7 @@ module write_out
     character(len=64) :: filename                  ! output filename
     character(len=64) :: time_since_init_min_str   ! time_since_init_min as string
     integer           :: ji,jk,jl                  ! line indices
-    real(wp)          :: upper_weight(nlins,ncols) ! interpolation weights
+    real(wp)          :: upper_weight(ny,nx) ! interpolation weights
     
     write(*,*) "Writing output ..."
     
@@ -70,8 +70,8 @@ module write_out
     
     ! defining the dimensions
     call nc_check(nf90_def_dim(ncid,"single_double",1,single_double_dimid))
-    call nc_check(nf90_def_dim(ncid,"lon_model",ncols,x_dimid))
-    call nc_check(nf90_def_dim(ncid,"lat_model",nlins,y_dimid))
+    call nc_check(nf90_def_dim(ncid,"lon_model",nx,x_dimid))
+    call nc_check(nf90_def_dim(ncid,"lat_model",ny,y_dimid))
     call nc_check(nf90_def_dim(ncid,"z",nlays,z_dimid))
     call nc_check(nf90_def_dim(ncid,"j_constituent",no_of_constituents,constituents_dimid))
 
@@ -168,8 +168,8 @@ module write_out
     if (no_of_gaseous_constituents>1) then
       ! relative humidity
       !$omp parallel do private(ji,jk,jl)
-      do ji=1,nlins
-        do jk=1,ncols
+      do ji=1,ny
+        do jk=1,nx
           do jl=1,nlays
             diag%scalar_placeholder(ji,jk,jl) = rel_humidity(state%rho(ji,jk,jl,no_of_condensed_constituents+2), &
             diag%scalar_placeholder(ji,jk,jl))
@@ -182,7 +182,7 @@ module write_out
     
     ! 3D u wind
     !$omp parallel do private(jk)
-    do jk=1,ncols
+    do jk=1,nx
       diag%scalar_placeholder(:,jk,:) = 0.5_wp*(state%wind_u(:,jk,:)+state%wind_u(:,jk+1,:))
     enddo
     !$omp end parallel do
@@ -190,7 +190,7 @@ module write_out
     
     ! 3D v wind
     !$omp parallel do private(ji)
-    do ji=1,nlins
+    do ji=1,ny
       diag%scalar_placeholder(ji,:,:) = 0.5_wp*(state%wind_v(ji,:,:)+state%wind_v(ji+1,:,:))
     enddo
     !$omp end parallel do

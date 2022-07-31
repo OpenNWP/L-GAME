@@ -6,7 +6,7 @@ module averaging
   ! This module contains averaging operators.
 
   use definitions, only: t_grid,wp
-  use run_nml,     only: nlays,nlays_oro,nlins,ncols
+  use run_nml,     only: nlays,nlays_oro,ny,nx
   use bc_nml,      only: lperiodic
   
   implicit none
@@ -71,8 +71,8 @@ module averaging
     
     ! correction to the x-component
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols+1
+    do ji=1,ny
+      do jk=1,nx+1
         do jl=1,nlays
           result_field_x(ji,jk,jl) = result_field_x(ji,jk,jl) &
           - grid%slope_x(ji,jk,jl)*remap_ver2hor_x(result_field_z,grid,ji,jk,jl)
@@ -83,8 +83,8 @@ module averaging
     
     ! correction to the y-component
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins+1
-      do jk=1,ncols
+    do ji=1,ny+1
+      do jk=1,nx
         do jl=1,nlays
           result_field_y(ji,jk,jl) = result_field_y(ji,jk,jl) &
           - grid%slope_y(ji,jk,jl)*remap_ver2hor_y(result_field_z,grid,ji,jk,jl)
@@ -109,13 +109,13 @@ module averaging
     ! initialization with zero
     remap_ver2hor_x = 0._wp
     
-    if (jk==1 .or. jk==ncols+1) then
+    if (jk==1 .or. jk==nx+1) then
       if (lperiodic) then
-        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,ncols,jl,5)*vertical_cov(ji,ncols,jl)
+        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,nx,jl,5)*vertical_cov(ji,nx,jl)
         remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,1,jl,5)*vertical_cov(ji,1,jl)
         ! layer below
         if (jl<nlays) then
-          remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,ncols,jl,6)*vertical_cov(ji,ncols,jl+1)
+          remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,nx,jl,6)*vertical_cov(ji,nx,jl+1)
           remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,1,jl,6)*vertical_cov(ji,1,jl+1)
         endif
       else
@@ -150,13 +150,13 @@ module averaging
     ! initialization with zero
     remap_ver2hor_y = 0._wp
     
-    if (ji==1 .or. ji==nlins+1) then
+    if (ji==1 .or. ji==ny+1) then
       if (lperiodic) then
-        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(nlins,jk,jl,5)*vertical_cov(nlins,jk,jl)
+        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ny,jk,jl,5)*vertical_cov(ny,jk,jl)
         remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(1,jk,jl,5)*vertical_cov(1,jk,jl)
         ! layer below
         if (jl<nlays) then
-          remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(nlins,jk,jl,6)*vertical_cov(nlins,jk,jl+1)
+          remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ny,jk,jl,6)*vertical_cov(ny,jk,jl+1)
           remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(1,jk,jl,6)*vertical_cov(1,jk,jl+1)
         endif
       else

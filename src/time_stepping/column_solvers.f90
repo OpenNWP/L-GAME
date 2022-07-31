@@ -5,7 +5,7 @@ module column_solvers
 
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
-  use run_nml,          only: nlins,ncols,wp,nlays,dtime,toa,impl_weight,partial_impl_weight
+  use run_nml,          only: ny,nx,wp,nlays,dtime,toa,impl_weight,partial_impl_weight
   use constituents_nml, only: no_of_condensed_constituents,no_of_constituents, &
                               snow_velocity,rain_velocity,cloud_droplets_velocity
   use definitions,      only: t_grid,t_state,t_tend,t_diag
@@ -78,8 +78,8 @@ module column_solvers
     ! calculating the sensible power flux density if soil is switched on
     if (lsfc_sensible_heat_flux) then
       !$omp parallel do private(ji,jk,t_gas_lowest_layer_old,t_gas_lowest_layer_new)
-      do ji=1,nlins
-        do jk=1,ncols
+      do ji=1,ny
+        do jk=1,nx
 
           ! gas temperature in the lowest layer
           t_gas_lowest_layer_old = (grid%exner_bg(ji,jk,nlays)+state_old%exner_pert(ji,jk,nlays)) &
@@ -107,8 +107,8 @@ module column_solvers
     !$omp rho_expl,rhotheta_v_expl,exner_pert_expl,theta_v_pert_expl,rho_int_old, &
     !$omp rho_int_expl,theta_v_int_new,rho_int_new,alpha_old,beta_old,gamma_old,alpha_new, &
     !$omp beta_new,gamma_new,alpha,beta,gammaa,damping_coeff,above_damping,soil_switch)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
       
         ! determining wether soil needs to be calculated
         soil_switch = 0
@@ -374,8 +374,8 @@ module column_solvers
         ! loop over all columns
         !$omp parallel do private(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
         !$omp d_vector,e_vector,r_vector,solution_vector,added_mass)
-        do ji=1,nlins
-          do jk=1,ncols
+        do ji=1,ny
+          do jk=1,nx
 
             ! diagnozing the vertical fluxes
             do jl=1,nlays-1

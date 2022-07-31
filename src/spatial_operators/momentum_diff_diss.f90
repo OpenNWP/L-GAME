@@ -8,7 +8,7 @@ module momentum_diff_diss
   use definitions,              only: t_grid,t_diag,t_irrev,t_state
   use divergence_operators,     only: div_h,add_vertical_div
   use gradient_operators,       only: grad_hor,grad_vert_cov
-  use run_nml,                  only: nlins,ncols,nlays,wp
+  use run_nml,                  only: ny,nx,nlays,wp
   use diff_nml,                 only: h_prandtl
   use inner_product,            only: inner
   use derived_quantities,       only: density_gas,density_total
@@ -65,8 +65,8 @@ module momentum_diff_diss
     ! Computing the curl of vorticity component
     ! -----------------------------------------
     !$omp parallel do private(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
-    do ji=1,nlins
-      do jk=1,ncols+1
+    do ji=1,ny
+      do jk=1,nx+1
         do jl=1,nlays
           diag%u_placeholder(ji,jk,jl) = (irrev%viscosity_coeff_curl_dual(ji+1,jk,jl)*diag%zeta_z(ji+1,jk,jl) - &
           irrev%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
@@ -91,8 +91,8 @@ module momentum_diff_diss
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
-    do ji=1,nlins+1
-      do jk=1,ncols
+    do ji=1,ny+1
+      do jk=1,nx
         do jl=1,nlays
           diag%v_placeholder(ji,jk,jl) = (irrev%viscosity_coeff_curl_dual(ji,jk+1,jl)*diag%zeta_z(ji,jk+1,jl) - &
           irrev%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
@@ -118,9 +118,9 @@ module momentum_diff_diss
     
     ! adding up the two components and dividing by the averaged density
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
+    do ji=1,ny
       do jl=1,nlays
-        do jk=2,ncols
+        do jk=2,nx
           irrev%mom_diff_tend_x(ji,jk,jl) = (irrev%mom_diff_tend_x(ji,jk,jl) + diag%u_placeholder(ji,jk,jl)) &
           /(0.5_wp*(density_total(state,ji,jk-1,jl) + density_total(state,ji,jk,jl)))
         enddo
@@ -128,18 +128,18 @@ module momentum_diff_diss
         ! periodic boundary conditions
         if (lperiodic) then
           irrev%mom_diff_tend_x(ji,1,jl) = (irrev%mom_diff_tend_x(ji,1,jl) + diag%u_placeholder(ji,1,jl)) &
-          /(0.5_wp*(density_total(state,ji,ncols,jl) + density_total(state,ji,1,jl)))
+          /(0.5_wp*(density_total(state,ji,nx,jl) + density_total(state,ji,1,jl)))
         endif
-        irrev%mom_diff_tend_x(ji,ncols+1,jl) = irrev%mom_diff_tend_x(ji,1,jl)
+        irrev%mom_diff_tend_x(ji,nx+1,jl) = irrev%mom_diff_tend_x(ji,1,jl)
         
       enddo
     enddo
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,ncols
+    do jk=1,nx
       do jl=1,nlays
-        do ji=2,nlins
+        do ji=2,ny
           irrev%mom_diff_tend_y(ji,jk,jl) = (irrev%mom_diff_tend_y(ji,jk,jl) + diag%v_placeholder(ji,jk,jl)) &
           /(0.5_wp*(density_total(state,ji-1,jk,jl) + density_total(state,ji,jk,jl)))
         enddo
@@ -147,9 +147,9 @@ module momentum_diff_diss
         ! periodic boundary conditions
         if (lperiodic) then
           irrev%mom_diff_tend_y(1,jk,jl) = (irrev%mom_diff_tend_y(1,jk,jl) + diag%v_placeholder(1,jk,jl)) &
-          /(0.5_wp*(density_total(state,nlins,jk,jl) + density_total(state,1,jk,jl)))
+          /(0.5_wp*(density_total(state,ny,jk,jl) + density_total(state,1,jk,jl)))
         endif
-        irrev%mom_diff_tend_y(nlins+1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl)
+        irrev%mom_diff_tend_y(ny+1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl)
         
       enddo
     enddo
@@ -185,7 +185,7 @@ module momentum_diff_diss
     !$omp end parallel workshare
     ! calculation at the surface
     !$omp parallel do private(jk)
-    do jk=2,ncols
+    do jk=2,nx
       diag%du_dz(:,jk,nlays+1) = state%wind_u(:,jk,nlays)/(grid%z_u(:,jk,nlays) &
       - 0.5_wp*(grid%z_w(:,jk-1,nlays+1)+grid%z_w(:,jk,nlays+1)))
     enddo
@@ -195,13 +195,13 @@ module momentum_diff_diss
     if (lperiodic) then
       !$omp parallel workshare
       diag%du_dz(:,1,nlays+1) = state%wind_u(:,1,nlays)/(grid%z_u(:,1,nlays) &
-      - 0.5_wp*(grid%z_w(:,ncols,nlays+1)+grid%z_w(:,1,nlays+1)))
-      diag%du_dz(:,ncols+1,nlays+1) = diag%du_dz(:,1,nlays+1)
+      - 0.5_wp*(grid%z_w(:,nx,nlays+1)+grid%z_w(:,1,nlays+1)))
+      diag%du_dz(:,nx+1,nlays+1) = diag%du_dz(:,1,nlays+1)
       !$omp end parallel workshare
     endif
     
     !$omp parallel do private(ji)
-    do ji=2,nlins
+    do ji=2,ny
       diag%dv_dz(ji,:,nlays+1) = state%wind_v(ji,:,nlays)/(grid%z_v(ji,:,nlays) &
       - 0.5_wp*(grid%z_w(ji-1,:,nlays+1)+grid%z_w(ji,:,nlays+1)))
     enddo
@@ -211,16 +211,16 @@ module momentum_diff_diss
     if (lperiodic) then
       !$omp parallel workshare
       diag%dv_dz(1,:,nlays+1) = state%wind_v(1,:,nlays)/(grid%z_v(1,:,nlays) &
-      - 0.5_wp*(grid%z_w(nlins,:,nlays+1)+grid%z_w(1,:,nlays+1)))
-      diag%dv_dz(nlins+1,:,nlays+1) = diag%dv_dz(1,:,nlays+1)
+      - 0.5_wp*(grid%z_w(ny,:,nlays+1)+grid%z_w(1,:,nlays+1)))
+      diag%dv_dz(ny+1,:,nlays+1) = diag%dv_dz(1,:,nlays+1)
       !$omp end parallel workshare
     endif
     
     ! calculating the acceleration
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
+    do ji=1,ny
       do jl=1,nlays
-        do jk=2,ncols
+        do jk=2,nx
           irrev%mom_diff_tend_x(ji,jk,jl) = irrev%mom_diff_tend_x(ji,jk,jl) &
           + (irrev%vert_hor_viscosity_u(ji,jk,jl)*diag%du_dz(ji,jk,jl) &
           - irrev%vert_hor_viscosity_u(ji,jk,jl+1)*diag%du_dz(ji,jk,jl+1)) &
@@ -233,9 +233,9 @@ module momentum_diff_diss
           irrev%mom_diff_tend_x(ji,1,jl) = irrev%mom_diff_tend_x(ji,1,jl) &
           + (irrev%vert_hor_viscosity_u(ji,1,jl)*diag%du_dz(ji,1,jl) &
           - irrev%vert_hor_viscosity_u(ji,1,jl+1)*diag%du_dz(ji,1,jl+1)) &
-          /(0.5_wp*(grid%z_w(ji,ncols,jl) + grid%z_w(ji,1,jl) - grid%z_w(ji,ncols,jl+1) - grid%z_w(ji,1,jl+1))) &
-          /(0.5_wp*(density_total(state,ji,ncols,jl) + density_total(state,ji,1,jl)))
-          irrev%mom_diff_tend_x(ji,ncols+1,jl) = irrev%mom_diff_tend_x(ji,1,jl)
+          /(0.5_wp*(grid%z_w(ji,nx,jl) + grid%z_w(ji,1,jl) - grid%z_w(ji,nx,jl+1) - grid%z_w(ji,1,jl+1))) &
+          /(0.5_wp*(density_total(state,ji,nx,jl) + density_total(state,ji,1,jl)))
+          irrev%mom_diff_tend_x(ji,nx+1,jl) = irrev%mom_diff_tend_x(ji,1,jl)
         endif
       
       enddo
@@ -243,9 +243,9 @@ module momentum_diff_diss
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,ncols
+    do jk=1,nx
       do jl=1,nlays
-        do ji=2,nlins
+        do ji=2,ny
           irrev%mom_diff_tend_y(ji,jk,jl) = irrev%mom_diff_tend_y(ji,jk,jl) &
           + (irrev%vert_hor_viscosity_v(ji,jk,jl)*diag%dv_dz(ji,jk,jl) &
           - irrev%vert_hor_viscosity_v(ji,jk,jl+1)*diag%dv_dz(ji,jk,jl+1)) &
@@ -258,9 +258,9 @@ module momentum_diff_diss
           irrev%mom_diff_tend_y(1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl) &
           + (irrev%vert_hor_viscosity_v(1,jk,jl)*diag%dv_dz(1,jk,jl) &
           - irrev%vert_hor_viscosity_v(1,jk,jl+1)*diag%dv_dz(1,jk,jl+1)) &
-          /(0.5_wp*(grid%z_w(nlins,jk,jl) + grid%z_w(1,jk,jl) - grid%z_w(nlins,jk,jl+1) - grid%z_w(1,jk,jl+1))) &
-          /(0.5_wp*(density_total(state,nlins,jk,jl) + density_total(state,1,jk,jl)))
-          irrev%mom_diff_tend_y(nlins+1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl)
+          /(0.5_wp*(grid%z_w(ny,jk,jl) + grid%z_w(1,jk,jl) - grid%z_w(ny,jk,jl+1) - grid%z_w(1,jk,jl+1))) &
+          /(0.5_wp*(density_total(state,ny,jk,jl) + density_total(state,1,jk,jl)))
+          irrev%mom_diff_tend_y(ny+1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl)
         endif
       
       enddo
@@ -307,8 +307,8 @@ module momentum_diff_diss
     call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
     ! vertically averaging the divergence to half levels and dividing by the density
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=2,nlays
           irrev%mom_diff_tend_z(ji,jk,jl) = irrev%mom_diff_tend_z(ji,jk,jl) + &
           0.5_wp*(diag%scalar_placeholder(ji,jk,jl-1) + diag%scalar_placeholder(ji,jk,jl))
@@ -339,8 +339,8 @@ module momentum_diff_diss
     irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,irrev%heating_diss,grid)
     
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           irrev%heating_diss(ji,jk,jl) = -density_gas(state,ji,jk,jl)*irrev%heating_diss(ji,jk,jl)
         enddo

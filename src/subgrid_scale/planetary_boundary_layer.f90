@@ -6,7 +6,7 @@ module planetary_boundary_layer
   ! This module computes everything related to the planetary boundary layer.
   
   use definitions, only: wp,t_state,t_grid,t_diag,t_irrev
-  use run_nml,     only: nlins,ncols,nlays,dtime
+  use run_nml,     only: ny,nx,nlays,dtime
   use constants,   only: EPSILON_SECURITY,M_PI,gravity
   use surface_nml, only: lprog_soil_temp
   use diff_nml,    only: h_prandtl
@@ -51,8 +51,8 @@ module planetary_boundary_layer
     
     !$omp parallel do private(ji,jk,u_lowest_layer,u10,agl,theta_v_lowest_layer,theta_v_second_layer,dz,dtheta_v_dz, &
     !$omp w_pert,theta_v_pert,w_pert_theta_v_pert_avg)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         agl = grid%z_scalar(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1)
 
         ! wind speed in the lowest layer
@@ -103,8 +103,8 @@ module planetary_boundary_layer
     ! updating the surface flux resistance acting on scalar quantities (moisture and sensible heat)
     if (lprog_soil_temp) then
       !$omp parallel do private(ji,jk)
-      do ji=1,nlins
-        do jk=1,ncols
+      do ji=1,ny
+        do jk=1,nx
           diag%scalar_flux_resistance(ji,jk) = scalar_flux_resistance(diag%roughness_velocity(ji,jk), &
           grid%z_scalar(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1), &
           grid%roughness_length(ji,jk),diag%monin_obukhov_length(ji,jk))
@@ -131,8 +131,8 @@ module planetary_boundary_layer
 
     !$omp parallel do private(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
     !$omp flux_resistance,wind_rescale_factor)
-    do ji=1,nlins
-        do jk=2,ncols
+    do ji=1,ny
+        do jk=2,nx
 
           ! averaging some quantities to the vector point
           wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji,jk-1,nlays)**0.5_wp + diag%v_squared(ji,jk,nlays)**0.5_wp)
@@ -162,12 +162,12 @@ module planetary_boundary_layer
         if (lperiodic) then
         
           ! averaging some quantities to the vector point
-          wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji,ncols,nlays)**0.5_wp + diag%v_squared(ji,1,nlays)**0.5_wp)
-          z_agl = grid%z_u(ji,1,nlays) - 0.5_wp*(grid%z_w(ji,ncols,nlays+1) + grid%z_w(ji,1,nlays+1))
-          layer_thickness = 0.5_wp*(grid%z_w(ji,ncols,nlays) + grid%z_w(ji,1,nlays)) &
-          - 0.5_wp*(grid%z_w(ji,ncols,nlays+1) + grid%z_w(ji,1,nlays+1))
-          roughness_length = 0.5_wp*(grid%roughness_length(ji,ncols) + grid%roughness_length(ji,1))
-          monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji,ncols) &
+          wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji,nx,nlays)**0.5_wp + diag%v_squared(ji,1,nlays)**0.5_wp)
+          z_agl = grid%z_u(ji,1,nlays) - 0.5_wp*(grid%z_w(ji,nx,nlays+1) + grid%z_w(ji,1,nlays+1))
+          layer_thickness = 0.5_wp*(grid%z_w(ji,nx,nlays) + grid%z_w(ji,1,nlays)) &
+          - 0.5_wp*(grid%z_w(ji,nx,nlays+1) + grid%z_w(ji,1,nlays+1))
+          roughness_length = 0.5_wp*(grid%roughness_length(ji,nx) + grid%roughness_length(ji,1))
+          monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji,nx) &
           + diag%monin_obukhov_length(ji,1))
 
           ! calculating the flux resistance at the vector point
@@ -183,7 +183,7 @@ module planetary_boundary_layer
           irrev%mom_diff_tend_x(ji,1,nlays) = irrev%mom_diff_tend_x(ji,1,nlays) - &
           wind_rescale_factor*state%wind_u(ji,1,nlays)/flux_resistance/layer_thickness
           
-          irrev%mom_diff_tend_x(ji,ncols+1,nlays) = irrev%mom_diff_tend_x(ji,1,nlays)
+          irrev%mom_diff_tend_x(ji,nx+1,nlays) = irrev%mom_diff_tend_x(ji,1,nlays)
           
         endif
         
@@ -192,8 +192,8 @@ module planetary_boundary_layer
 
     !$omp parallel do private(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
     !$omp flux_resistance,wind_rescale_factor)
-    do jk=1,ncols
-      do ji=2,nlins
+    do jk=1,nx
+      do ji=2,ny
 
           ! averaging some quantities to the vector point
           wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji-1,jk,nlays)**0.5_wp + diag%v_squared(ji,jk,nlays)**0.5_wp)
@@ -222,12 +222,12 @@ module planetary_boundary_layer
         ! periodic boundary conditions
         if (lperiodic) then
           ! averaging some quantities to the vector point
-          wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(nlins,jk,nlays)**0.5_wp + diag%v_squared(1,jk,nlays)**0.5_wp)
-          z_agl = grid%z_v(1,jk,nlays) - 0.5_wp*(grid%z_w(nlins,jk,nlays+1) + grid%z_w(1,jk,nlays+1))
-          layer_thickness = 0.5_wp*(grid%z_w(nlins,jk,nlays) + grid%z_w(1,jk,nlays)) &
-          - 0.5_wp*(grid%z_w(nlins,jk,nlays+1) + grid%z_w(1,jk,nlays+1))
-          roughness_length = 0.5_wp*(grid%roughness_length(nlins,jk) + grid%roughness_length(1,jk))
-          monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(nlins,jk) &
+          wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ny,jk,nlays)**0.5_wp + diag%v_squared(1,jk,nlays)**0.5_wp)
+          z_agl = grid%z_v(1,jk,nlays) - 0.5_wp*(grid%z_w(ny,jk,nlays+1) + grid%z_w(1,jk,nlays+1))
+          layer_thickness = 0.5_wp*(grid%z_w(ny,jk,nlays) + grid%z_w(1,jk,nlays)) &
+          - 0.5_wp*(grid%z_w(ny,jk,nlays+1) + grid%z_w(1,jk,nlays+1))
+          roughness_length = 0.5_wp*(grid%roughness_length(ny,jk) + grid%roughness_length(1,jk))
+          monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ny,jk) &
           + diag%monin_obukhov_length(1,jk))
 
           ! calculating the flux resistance at the vector point
@@ -243,7 +243,7 @@ module planetary_boundary_layer
           irrev%mom_diff_tend_y(1,jk,nlays) = irrev%mom_diff_tend_y(1,jk,nlays) - &
           wind_rescale_factor*state%wind_v(1,jk,nlays)/flux_resistance/layer_thickness
           
-          irrev%mom_diff_tend_y(nlins+1,jk,nlays) = irrev%mom_diff_tend_y(1,jk,nlays)
+          irrev%mom_diff_tend_y(ny+1,jk,nlays) = irrev%mom_diff_tend_y(1,jk,nlays)
           
         endif
         

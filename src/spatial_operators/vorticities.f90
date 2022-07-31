@@ -6,7 +6,7 @@ module vorticities
   ! This module contains the calculation of the vorticities.
 
   use definitions,      only: t_state,t_diag,t_grid,wp
-  use run_nml,          only: nlins,ncols,nlays,nlays_oro,toa,lcorio,llinear
+  use run_nml,          only: ny,nx,nlays,nlays_oro,toa,lcorio,llinear
   use constants,        only: r_e
   use constituents_nml, only: no_of_condensed_constituents
   use averaging,        only: horizontal_covariant_x,horizontal_covariant_y
@@ -34,9 +34,9 @@ module vorticities
     
     ! calculating the relative vorticity in x-direction
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,ncols
+    do jk=1,nx
       do jl=2,nlays
-        do ji=2,nlins
+        do ji=2,ny
           diag%zeta_x(ji,jk,jl) = &
           grid%dz(ji-1,jk,jl)*state%wind_w(ji-1,jk,jl) &
           - grid%dy(ji,jk,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,jl-1) &
@@ -47,17 +47,17 @@ module vorticities
         ! boundary conditions
         if (lperiodic) then
           diag%zeta_x(1,jk,jl) = &
-          grid%dz(nlins,jk,jl)*state%wind_w(nlins,jk,jl) &
+          grid%dz(ny,jk,jl)*state%wind_w(ny,jk,jl) &
           - grid%dy(1,jk,jl-1)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,1,jk,jl-1) &
           - grid%dz(1,jk,jl)*state%wind_w(1,jk,jl) &
           + grid%dy(1,jk,jl)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,1,jk,jl)
-          diag%zeta_x(nlins+1,jk,jl) = diag%zeta_x(1,jk,jl)
+          diag%zeta_x(ny+1,jk,jl) = diag%zeta_x(1,jk,jl)
         else
           diag%zeta_x(1,jk,jl) = 0._wp
-          diag%zeta_x(nlins+1,jk,jl) = 0._wp
+          diag%zeta_x(ny+1,jk,jl) = 0._wp
         endif
         
-        do ji=1,nlins+1
+        do ji=1,ny+1
           ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
           diag%zeta_x(ji,jk,nlays+1) = -grid%dy(ji,jk,nlays)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,nlays)
         enddo
@@ -75,9 +75,9 @@ module vorticities
     
     ! calculating the relative vorticity in y-direction
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
+    do ji=1,ny
       do jl=2,nlays
-        do jk=2,ncols
+        do jk=2,nx
           diag%zeta_y(ji,jk,jl) = &
           -grid%dz(ji,jk,jl)*state%wind_w(ji,jk,jl) &
           - grid%dx(ji,jk,jl)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,jl) &
@@ -90,15 +90,15 @@ module vorticities
           diag%zeta_y(ji,1,jl) = &
           -grid%dz(ji,1,jl)*state%wind_w(ji,1,jl) &
           - grid%dx(ji,1,jl)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,1,jl) &
-          + grid%dz(ji,ncols,jl)*state%wind_w(ji,ncols,jl) &
+          + grid%dz(ji,nx,jl)*state%wind_w(ji,nx,jl) &
           + grid%dx(ji,1,jl-1)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,1,jl-1)
-          diag%zeta_y(ji,ncols+1,jl) = diag%zeta_y(ji,1,jl)
+          diag%zeta_y(ji,nx+1,jl) = diag%zeta_y(ji,1,jl)
         else
           diag%zeta_y(ji,1,jl) = 0._wp
-          diag%zeta_y(ji,ncols+1,jl) = 0._wp
+          diag%zeta_y(ji,nx+1,jl) = 0._wp
         endif
         
-        do jk=1,ncols+1
+        do jk=1,nx+1
           ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
           diag%zeta_y(ji,jk,nlays+1) = grid%dx(ji,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,nlays)
         enddo
@@ -117,8 +117,8 @@ module vorticities
       
     ! calculating the relative vorticity in z-direction
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins+1
-      do jk=1,ncols+1
+    do ji=1,ny+1
+      do jk=1,nx+1
         do jl=1,nlays
           diag%zeta_z(ji,jk,jl) = rel_vort_z_local(state,grid,ji,jk,jl)/grid%area_dual_z(ji,jk,jl)
         enddo
@@ -180,9 +180,9 @@ module vorticities
     ! dividing by the averaged density to obtain the "potential vorticity"
     ! horizontal vorticity in x-direction
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,ncols
+    do jk=1,nx
       do jl=1,nlays+1
-        do ji=2,nlins
+        do ji=2,ny
           if (jl==1) then
             diag%eta_x(ji,jk,jl) = diag%eta_x(ji,jk,jl)/(0.5_wp*(state%rho(ji-1,jk,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
@@ -215,22 +215,22 @@ module vorticities
         
         if (lperiodic) then
           if (jl==1) then
-            diag%eta_x(1,jk,jl) = diag%eta_x(1,jk,jl)/(0.5_wp*(state%rho(nlins,jk,jl,no_of_condensed_constituents+1) &
+            diag%eta_x(1,jk,jl) = diag%eta_x(1,jk,jl)/(0.5_wp*(state%rho(ny,jk,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
-            +(toa-grid%z_scalar(nlins,jk,jl))*(state%rho(nlins,jk,jl,no_of_condensed_constituents+1) &
-            -state%rho(nlins,jk,jl+1,no_of_condensed_constituents+1))/ &
-            (grid%z_scalar(nlins,jk,jl)-grid%z_scalar(nlins,jk,jl+1)) &
+            +(toa-grid%z_scalar(ny,jk,jl))*(state%rho(ny,jk,jl,no_of_condensed_constituents+1) &
+            -state%rho(ny,jk,jl+1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(ny,jk,jl)-grid%z_scalar(ny,jk,jl+1)) &
             +state%rho(1,jk,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
             +(toa-grid%z_scalar(1,jk,jl))*(state%rho(1,jk,jl,no_of_condensed_constituents+1) &
             -state%rho(1,jk,jl+1,no_of_condensed_constituents+1))/ &
             (grid%z_scalar(1,jk,jl)-grid%z_scalar(1,jk,jl+1))))
           elseif (jl==nlays+1) then
-            diag%eta_x(1,jk,jl) = diag%eta_x(1,jk,jl)/(0.5_wp*(state%rho(nlins,jk,jl-1,no_of_condensed_constituents+1) &
+            diag%eta_x(1,jk,jl) = diag%eta_x(1,jk,jl)/(0.5_wp*(state%rho(ny,jk,jl-1,no_of_condensed_constituents+1) &
             ! linear extrapolation to the surface
-            +(grid%z_w(nlins,jk,jl)-grid%z_scalar(nlins,jk,jl-1))*(state%rho(nlins,jk,jl-2,no_of_condensed_constituents+1) &
-            -state%rho(nlins,jk,jl-1,no_of_condensed_constituents+1))/ &
-            (grid%z_scalar(nlins,jk,jl-2)-grid%z_scalar(nlins,jk,jl-1)) &
+            +(grid%z_w(ny,jk,jl)-grid%z_scalar(ny,jk,jl-1))*(state%rho(ny,jk,jl-2,no_of_condensed_constituents+1) &
+            -state%rho(ny,jk,jl-1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(ny,jk,jl-2)-grid%z_scalar(ny,jk,jl-1)) &
             +state%rho(1,jk,jl-1,no_of_condensed_constituents+1) &
             ! linear extrapolation to the surface
             +(grid%z_w(1,jk,jl)-grid%z_scalar(1,jk,jl-1)) &
@@ -238,11 +238,11 @@ module vorticities
             -state%rho(1,jk,jl-1,no_of_condensed_constituents+1))/ &
             (grid%z_scalar(1,jk,jl-2)-grid%z_scalar(1,jk,jl-1))))
           else
-            diag%eta_x(1,jk,jl) = diag%eta_x(1,jk,jl)/(0.25_wp*(state%rho(nlins,jk,jl-1,no_of_condensed_constituents+1) &
+            diag%eta_x(1,jk,jl) = diag%eta_x(1,jk,jl)/(0.25_wp*(state%rho(ny,jk,jl-1,no_of_condensed_constituents+1) &
             +state%rho(1,jk,jl-1,no_of_condensed_constituents+1)+ &
-            state%rho(nlins,jk,jl,no_of_condensed_constituents+1)+state%rho(1,jk,jl,no_of_condensed_constituents+1)))
+            state%rho(ny,jk,jl,no_of_condensed_constituents+1)+state%rho(1,jk,jl,no_of_condensed_constituents+1)))
           endif
-          diag%eta_x(nlins+1,jk,jl) = diag%eta_x(1,jk,jl)
+          diag%eta_x(ny+1,jk,jl) = diag%eta_x(1,jk,jl)
         endif
         
       enddo
@@ -251,9 +251,9 @@ module vorticities
   
     ! horizontal vorticity in y-direction
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
+    do ji=1,ny
       do jl=1,nlays+1
-        do jk=2,ncols
+        do jk=2,nx
           if (jl==1) then
             diag%eta_y(ji,jk,jl) = diag%eta_y(ji,jk,jl)/(0.5_wp*(state%rho(ji,jk-1,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
@@ -286,22 +286,22 @@ module vorticities
         
         if (lperiodic) then
           if (jl==1) then
-            diag%eta_y(ji,1,jl) = diag%eta_y(ji,1,jl)/(0.5_wp*(state%rho(ji,ncols,jl,no_of_condensed_constituents+1) &
+            diag%eta_y(ji,1,jl) = diag%eta_y(ji,1,jl)/(0.5_wp*(state%rho(ji,nx,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
-            +(toa-grid%z_scalar(ji,ncols,jl))*(state%rho(ji,ncols,jl,no_of_condensed_constituents+1) &
-            -state%rho(ji,ncols,jl+1,no_of_condensed_constituents+1))/ &
-            (grid%z_scalar(ji,ncols,jl)-grid%z_scalar(ji,ncols,jl+1)) &
+            +(toa-grid%z_scalar(ji,nx,jl))*(state%rho(ji,nx,jl,no_of_condensed_constituents+1) &
+            -state%rho(ji,nx,jl+1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(ji,nx,jl)-grid%z_scalar(ji,nx,jl+1)) &
             +state%rho(ji,1,jl,no_of_condensed_constituents+1) &
             ! linear extrapolation to the TOA
             +(toa-grid%z_scalar(ji,1,jl))*(state%rho(ji,1,jl,no_of_condensed_constituents+1) &
             -state%rho(ji,1,jl+1,no_of_condensed_constituents+1))/ &
             (grid%z_scalar(ji,1,jl)-grid%z_scalar(ji,1,jl+1))))
           elseif (jl==nlays+1) then
-            diag%eta_y(ji,1,jl) = diag%eta_y(ji,1,jl)/(0.5_wp*(state%rho(ji,ncols,jl-1,no_of_condensed_constituents+1) &
+            diag%eta_y(ji,1,jl) = diag%eta_y(ji,1,jl)/(0.5_wp*(state%rho(ji,nx,jl-1,no_of_condensed_constituents+1) &
             ! linear extrapolation to the surface
-            +(grid%z_w(ji,ncols,jl)-grid%z_scalar(ji,ncols,jl-1))*(state%rho(ji,ncols,jl-2,no_of_condensed_constituents+1) &
-            -state%rho(ji,ncols,jl-1,no_of_condensed_constituents+1))/ &
-            (grid%z_scalar(ji,ncols,jl-2)-grid%z_scalar(ji,ncols,jl-1)) &
+            +(grid%z_w(ji,nx,jl)-grid%z_scalar(ji,nx,jl-1))*(state%rho(ji,nx,jl-2,no_of_condensed_constituents+1) &
+            -state%rho(ji,nx,jl-1,no_of_condensed_constituents+1))/ &
+            (grid%z_scalar(ji,nx,jl-2)-grid%z_scalar(ji,nx,jl-1)) &
             +state%rho(ji,1,jl-1,no_of_condensed_constituents+1) &
             ! linear extrapolation to the surface
             +(grid%z_w(ji,1,jl)-grid%z_scalar(ji,1,jl-1)) &
@@ -309,11 +309,11 @@ module vorticities
             -state%rho(ji,1,jl-1,no_of_condensed_constituents+1))/ &
             (grid%z_scalar(ji,1,jl-2)-grid%z_scalar(ji,1,jl-1))))
           else
-            diag%eta_y(ji,1,jl) = diag%eta_y(ji,1,jl)/(0.25_wp*(state%rho(ji,ncols,jl-1,no_of_condensed_constituents+1) &
+            diag%eta_y(ji,1,jl) = diag%eta_y(ji,1,jl)/(0.25_wp*(state%rho(ji,nx,jl-1,no_of_condensed_constituents+1) &
             +state%rho(ji,1,jl-1,no_of_condensed_constituents+1)+ &
-            state%rho(ji,ncols,jl,no_of_condensed_constituents+1)+state%rho(ji,1,jl,no_of_condensed_constituents+1)))
+            state%rho(ji,nx,jl,no_of_condensed_constituents+1)+state%rho(ji,1,jl,no_of_condensed_constituents+1)))
           endif
-          diag%eta_y(ji,ncols+1,jl) = diag%eta_y(ji,1,jl)
+          diag%eta_y(ji,nx+1,jl) = diag%eta_y(ji,1,jl)
         endif
         
       enddo
@@ -322,8 +322,8 @@ module vorticities
     
     ! vertical vorticity
     !$omp parallel do private(ji,jk)
-    do ji=2,nlins
-      do jk=2,ncols
+    do ji=2,ny
+      do jk=2,nx
         diag%eta_z(ji,jk,:) = diag%eta_z(ji,jk,:)/(0.25_wp*(state%rho(ji,jk-1,:,no_of_condensed_constituents+1) &
         +state%rho(ji,jk,:,no_of_condensed_constituents+1) &
         +state%rho(ji-1,jk,:,no_of_condensed_constituents+1)+state%rho(ji-1,jk-1,:,no_of_condensed_constituents+1)))
@@ -331,10 +331,10 @@ module vorticities
       
       ! periodic boundary conditions
       if (lperiodic) then
-        diag%eta_z(ji,1,:) = diag%eta_z(ji,1,:)/(0.25_wp*(state%rho(ji,ncols,:,no_of_condensed_constituents+1) &
+        diag%eta_z(ji,1,:) = diag%eta_z(ji,1,:)/(0.25_wp*(state%rho(ji,nx,:,no_of_condensed_constituents+1) &
         +state%rho(ji,1,:,no_of_condensed_constituents+1) &
-        +state%rho(ji-1,1,:,no_of_condensed_constituents+1)+state%rho(ji-1,ncols,:,no_of_condensed_constituents+1)))
-        diag%eta_z(ji,ncols+1,:) = diag%eta_z(ji,1,:)
+        +state%rho(ji-1,1,:,no_of_condensed_constituents+1)+state%rho(ji-1,nx,:,no_of_condensed_constituents+1)))
+        diag%eta_z(ji,nx+1,:) = diag%eta_z(ji,1,:)
       endif
       
     enddo
@@ -343,11 +343,11 @@ module vorticities
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel do private(jk)
-      do jk=2,ncols
+      do jk=2,nx
         diag%eta_z(1,jk,:) = diag%eta_z(1,jk,:)/(0.25_wp*(state%rho(1,jk-1,:,no_of_condensed_constituents+1) &
         +state%rho(1,jk,:,no_of_condensed_constituents+1) &
-        +state%rho(nlins,jk,:,no_of_condensed_constituents+1)+state%rho(nlins,jk-1,:,no_of_condensed_constituents+1)))
-        diag%eta_z(nlins+1,jk,:) = diag%eta_z(1,jk,:)
+        +state%rho(ny,jk,:,no_of_condensed_constituents+1)+state%rho(ny,jk-1,:,no_of_condensed_constituents+1)))
+        diag%eta_z(ny+1,jk,:) = diag%eta_z(1,jk,:)
       enddo
       !$omp end parallel do
     endif
@@ -355,12 +355,12 @@ module vorticities
     ! corners under periodic boundary conditions
     if (lperiodic) then
       !$omp parallel workshare
-      diag%eta_z(1,1,:) = diag%eta_z(1,1,:)/(0.25_wp*(state%rho(1,ncols,:,no_of_condensed_constituents+1) &
+      diag%eta_z(1,1,:) = diag%eta_z(1,1,:)/(0.25_wp*(state%rho(1,nx,:,no_of_condensed_constituents+1) &
       +state%rho(1,1,:,no_of_condensed_constituents+1) &
-      +state%rho(nlins,1,:,no_of_condensed_constituents+1)+state%rho(nlins,ncols,:,no_of_condensed_constituents+1)))
-      diag%eta_z(1,ncols+1,:) = diag%eta_z(1,1,:)
-      diag%eta_z(nlins+1,1,:) = diag%eta_z(1,1,:)
-      diag%eta_z(nlins+1,ncols+1,:) = diag%eta_z(1,1,:)
+      +state%rho(ny,1,:,no_of_condensed_constituents+1)+state%rho(ny,nx,:,no_of_condensed_constituents+1)))
+      diag%eta_z(1,nx+1,:) = diag%eta_z(1,1,:)
+      diag%eta_z(ny+1,1,:) = diag%eta_z(1,1,:)
+      diag%eta_z(ny+1,nx+1,:) = diag%eta_z(1,1,:)
       !$omp end parallel workshare
     endif
     
@@ -399,17 +399,17 @@ module vorticities
     rel_vort_z_local = 0._wp
     
     ! boundary handling
-    if (ji==1 .or. jk==1 .or. ji==nlins+1 .or. jk==ncols+1) then
+    if (ji==1 .or. jk==1 .or. ji==ny+1 .or. jk==nx+1) then
       if (lperiodic) then
         j_i(1) = ji
-        if (jk==ncols+1) then
+        if (jk==nx+1) then
           j_k(1) = 1
         else
           j_k(1) = jk
         endif
         
         if (ji==1) then
-          j_i(2) = nlins
+          j_i(2) = ny
         else
           j_i(2) = ji-1
         endif
@@ -417,12 +417,12 @@ module vorticities
         
         j_i(3) = ji
         if (jk==1) then
-          j_k(3) = ncols
+          j_k(3) = nx
         else
           j_k(3) = jk-1
         endif
         
-        if (ji==nlins+1) then
+        if (ji==ny+1) then
           j_i(4) = 1
         else
           j_i(4) = ji

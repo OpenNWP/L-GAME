@@ -5,7 +5,7 @@ module effective_diff_coeffs
   
   ! This module computes the effective diffusion coefficients.
   
-  use run_nml,              only: nlins,ncols,nlays,dtime
+  use run_nml,              only: ny,nx,nlays,dtime
   use definitions,          only: wp,t_state,t_diag,t_irrev,t_grid
   use diff_nml,             only: diff_h_smag_div,diff_h_smag_rot,lmom_diff_h,ltemp_diff_h
   use derived_quantities,   only: calc_diffusion_coeff
@@ -47,8 +47,8 @@ module effective_diff_coeffs
     
     ! calculation of the molecular diffusion coefficient
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
           state%rho(ji,jk,jl,no_of_condensed_constituents+1))
@@ -64,8 +64,8 @@ module effective_diff_coeffs
     
     ! multiplying by the density
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           irrev%viscosity_coeff_div(ji,jk,jl) = density_gas(state,ji,jk,jl)*irrev%viscosity_coeff_div(ji,jk,jl)
         enddo
@@ -96,8 +96,8 @@ module effective_diff_coeffs
     ! molecular component
     !$omp parallel do private(ji,jk,jl)
     do jl=1,nlays
-      do ji=2,nlins
-        do jk=2,ncols
+      do ji=2,ny
+        do jk=2,nx
           irrev%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*sum(irrev%viscosity_molecular(ji-1:ji,jk-1:jk,jl))
         enddo
       enddo
@@ -105,25 +105,25 @@ module effective_diff_coeffs
       ! periodic boundary conditions
       if (lperiodic) then
       
-        do jk=2,ncols
+        do jk=2,nx
           irrev%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
-          irrev%viscosity_molecular(1,jk-1,jl) + irrev%viscosity_molecular(nlins,jk-1,jl) &
-          + irrev%viscosity_molecular(1,jk,jl) + irrev%viscosity_molecular(nlins,jk,jl))
-          irrev%viscosity_coeff_curl_dual(nlins+1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl)
+          irrev%viscosity_molecular(1,jk-1,jl) + irrev%viscosity_molecular(ny,jk-1,jl) &
+          + irrev%viscosity_molecular(1,jk,jl) + irrev%viscosity_molecular(ny,jk,jl))
+          irrev%viscosity_coeff_curl_dual(ny+1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl)
         enddo
-        do ji=2,nlins
+        do ji=2,ny
           irrev%viscosity_coeff_curl_dual(ji,1,jl) = 0.25_wp*( &
-          irrev%viscosity_molecular(ji-1,ncols,jl) + irrev%viscosity_molecular(ji-1,1,jl) &
-          + irrev%viscosity_molecular(ji,ncols,jl) + irrev%viscosity_molecular(ji,1,jl))
-          irrev%viscosity_coeff_curl_dual(ji,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl)
+          irrev%viscosity_molecular(ji-1,nx,jl) + irrev%viscosity_molecular(ji-1,1,jl) &
+          + irrev%viscosity_molecular(ji,nx,jl) + irrev%viscosity_molecular(ji,1,jl))
+          irrev%viscosity_coeff_curl_dual(ji,nx+1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl)
         enddo
       
         ! corners
-        irrev%viscosity_coeff_curl_dual(1,1,jl) = 0.25*(irrev%viscosity_molecular(1,1,jl) + irrev%viscosity_molecular(nlins,1,jl) &
-        + irrev%viscosity_molecular(1,ncols,jl) + irrev%viscosity_molecular(nlins,ncols,jl))
-        irrev%viscosity_coeff_curl_dual(1,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
-        irrev%viscosity_coeff_curl_dual(nlins+1,1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
-        irrev%viscosity_coeff_curl_dual(nlins+1,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        irrev%viscosity_coeff_curl_dual(1,1,jl) = 0.25*(irrev%viscosity_molecular(1,1,jl) + irrev%viscosity_molecular(ny,1,jl) &
+        + irrev%viscosity_molecular(1,nx,jl) + irrev%viscosity_molecular(ny,nx,jl))
+        irrev%viscosity_coeff_curl_dual(1,nx+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        irrev%viscosity_coeff_curl_dual(ny+1,1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        irrev%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
         
       endif
     
@@ -132,8 +132,8 @@ module effective_diff_coeffs
     
     ! turbulent component
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins+1
-      do jk=1,ncols+1
+    do ji=1,ny+1
+      do jk=1,nx+1
         do jl=1,nlays
           irrev%viscosity_coeff_curl_dual(ji,jk,jl) = irrev%viscosity_coeff_curl_dual(ji,jk,jl) &
           + diff_h_smag_rot*grid%mean_velocity_area*abs(diag%zeta_z(ji,jk,jl))
@@ -145,8 +145,8 @@ module effective_diff_coeffs
     ! multiplication by the density
     !$omp parallel do private(ji,jk,jl)
     do jl=1,nlays
-      do ji=2,nlins
-        do jk=2,ncols
+      do ji=2,ny
+        do jk=2,nx
           irrev%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*(density_gas(state,ji-1,jk-1,jl)+density_gas(state,ji-1,jk,jl) &
           + density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl))*irrev%viscosity_coeff_curl_dual(ji,jk,jl)
         enddo
@@ -155,26 +155,26 @@ module effective_diff_coeffs
       ! periodic boundary conditions
       if (lperiodic) then
       
-        do jk=2,ncols
+        do jk=2,nx
           irrev%viscosity_coeff_curl_dual(1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl) &
-          *(0.25_wp*(density_gas(state,1,jk-1,jl) + density_gas(state,nlins,jk-1,jl) &
-          + density_gas(state,1,jk,jl) + density_gas(state,nlins,jk,jl)))
-          irrev%viscosity_coeff_curl_dual(nlins+1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl)
+          *(0.25_wp*(density_gas(state,1,jk-1,jl) + density_gas(state,ny,jk-1,jl) &
+          + density_gas(state,1,jk,jl) + density_gas(state,ny,jk,jl)))
+          irrev%viscosity_coeff_curl_dual(ny+1,jk,jl) = irrev%viscosity_coeff_curl_dual(1,jk,jl)
         enddo
-        do ji=2,nlins
+        do ji=2,ny
           irrev%viscosity_coeff_curl_dual(ji,1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl) &
-          *(0.25_wp*(density_gas(state,ji-1,ncols,jl)+density_gas(state,ji-1,1,jl) &
-          + density_gas(state,ji,ncols,jl)+density_gas(state,ji,1,jl)))
-          irrev%viscosity_coeff_curl_dual(ji,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl)
+          *(0.25_wp*(density_gas(state,ji-1,nx,jl)+density_gas(state,ji-1,1,jl) &
+          + density_gas(state,ji,nx,jl)+density_gas(state,ji,1,jl)))
+          irrev%viscosity_coeff_curl_dual(ji,nx+1,jl) = irrev%viscosity_coeff_curl_dual(ji,1,jl)
         enddo
       
         ! corners
         irrev%viscosity_coeff_curl_dual(1,1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl) &
-        *(0.25_wp*(density_gas(state,nlins,ncols,jl)+density_gas(state,nlins,1,jl) &
-        + density_gas(state,1,ncols,jl)+density_gas(state,1,1,jl)))
-        irrev%viscosity_coeff_curl_dual(1,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
-        irrev%viscosity_coeff_curl_dual(nlins+1,1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
-        irrev%viscosity_coeff_curl_dual(nlins+1,ncols+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        *(0.25_wp*(density_gas(state,ny,nx,jl)+density_gas(state,ny,1,jl) &
+        + density_gas(state,1,nx,jl)+density_gas(state,1,1,jl)))
+        irrev%viscosity_coeff_curl_dual(1,nx+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        irrev%viscosity_coeff_curl_dual(ny+1,1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
+        irrev%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = irrev%viscosity_coeff_curl_dual(1,1,jl)
         
       endif
     
@@ -183,8 +183,8 @@ module effective_diff_coeffs
     
     ! averaging the curl diffusion coefficient to the cell centers
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           irrev%viscosity_coeff_curl(ji,jk,jl) = 0.25_wp*sum(irrev%viscosity_coeff_curl_dual(ji:ji+1,jk:jk+1,jl))
         enddo
@@ -213,9 +213,9 @@ module effective_diff_coeffs
     call tke_update(state,diag,irrev,grid)
     
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
+    do ji=1,ny
       do jl=2,nlays
-        do jk=2,ncols
+        do jk=2,nx
           irrev%vert_hor_viscosity_u(ji,jk,jl) = &
           ! molecular component
           0.25_wp*( &
@@ -235,16 +235,16 @@ module effective_diff_coeffs
           irrev%vert_hor_viscosity_u(ji,1,jl) = &
           ! molecular component
           0.25_wp*( &
-          irrev%viscosity_molecular(ji,ncols,jl-1) + irrev%viscosity_molecular(ji,1,jl-1) &
-          + irrev%viscosity_molecular(ji,ncols,jl) + irrev%viscosity_molecular(ji,1,jl)) &
+          irrev%viscosity_molecular(ji,nx,jl-1) + irrev%viscosity_molecular(ji,1,jl-1) &
+          + irrev%viscosity_molecular(ji,nx,jl) + irrev%viscosity_molecular(ji,1,jl)) &
           ! turbulent component
           + 0.25_wp*( &
-          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,ncols,jl-1)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,nx,jl-1)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,1,jl-1)) + &
-          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,ncols,jl)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,nx,jl)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(ji,1,jl)))
           
-          irrev%vert_hor_viscosity_u(ji,ncols+1,jl) = irrev%vert_hor_viscosity_u(ji,1,jl)
+          irrev%vert_hor_viscosity_u(ji,nx+1,jl) = irrev%vert_hor_viscosity_u(ji,1,jl)
           
         endif
         
@@ -253,9 +253,9 @@ module effective_diff_coeffs
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,ncols
+    do jk=1,nx
       do jl=2,nlays
-        do ji=2,nlins
+        do ji=2,ny
           irrev%vert_hor_viscosity_v(ji,jk,jl) = &
           ! molecular component
           0.25_wp*( &
@@ -275,16 +275,16 @@ module effective_diff_coeffs
           irrev%vert_hor_viscosity_v(1,jk,jl) = &
           ! molecular component
           0.25_wp*( &
-          irrev%viscosity_molecular(nlins,jk,jl-1) + irrev%viscosity_molecular(1,jk,jl-1) &
-          + irrev%viscosity_molecular(nlins,jk,jl) + irrev%viscosity_molecular(1,jk,jl)) &
+          irrev%viscosity_molecular(ny,jk,jl-1) + irrev%viscosity_molecular(1,jk,jl-1) &
+          + irrev%viscosity_molecular(ny,jk,jl) + irrev%viscosity_molecular(1,jk,jl)) &
           ! turbulent component
           + 0.25_wp*( &
-          tke2vertical_diff_coeff(irrev%viscosity_molecular(nlins,jk,jl-1)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ny,jk,jl-1)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(1,jk,jl-1)) + &
-          tke2vertical_diff_coeff(irrev%viscosity_molecular(nlins,jk,jl)) + &
+          tke2vertical_diff_coeff(irrev%viscosity_molecular(ny,jk,jl)) + &
           tke2vertical_diff_coeff(irrev%viscosity_molecular(1,jk,jl)))
           
-          irrev%vert_hor_viscosity_v(nlins+1,jk,jl) = irrev%vert_hor_viscosity_v(1,jk,jl)
+          irrev%vert_hor_viscosity_v(ny+1,jk,jl) = irrev%vert_hor_viscosity_v(1,jk,jl)
           
         endif
         
@@ -294,9 +294,9 @@ module effective_diff_coeffs
     
     ! multiplication by the density
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
+    do ji=1,ny
       do jl=2,nlays
-        do jk=2,ncols
+        do jk=2,nx
           irrev%vert_hor_viscosity_u(ji,jk,jl) = irrev%vert_hor_viscosity_u(ji,jk,jl) &
           ! molecular component
           *0.25_wp*( &
@@ -310,8 +310,8 @@ module effective_diff_coeffs
           irrev%vert_hor_viscosity_u(ji,1,jl) = irrev%vert_hor_viscosity_u(ji,1,jl) &
           ! molecular component
           *0.25_wp*( &
-          density_gas(state,ji,ncols,jl-1) + density_gas(state,ji,1,jl-1) &
-          + density_gas(state,ji,ncols,jl) + density_gas(state,ji,1,jl))
+          density_gas(state,ji,nx,jl-1) + density_gas(state,ji,1,jl-1) &
+          + density_gas(state,ji,nx,jl) + density_gas(state,ji,1,jl))
         endif
         
       enddo
@@ -319,9 +319,9 @@ module effective_diff_coeffs
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,ncols
+    do jk=1,nx
       do jl=2,nlays
-        do ji=2,nlins
+        do ji=2,ny
           irrev%vert_hor_viscosity_v(ji,jk,jl) = irrev%vert_hor_viscosity_v(ji,jk,jl) &
           ! molecular component
           *0.25_wp*( &
@@ -335,8 +335,8 @@ module effective_diff_coeffs
           irrev%vert_hor_viscosity_v(1,jk,jl) = irrev%vert_hor_viscosity_v(1,jk,jl) &
           ! molecular component
           *0.25_wp*( &
-          density_gas(state,nlins,jk,jl-1) + density_gas(state,1,jk,jl-1) &
-          + density_gas(state,nlins,jk,jl) + density_gas(state,1,jk,jl))
+          density_gas(state,ny,jk,jl-1) + density_gas(state,1,jk,jl-1) &
+          + density_gas(state,ny,jk,jl) + density_gas(state,1,jk,jl))
           
         endif
         
@@ -373,8 +373,8 @@ module effective_diff_coeffs
     integer  :: ji,jk,jl              ! loop indices
     
     !$omp parallel do private(ji,jk,jl,mom_diff_coeff)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
     
           mom_diff_coeff &
@@ -415,8 +415,8 @@ module effective_diff_coeffs
       
       ! molecular viscosity
       !$omp parallel do private(ji,jk,jl)
-      do ji=1,nlins
-        do jk=1,ncols
+      do ji=1,ny
+        do jk=1,nx
           do jl=1,nlays
             irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
             state%rho(ji,jk,jl,no_of_condensed_constituents+1))
@@ -428,8 +428,8 @@ module effective_diff_coeffs
     endif
     
     !$omp parallel do private(ji,jk,jl,c_g_v)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           c_g_v = spec_heat_cap_diagnostics_v(state,ji,jk,jl)
           ! horizontal diffusion coefficient
@@ -471,8 +471,8 @@ module effective_diff_coeffs
       
       ! molecular viscosity
       !$omp parallel do private(ji,jk,jl)
-      do ji=1,nlins
-        do jk=1,ncols
+      do ji=1,ny
+        do jk=1,nx
           do jl=1,nlays
             irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
             state%rho(ji,jk,jl,no_of_condensed_constituents+1))
@@ -484,8 +484,8 @@ module effective_diff_coeffs
     endif
     
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         do jl=1,nlays
           ! horizontal diffusion coefficient
           irrev%scalar_diff_coeff_h(ji,jk,jl) &

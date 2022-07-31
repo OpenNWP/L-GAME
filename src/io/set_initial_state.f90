@@ -7,7 +7,7 @@ module set_initial_state
 
   use definitions,      only: t_state,wp,t_diag,t_grid
   use netcdf
-  use run_nml,          only: nlins,ncols,nlays,scenario,run_id,lplane,dx
+  use run_nml,          only: ny,nx,nlays,scenario,run_id,lplane,dx
   use constituents_nml, only: no_of_condensed_constituents,no_of_constituents
   use dictionary,       only: specific_gas_constants,spec_heat_capacities_v_gas,spec_heat_capacities_p_gas
   use constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
@@ -37,7 +37,7 @@ module set_initial_state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    real(wp) :: pres_lowest_layer(nlins,ncols)              ! pressure in the lowest layer
+    real(wp) :: pres_lowest_layer(ny,nx)              ! pressure in the lowest layer
     real(wp) :: n_squared                                   ! Brunt-Väisälä frequency for the Schär test case
     real(wp) :: gravity_local                               ! gravity acceleration
     real(wp) :: delta_z                                     ! delta z
@@ -63,8 +63,8 @@ module set_initial_state
         !$omp end parallel workshare
         
         !$omp parallel do private(ji,jk,jl)
-        do ji=1,nlins
-          do jk=1,ncols
+        do ji=1,ny
+          do jk=1,nx
             do jl=1,nlays
               diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))
             enddo
@@ -96,8 +96,8 @@ module set_initial_state
         
         ! horizontal wind
         !$omp parallel do private(ji,jk,jl)
-        do ji=1,nlins
-          do jk=1,ncols+1
+        do ji=1,ny
+          do jk=1,nx+1
             do jl=1,nlays
               if (grid%z_u(ji,jk,jl)>=z_2) then
                 state%wind_u(ji,jk,jl) = u_0
@@ -116,8 +116,8 @@ module set_initial_state
         !$omp end parallel workshare
         
         !$omp parallel do private(ji,jk,jl)
-        do ji=1,nlins
-          do jk=1,ncols
+        do ji=1,ny
+          do jk=1,nx
             do jl=1,nlays
               diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))
             enddo
@@ -128,10 +128,10 @@ module set_initial_state
         
         ! density anomaly
         !$omp parallel do private(ji,jk,jl,r,x_coord)
-        do ji=1,nlins
-          do jk=1,ncols
+        do ji=1,ny
+          do jk=1,nx
             do jl=1,nlays
-              x_coord = dx*jk - (ncols/2 + 1)*dx
+              x_coord = dx*jk - (nx/2 + 1)*dx
               r = (((x_coord-x_0)/A_x)**2 + ((grid%z_scalar(ji,jk,jl)-z_0)/A_z)**2)**0.5_wp
               if (r<=1._wp) then
                 state%rho(ji,jk,jl,no_of_condensed_constituents+2) = rho_0*cos(0.5_wp*M_PI*r)**2
@@ -163,8 +163,8 @@ module set_initial_state
         ! background state not yet substracted here
        
         !$omp parallel do private(ji,jk,jl,delta_z,gravity_local)
-        do ji=1,nlins
-          do jk=1,ncols
+        do ji=1,ny
+          do jk=1,nx
             ! calculating delta_z
             delta_z = grid%z_scalar(ji,jk,nlays)
             ! calculating the gravity
@@ -220,8 +220,8 @@ module set_initial_state
     endselect
     
     !$omp parallel do private(ji,jk)
-    do ji=1,nlins
-      do jk=1,ncols
+    do ji=1,ny
+      do jk=1,nx
         state%temperature_soil(ji,jk,:) = 280._wp
       enddo
     enddo
@@ -322,8 +322,8 @@ module set_initial_state
     
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
     !$omp parallel do private(ji,jk,jl,b,c,pressure)
-    do ji=1,nlins
-      do jk=1,ncols  
+    do ji=1,ny
+      do jk=1,nx  
         ! integrating from bottom to top
         do jl=nlays,1,-1
           ! lowest layer
