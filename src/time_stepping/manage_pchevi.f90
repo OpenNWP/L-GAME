@@ -14,7 +14,7 @@ module manage_pchevi
   use column_solvers,             only: three_band_solver_ver,three_band_solver_gen_densities
   use boundaries,                 only: update_boundaries
   use derived_quantities,         only: temperature_diagnostics
-  use constituents_nml,           only: no_of_constituents
+  use constituents_nml,           only: n_constituents
   use diff_nml,                   only: lmom_diff_v
   use surface_nml,                only: lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl
   use planetary_boundary_layer,   only: update_sfc_turb_quantities
@@ -91,14 +91,14 @@ module manage_pchevi
       
       ! 3.) vertical tracer advection
       ! -----------------------------
-      if (no_of_constituents>1) then
+      if (n_constituents>1) then
         call three_band_solver_gen_densities(state_old,state_new,tend,grid)
       endif
       
     enddo
     
     ! saturation adjustment, calculation of latent heating rates, evaporation at the surface
-    if (no_of_constituents>1) then
+    if (n_constituents>1) then
       call moisturizer(state_new,diag,irrev,grid)
     endif
     

@@ -9,7 +9,7 @@ program control
                                        t_init,ny,nx,nlays,lrestart, &
                                        lideal
   use io_nml,                    only: io_nml_setup,dt_write
-  use constituents_nml,          only: constituents_nml_setup,no_of_condensed_constituents,no_of_constituents, &
+  use constituents_nml,          only: constituents_nml_setup,n_condensed_constituents,n_constituents, &
                                        snow_velocity,rain_velocity
   use diff_nml,                  only: diff_nml_setup
   use surface_nml,               only: surface_nml_setup,nsoillays
@@ -186,7 +186,7 @@ program control
   allocate(grid%t_const_soil(ny,nx))
   grid%t_const_soil = 0._wp
   ! state at the old time step
-  allocate(state_old%rho(ny,nx,nlays,no_of_constituents))
+  allocate(state_old%rho(ny,nx,nlays,n_constituents))
   state_old%rho = 0._wp
   allocate(state_old%rhotheta_v(ny,nx,nlays))
   state_old%rhotheta_v = 0._wp
@@ -203,7 +203,7 @@ program control
   allocate(state_old%temperature_soil(ny,nx,nsoillays))
   state_old%temperature_soil = 0._wp
   ! state at the new time step
-  allocate(state_new%rho(ny,nx,nlays,no_of_constituents))
+  allocate(state_new%rho(ny,nx,nlays,n_constituents))
   state_new%rho = 0._wp
   allocate(state_new%rhotheta_v(ny,nx,nlays))
   state_new%rhotheta_v = 0._wp
@@ -220,7 +220,7 @@ program control
   allocate(state_new%temperature_soil(ny,nx,nsoillays))
   state_new%temperature_soil = 0._wp
   ! state containing the tendency
-  allocate(tend%rho(ny,nx,nlays,no_of_constituents))
+  allocate(tend%rho(ny,nx,nlays,n_constituents))
   tend%rho = 0._wp
   allocate(tend%rhotheta_v(ny,nx,nlays))
   tend%rhotheta_v = 0._wp
@@ -231,7 +231,7 @@ program control
   allocate(tend%wind_w(ny,nx,nlays+1))
   tend%wind_w = 0._wp
   ! state containing the tendency of the boundary conditions
-  allocate(bc%rho(ny,nx,nlays,no_of_constituents,2))
+  allocate(bc%rho(ny,nx,nlays,n_constituents,2))
   bc%rho = 0._wp
   allocate(bc%rhotheta_v(ny,nx,nlays,2))
   bc%rhotheta_v = 0._wp
@@ -250,7 +250,7 @@ program control
   bc%index_old = 1
   bc%index_new = 2
   ! state to be written out
-  allocate(state_write%rho(ny,nx,nlays,no_of_constituents))
+  allocate(state_write%rho(ny,nx,nlays,n_constituents))
   state_write%rho = 0._wp
   allocate(state_write%rhotheta_v(ny,nx,nlays))
   state_write%rhotheta_v = 0._wp
@@ -388,7 +388,7 @@ program control
   irrev%mom_diff_tend_z = 0._wp
   allocate(irrev%heating_diss(ny,nx,nlays))
   irrev%heating_diss = 0._wp
-  allocate(irrev%mass_source_rates(ny,nx,nlays,no_of_condensed_constituents+1))
+  allocate(irrev%mass_source_rates(ny,nx,nlays,n_condensed_constituents+1))
   irrev%mass_source_rates = 0._wp
   allocate(irrev%heat_source_rates(ny,nx,nlays))
   irrev%heat_source_rates = 0._wp

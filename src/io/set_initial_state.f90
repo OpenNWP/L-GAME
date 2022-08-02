@@ -8,7 +8,7 @@ module set_initial_state
   use definitions,      only: t_state,wp,t_diag,t_grid
   use netcdf
   use run_nml,          only: ny,nx,nlays,scenario,run_id,lplane,dx
-  use constituents_nml, only: no_of_condensed_constituents,no_of_constituents
+  use constituents_nml, only: n_condensed_constituents,n_constituents
   use constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
                               gravity,p_0_standard,r_e,t_grad_inv,M_PI,r_d,c_d_p,c_d_v
   use io_nml,           only: restart_filename
@@ -69,9 +69,9 @@ module set_initial_state
     
         !$omp parallel workshare
         ! humidity
-        state%rho(:,:,:,no_of_constituents) = 0._wp
+        state%rho(:,:,:,n_constituents) = 0._wp
         ! condensates
-        state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
+        state%rho(:,:,:,1:n_condensed_constituents) = 0._wp
         !$omp end parallel workshare
 
       case("advection")
@@ -128,9 +128,9 @@ module set_initial_state
               x_coord = dx*jk - (nx/2 + 1)*dx
               r = (((x_coord-x_0)/A_x)**2 + ((grid%z_scalar(ji,jk,jl)-z_0)/A_z)**2)**0.5_wp
               if (r<=1._wp) then
-                state%rho(ji,jk,jl,no_of_condensed_constituents+2) = rho_0*cos(0.5_wp*M_PI*r)**2
+                state%rho(ji,jk,jl,n_condensed_constituents+2) = rho_0*cos(0.5_wp*M_PI*r)**2
               else
-                state%rho(ji,jk,jl,no_of_condensed_constituents+2) = 0._wp
+                state%rho(ji,jk,jl,n_condensed_constituents+2) = 0._wp
               endif
             enddo
           enddo
@@ -139,7 +139,7 @@ module set_initial_state
     
         !$omp parallel workshare
         ! condensates
-        state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
+        state%rho(:,:,:,1:n_condensed_constituents) = 0._wp
         !$omp end parallel workshare
 
       case("schaer")
@@ -206,9 +206,9 @@ module set_initial_state
     
         !$omp parallel workshare
         ! humidity
-        state%rho(:,:,:,no_of_constituents) = 0._wp
+        state%rho(:,:,:,n_constituents) = 0._wp
         ! condensates
-        state%rho(:,:,:,1:no_of_condensed_constituents) = 0._wp
+        state%rho(:,:,:,1:n_condensed_constituents) = 0._wp
         !$omp end parallel workshare
         
     endselect
@@ -241,7 +241,7 @@ module set_initial_state
     
     ! setting the virtual potential temperature perturbation
     !$omp parallel workshare
-    state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_v_bg
+    state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,n_condensed_constituents+1) - grid%theta_v_bg
     state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_d_v) - grid%exner_bg
     !$omp end parallel workshare
   
@@ -332,10 +332,10 @@ module set_initial_state
     
     !$omp parallel workshare
     ! density
-    state%rho(:,:,:,no_of_condensed_constituents+1) = p_0*(state%exner_pert)**(c_d_p/r_d) &
+    state%rho(:,:,:,n_condensed_constituents+1) = p_0*(state%exner_pert)**(c_d_p/r_d) &
     /(r_d*diag%scalar_placeholder)
     ! virtual potential temperature density
-    state%rhotheta_v = state%rho(:,:,:,no_of_condensed_constituents+1)*state%theta_v_pert
+    state%rhotheta_v = state%rho(:,:,:,n_condensed_constituents+1)*state%theta_v_pert
     ! substracting the background state
     state%theta_v_pert = state%theta_v_pert - grid%theta_v_bg
     state%exner_pert = state%exner_pert - grid%exner_bg

@@ -902,8 +902,8 @@ module grid_generator
     integer               :: lat_in_id              ! variable ID of the latitude vector
     integer               :: lon_in_id              ! variable ID of the longitude vector
     integer               :: z_in_id                ! variable ID of the orography
-    integer               :: no_of_lat_points       ! number of latitude points of the input dataset
-    integer               :: no_of_lon_points       ! number of longitude points of the input dataset
+    integer               :: n_lat_points       ! number of latitude points of the input dataset
+    integer               :: n_lon_points       ! number of longitude points of the input dataset
     real(wp), allocatable :: latitude_input(:)      ! latitudes of the input dataset
     real(wp), allocatable :: longitude_input(:)     ! longitudes of the input dataset
     real(wp), allocatable :: lat_distance_vector(:) ! latitudes distance vector
@@ -912,8 +912,8 @@ module grid_generator
     integer               :: lat_index,lon_index    ! minimum distance indices
     integer               :: ji,jk,jl               ! loop indices
     
-    no_of_lat_points = 10801
-    no_of_lon_points = 21601
+    n_lat_points = 10801
+    n_lon_points = 21601
     
     ! the filename of the grid file including the relative path
     filename = "../../grids/phys_sfc_properties/" // trim(oro_raw_filename)
@@ -927,9 +927,9 @@ module grid_generator
     call nc_check(nf90_inq_varid(ncid,"z",z_in_id))
     
     ! allocating memory for reading the grid files
-    allocate(latitude_input(no_of_lat_points))
-    allocate(longitude_input(no_of_lon_points))
-    allocate(z_input(no_of_lon_points,no_of_lat_points))
+    allocate(latitude_input(n_lat_points))
+    allocate(longitude_input(n_lon_points))
+    allocate(z_input(n_lon_points,n_lat_points))
     
     ! reading the arrays
     call nc_check(nf90_get_var(ncid,lat_in_id,latitude_input))
@@ -940,8 +940,8 @@ module grid_generator
     call nc_check(nf90_close(ncid))
     
     ! allocating memory for the distance vectors
-    allocate(lat_distance_vector(no_of_lat_points))
-    allocate(lon_distance_vector(no_of_lon_points))
+    allocate(lat_distance_vector(n_lat_points))
+    allocate(lon_distance_vector(n_lon_points))
 
     ! setting the unfiltered orography
     do ji=1,ny
@@ -949,11 +949,11 @@ module grid_generator
         ! default
         grid%z_w(ji,jk,nlays+1) = 0._wp
     
-        do jl=1,no_of_lat_points
+        do jl=1,n_lat_points
           lat_distance_vector(jl) = abs(2._wp*M_PI*latitude_input(jl)/360._wp - grid%lat_geo_scalar(ji,jk))
         enddo
     
-        do jl=1,no_of_lon_points
+        do jl=1,n_lon_points
           lon_distance_vector(jl) = abs(2._wp*M_PI*longitude_input(jl)/360._wp - grid%lon_geo_scalar(ji,jk))
         enddo
     

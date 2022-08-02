@@ -9,7 +9,7 @@ module boundaries
   use run_nml,           only: ny,nx,nlays,t_init
   use bc_nml,            only: n_swamp,bc_root_filename,bc_root_filename,dtime_bc,t_latest_bc
   use constants,         only: M_PI,p_0,r_d,c_d_v
-  use constituents_nml,  only: no_of_condensed_constituents
+  use constituents_nml,  only: n_condensed_constituents
   use set_initial_state, only: read_from_nc
 
   implicit none
@@ -94,7 +94,7 @@ module boundaries
     
     ! setting the virtual potential temperature perturbation
     !$omp parallel workshare
-    state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_v_bg
+    state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,n_condensed_constituents+1) - grid%theta_v_bg
     state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_d_v) - grid%exner_bg
     !$omp end parallel workshare
     

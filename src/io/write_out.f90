@@ -8,7 +8,7 @@ module write_out
   use definitions,        only: t_state,wp,t_diag,t_grid
   use netcdf
   use run_nml,            only: ny,nx,nlays,scenario,run_id
-  use constituents_nml,   only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
+  use constituents_nml,   only: n_condensed_constituents,n_gaseous_constituents,n_constituents
   use derived_quantities, only: rel_humidity
   use set_initial_state,  only: bg_temp,bg_pres,geopot,nc_check
 
@@ -73,7 +73,7 @@ module write_out
     call nc_check(nf90_def_dim(ncid,"lon_model",nx,x_dimid))
     call nc_check(nf90_def_dim(ncid,"lat_model",ny,y_dimid))
     call nc_check(nf90_def_dim(ncid,"z",nlays,z_dimid))
-    call nc_check(nf90_def_dim(ncid,"j_constituent",no_of_constituents,constituents_dimid))
+    call nc_check(nf90_def_dim(ncid,"j_constituent",n_constituents,constituents_dimid))
 
     ! setting the dimension ID arrays
     ! 2D
@@ -119,7 +119,7 @@ module write_out
     call nc_check(nf90_put_att(ncid,varid_rho,"Description","mass densities"))
     call nc_check(nf90_put_att(ncid,varid_rho,"Unit","kg/m^3"))
     
-    if (no_of_gaseous_constituents>1) then
+    if (n_gaseous_constituents>1) then
       call nc_check(nf90_def_var(ncid,"r",NF90_REAL,dimids_3d,varid_r))
       call nc_check(nf90_put_att(ncid,varid_r,"Description","relative humidity"))
       call nc_check(nf90_put_att(ncid,varid_r,"Unit","%"))
@@ -165,13 +165,13 @@ module write_out
     !$omp end parallel workshare
     call nc_check(nf90_put_var(ncid,varid_t,diag%scalar_placeholder))
     
-    if (no_of_gaseous_constituents>1) then
+    if (n_gaseous_constituents>1) then
       ! relative humidity
       !$omp parallel do private(ji,jk,jl)
       do ji=1,ny
         do jk=1,nx
           do jl=1,nlays
-            diag%scalar_placeholder(ji,jk,jl) = rel_humidity(state%rho(ji,jk,jl,no_of_condensed_constituents+2), &
+            diag%scalar_placeholder(ji,jk,jl) = rel_humidity(state%rho(ji,jk,jl,n_condensed_constituents+2), &
             diag%scalar_placeholder(ji,jk,jl))
           enddo
         enddo

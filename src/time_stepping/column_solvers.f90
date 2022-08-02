@@ -6,7 +6,7 @@ module column_solvers
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
   use run_nml,          only: ny,nx,wp,nlays,dtime,toa,impl_weight,partial_impl_weight
-  use constituents_nml, only: no_of_condensed_constituents,no_of_constituents, &
+  use constituents_nml, only: n_condensed_constituents,n_constituents, &
                               snow_velocity,rain_velocity,cloud_droplets_velocity
   use definitions,      only: t_grid,t_state,t_tend,t_diag
   use diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
@@ -81,9 +81,9 @@ module column_solvers
           *(grid%theta_v_bg(ji,jk,nlays)+state_new%theta_v_pert(ji,jk,nlays))
 
           ! the sensible power flux density
-          diag%power_flux_density_sensible(ji,jk) = 0.5_wp*c_d_v*(state_new%rho(ji,jk,nlays,no_of_condensed_constituents+1) &
+          diag%power_flux_density_sensible(ji,jk) = 0.5_wp*c_d_v*(state_new%rho(ji,jk,nlays,n_condensed_constituents+1) &
           *(t_gas_lowest_layer_old - state_old%temperature_soil(ji,jk,1)) &
-          + state_old%rho(ji,jk,nlays,no_of_condensed_constituents+1) &
+          + state_old%rho(ji,jk,nlays,n_condensed_constituents+1) &
           *(t_gas_lowest_layer_new - state_new%temperature_soil(ji,jk,1)))/diag%scalar_flux_resistance(ji,jk)
 
           ! contribution of sensible heat to rhotheta_v
@@ -112,26 +112,26 @@ module column_solvers
         ! explicit quantities
         do jl=1,nlays
           ! explicit density
-          rho_expl(jl) = state_old%rho(ji,jk,jl,no_of_condensed_constituents+1) &
-          + dtime*tend%rho(ji,jk,jl,no_of_condensed_constituents+1)
+          rho_expl(jl) = state_old%rho(ji,jk,jl,n_condensed_constituents+1) &
+          + dtime*tend%rho(ji,jk,jl,n_condensed_constituents+1)
           ! explicit virtual potential temperature density
           rhotheta_v_expl(jl) = state_old%rhotheta_v(ji,jk,jl) + dtime*tend%rhotheta_v(ji,jk,jl)
           if (rk_step==1) then
             ! old time step partial derivatives of theta_v and Pi (divided by the volume)
-            alpha(jl) = -state_old%rhotheta_v(ji,jk,jl)/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)**2 &
+            alpha(jl) = -state_old%rhotheta_v(ji,jk,jl)/state_old%rho(ji,jk,jl,n_condensed_constituents+1)**2 &
             /grid%volume(ji,jk,jl)
-            beta(jl)  = 1._wp/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)/grid%volume(ji,jk,jl)
+            beta(jl)  = 1._wp/state_old%rho(ji,jk,jl,n_condensed_constituents+1)/grid%volume(ji,jk,jl)
             gammaa(jl) = r_d/(c_d_v*state_old%rhotheta_v(ji,jk,jl))* &
             (grid%exner_bg(ji,jk,jl)+state_old%exner_pert(ji,jk,jl))/grid%volume(ji,jk,jl)
           else
             ! old time step partial derivatives of theta_v and Pi
-            alpha_old(jl) = -state_old%rhotheta_v(ji,jk,jl)/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)**2
-            beta_old(jl)  = 1._wp/state_old%rho(ji,jk,jl,no_of_condensed_constituents+1)
+            alpha_old(jl) = -state_old%rhotheta_v(ji,jk,jl)/state_old%rho(ji,jk,jl,n_condensed_constituents+1)**2
+            beta_old(jl)  = 1._wp/state_old%rho(ji,jk,jl,n_condensed_constituents+1)
             gamma_old(jl) = r_d/(c_d_v*state_old%rhotheta_v(ji,jk,jl))* &
             (grid%exner_bg(ji,jk,jl)+state_old%exner_pert(ji,jk,jl))
             ! new time step partial derivatives of theta_v and Pi
-            alpha_new(jl) = -state_new%rhotheta_v(ji,jk,jl)/state_new%rho(ji,jk,jl,no_of_condensed_constituents+1)**2
-            beta_new(jl)  = 1._wp/state_new%rho(ji,jk,jl,no_of_condensed_constituents+1)
+            alpha_new(jl) = -state_new%rhotheta_v(ji,jk,jl)/state_new%rho(ji,jk,jl,n_condensed_constituents+1)**2
+            beta_new(jl)  = 1._wp/state_new%rho(ji,jk,jl,n_condensed_constituents+1)
             gamma_new(jl) = r_d/(c_d_v*state_new%rhotheta_v(ji,jk,jl)) &
             *(grid%exner_bg(ji,jk,jl)+state_new%exner_pert(ji,jk,jl))
             ! interpolation of partial derivatives of theta_v and Pi (divided by the volume)
@@ -141,7 +141,7 @@ module column_solvers
           endif
           ! explicit virtual potential temperature perturbation
           theta_v_pert_expl(jl) = state_old%theta_v_pert(ji,jk,jl) &
-          + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl,no_of_condensed_constituents+1) &
+          + dtime*grid%volume(ji,jk,jl)*(alpha(jl)*tend%rho(ji,jk,jl,n_condensed_constituents+1) &
           + beta(jl)*tend%rhotheta_v(ji,jk,jl))
           ! explicit Exner pressure perturbation
           exner_pert_expl(jl) = state_old%exner_pert(ji,jk,jl)+dtime*grid%volume(ji,jk,jl)*gammaa(jl)*tend%rhotheta_v(ji,jk,jl)
@@ -149,11 +149,11 @@ module column_solvers
         
         ! interface values
         do jl=1,nlays-1
-          rho_int_old(jl) = 0.5_wp*(state_old%rho(ji,jk,jl,no_of_condensed_constituents+1) &
-          + state_old%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
+          rho_int_old(jl) = 0.5_wp*(state_old%rho(ji,jk,jl,n_condensed_constituents+1) &
+          + state_old%rho(ji,jk,jl+1,n_condensed_constituents+1))
           rho_int_expl(jl) = 0.5_wp*(rho_expl(jl)+rho_expl(jl+1))
-          theta_v_int_new(jl) = 0.5_wp*(state_new%rhotheta_v(ji,jk,jl)/state_new%rho(ji,jk,jl,no_of_condensed_constituents+1) &
-          + state_new%rhotheta_v(ji,jk,jl+1)/state_new%rho(ji,jk,jl+1,no_of_condensed_constituents+1))
+          theta_v_int_new(jl) = 0.5_wp*(state_new%rhotheta_v(ji,jk,jl)/state_new%rho(ji,jk,jl,n_condensed_constituents+1) &
+          + state_new%rhotheta_v(ji,jk,jl+1)/state_new%rho(ji,jk,jl+1,n_condensed_constituents+1))
         enddo
       
         ! filling up the coefficient vectors
@@ -281,23 +281,23 @@ module column_solvers
         ! results
         ! density, virtual potential temperature density
         do jl=2,nlays-1
-          state_new%rho(ji,jk,jl,no_of_condensed_constituents+1) = rho_expl(jl) &
+          state_new%rho(ji,jk,jl,n_condensed_constituents+1) = rho_expl(jl) &
           + dtime*(-solution_vector(jl-1)+solution_vector(jl))/grid%volume(ji,jk,jl)
           state_new%rhotheta_v(ji,jk,jl) = rhotheta_v_expl(jl) &
           + dtime*(-theta_v_int_new(jl-1)*solution_vector(jl-1)+theta_v_int_new(jl)*solution_vector(jl))/grid%volume(ji,jk,jl)
         enddo
         ! uppermost layer
-        state_new%rho(ji,jk,1,no_of_condensed_constituents+1) = rho_expl(1)+dtime*solution_vector(1)/grid%volume(ji,jk,1)
+        state_new%rho(ji,jk,1,n_condensed_constituents+1) = rho_expl(1)+dtime*solution_vector(1)/grid%volume(ji,jk,1)
         state_new%rhotheta_v(ji,jk,1) = rhotheta_v_expl(1)+dtime*theta_v_int_new(1)*solution_vector(1)/grid%volume(ji,jk,1)
         ! lowest layer
-        state_new%rho(ji,jk,nlays,no_of_condensed_constituents+1) = rho_expl(nlays) &
+        state_new%rho(ji,jk,nlays,n_condensed_constituents+1) = rho_expl(nlays) &
         - dtime*solution_vector(nlays-1)/grid%volume(ji,jk,nlays)
         state_new%rhotheta_v(ji,jk,nlays) = rhotheta_v_expl(nlays) &
         - dtime*theta_v_int_new(nlays-1)*solution_vector(nlays-1)/grid%volume(ji,jk,nlays)
         ! vertical velocity
         do jl=2,nlays
-          rho_int_new = 0.5_wp*(state_new%rho(ji,jk,jl-1,no_of_condensed_constituents+1) &
-          + state_new%rho(ji,jk,jl,no_of_condensed_constituents+1))
+          rho_int_new = 0.5_wp*(state_new%rho(ji,jk,jl-1,n_condensed_constituents+1) &
+          + state_new%rho(ji,jk,jl,n_condensed_constituents+1))
           state_new%wind_w(ji,jk,jl) = (2._wp*solution_vector(jl-1)/grid%area_z(ji,jk,jl) &
           - rho_int_new*state_old%wind_w(ji,jk,jl))/rho_int_old(jl-1)
         enddo
@@ -320,7 +320,7 @@ module column_solvers
     
     ! virtual potential temperature perturbation at the new time step
     !$omp parallel workshare
-    state_new%theta_v_pert(:,:,:) = state_new%rhotheta_v(:,:,:)/state_new%rho(:,:,:,no_of_condensed_constituents+1) &
+    state_new%theta_v_pert(:,:,:) = state_new%rhotheta_v(:,:,:)/state_new%rho(:,:,:,n_condensed_constituents+1) &
     - grid%theta_v_bg(:,:,:)
     !$omp end parallel workshare
 
@@ -338,7 +338,7 @@ module column_solvers
     type(t_grid),  intent(in)    :: grid      ! model grid
     
     ! local variables
-    integer  :: no_of_relevant_constituents         ! number of relevant constituents for a certain quantity
+    integer  :: n_relevant_constituents         ! number of relevant constituents for a certain quantity
     real(wp) :: impl_weight,expl_weight             ! time stepping weights
     real(wp) :: c_vector(nlays-1)                   ! vector for solving the system of linear equations
     real(wp) :: d_vector(nlays)                     ! vector for solving the system of linear equations
@@ -355,14 +355,14 @@ module column_solvers
     expl_weight = 1._wp - impl_weight
     
     ! firstly the number of relevant constituents needs to be determined
-    no_of_relevant_constituents = 0
+    n_relevant_constituents = 0
     ! mass densities
-    no_of_relevant_constituents = no_of_constituents ! the main gaseous constituent is excluded later
+    n_relevant_constituents = n_constituents ! the main gaseous constituent is excluded later
 
     ! loop over all relevant constituents
-    do j_constituent=1,no_of_relevant_constituents
+    do j_constituent=1,n_relevant_constituents
       ! This is done do all tracers apart from the main gaseous constituent.
-      if (j_constituent/=no_of_condensed_constituents+1) then
+      if (j_constituent/=n_condensed_constituents+1) then
         
         ! loop over all columns
         !$omp parallel do private(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
@@ -378,15 +378,15 @@ module column_solvers
               ! for condensed constituents, a sink velocity must be added.
               ! precipitation
               ! snow
-              if (j_constituent<=no_of_condensed_constituents/4) then
+              if (j_constituent<=n_condensed_constituents/4) then
                 vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - snow_velocity
                 vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - snow_velocity
               ! rain
-              elseif (j_constituent<=no_of_condensed_constituents/2) then
+              elseif (j_constituent<=n_condensed_constituents/2) then
                 vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - rain_velocity
                 vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - rain_velocity
               ! clouds
-              elseif (j_constituent<=no_of_condensed_constituents) then
+              elseif (j_constituent<=n_condensed_constituents) then
                 vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - cloud_droplets_velocity
                 vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - cloud_droplets_velocity
               endif
@@ -429,15 +429,15 @@ module column_solvers
                 endif
                 ! precipitation
                 ! snow
-                if (j_constituent<=no_of_condensed_constituents/4) then
+                if (j_constituent<=n_condensed_constituents/4) then
                   d_vector(jl) = d_vector(jl) + impl_weight*snow_velocity*dtime &
                   *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                 ! rain
-                elseif (j_constituent<=no_of_condensed_constituents/2) then
+                elseif (j_constituent<=n_condensed_constituents/2) then
                   d_vector(jl) = d_vector(jl) + impl_weight*rain_velocity*dtime &
                   *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                 ! clouds
-                elseif (j_constituent<=no_of_condensed_constituents) then
+                elseif (j_constituent<=n_condensed_constituents) then
                   d_vector(jl) = d_vector(jl) + impl_weight*cloud_droplets_velocity*dtime &
                   *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                 endif
@@ -459,15 +459,15 @@ module column_solvers
                 r_vector(jl) = r_vector(jl) - expl_weight*dtime*vertical_flux_vector_rhs(jl-1)/grid%volume(ji,jk,jl)
                 ! precipitation
                 ! snow
-                if (j_constituent<=no_of_condensed_constituents/4) then
+                if (j_constituent<=n_condensed_constituents/4) then
                   r_vector(jl) = r_vector(jl) - expl_weight*snow_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
                   *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                 ! rain
-                elseif (j_constituent<=no_of_condensed_constituents/2) then
+                elseif (j_constituent<=n_condensed_constituents/2) then
                   r_vector(jl) = r_vector(jl) - expl_weight*rain_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
                   *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                 ! clouds
-                elseif (j_constituent<=no_of_condensed_constituents) then
+                elseif (j_constituent<=n_condensed_constituents) then
                   r_vector(jl) = r_vector(jl) - expl_weight*cloud_droplets_velocity*dtime*state_old%rho(ji,jk,jl,j_constituent) &
                   *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
                 endif

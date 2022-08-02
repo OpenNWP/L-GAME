@@ -11,7 +11,7 @@ module explicit_scalar_tendencies
   use divergence_operators,  only: div_h,div_h_tracers,add_vertical_div
   use run_nml,               only: dtime
   use phase_trans,           only: calc_h2otracers_source_rates
-  use constituents_nml,      only: no_of_condensed_constituents,no_of_constituents
+  use constituents_nml,      only: n_condensed_constituents,n_constituents
   use diff_nml,              only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
   use effective_diff_coeffs, only: temp_diffusion_coeffs,mass_diffusion_coeffs
   use gradient_operators,    only: grad
@@ -38,14 +38,14 @@ module explicit_scalar_tendencies
     
     ! local variables
     integer  :: j_constituent                  ! loop variable
-    real(wp) :: old_weight(no_of_constituents) ! time stepping weight
-    real(wp) :: new_weight(no_of_constituents) ! time stepping weight
+    real(wp) :: old_weight(n_constituents) ! time stepping weight
+    real(wp) :: new_weight(n_constituents) ! time stepping weight
     integer  :: diff_switch                    ! diffusion switch
     
     ! setting the time stepping weights
-    do j_constituent=1,no_of_constituents
+    do j_constituent=1,n_constituents
       new_weight(j_constituent) = 1._wp
-        if (rk_step==2 .and. j_constituent/=no_of_condensed_constituents+1) then
+        if (rk_step==2 .and. j_constituent/=n_condensed_constituents+1) then
           new_weight(j_constituent) = 0.5_wp
         endif
       old_weight(j_constituent) = 1._wp - new_weight(j_constituent)
@@ -70,13 +70,13 @@ module explicit_scalar_tendencies
     endif
     
     ! loop over all constituents
-    do j_constituent=1,no_of_constituents
+    do j_constituent=1,n_constituents
     
       ! explicit mass densities integration
       ! -----------------------------------
       ! calculating the divergence of the mass flux density
       ! main gaseous constituent
-      if (j_constituent==no_of_condensed_constituents+1) then
+      if (j_constituent==n_condensed_constituents+1) then
         call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%flux_density_u,diag%flux_density_v)
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
       ! all other constituents
@@ -117,7 +117,7 @@ module explicit_scalar_tendencies
       ! explicit virtual potential temperature density integration
       ! --------------------------------------------------
       ! calculating the virtual potential temperature density flux
-      if (j_constituent==no_of_condensed_constituents+1) then
+      if (j_constituent==n_condensed_constituents+1) then
         !$omp parallel workshare
         diag%scalar_placeholder = grid%theta_v_bg + state%theta_v_pert
         !$omp end parallel workshare
@@ -149,21 +149,21 @@ module explicit_scalar_tendencies
     type(t_irrev),intent(inout) :: irrev ! irreversible quantities (phase transitions are irreversible)
     type(t_grid), intent(in)    :: grid  ! grid properties
       
-    if (no_of_constituents>1) then
+    if (n_constituents>1) then
     
       ! calculating the source rates
       call calc_h2otracers_source_rates(state,diag,irrev,grid)
       
       ! condensates
       !$omp parallel workshare
-      state%rho(:,:,:,1:no_of_condensed_constituents) = state%rho(:,:,:,1:no_of_condensed_constituents) &
-      + dtime*irrev%mass_source_rates(:,:,:,1:no_of_condensed_constituents)
+      state%rho(:,:,:,1:n_condensed_constituents) = state%rho(:,:,:,1:n_condensed_constituents) &
+      + dtime*irrev%mass_source_rates(:,:,:,1:n_condensed_constituents)
       !$omp end parallel workshare
       
       ! water vapour
       !$omp parallel workshare
-      state%rho(:,:,:,no_of_constituents) = state%rho(:,:,:,no_of_constituents) &
-      + dtime*irrev%mass_source_rates(:,:,:,no_of_constituents-1)
+      state%rho(:,:,:,n_constituents) = state%rho(:,:,:,n_constituents) &
+      + dtime*irrev%mass_source_rates(:,:,:,n_constituents-1)
       !$omp end parallel workshare
       
     endif

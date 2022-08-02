@@ -9,7 +9,7 @@ module effective_diff_coeffs
   use definitions,          only: wp,t_state,t_diag,t_irrev,t_grid
   use diff_nml,             only: diff_h_smag_div,diff_h_smag_rot,lmom_diff_h,ltemp_diff_h
   use derived_quantities,   only: calc_diffusion_coeff
-  use constituents_nml,     only: no_of_condensed_constituents
+  use constituents_nml,     only: n_condensed_constituents
   use tke,                  only: tke_update
   use divergence_operators, only: div_h
   use derived_quantities,   only: density_gas,spec_heat_cap_diagnostics_v
@@ -51,7 +51,7 @@ module effective_diff_coeffs
       do jk=1,nx
         do jl=1,nlays
           irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
-          state%rho(ji,jk,jl,no_of_condensed_constituents+1))
+          state%rho(ji,jk,jl,n_condensed_constituents+1))
         enddo
       enddo
     enddo
@@ -419,7 +419,7 @@ module effective_diff_coeffs
         do jk=1,nx
           do jl=1,nlays
             irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
-            state%rho(ji,jk,jl,no_of_condensed_constituents+1))
+            state%rho(ji,jk,jl,n_condensed_constituents+1))
           enddo
         enddo
       enddo
@@ -475,7 +475,7 @@ module effective_diff_coeffs
         do jk=1,nx
           do jl=1,nlays
             irrev%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
-            state%rho(ji,jk,jl,no_of_condensed_constituents+1))
+            state%rho(ji,jk,jl,n_condensed_constituents+1))
           enddo
         enddo
       enddo

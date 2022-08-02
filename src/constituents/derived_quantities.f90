@@ -8,7 +8,7 @@ module derived_quantities
   use definitions,      only: wp,t_grid,t_state,t_diag
   use run_nml,          only: ny,nx,nlays
   use constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0
-  use constituents_nml, only: no_of_condensed_constituents,no_of_gaseous_constituents,no_of_constituents
+  use constituents_nml, only: n_condensed_constituents,n_gaseous_constituents,n_constituents
   use dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water
   
   implicit none
@@ -63,20 +63,20 @@ module derived_quantities
     real(wp) :: spec_heat_cap_diagnostics_v
     
     ! local variables
-    integer  :: no_of_relevant_constituents ! the number of relevant constituents for this calculation
+    integer  :: n_relevant_constituents ! the number of relevant constituents for this calculation
     integer  :: j_constituent               ! constituent index
     real(wp) :: rho_g                       ! gas density
     real(wp) :: spec_heat_capacities_v_gas(2)
     
-    no_of_relevant_constituents = 1
-    rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
+    n_relevant_constituents = 1
+    rho_g = state%rho(ji,jk,jl,n_condensed_constituents+1)
     
     spec_heat_capacities_v_gas(1) = c_d_v
     spec_heat_capacities_v_gas(2) = c_v_v
     
     spec_heat_cap_diagnostics_v = 0._wp
-    do j_constituent=1,no_of_relevant_constituents
-      spec_heat_cap_diagnostics_v = spec_heat_cap_diagnostics_v +  state%rho(ji,jk,jl,no_of_condensed_constituents+j_constituent) &
+    do j_constituent=1,n_relevant_constituents
+      spec_heat_cap_diagnostics_v = spec_heat_cap_diagnostics_v +  state%rho(ji,jk,jl,n_condensed_constituents+j_constituent) &
       /rho_g*spec_heat_capacities_v_gas(j_constituent)
     enddo
     
@@ -94,20 +94,20 @@ module derived_quantities
     real(wp) :: spec_heat_cap_diagnostics_p
     
     ! local variables
-    integer  :: no_of_relevant_constituents ! the number of relevant constituents for this calculation
+    integer  :: n_relevant_constituents ! the number of relevant constituents for this calculation
     integer  :: j_constituent               ! constituent index
     real(wp) :: rho_g                       ! gas density
     real(wp) :: spec_heat_capacities_p_gas(2)
     
-    no_of_relevant_constituents = 1
-    rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
+    n_relevant_constituents = 1
+    rho_g = state%rho(ji,jk,jl,n_condensed_constituents+1)
     
     spec_heat_capacities_p_gas(1) = c_d_p
     spec_heat_capacities_p_gas(2) = c_v_p
     
     spec_heat_cap_diagnostics_p = 0._wp
-    do j_constituent=1,no_of_relevant_constituents
-      spec_heat_cap_diagnostics_p = spec_heat_cap_diagnostics_p + state%rho(ji,jk,jl,no_of_condensed_constituents+j_constituent) &
+    do j_constituent=1,n_relevant_constituents
+      spec_heat_cap_diagnostics_p = spec_heat_cap_diagnostics_p + state%rho(ji,jk,jl,n_condensed_constituents+j_constituent) &
       /rho_g*spec_heat_capacities_p_gas(j_constituent)
     enddo
     
@@ -124,21 +124,21 @@ module derived_quantities
     real(wp)                  :: gas_constant_diagnostics
     
     ! local variables
-    integer  :: no_of_relevant_constituents ! the number of relevant constituents for this calculation
+    integer  :: n_relevant_constituents ! the number of relevant constituents for this calculation
     integer  :: j_constituent               ! constituent index
     real(wp) :: rho_g                       ! gas density
     real(wp) :: specific_gas_constants(2)
     
-    no_of_relevant_constituents = 1
-    rho_g = state%rho(ji,jk,jl,no_of_condensed_constituents+1)
+    n_relevant_constituents = 1
+    rho_g = state%rho(ji,jk,jl,n_condensed_constituents+1)
     
     gas_constant_diagnostics = 0._wp
     
     specific_gas_constants(1) = r_d
     specific_gas_constants(2) = r_v
     
-    do j_constituent=1,no_of_relevant_constituents
-      gas_constant_diagnostics = gas_constant_diagnostics + state%rho(ji,jk,jl,no_of_condensed_constituents+j_constituent) &
+    do j_constituent=1,n_relevant_constituents
+      gas_constant_diagnostics = gas_constant_diagnostics + state%rho(ji,jk,jl,n_condensed_constituents+j_constituent) &
       /rho_g*specific_gas_constants(j_constituent)
     enddo
     
@@ -159,7 +159,7 @@ module derived_quantities
     
     density_total = 0._wp
     
-    do j_constituent=1,no_of_constituents
+    do j_constituent=1,n_constituents
       density_total = density_total + state%rho(ji,jk,jl,j_constituent)
     enddo
     
@@ -180,8 +180,8 @@ module derived_quantities
     
     density_gas = 0._wp
     
-    do j_constituent=1,no_of_gaseous_constituents
-      density_gas = density_gas + state%rho(ji,jk,jl,no_of_condensed_constituents+j_constituent)
+    do j_constituent=1,n_gaseous_constituents
+      density_gas = density_gas + state%rho(ji,jk,jl,n_condensed_constituents+j_constituent)
     enddo
     
   end function density_gas

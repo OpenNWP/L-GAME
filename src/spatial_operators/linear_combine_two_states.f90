@@ -6,7 +6,7 @@ module linear_combine_two_states
   ! This module contains functionality to interpolate two states.
 
   use definitions,      only: t_state,wp,t_grid
-  use constituents_nml, only: no_of_condensed_constituents
+  use constituents_nml, only: n_condensed_constituents
   
   implicit none
   
@@ -30,7 +30,7 @@ module linear_combine_two_states
     !$omp parallel workshare
     state_out%rho = coeff_0*state_0%rho + coeff_1*state_1%rho
     state_out%rhotheta_v = coeff_0*state_0%rhotheta_v + coeff_1*state_1%rhotheta_v
-    state_out%theta_v_pert = state_out%rhotheta_v/state_out%rho(:,:,:,no_of_condensed_constituents+1) - grid%theta_v_bg
+    state_out%theta_v_pert = state_out%rhotheta_v/state_out%rho(:,:,:,n_condensed_constituents+1) - grid%theta_v_bg
     state_out%exner_pert = coeff_0*state_0%exner_pert + coeff_1*state_1%exner_pert
     state_out%wind_u = coeff_0*state_0%wind_u + coeff_1*state_1%wind_u
     state_out%wind_v = coeff_0*state_0%wind_v + coeff_1*state_1%wind_v
