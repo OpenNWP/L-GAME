@@ -179,7 +179,7 @@ module boundaries
   
     integer, intent(in) :: input
     
-    write(int2string, *) input
+    write(int2string,*) input
     int2string = adjustl(int2string)
     
   end function int2string
