@@ -5,7 +5,6 @@ module run_nml
 
   ! This is the namelists the configures the basic run properties of a model integration.
   
-  use iso_c_binding
   use definitions, only: wp
   use constants,   only: M_PI
   
