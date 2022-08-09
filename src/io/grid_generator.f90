@@ -23,11 +23,6 @@ module grid_generator
 
   implicit none
   
-  private
-  
-  public :: grid_setup
-  public :: bg_setup
-  
   contains
   
   subroutine grid_setup(grid)

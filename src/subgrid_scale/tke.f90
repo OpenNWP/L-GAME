@@ -14,10 +14,6 @@ module tke
   
   implicit none
   
-  private
-  
-  public :: tke_update
-  
   contains
   
   subroutine tke_update(state,diag,irrev,grid)

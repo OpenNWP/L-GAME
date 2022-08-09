@@ -10,10 +10,6 @@ module inner_product
   
   implicit none
   
-  private
-  
-  public :: inner
-  
   contains
 
   subroutine inner(u_vector_1,v_vector_1,w_vector_1,u_vector_2,v_vector_2,w_vector_2,output_scalar,grid)

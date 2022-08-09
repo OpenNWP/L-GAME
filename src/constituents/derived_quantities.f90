@@ -13,17 +13,6 @@ module derived_quantities
   
   implicit none
   
-  private
-  
-  public :: temperature_diagnostics
-  public :: spec_heat_cap_diagnostics_v
-  public :: spec_heat_cap_diagnostics_p
-  public :: gas_constant_diagnostics
-  public :: density_total
-  public :: density_gas
-  public :: calc_diffusion_coeff
-  public :: rel_humidity
-  
   contains
 
   subroutine temperature_diagnostics(state,diag,grid)

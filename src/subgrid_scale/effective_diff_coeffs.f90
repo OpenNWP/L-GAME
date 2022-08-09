@@ -17,15 +17,6 @@ module effective_diff_coeffs
   
   implicit none
   
-  private
-  
-  public :: hor_div_viscosity
-  public :: hor_curl_viscosity
-  public :: vert_hor_mom_viscosity
-  public :: vert_vert_mom_viscosity
-  public :: temp_diffusion_coeffs
-  public :: mass_diffusion_coeffs
-  
   contains
   
   subroutine hor_div_viscosity(state,diag,divergence_h,irrev,grid)

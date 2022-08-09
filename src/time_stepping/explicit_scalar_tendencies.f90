@@ -18,11 +18,6 @@ module explicit_scalar_tendencies
 
   implicit none
   
-  private
-  
-  public :: expl_scalar_tend
-  public :: moisturizer
-  
   contains
   
   subroutine expl_scalar_tend(grid,state,tend,diag,irrev,rk_step)

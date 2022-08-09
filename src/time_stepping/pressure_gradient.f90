@@ -12,10 +12,6 @@ module pressure_gradient
   use multiplications,    only: scalar_times_vector
 
   implicit none
-
-  private
-  
-  public :: manage_pressure_gradient
   
   contains
 

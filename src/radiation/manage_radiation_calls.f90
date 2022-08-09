@@ -11,10 +11,6 @@ module manage_radiation_calls
   
   implicit none
   
-  private
-  
-  public :: call_radiation
-  
   contains
   
   subroutine call_radiation(state,grid,diag,time_coordinate)

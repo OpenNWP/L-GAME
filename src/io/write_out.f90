@@ -14,10 +14,6 @@ module write_out
 
   implicit none
   
-  private
-  
-  public :: write_output
-  
   contains
   
   subroutine write_output(state,diag,time_since_init_min,grid)

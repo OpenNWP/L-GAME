@@ -13,12 +13,6 @@ module read_write_grid
   
   implicit none
   
-  private
-  
-  public :: write_grid
-  public :: read_oro
-  public :: read_land_sea
-  
   contains
   
   subroutine write_grid(grid)

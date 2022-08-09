@@ -11,13 +11,6 @@ module averaging
   
   implicit none
   
-  private
-  
-  public :: vertical_contravariant_corr
-  public :: hor_cov_to_con
-  public :: horizontal_covariant_x
-  public :: horizontal_covariant_y
-  
   contains
   
   function vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)

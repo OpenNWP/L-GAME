@@ -15,16 +15,6 @@ module set_initial_state
 
   implicit none
   
-  private
-  
-  public :: ideal_init
-  public :: bg_temp
-  public :: bg_pres
-  public :: geopot
-  public :: restart
-  public :: read_from_nc
-  public :: nc_check
-  
   contains
   
   subroutine ideal_init(state,diag,grid)

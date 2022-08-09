@@ -11,10 +11,6 @@ module vorticity_flux
   
   implicit none
   
-  private
-  
-  public :: calc_vorticity_flux_term
-  
   contains
   
   subroutine calc_vorticity_flux_term(diag,grid)

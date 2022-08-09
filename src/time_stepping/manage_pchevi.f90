@@ -22,10 +22,6 @@ module manage_pchevi
   use manage_radiation_calls,     only: call_radiation
 
   implicit none
-  
-  private
-  
-  public :: pchevi
 
   contains
   

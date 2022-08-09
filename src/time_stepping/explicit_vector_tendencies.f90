@@ -20,10 +20,6 @@ module explicit_vector_tendencies
 
   implicit none
   
-  private
-  
-  public :: expl_vector_tend
-  
   contains
 
   subroutine expl_vector_tend(state,tend,diag,irrev,grid,rk_step,total_step_counter)

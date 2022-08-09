@@ -10,11 +10,6 @@ module linear_combine_two_states
   
   implicit none
   
-  private
-  
-  public :: lin_combination
-  public :: interpolation_t
-  
   contains
 
   subroutine lin_combination(state_0,state_1,state_out,coeff_0,coeff_1,grid)

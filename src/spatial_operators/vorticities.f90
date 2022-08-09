@@ -14,11 +14,6 @@ module vorticities
   
   implicit none
   
-  private
-  
-  public :: rel_vort
-  public :: calc_pot_vort
-  
   contains
 
   subroutine rel_vort(state,diag,grid)

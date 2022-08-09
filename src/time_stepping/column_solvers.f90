@@ -15,11 +15,6 @@ module column_solvers
 
   implicit none
   
-  private
-  
-  public :: three_band_solver_ver
-  public :: three_band_solver_gen_densities
-  
   contains
   
   subroutine three_band_solver_ver(state_old,state_new,diag,tend,grid,rk_step)

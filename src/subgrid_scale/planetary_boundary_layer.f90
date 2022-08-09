@@ -14,13 +14,7 @@ module planetary_boundary_layer
   
   implicit none
   
-  private
-  
   real(wp) :: KARMAN = 0.4_wp ! von Karman's constant
-  
-  public :: momentum_flux_resistance
-  public :: update_sfc_turb_quantities
-  public :: pbl_wind_tendency
   
   contains
 

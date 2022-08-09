@@ -11,14 +11,6 @@ module multiplications
   
   implicit none
   
-  private
-  
-  public :: scalar_times_scalar
-  public :: scalar_times_vector_h
-  public :: scalar_times_vector_h_upstream
-  public :: scalar_times_vector
-  public :: scalar_times_vector_v
-  
   contains
 
   subroutine scalar_times_scalar(scalar_field_1,scalar_field_2,scalar_field_out)

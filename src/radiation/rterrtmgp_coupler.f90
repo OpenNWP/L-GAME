@@ -43,8 +43,6 @@ module radiation
   ! the gases in lowercase
   character(len = 32),dimension(size(active_gases)) :: gases_lowercase
   
-  public :: calc_radiative_flux_convergence
-  
   contains
   
   subroutine radiation_init()

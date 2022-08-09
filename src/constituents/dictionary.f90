@@ -24,16 +24,6 @@ module dictionary
   
   implicit none
   
-  private
-  
-  public :: molar_fraction_in_dry_air
-  public :: calc_o3_vmr
-  public :: phase_trans_heat
-  public :: saturation_pressure_over_water
-  public :: saturation_pressure_over_ice
-  public :: enhancement_factor_over_water
-  public :: enhancement_factor_over_ice
-  
   contains
 
   function molar_fraction_in_dry_air(gas_number)

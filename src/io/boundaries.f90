@@ -14,12 +14,6 @@ module boundaries
 
   implicit none
   
-  private
-  
-  public :: update_boundaries
-  public :: read_boundaries
-  public :: setup_bc_factor
-  
   contains
   
   subroutine update_boundaries(state,bc,t_now,grid)

@@ -16,10 +16,6 @@ module phase_trans
   
   implicit none
   
-  private
-  
-  public :: calc_h2otracers_source_rates
-  
   contains
   
   subroutine calc_h2otracers_source_rates(state,diag,irrev,grid)

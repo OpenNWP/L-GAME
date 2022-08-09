@@ -19,12 +19,6 @@ module momentum_diff_diss
   
   implicit none
   
-  private
-  
-  public :: mom_diff_h
-  public :: mom_diff_v
-  public :: simple_dissipation_rate
-  
   contains
   
   subroutine mom_diff_h(state,diag,irrev,grid)

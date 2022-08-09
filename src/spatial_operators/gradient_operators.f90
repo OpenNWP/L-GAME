@@ -12,13 +12,6 @@ module gradient_operators
     
   implicit none
   
-  private
-  
-  public :: grad_hor_cov
-  public :: grad_vert_cov
-  public :: grad
-  public :: grad_hor
-  
   contains
   
   subroutine grad_hor_cov(scalar_field,result_field_x,result_field_y,grid)

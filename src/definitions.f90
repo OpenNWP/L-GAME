@@ -7,16 +7,6 @@ module definitions
                             
   implicit none
   
-  private
-  
-  public :: wp
-  public :: t_grid
-  public :: t_state
-  public :: t_diag
-  public :: t_tend
-  public :: t_bc
-  public :: t_irrev
-  
   ! setting the floating point precision
   ! single precision
   integer, parameter :: ps = 6

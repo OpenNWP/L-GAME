@@ -11,12 +11,6 @@ module divergence_operators
   
   implicit none
   
-  private
-  
-  public :: div_h
-  public :: div_h_tracers
-  public :: add_vertical_div
-  
   contains
 
   subroutine div_h(vector_field_x,vector_field_y,result_field,grid)
