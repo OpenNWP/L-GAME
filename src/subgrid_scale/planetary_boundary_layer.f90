@@ -14,7 +14,7 @@ module planetary_boundary_layer
   
   implicit none
   
-  real(wp) :: KARMAN = 0.4_wp ! von Karman's constant
+  real(wp), parameter :: KARMAN = 0.4_wp ! von Karman's constant
   
   contains
 
@@ -251,9 +251,9 @@ module planetary_boundary_layer
     ! This function returns the roughness length as a function of the mean wind speed at 10 m above a fully developed sea.
 
     ! input variable
-    real(wp),intent(in) :: u10
+    real(wp), intent(in) :: u10
     ! output variable
-    real(wp)            :: roughness_length_from_u10_sea
+    real(wp)             :: roughness_length_from_u10_sea
 
     ! local variables
     real(wp) :: swh,period,wavelength ! properties of the wave field
@@ -270,7 +270,7 @@ module planetary_boundary_layer
     wavelength = gravity*period**2/(2._wp*M_PI)
 
     ! final result
-    roughness_length_from_u10_sea = 1200._wp*swh*swh/max(wavelength,EPSILON_SECURITY)**4.5_wp
+    roughness_length_from_u10_sea = 1200._wp*swh*(swh/max(wavelength,EPSILON_SECURITY))**4.5_wp
 
     ! avoid too small values for stability
     roughness_length_from_u10_sea = max(0.0001_wp,roughness_length_from_u10_sea)
