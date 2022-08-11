@@ -78,7 +78,7 @@ module run_nml
     lat_center = 0._wp
     lon_center = 0._wp
     
-    ! open and read Namelist file
+    ! open and read namelist file
     open(action="read", file="namelist.nml", newunit=fileunit)
     read(nml=run, unit=fileunit)
         

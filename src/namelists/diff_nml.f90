@@ -46,7 +46,7 @@ module diff_nml
     lmass_diff_v = .true.
     h_prandtl = 100._wp
     
-    ! Open and read Namelist file.
+    ! Open and read namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
     read(nml=diff, unit=fileunit)
         

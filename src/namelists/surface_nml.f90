@@ -34,7 +34,7 @@ module surface_nml
     lsfc_phase_trans = .true.
     lpbl = .true.
     
-    ! Open and read Namelist file.
+    ! Open and read namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
     read(nml=surface, unit=fileunit)
         

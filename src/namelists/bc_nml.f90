@@ -32,7 +32,7 @@ module bc_nml
     bc_root_filename = "bc"
     t_latest_bc = 0._wp
     
-    ! Open and read Namelist file.
+    ! Open and read namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
     read(nml=bc, unit=fileunit)
     
