@@ -20,7 +20,7 @@ module run_nml
   real(wp)          :: toa                 ! top of atmosphere
   real(wp)          :: sigma               ! vertical grid stretching parameter
   integer           :: run_span_min        ! run span in minutes
-  real              :: t_init              ! epoch time stamp of the initialization
+  real(wp)          :: t_init              ! epoch time stamp of the initialization
   integer           :: start_year          ! year when to begin the model run
   integer           :: start_month         ! month when to begin the model run
   integer           :: start_day           ! day when to begin the model run
