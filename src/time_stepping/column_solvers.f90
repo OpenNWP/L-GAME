@@ -17,17 +17,18 @@ module column_solvers
   
   contains
   
-  subroutine three_band_solver_ver(state_old,state_new,diag,tend,grid,rk_step)
+  subroutine three_band_solver_ver(state_old,state_new,state_target,diag,tend,grid,rk_step)
   
     ! This subroutine is the main implicit vertical solver.
 
     ! input arguments and output
-    type(t_state), intent(in)    :: state_old ! state at the old timestep
-    type(t_state), intent(inout) :: state_new ! state at the new timestep
-    type(t_diag),  intent(inout) :: diag      ! diagnostic quantities
-    type(t_tend),  intent(inout) :: tend      ! explicit tendencies
-    type(t_grid),  intent(in)    :: grid      ! model grid
-    integer,       intent(in)    :: rk_step   ! Runge Kutta substep
+    type(t_state), intent(in)    :: state_old    ! state at the old timestep
+    type(t_state), intent(inout) :: state_new    ! state at the new timestep
+    type(t_state), intent(inout) :: state_target ! state into which to write the results
+    type(t_diag),  intent(inout) :: diag         ! diagnostic quantities
+    type(t_tend),  intent(inout) :: tend         ! explicit tendencies
+    type(t_grid),  intent(in)    :: grid         ! model grid
+    integer,       intent(in)    :: rk_step      ! Runge Kutta substep
 
     ! local variables
     integer  :: soil_switch                        ! soil switch: 0 if soil does not have to be calculated off, 1 if soil has to be calculated
@@ -276,36 +277,36 @@ module column_solvers
         ! results
         ! density, virtual potential temperature density
         do jl=2,nlays-1
-          state_new%rho(ji,jk,jl,n_condensed_constituents+1) = rho_expl(jl) &
+          state_target%rho(ji,jk,jl,n_condensed_constituents+1) = rho_expl(jl) &
           + dtime*(-solution_vector(jl-1)+solution_vector(jl))/grid%volume(ji,jk,jl)
-          state_new%rhotheta_v(ji,jk,jl) = rhotheta_v_expl(jl) &
+          state_target%rhotheta_v(ji,jk,jl) = rhotheta_v_expl(jl) &
           + dtime*(-theta_v_int_new(jl-1)*solution_vector(jl-1)+theta_v_int_new(jl)*solution_vector(jl))/grid%volume(ji,jk,jl)
         enddo
         ! uppermost layer
-        state_new%rho(ji,jk,1,n_condensed_constituents+1) = rho_expl(1)+dtime*solution_vector(1)/grid%volume(ji,jk,1)
-        state_new%rhotheta_v(ji,jk,1) = rhotheta_v_expl(1)+dtime*theta_v_int_new(1)*solution_vector(1)/grid%volume(ji,jk,1)
+        state_target%rho(ji,jk,1,n_condensed_constituents+1) = rho_expl(1)+dtime*solution_vector(1)/grid%volume(ji,jk,1)
+        state_target%rhotheta_v(ji,jk,1) = rhotheta_v_expl(1)+dtime*theta_v_int_new(1)*solution_vector(1)/grid%volume(ji,jk,1)
         ! lowest layer
-        state_new%rho(ji,jk,nlays,n_condensed_constituents+1) = rho_expl(nlays) &
+        state_target%rho(ji,jk,nlays,n_condensed_constituents+1) = rho_expl(nlays) &
         - dtime*solution_vector(nlays-1)/grid%volume(ji,jk,nlays)
-        state_new%rhotheta_v(ji,jk,nlays) = rhotheta_v_expl(nlays) &
+        state_target%rhotheta_v(ji,jk,nlays) = rhotheta_v_expl(nlays) &
         - dtime*theta_v_int_new(nlays-1)*solution_vector(nlays-1)/grid%volume(ji,jk,nlays)
         ! vertical velocity
         do jl=2,nlays
-          rho_int_new = 0.5_wp*(state_new%rho(ji,jk,jl-1,n_condensed_constituents+1) &
-          + state_new%rho(ji,jk,jl,n_condensed_constituents+1))
-          state_new%wind_w(ji,jk,jl) = (2._wp*solution_vector(jl-1)/grid%area_z(ji,jk,jl) &
+          rho_int_new = 0.5_wp*(state_target%rho(ji,jk,jl-1,n_condensed_constituents+1) &
+          + state_target%rho(ji,jk,jl,n_condensed_constituents+1))
+          state_target%wind_w(ji,jk,jl) = (2._wp*solution_vector(jl-1)/grid%area_z(ji,jk,jl) &
           - rho_int_new*state_old%wind_w(ji,jk,jl))/rho_int_old(jl-1)
         enddo
         ! Exner pressure
         do jl=1,nlays
-          state_new%exner_pert(ji,jk,jl) = state_old%exner_pert(ji,jk,jl) &
-          + grid%volume(ji,jk,jl)*gammaa(jl)*(state_new%rhotheta_v(ji,jk,jl)-state_old%rhotheta_v(ji,jk,jl))
+          state_target%exner_pert(ji,jk,jl) = state_old%exner_pert(ji,jk,jl) &
+          + grid%volume(ji,jk,jl)*gammaa(jl)*(state_target%rhotheta_v(ji,jk,jl)-state_old%rhotheta_v(ji,jk,jl))
         enddo
         
         ! soil temperature
         if (soil_switch==1) then
           do jl=1,nsoillays
-            state_new%temperature_soil(ji,jk,jl) = solution_vector(nlays-1+jl)
+            state_target%temperature_soil(ji,jk,jl) = solution_vector(nlays-1+jl)
           enddo
         endif
 		
@@ -315,7 +316,7 @@ module column_solvers
     
     ! virtual potential temperature perturbation at the new time step
     !$omp parallel workshare
-    state_new%theta_v_pert(:,:,:) = state_new%rhotheta_v(:,:,:)/state_new%rho(:,:,:,n_condensed_constituents+1) &
+    state_target%theta_v_pert(:,:,:) = state_target%rhotheta_v(:,:,:)/state_target%rho(:,:,:,n_condensed_constituents+1) &
     - grid%theta_v_bg(:,:,:)
     !$omp end parallel workshare
 

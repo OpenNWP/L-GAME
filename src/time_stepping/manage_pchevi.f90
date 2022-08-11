@@ -60,16 +60,21 @@ module manage_pchevi
     do rk_step=1,2
     
       ! state_old remains unchanged the whole time.
-      ! At rk_step==1, it is state_old==state_new.
+      ! At rk_step==1, state_new contains garbage.
       
       ! 1.) Explicit component of the momentum equation.
       ! ------------------------------------------------
       ! Update of the pressure gradient.
       if (rk_step==1) then
-        call manage_pressure_gradient(state_new,diag,grid,total_step_counter==0)
+        call manage_pressure_gradient(state_old,diag,grid,total_step_counter==0)
       endif
       ! Only the horizontal momentum is a forward tendency.
-      call expl_vector_tend(state_new,tend,diag,irrev,grid,rk_step,total_step_counter)
+      if (rk_step==1) then
+        call expl_vector_tend(state_old,tend,diag,irrev,grid,rk_step,total_step_counter)
+      endif
+      if (rk_step==2) then
+        call expl_vector_tend(state_new,tend,diag,irrev,grid,rk_step,total_step_counter)
+      endif
       ! time stepping for the horizontal momentum can be directly executed
       !$omp parallel workshare
       state_new%wind_u = state_old%wind_u + dtime*tend%wind_u
@@ -79,13 +84,23 @@ module manage_pchevi
 
       ! 2.) Explicit component of the generalized density equations.
       ! ------------------------------------------------------------
-      call expl_scalar_tend(grid,state_new,tend,diag,irrev,rk_step)
+      if (rk_step==1) then
+        call expl_scalar_tend(grid,state_old,state_new,tend,diag,irrev,rk_step)
+      endif
+      if (rk_step==2) then
+        call expl_scalar_tend(grid,state_new,state_new,tend,diag,irrev,rk_step)
+      endif
       
       ! 3.) implicit dynamic vertical solver
       ! ------------------------------------
-      call three_band_solver_ver(state_old,state_new,diag,tend,grid,rk_step)
+      if (rk_step==1) then
+        call three_band_solver_ver(state_old,state_old,state_new,diag,tend,grid,rk_step)
+      endif
+      if (rk_step==2) then
+        call three_band_solver_ver(state_old,state_new,state_new,diag,tend,grid,rk_step)
+      endif
       
-      ! 3.) vertical tracer advection
+      ! 4.) vertical tracer advection
       ! -----------------------------
       if (n_constituents>1) then
         call three_band_solver_gen_densities(state_old,state_new,tend,grid)
@@ -98,7 +113,7 @@ module manage_pchevi
       call moisturizer(state_new,diag,irrev,grid)
     endif
     
-    ! calling the boundary conditions subroutine for real-data simulation
+    ! calling the boundary conditions subroutine in real-data simulations
     if (.not. lperiodic) then
       call update_boundaries(state_new,bc,(total_step_counter+1)*dtime,grid)
     endif

@@ -20,16 +20,17 @@ module explicit_scalar_tendencies
   
   contains
   
-  subroutine expl_scalar_tend(grid,state,tend,diag,irrev,rk_step)
+  subroutine expl_scalar_tend(grid,state_scalar,state_vector,tend,diag,irrev,rk_step)
   
     ! This subroutine manages the calculation of the explicit part of the scalar tendencies.
   
-    type(t_grid),  intent(in)    :: grid      ! model grid
-    type(t_state), intent(in)    :: state     ! state with which to calculate the divergence
-    type(t_tend),  intent(inout) :: tend      ! state which will contain the tendencies
-    type(t_diag),  intent(inout) :: diag      ! diagnostic quantities
-    type(t_irrev), intent(inout) :: irrev     ! irreversible quantities
-    integer,       intent(in)    :: rk_step   ! RK substep index
+    type(t_grid),  intent(in)    :: grid         ! model grid
+    type(t_state), intent(in)    :: state_scalar ! state from which to use the scalar quantities
+    type(t_state), intent(in)    :: state_vector ! state from which to use the wind
+    type(t_tend),  intent(inout) :: tend         ! state which will contain the tendencies
+    type(t_diag),  intent(inout) :: diag         ! diagnostic quantities
+    type(t_irrev), intent(inout) :: irrev        ! irreversible quantities
+    integer,       intent(in)    :: rk_step      ! RK substep index
     
     ! local variables
     integer  :: j_constituent                  ! loop variable
@@ -49,7 +50,7 @@ module explicit_scalar_tendencies
     ! Temperature diffusion gets updated here,but only at the first RK step and if heat conduction is switched on.
     if (ltemp_diff_h) then
       ! Now we need to calculate the temperature diffusion coefficients.
-      call temp_diffusion_coeffs(state,diag,irrev,grid)
+      call temp_diffusion_coeffs(state_scalar,diag,irrev,grid)
       ! The diffusion of the temperature depends on its gradient.
       call grad(diag%temperature,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
       ! Now the diffusive temperature flux density can be obtained.
@@ -72,14 +73,15 @@ module explicit_scalar_tendencies
       ! calculating the divergence of the mass flux density
       ! main gaseous constituent
       if (j_constituent==n_condensed_constituents+1) then
-        call scalar_times_vector_h(state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%flux_density_u,diag%flux_density_v)
+        call scalar_times_vector_h(state_scalar%rho(:,:,:,j_constituent),state_scalar%wind_u,state_scalar%wind_v, &
+                                   diag%flux_density_u,diag%flux_density_v)
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
       ! all other constituents
       else
         call scalar_times_vector_h_upstream( &
-        state%rho(:,:,:,j_constituent),state%wind_u,state%wind_v,diag%flux_density_u,diag%flux_density_v)
-        call div_h_tracers(diag%flux_density_u,diag%flux_density_v,state%rho(:,:,:,j_constituent), &
-        state%wind_u,state%wind_v,diag%flux_density_div,grid)
+        state_scalar%rho(:,:,:,j_constituent),state_vector%wind_u,state_vector%wind_v,diag%flux_density_u,diag%flux_density_v)
+        call div_h_tracers(diag%flux_density_u,diag%flux_density_v,state_scalar%rho(:,:,:,j_constituent), &
+        state_vector%wind_u,state_vector%wind_v,diag%flux_density_div,grid)
       endif
 
       ! mass diffusion
@@ -88,10 +90,10 @@ module explicit_scalar_tendencies
         diff_switch = 1
         ! firstly, we need to calculate the mass diffusion coeffcients
         if (j_constituent==1) then
-          call mass_diffusion_coeffs(state,diag,irrev,grid)
+          call mass_diffusion_coeffs(state_scalar,diag,irrev,grid)
         endif
         ! The diffusion of the mass density depends on its gradient.
-        call grad(state%rho(:,:,:,j_constituent),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
+        call grad(state_scalar%rho(:,:,:,j_constituent),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
         ! Now the diffusive mass flux density can be obtained.
         call scalar_times_vector_h(irrev%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
         diag%u_placeholder,diag%v_placeholder)
@@ -114,7 +116,7 @@ module explicit_scalar_tendencies
       ! calculating the virtual potential temperature density flux
       if (j_constituent==n_condensed_constituents+1) then
         !$omp parallel workshare
-        diag%scalar_placeholder = grid%theta_v_bg + state%theta_v_pert
+        diag%scalar_placeholder = grid%theta_v_bg + state_scalar%theta_v_pert
         !$omp end parallel workshare
         call scalar_times_vector_h(diag%scalar_placeholder,diag%flux_density_u,diag%flux_density_v,&
         diag%flux_density_u,diag%flux_density_v)
@@ -126,7 +128,7 @@ module explicit_scalar_tendencies
         ! diabatic heating rates
         + (irrev%heating_diss + diag%radiation_tendency + irrev%heat_source_rates &
         + irrev%temp_diff_heating) &
-        /(c_d_p*(grid%exner_bg+state%exner_pert))
+        /(c_d_p*(grid%exner_bg+state_scalar%exner_pert))
         !$omp end parallel workshare
         
       endif

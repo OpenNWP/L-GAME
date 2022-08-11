@@ -32,7 +32,7 @@ program control
   integer           :: timestep_counter                ! counter of the timestep
   real(wp)          :: t_0,run_span,t_write            ! time information
   type(t_grid)      :: grid                            ! grid properties
-  type(t_state)     :: state_old,state_new,state_write ! states at different time steps
+  type(t_state)     :: state_1,state_2,state_write ! states at different time steps
   type(t_diag)      :: diag                            ! diagnostic quantities
   type(t_tend)      :: tend                            ! state containing the tendency
   type(t_bc)        :: bc                              ! boundary conditions
@@ -186,39 +186,39 @@ program control
   allocate(grid%t_const_soil(ny,nx))
   grid%t_const_soil = 0._wp
   ! state at the old time step
-  allocate(state_old%rho(ny,nx,nlays,n_constituents))
-  state_old%rho = 0._wp
-  allocate(state_old%rhotheta_v(ny,nx,nlays))
-  state_old%rhotheta_v = 0._wp
-  allocate(state_old%theta_v_pert(ny,nx,nlays))
-  state_old%theta_v_pert = 0._wp
-  allocate(state_old%exner_pert(ny,nx,nlays))
-  state_old%exner_pert = 0._wp
-  allocate(state_old%wind_u(ny,nx+1,nlays))
-  state_old%wind_u = 0._wp
-  allocate(state_old%wind_v(ny+1,nx,nlays))
-  state_old%wind_v = 0._wp
-  allocate(state_old%wind_w(ny,nx,nlays+1))
-  state_old%wind_w = 0._wp
-  allocate(state_old%temperature_soil(ny,nx,nsoillays))
-  state_old%temperature_soil = 0._wp
+  allocate(state_1%rho(ny,nx,nlays,n_constituents))
+  state_1%rho = 0._wp
+  allocate(state_1%rhotheta_v(ny,nx,nlays))
+  state_1%rhotheta_v = 0._wp
+  allocate(state_1%theta_v_pert(ny,nx,nlays))
+  state_1%theta_v_pert = 0._wp
+  allocate(state_1%exner_pert(ny,nx,nlays))
+  state_1%exner_pert = 0._wp
+  allocate(state_1%wind_u(ny,nx+1,nlays))
+  state_1%wind_u = 0._wp
+  allocate(state_1%wind_v(ny+1,nx,nlays))
+  state_1%wind_v = 0._wp
+  allocate(state_1%wind_w(ny,nx,nlays+1))
+  state_1%wind_w = 0._wp
+  allocate(state_1%temperature_soil(ny,nx,nsoillays))
+  state_1%temperature_soil = 0._wp
   ! state at the new time step
-  allocate(state_new%rho(ny,nx,nlays,n_constituents))
-  state_new%rho = 0._wp
-  allocate(state_new%rhotheta_v(ny,nx,nlays))
-  state_new%rhotheta_v = 0._wp
-  allocate(state_new%theta_v_pert(ny,nx,nlays))
-  state_new%theta_v_pert = 0._wp
-  allocate(state_new%exner_pert(ny,nx,nlays))
-  state_new%exner_pert = 0._wp
-  allocate(state_new%wind_u(ny,nx+1,nlays))
-  state_new%wind_u = 0._wp
-  allocate(state_new%wind_v(ny+1,nx,nlays))
-  state_new%wind_v = 0._wp
-  allocate(state_new%wind_w(ny,nx,nlays+1))
-  state_new%wind_w = 0._wp
-  allocate(state_new%temperature_soil(ny,nx,nsoillays))
-  state_new%temperature_soil = 0._wp
+  allocate(state_2%rho(ny,nx,nlays,n_constituents))
+  state_2%rho = 0._wp
+  allocate(state_2%rhotheta_v(ny,nx,nlays))
+  state_2%rhotheta_v = 0._wp
+  allocate(state_2%theta_v_pert(ny,nx,nlays))
+  state_2%theta_v_pert = 0._wp
+  allocate(state_2%exner_pert(ny,nx,nlays))
+  state_2%exner_pert = 0._wp
+  allocate(state_2%wind_u(ny,nx+1,nlays))
+  state_2%wind_u = 0._wp
+  allocate(state_2%wind_v(ny+1,nx,nlays))
+  state_2%wind_v = 0._wp
+  allocate(state_2%wind_w(ny,nx,nlays+1))
+  state_2%wind_w = 0._wp
+  allocate(state_2%temperature_soil(ny,nx,nsoillays))
+  state_2%temperature_soil = 0._wp
   ! state containing the tendency
   allocate(tend%rho(ny,nx,nlays,n_constituents))
   tend%rho = 0._wp
@@ -418,12 +418,12 @@ program control
   ! setting the initial state
   write(*,*) "Setting the initial state..."
   if (lrestart) then
-    call restart(state_old,grid)
+    call restart(state_1,grid)
     call read_boundaries(bc,real(t_init,wp),1)
     call read_boundaries(bc,real(t_init+dtime_bc,wp),2)
     t_latest_bc = t_0
   elseif (lideal) then
-    call ideal_init(state_old,diag,grid)
+    call ideal_init(state_1,diag,grid)
   endif
   write(*,*) "... initial state set."
   
@@ -431,19 +431,19 @@ program control
   t_0 = t_init
   t_rad_update = t_0
   ! calculating the temperature of the gas phase
-  call temperature_diagnostics(state_old,diag,grid)
+  call temperature_diagnostics(state_1,diag,grid)
   if (lrad) then
     call radiation_init()
-    call call_radiation(state_old,grid,diag,t_0)
+    call call_radiation(state_1,grid,diag,t_0)
   endif
   ! setting the next time for the radiation update
   t_rad_update = t_rad_update+dtime_rad
   
   ! writing out the initial state
-  call write_output(state_old,diag,0,grid)
+  call write_output(state_1,diag,0,grid)
   
   ! copying the new state to the old state
-  state_new = state_old
+  state_2 = state_1
   
   ! the loop over the time steps
   t_write = t_0 + dt_write
@@ -452,7 +452,7 @@ program control
   do while (t_0<t_init+run_span+300._wp .and. run_span/=0)
     
     ! writing the new state into the old state
-    call lin_combination(state_new,state_new,state_old,0._wp,1._wp,grid)
+    call lin_combination(state_2,state_2,state_1,0._wp,1._wp,grid)
 
     if (lrad .and. t_0<=t_rad_update .and. t_0+dtime>=t_rad_update) then
       lrad_update = .true.
@@ -462,11 +462,15 @@ program control
     endif
 
     ! this is the RKHEVI routine performing the time stepping
-    call pchevi(state_old,state_new,tend,bc,grid,diag,irrev,timestep_counter,lrad_update,t_0)
+    if (mod(timestep_counter,2)==0) then
+      call pchevi(state_1,state_2,tend,bc,grid,diag,irrev,timestep_counter,lrad_update,t_0)
+    else
+      call pchevi(state_2,state_1,tend,bc,grid,diag,irrev,timestep_counter,lrad_update,t_0)
+    endif
     
     ! managing the calls to the output routine
     if (t_0+dtime>=t_write) then
-      call interpolation_t(state_old,state_new,state_write,t_0,t_0+dtime,t_write,grid)
+      call interpolation_t(state_1,state_2,state_write,t_0,t_0+dtime,t_write,grid)
       call write_output(state_write,diag,int((t_write-t_init)/60._wp),grid)
     
       t_write = t_write+dt_write
@@ -531,23 +535,23 @@ program control
   deallocate(grid%z_soil_center)
   deallocate(grid%t_const_soil)
   ! state at the old time step
-  deallocate(state_old%rho)
-  deallocate(state_old%rhotheta_v)
-  deallocate(state_old%theta_v_pert)
-  deallocate(state_old%exner_pert)
-  deallocate(state_old%wind_u)
-  deallocate(state_old%wind_v)
-  deallocate(state_old%wind_w)
-  deallocate(state_old%temperature_soil)
+  deallocate(state_1%rho)
+  deallocate(state_1%rhotheta_v)
+  deallocate(state_1%theta_v_pert)
+  deallocate(state_1%exner_pert)
+  deallocate(state_1%wind_u)
+  deallocate(state_1%wind_v)
+  deallocate(state_1%wind_w)
+  deallocate(state_1%temperature_soil)
   ! state at the new time step
-  deallocate(state_new%rho)
-  deallocate(state_new%rhotheta_v)
-  deallocate(state_new%theta_v_pert)
-  deallocate(state_new%exner_pert)
-  deallocate(state_new%wind_u)
-  deallocate(state_new%wind_v)
-  deallocate(state_new%wind_w)
-  deallocate(state_new%temperature_soil)
+  deallocate(state_2%rho)
+  deallocate(state_2%rhotheta_v)
+  deallocate(state_2%theta_v_pert)
+  deallocate(state_2%exner_pert)
+  deallocate(state_2%wind_u)
+  deallocate(state_2%wind_v)
+  deallocate(state_2%wind_w)
+  deallocate(state_2%temperature_soil)
   ! state containing the tendency
   deallocate(tend%rho)
   deallocate(tend%rhotheta_v)
