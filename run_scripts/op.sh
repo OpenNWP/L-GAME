@@ -11,8 +11,8 @@ cat > namelist.nml << EOF
 
 &run
 run_id="$run_id"
-nlins=${BASH_ARGV[8]}
-ncols=${BASH_ARGV[7]}
+ny=${BASH_ARGV[8]}
+nx=${BASH_ARGV[7]}
 nlays=${BASH_ARGV[6]}
 nlays_oro=${BASH_ARGV[5]}
 dy=${BASH_ARGV[4]}
