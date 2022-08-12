@@ -442,7 +442,7 @@ program control
   ! writing out the initial state
   call write_output(state_1,diag,0,grid)
   
-  ! copying the new state to the old state
+  ! copying the first state to the second state
   state_2 = state_1
   
   ! the loop over the time steps
