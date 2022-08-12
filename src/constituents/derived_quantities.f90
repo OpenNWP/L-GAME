@@ -3,7 +3,7 @@
 
 module derived_quantities
 
-  ! In this module, more complex thermodynamic quantities are being calculated.
+  ! In this module more complex thermodynamic quantities are being calculated.
   
   use definitions,      only: wp,t_grid,t_state,t_diag
   use run_nml,          only: ny,nx,nlays
@@ -132,27 +132,6 @@ module derived_quantities
     enddo
     
   end function gas_constant_diagnostics
-
-  function density_total(state,ji,jk,jl)
-  
-    ! This function calculates the total density of the air at a certain gridpoint.
-    
-    ! input arguments
-    type(t_state), intent(in) :: state         ! state with which to calculate the result
-    integer,       intent(in) :: ji,jk,jl      ! indices of the gridpoint
-    ! output
-    real(wp)                  :: density_total ! the result
-    
-    ! local variables
-    integer :: j_constituent
-    
-    density_total = 0._wp
-    
-    do j_constituent=1,n_constituents
-      density_total = density_total + state%rho(ji,jk,jl,j_constituent)
-    enddo
-    
-  end function density_total
 
   function density_gas(state,ji,jk,jl)
     
