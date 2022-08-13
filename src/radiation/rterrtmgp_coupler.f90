@@ -1,7 +1,7 @@
 ! This source file is part of the Geophysical Fluids Modeling Framework (GAME),which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/GAME
 
-module radiation
+module rrtmgp_coupler
 
   ! This module is a coupler to RTE+RRTMGP.
   
@@ -838,7 +838,7 @@ module radiation
   
   end subroutine handle_error
   
-end module radiation
+end module rrtmgp_coupler
 
 
 
