@@ -7,8 +7,7 @@ module pressure_gradient
 
   use constants,          only: c_d_p
   use gradient_operators, only: grad
-  use run_nml,            only: wp
-  use definitions,        only: t_state,t_diag,t_grid
+  use definitions,        only: t_state,t_diag,t_grid,wp
   use multiplications,    only: scalar_times_vector
 
   implicit none
