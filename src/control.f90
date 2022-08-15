@@ -18,7 +18,7 @@ program control
   use set_initial_state,         only: restart,ideal_init
   use write_out,                 only: write_output
   use manage_pchevi,             only: pchevi
-  use linear_combine_two_states, only: lin_combination,interpolation_t
+  use linear_combine_two_states, only: lin_combination
   use bc_nml,                    only: bc_nml_setup,lperiodic,t_latest_bc,dtime_bc
   use rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
   use manage_radiation_calls,    only: call_radiation
@@ -470,7 +470,7 @@ program control
     
     ! managing the calls to the output routine
     if (t_0+dtime>=t_write) then
-      call interpolation_t(state_1,state_2,state_write,t_0,t_0+dtime,t_write,grid)
+      call lin_combination(state_1,state_2,state_write,1._wp-(t_write-t_0)/dtime,(t_write-t_0)/dtime,grid)
       call write_output(state_write,diag,int((t_write-t_init)/60._wp),grid)
     
       t_write = t_write+dt_write
