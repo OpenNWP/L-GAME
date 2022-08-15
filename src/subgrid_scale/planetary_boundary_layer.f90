@@ -9,12 +9,10 @@ module planetary_boundary_layer
   use run_nml,     only: ny,nx,nlays,dtime
   use constants,   only: EPSILON_SECURITY,M_PI,gravity
   use surface_nml, only: lprog_soil_temp
-  use diff_nml,    only: h_prandtl
+  use diff_nml,    only: h_prandtl,karman
   use bc_nml,      only: lperiodic
   
   implicit none
-  
-  real(wp), parameter :: KARMAN = 0.4_wp ! von Karman's constant
   
   contains
 
@@ -88,7 +86,7 @@ module planetary_boundary_layer
 
         ! computing the Monin-Obukhov length
         diag%monin_obukhov_length(ji,jk) = -theta_v_lowest_layer*diag%roughness_velocity(ji,jk)**3 &
-        /(KARMAN*gravity*w_pert_theta_v_pert_avg)
+        /(karman*gravity*w_pert_theta_v_pert_avg)
       
       enddo
     enddo 
@@ -292,7 +290,7 @@ module planetary_boundary_layer
     ! height of the prandtl layer
     used_vertical_height = min(z_agl,h_prandtl)
 
-    scalar_flux_resistance = 1._wp/(KARMAN*roughness_velocity_value) &
+    scalar_flux_resistance = 1._wp/(karman*roughness_velocity_value) &
     ! neutral conditions
     *(log(used_vertical_height/roughness_length_value) &
     ! non-neutral conditions
@@ -322,7 +320,7 @@ module planetary_boundary_layer
     ! height of the prandtl layer
     used_vertical_height = min(z_agl,h_prandtl)
 
-    momentum_flux_resistance = 1._wp/(KARMAN*roughness_velocity(wind_h_lowest_layer,z_agl,roughness_length_value)) &
+    momentum_flux_resistance = 1._wp/(karman*roughness_velocity(wind_h_lowest_layer,z_agl,roughness_length_value)) &
     ! neutral conditions
     *(log(used_vertical_height/roughness_length_value) &
     ! non-neutral conditions
@@ -356,7 +354,7 @@ module planetary_boundary_layer
       denominator = EPSILON_SECURITY
     endif
 
-    roughness_velocity = wind_speed*KARMAN/denominator
+    roughness_velocity = wind_speed*karman/denominator
 
     roughness_velocity = max(EPSILON_SECURITY,roughness_velocity)
 

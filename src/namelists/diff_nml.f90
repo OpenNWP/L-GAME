@@ -21,9 +21,10 @@ module diff_nml
   logical  :: lmass_diff_h    ! horizontal mass diffusion switch
   logical  :: lmass_diff_v    ! vertical mass diffusion switch
   real(wp) :: h_prandtl       ! height of the Prandtl layer
+  real(wp) :: karman          ! von Karman's constant
   
   namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v,diff_h_smag_div,diff_h_smag_rot, &
-  ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
+  ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v,karman
   
   contains
   
@@ -45,6 +46,7 @@ module diff_nml
     lmass_diff_h = .true.
     lmass_diff_v = .true.
     h_prandtl = 100._wp
+    karman = 0.4_wp
     
     ! Open and read namelist file.
     open(action="read", file="namelist.nml", newunit=fileunit)
