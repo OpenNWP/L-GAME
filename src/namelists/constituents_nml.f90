@@ -17,6 +17,8 @@ module constituents_nml
   real(wp) :: rain_velocity            ! sedimentation velocity of rain
   real(wp) :: cloud_droplets_velocity  ! sedimentation velocity of cloud droplets
 
+  namelist /constituents/lmoist
+
   contains
 
   subroutine constituents_nml_setup()
