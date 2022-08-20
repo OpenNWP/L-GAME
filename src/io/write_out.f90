@@ -69,7 +69,7 @@ module write_out
     call nc_check(nf90_def_dim(ncid,"lon_model",nx,x_dimid))
     call nc_check(nf90_def_dim(ncid,"lat_model",ny,y_dimid))
     call nc_check(nf90_def_dim(ncid,"z",nlays,z_dimid))
-    call nc_check(nf90_def_dim(ncid,"j_constituent",n_constituents,constituents_dimid))
+    call nc_check(nf90_def_dim(ncid,"jc",n_constituents,constituents_dimid))
 
     ! setting the dimension ID arrays
     ! 2D

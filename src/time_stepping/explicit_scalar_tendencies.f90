@@ -33,18 +33,18 @@ module explicit_scalar_tendencies
     integer,       intent(in)    :: rk_step      ! RK substep index
     
     ! local variables
-    integer  :: j_constituent                  ! loop variable
+    integer  :: jc                         ! loop variable
     real(wp) :: old_weight(n_constituents) ! time stepping weight
     real(wp) :: new_weight(n_constituents) ! time stepping weight
-    integer  :: diff_switch                    ! diffusion switch
+    integer  :: diff_switch                ! diffusion switch
     
     ! setting the time stepping weights
-    do j_constituent=1,n_constituents
-      new_weight(j_constituent) = 1._wp
-        if (rk_step==2 .and. j_constituent/=n_condensed_constituents+1) then
-          new_weight(j_constituent) = 0.5_wp
+    do jc=1,n_constituents
+      new_weight(jc) = 1._wp
+        if (rk_step==2 .and. jc/=n_condensed_constituents+1) then
+          new_weight(jc) = 0.5_wp
         endif
-      old_weight(j_constituent) = 1._wp - new_weight(j_constituent)
+      old_weight(jc) = 1._wp - new_weight(jc)
     enddo
     
     ! Temperature diffusion gets updated here,but only at the first RK step and if heat conduction is switched on.
@@ -66,21 +66,21 @@ module explicit_scalar_tendencies
     endif
     
     ! loop over all constituents
-    do j_constituent=1,n_constituents
+    do jc=1,n_constituents
     
       ! explicit mass densities integration
       ! -----------------------------------
       ! calculating the divergence of the mass flux density
       ! main gaseous constituent
-      if (j_constituent==n_condensed_constituents+1) then
-        call scalar_times_vector_h(state_scalar%rho(:,:,:,j_constituent),state_scalar%wind_u,state_scalar%wind_v, &
+      if (jc==n_condensed_constituents+1) then
+        call scalar_times_vector_h(state_scalar%rho(:,:,:,jc),state_scalar%wind_u,state_scalar%wind_v, &
                                    diag%flux_density_u,diag%flux_density_v)
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
       ! all other constituents
       else
         call scalar_times_vector_h_upstream( &
-        state_scalar%rho(:,:,:,j_constituent),state_vector%wind_u,state_vector%wind_v,diag%flux_density_u,diag%flux_density_v)
-        call div_h_tracers(diag%flux_density_u,diag%flux_density_v,state_scalar%rho(:,:,:,j_constituent), &
+        state_scalar%rho(:,:,:,jc),state_vector%wind_u,state_vector%wind_v,diag%flux_density_u,diag%flux_density_v)
+        call div_h_tracers(diag%flux_density_u,diag%flux_density_v,state_scalar%rho(:,:,:,jc), &
         state_vector%wind_u,state_vector%wind_v,diag%flux_density_div,grid)
       endif
 
@@ -89,11 +89,11 @@ module explicit_scalar_tendencies
       if (lmass_diff_h) then
         diff_switch = 1
         ! firstly, we need to calculate the mass diffusion coeffcients
-        if (j_constituent==1) then
+        if (jc==1) then
           call mass_diffusion_coeffs(state_scalar,diag,irrev,grid)
         endif
         ! The diffusion of the mass density depends on its gradient.
-        call grad(state_scalar%rho(:,:,:,j_constituent),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
+        call grad(state_scalar%rho(:,:,:,jc),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
         ! Now the diffusive mass flux density can be obtained.
         call scalar_times_vector_h(irrev%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
         diag%u_placeholder,diag%v_placeholder)
@@ -107,14 +107,14 @@ module explicit_scalar_tendencies
       endif
       
       !$omp parallel workshare
-      tend%rho(:,:,:,j_constituent) = old_weight(j_constituent)*tend%rho(:,:,:,j_constituent) &
-      + new_weight(j_constituent)*(-diag%flux_density_div)+diff_switch*diag%scalar_placeholder
+      tend%rho(:,:,:,jc) = old_weight(jc)*tend%rho(:,:,:,jc) &
+      + new_weight(jc)*(-diag%flux_density_div)+diff_switch*diag%scalar_placeholder
       !$omp end parallel workshare
     
       ! explicit virtual potential temperature density integration
       ! --------------------------------------------------
       ! calculating the virtual potential temperature density flux
-      if (j_constituent==n_condensed_constituents+1) then
+      if (jc==n_condensed_constituents+1) then
         !$omp parallel workshare
         diag%scalar_placeholder = grid%theta_v_bg + state_scalar%theta_v_pert
         !$omp end parallel workshare
