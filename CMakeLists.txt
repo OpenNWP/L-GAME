@@ -39,7 +39,7 @@ src/spatial_operators/momentum_diff_diss.f90
 src/spatial_operators/inner_product.f90
 src/spatial_operators/divergence_operators.f90
 src/radiation/mo_manage_radiation_calls.f90
-src/radiation/rterrtmgp_coupler.f90
+src/radiation/mo_rterrtmgp_coupler.f90
 src/namelists/bc_nml.f90
 src/namelists/diff_nml.f90
 src/namelists/constituents_nml.f90

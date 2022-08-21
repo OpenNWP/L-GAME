@@ -23,7 +23,7 @@ program control
   use rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
   use mo_manage_radiation_calls, only: call_radiation
   use boundaries,                only: setup_bc_factor,read_boundaries
-  use rrtmgp_coupler,            only: radiation_init
+  use mo_rrtmgp_coupler,         only: radiation_init
   use derived_quantities,        only: temperature_diagnostics
   
   implicit none
