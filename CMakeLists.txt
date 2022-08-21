@@ -23,9 +23,9 @@ src/time_stepping/explicit_vector_tendencies.f90
 src/time_stepping/explicit_scalar_tendencies.f90
 src/time_stepping/manage_pchevi.f90
 src/time_stepping/pressure_gradient.f90
-src/constituents/derived_quantities.f90
-src/constituents/dictionary.f90
-src/constituents/phase_trans.f90
+src/constituents/mo_derived.f90
+src/constituents/mo_dictionary.f90
+src/constituents/mo_phase_trans.f90
 src/subgrid_scale/mo_eff_diff_coeffs.f90
 src/subgrid_scale/mo_planetary_boundary_layer.f90
 src/subgrid_scale/mo_tke.f90
