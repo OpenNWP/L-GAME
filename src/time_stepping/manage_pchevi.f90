@@ -19,7 +19,7 @@ module manage_pchevi
   use surface_nml,                only: lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl
   use planetary_boundary_layer,   only: update_sfc_turb_quantities
   use bc_nml,                     only: lperiodic
-  use manage_radiation_calls,     only: call_radiation
+  use mo_manage_radiation_calls,  only: call_radiation
 
   implicit none
 

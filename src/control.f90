@@ -21,7 +21,7 @@ program control
   use linear_combine_two_states, only: lin_combination
   use bc_nml,                    only: bc_nml_setup,lperiodic,t_latest_bc,dtime_bc
   use rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
-  use manage_radiation_calls,    only: call_radiation
+  use mo_manage_radiation_calls, only: call_radiation
   use boundaries,                only: setup_bc_factor,read_boundaries
   use rrtmgp_coupler,            only: radiation_init
   use derived_quantities,        only: temperature_diagnostics
