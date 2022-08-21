@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module write_out
+module mo_write_out
 
   ! This module handles everything dealing with IO.
 
@@ -210,7 +210,7 @@ module write_out
     
   end subroutine write_output
 
-end module write_out
+end module mo_write_out
 
 
 
