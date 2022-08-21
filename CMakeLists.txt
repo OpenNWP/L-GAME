@@ -26,9 +26,9 @@ src/time_stepping/pressure_gradient.f90
 src/constituents/derived_quantities.f90
 src/constituents/dictionary.f90
 src/constituents/phase_trans.f90
-src/subgrid_scale/effective_diff_coeffs.f90
-src/subgrid_scale/planetary_boundary_layer.f90
-src/subgrid_scale/tke.f90
+src/subgrid_scale/mo_eff_diff_coeffs.f90
+src/subgrid_scale/mo_planetary_boundary_layer.f90
+src/subgrid_scale/mo_tke.f90
 src/spatial_operators/vorticity_flux.f90
 src/spatial_operators/multiplications.f90
 src/spatial_operators/linear_combine_two_states.f90
