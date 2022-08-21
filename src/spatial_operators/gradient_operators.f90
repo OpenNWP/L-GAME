@@ -5,10 +5,10 @@ module gradient_operators
 
   ! This module is a collection of gradient operators.
 
-  use definitions, only: t_grid,wp
-  use run_nml,     only: ny,nx,nlays,toa
-  use averaging,   only: hor_cov_to_con
-  use bc_nml,      only: lperiodic
+  use mo_definitions, only: t_grid,wp
+  use run_nml,        only: ny,nx,nlays,toa
+  use averaging,      only: hor_cov_to_con
+  use bc_nml,         only: lperiodic
     
   implicit none
   

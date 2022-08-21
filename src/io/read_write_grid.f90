@@ -6,7 +6,7 @@ module read_write_grid
   ! This module reads the grid from a file or writes the grid to a file. This is useful for efficiency.
   
   use netcdf
-  use definitions,       only: t_grid,wp
+  use mo_definitions,    only: t_grid,wp
   use set_initial_state, only: nc_check
   use io_nml,            only: grid_filename,land_sea_filename
   use run_nml,           only: ny,nx,nlays

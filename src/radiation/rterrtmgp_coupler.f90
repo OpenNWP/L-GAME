@@ -5,7 +5,7 @@ module rrtmgp_coupler
 
   ! This module is a coupler to RTE+RRTMGP.
   
-  use definitions,                only: wp
+  use mo_definitions,             only: wp
   use constants,                  only: EPSILON_SECURITY,r_d,r_v
   use mo_rrtmgp_util_string,      only: lower_case
   use mo_gas_optics_rrtmgp,       only: ty_gas_optics_rrtmgp

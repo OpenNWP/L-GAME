@@ -5,7 +5,7 @@ module boundaries
 
   ! This module handles everything dealing with boundary conditions.
 
-  use definitions,       only: t_state,t_bc,t_grid,wp
+  use mo_definitions,    only: t_state,t_bc,t_grid,wp
   use run_nml,           only: ny,nx,nlays,t_init
   use bc_nml,            only: n_swamp,bc_root_filename,bc_root_filename,dtime_bc,t_latest_bc
   use constants,         only: M_PI,p_0,r_d,c_d_v

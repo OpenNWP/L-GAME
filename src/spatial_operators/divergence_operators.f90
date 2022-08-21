@@ -5,9 +5,9 @@ module divergence_operators
 
   ! The calculation of the horizontal divergence operator is executed in this module.
 
-  use definitions, only: wp,t_grid
-  use run_nml,     only: ny,nx,nlays,nlays_oro,dtime
-  use averaging,   only: vertical_contravariant_corr
+  use mo_definitions, only: wp,t_grid
+  use run_nml,        only: ny,nx,nlays,nlays_oro,dtime
+  use averaging,      only: vertical_contravariant_corr
   
   implicit none
   

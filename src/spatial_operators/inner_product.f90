@@ -5,8 +5,8 @@ module inner_product
 
   ! The calculation of the inner product is executed in this module.
 
-  use run_nml,     only: ny,nx,nlays
-  use definitions, only: t_grid,wp
+  use run_nml,        only: ny,nx,nlays
+  use mo_definitions, only: t_grid,wp
   
   implicit none
   

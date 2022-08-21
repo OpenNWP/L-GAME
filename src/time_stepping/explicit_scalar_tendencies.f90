@@ -6,7 +6,7 @@ module explicit_scalar_tendencies
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
   use constants,             only: c_d_p
-  use definitions,           only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
+  use mo_definitions,        only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
   use multiplications,       only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
   use divergence_operators,  only: div_h,div_h_tracers,add_vertical_div
   use run_nml,               only: dtime

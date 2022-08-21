@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module definitions
+module mo_definitions
 
   ! This file contains some definitions.
                             
@@ -196,7 +196,7 @@ module definitions
   
   end type t_irrev
   
-end module definitions
+end module mo_definitions
 
 
 

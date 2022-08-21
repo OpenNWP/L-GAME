@@ -19,8 +19,8 @@ module dictionary
   ! 10: O3
   ! 11: N2O
 
-  use definitions, only: wp
-  use constants,   only: t_0,n_a,r_v,m_v
+  use mo_definitions, only: wp
+  use constants,      only: t_0,n_a,r_v,m_v
   
   implicit none
   

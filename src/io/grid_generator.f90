@@ -6,7 +6,7 @@
 module grid_generator
 
   use netcdf
-  use definitions,        only: wp,t_grid
+  use mo_definitions,     only: wp,t_grid
   use run_nml,            only: ny,nx,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
                                 lon_center,lplane
   use constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &

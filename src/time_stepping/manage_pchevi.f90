@@ -5,7 +5,7 @@ module manage_pchevi
 
   ! In this module, the RKHEVI time stepping is managed.
 
-  use definitions,                only: t_grid,t_state,t_diag,t_irrev,t_tend,t_bc,wp
+  use mo_definitions,             only: t_grid,t_state,t_diag,t_irrev,t_tend,t_bc,wp
   use linear_combine_two_states,  only: lin_combination
   use run_nml,                    only: dtime,ny,nx
   use pressure_gradient,          only: manage_pressure_gradient

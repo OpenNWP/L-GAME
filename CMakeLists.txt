@@ -10,7 +10,7 @@ project(lgame VERSION ${version})
 enable_language(Fortran)
 add_executable(
 lgame
-src/definitions.f90
+src/mo_definitions.f90
 src/control.f90
 src/constants.f90
 src/io/boundaries.f90

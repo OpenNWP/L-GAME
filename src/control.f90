@@ -13,7 +13,7 @@ program control
                                        snow_velocity,rain_velocity
   use diff_nml,                  only: diff_nml_setup
   use surface_nml,               only: surface_nml_setup,nsoillays
-  use definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_bc,t_irrev
+  use mo_definitions,            only: t_grid,t_state,wp,t_diag,t_tend,t_bc,t_irrev
   use grid_generator,            only: grid_setup,bg_setup
   use set_initial_state,         only: restart,ideal_init
   use write_out,                 only: write_output

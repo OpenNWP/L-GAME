@@ -5,7 +5,7 @@ module momentum_diff_diss
 
   ! This module handles momentum diffusion and dissipation.
   
-  use definitions,              only: t_grid,t_diag,t_irrev,t_state
+  use mo_definitions,           only: t_grid,t_diag,t_irrev,t_state
   use divergence_operators,     only: div_h,add_vertical_div
   use gradient_operators,       only: grad_hor,grad_vert_cov
   use run_nml,                  only: ny,nx,nlays,wp

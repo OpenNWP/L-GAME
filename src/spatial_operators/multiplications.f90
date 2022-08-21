@@ -5,9 +5,9 @@ module multiplications
 
   ! This module is a collection of various multiplications of vector and/or scalar fields.
   
-  use definitions, only: wp
-  use run_nml,     only: ny,nx,nlays
-  use bc_nml,      only: lperiodic
+  use mo_definitions, only: wp
+  use run_nml,        only: ny,nx,nlays
+  use bc_nml,         only: lperiodic
   
   implicit none
   

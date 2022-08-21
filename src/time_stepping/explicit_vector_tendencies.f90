@@ -5,7 +5,7 @@ module explicit_vector_tendencies
 
   ! This module manages the calculation of the explicit part of the wind tendencies.
 
-  use definitions,              only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
+  use mo_definitions,           only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
   use inner_product,            only: inner
   use gradient_operators,       only: grad
   use run_nml,                  only: ny,nx,nlays,impl_weight,llinear,lcorio

@@ -5,7 +5,7 @@ module manage_radiation_calls
 
   ! This manages the calls to RTE+RRTMGP.
 
-  use definitions,    only: t_grid,t_state,t_diag,t_irrev
+  use mo_definitions, only: t_grid,t_state,t_diag,t_irrev
   use run_nml,        only: ny,nx,nlays,wp
   use rrtmgp_coupler, only: calc_radiative_flux_convergence
   

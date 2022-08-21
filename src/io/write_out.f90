@@ -5,7 +5,7 @@ module write_out
 
   ! This module handles everything dealing with IO.
 
-  use definitions,        only: t_state,wp,t_diag,t_grid
+  use mo_definitions,     only: t_state,wp,t_diag,t_grid
   use netcdf
   use run_nml,            only: ny,nx,nlays,scenario,run_id
   use constituents_nml,   only: n_condensed_constituents,n_gaseous_constituents,n_constituents

@@ -5,7 +5,7 @@ module diff_nml
   
   ! In this namelist, the diffusion properties are configured.
   
-  use definitions, only: wp
+  use mo_definitions, only: wp
   
   implicit none
   
@@ -24,7 +24,7 @@ module diff_nml
   real(wp) :: karman          ! von Karman's constant
   
   namelist /diff/lklemp,klemp_damp_max,klemp_begin_rel,lmom_diff_h,lmom_diff_v,diff_h_smag_div,diff_h_smag_rot, &
-  ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v,karman
+  ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v,karman,lklemp,klemp_damp_max,klemp_begin_rel
   
   contains
   

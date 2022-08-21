@@ -5,7 +5,7 @@ module io_nml
 
   ! This nameslist configures the IO behaviour of the model.
 
-  use definitions, only: wp
+  use mo_definitions, only: wp
   
   implicit none
   

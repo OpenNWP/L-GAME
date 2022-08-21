@@ -5,8 +5,8 @@ module bc_nml
 
   ! In this namelist, the boundary conditions are configured.
   
-  use definitions, only: wp
-  use run_nml,     only: ny,nx
+  use mo_definitions, only: wp
+  use run_nml,        only: ny,nx
   
   implicit none
   

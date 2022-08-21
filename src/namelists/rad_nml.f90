@@ -5,8 +5,8 @@ module rad_nml
 
   ! In this namelist, the radiation is configured.
   
-  use definitions, only: wp
-  use run_nml,     only: dy
+  use mo_definitions, only: wp
+  use run_nml,        only: dy
   
   implicit none
   

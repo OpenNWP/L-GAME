@@ -5,7 +5,7 @@ module tke
   
   ! This module computes everything related to the turbulent kinetic energy (TKE).
   
-  use definitions,        only: wp,t_state,t_diag,t_irrev,t_grid
+  use mo_definitions,     only: wp,t_state,t_diag,t_irrev,t_grid
   use run_nml,            only: ny,nx,nlays,dtime
   use derived_quantities, only: density_gas
   use constants,          only: M_PI

@@ -5,9 +5,9 @@ module vorticity_flux
 
   ! This module computes the vorticity flux term.
   
-  use definitions, only: t_grid,t_diag,wp
-  use run_nml,     only: ny,nx,nlays
-  use bc_nml,      only: lperiodic
+  use mo_definitions, only: t_grid,t_diag,wp
+  use run_nml,        only: ny,nx,nlays
+  use bc_nml,         only: lperiodic
   
   implicit none
   

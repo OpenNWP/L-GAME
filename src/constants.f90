@@ -5,7 +5,7 @@ module constants
 
   ! This is a collection of some quantities that are hardly ever changed.
   
-  use definitions, only: wp
+  use mo_definitions, only: wp
   
   implicit none
   

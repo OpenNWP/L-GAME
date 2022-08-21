@@ -5,8 +5,8 @@ module surface_nml
 
   ! This namelist defines the surface properties.
 
-  use definitions, only: wp
-  use diff_nml,    only: lmom_diff_h
+  use mo_definitions, only: wp
+  use diff_nml,       only: lmom_diff_h
   
   implicit none
   

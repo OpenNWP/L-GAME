@@ -6,7 +6,7 @@ module effective_diff_coeffs
   ! This module computes the effective diffusion coefficients.
   
   use run_nml,              only: ny,nx,nlays,dtime
-  use definitions,          only: wp,t_state,t_diag,t_irrev,t_grid
+  use mo_definitions,       only: wp,t_state,t_diag,t_irrev,t_grid
   use diff_nml,             only: diff_h_smag_div,diff_h_smag_rot,lmom_diff_h,ltemp_diff_h
   use derived_quantities,   only: calc_diffusion_coeff
   use constituents_nml,     only: n_condensed_constituents
