@@ -13,7 +13,7 @@ module momentum_diff_diss
   use inner_product,            only: inner
   use mo_derived,               only: density_gas
   use effective_diff_coeffs,    only: hor_div_viscosity,vert_vert_mom_viscosity,hor_curl_viscosity
-  use multiplications,          only: scalar_times_scalar
+  use mo_multiplications,       only: scalar_times_scalar
   use bc_nml,                   only: lperiodic
   use vorticities,              only: rel_vort
   

@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module multiplications
+module mo_multiplications
 
   ! This module is a collection of various multiplications of vector and/or scalar fields.
   
@@ -199,7 +199,7 @@ module multiplications
   
   end subroutine scalar_times_vector
 
-end module multiplications
+end module mo_multiplications
 
 
 

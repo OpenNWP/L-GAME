@@ -7,7 +7,7 @@ module explicit_scalar_tendencies
 
   use constants,             only: c_d_p
   use mo_definitions,        only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
-  use multiplications,       only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
+  use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
   use divergence_operators,  only: div_h,div_h_tracers,add_vertical_div
   use run_nml,               only: dtime
   use phase_trans,           only: calc_h2otracers_source_rates

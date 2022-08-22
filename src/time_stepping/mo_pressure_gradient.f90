@@ -8,7 +8,7 @@ module mo_pressure_gradient
   use constants,          only: c_d_p
   use gradient_operators, only: grad
   use mo_definitions,     only: t_state,t_diag,t_grid,wp
-  use multiplications,    only: scalar_times_vector
+  use mo_multiplications, only: scalar_times_vector
 
   implicit none
   
