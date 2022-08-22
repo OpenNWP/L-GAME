@@ -17,7 +17,7 @@ module manage_pchevi
   use constituents_nml,           only: n_constituents
   use diff_nml,                   only: lmom_diff_v
   use surface_nml,                only: lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl
-  use planetary_boundary_layer,   only: update_sfc_turb_quantities
+  use mo_pbl,                     only: update_sfc_turb_quantities
   use bc_nml,                     only: lperiodic
   use mo_manage_radiation_calls,  only: call_radiation
 

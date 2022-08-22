@@ -5,18 +5,18 @@ module explicit_vector_tendencies
 
   ! This module manages the calculation of the explicit part of the wind tendencies.
 
-  use mo_definitions,           only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
-  use inner_product,            only: inner
-  use gradient_operators,       only: grad
-  use run_nml,                  only: ny,nx,nlays,impl_weight,llinear,lcorio
-  use constituents_nml,         only: n_condensed_constituents
-  use vorticities,              only: calc_pot_vort
-  use multiplications,          only: scalar_times_vector
-  use vorticity_flux,           only: calc_vorticity_flux_term
-  use diff_nml,                 only: lmom_diff_h,lmom_diff_v
-  use momentum_diff_diss,       only: mom_diff_h,mom_diff_v,simple_dissipation_rate
-  use planetary_boundary_layer, only: pbl_wind_tendency
-  use surface_nml,              only: lpbl
+  use mo_definitions,      only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
+  use inner_product,       only: inner
+  use gradient_operators,  only: grad
+  use run_nml,             only: ny,nx,nlays,impl_weight,llinear,lcorio
+  use constituents_nml,    only: n_condensed_constituents
+  use vorticities,         only: calc_pot_vort
+  use multiplications,     only: scalar_times_vector
+  use vorticity_flux,      only: calc_vorticity_flux_term
+  use diff_nml,            only: lmom_diff_h,lmom_diff_v
+  use momentum_diff_diss,  only: mom_diff_h,mom_diff_v,simple_dissipation_rate
+  use mo_pbl,              only: pbl_wind_tendency
+  use surface_nml,         only: lpbl
 
   implicit none
   

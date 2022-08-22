@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME),which is released under the MIT license.
 ! Github repository: https:!github.com/OpenNWP/L-GAME
 
-module planetary_boundary_layer
+module mo_pbl
 
   ! This module computes everything related to the planetary boundary layer.
   
@@ -423,7 +423,7 @@ module planetary_boundary_layer
     
  end function psi_m
 
-end module planetary_boundary_layer
+end module mo_pbl
 
 
 
