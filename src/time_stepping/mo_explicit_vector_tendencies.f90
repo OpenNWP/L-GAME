@@ -5,7 +5,7 @@ module explicit_vector_tendencies
 
   ! This module manages the calculation of the explicit part of the wind tendencies.
 
-  use mo_definitions,     only: t_grid,t_state,t_diag,t_irrev,t_tend,wp
+  use mo_definitions,     only: t_grid,t_state,t_diag,t_tend,wp
   use inner_product,      only: inner
   use gradient_operators, only: grad
   use run_nml,            only: ny,nx,nlays,impl_weight,llinear,lcorio
@@ -22,14 +22,13 @@ module explicit_vector_tendencies
   
   contains
 
-  subroutine expl_vector_tend(state,tend,diag,irrev,grid,rk_step,total_step_counter)
+  subroutine expl_vector_tend(state,tend,diag,grid,rk_step,total_step_counter)
   
     ! This subroutine manages the calculation of the explicit part of the wind tendencies.
   
     type(t_state), intent(in)    :: state              ! state to use for calculating the tendencies
     type(t_tend),  intent(inout) :: tend               ! the tendency
     type(t_diag),  intent(inout) :: diag               ! diagnostic properties
-    type(t_irrev), intent(inout) :: irrev              ! irreversible quantities
     type(t_grid),  intent(in)    :: grid               ! grid properties
     integer,       intent(in)    :: rk_step            ! Runge-Kutta step
     integer,       intent(in)    :: total_step_counter ! time step counter of the model integration
@@ -64,21 +63,21 @@ module explicit_vector_tendencies
     if (rk_step==1) then
       ! horizontal momentum diffusion
       if (lmom_diff_h) then
-        call mom_diff_h(state,diag,irrev,grid)
+        call mom_diff_h(state,diag,grid)
       endif
       ! vertical momentum diffusion
       if (lmom_diff_v) then
-        call mom_diff_v(state,diag,irrev,grid)
+        call mom_diff_v(state,diag,grid)
       endif
       
       ! planetary boundary layer
       if (lpbl) then
-        call pbl_wind_tendency(state,diag,irrev,grid)
+        call pbl_wind_tendency(state,diag,grid)
       endif
       
       ! dissipation
       if (lmom_diff_h .or. lpbl) then
-        call simple_dissipation_rate(state,irrev,grid)
+        call simple_dissipation_rate(state,diag,grid)
       endif
     endif
     
@@ -101,7 +100,7 @@ module explicit_vector_tendencies
     ! momentum advection
     - 0.5_wp*diag%v_squared_grad_x + diag%pot_vort_tend_x & 
     ! momentum diffusion
-    + irrev%mom_diff_tend_x)
+    + diag%mom_diff_tend_x)
     !$omp end parallel workshare
     
     ! y-direction
@@ -115,7 +114,7 @@ module explicit_vector_tendencies
     ! momentum advection
     - 0.5_wp*diag%v_squared_grad_y + diag%pot_vort_tend_y &
     ! momentum diffusion
-    + irrev%mom_diff_tend_y)
+    + diag%mom_diff_tend_y)
     !$omp end parallel workshare
     
     ! z-direction
@@ -128,7 +127,7 @@ module explicit_vector_tendencies
     ! momentum advection
     - 0.5_wp*diag%v_squared_grad_z + diag%pot_vort_tend_z &
     ! momentum diffusion
-    + irrev%mom_diff_tend_z)
+    + diag%mom_diff_tend_z)
     !$omp end parallel workshare
     
   end subroutine expl_vector_tend

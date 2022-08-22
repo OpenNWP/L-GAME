@@ -5,7 +5,7 @@ module mo_manage_pchevi
 
   ! In this module, the RKHEVI time stepping is managed.
 
-  use mo_definitions,             only: t_grid,t_state,t_diag,t_irrev,t_tend,t_bc,wp
+  use mo_definitions,             only: t_grid,t_state,t_diag,t_tend,t_bc,wp
   use linear_combine_two_states,  only: lin_combination
   use run_nml,                    only: dtime,ny,nx
   use mo_pressure_gradient,       only: manage_pressure_gradient
@@ -25,7 +25,7 @@ module mo_manage_pchevi
 
   contains
   
-  subroutine pchevi(state_old,state_new,tend,bc,grid,diag,irrev,total_step_counter,lrad_update,t_0)
+  subroutine pchevi(state_old,state_new,tend,bc,grid,diag,total_step_counter,lrad_update,t_0)
   
     ! This subroutine manages the predictor-corrector HEVI time stepping.
     
@@ -35,7 +35,6 @@ module mo_manage_pchevi
     type(t_bc),    intent(inout) :: bc                 ! boundary conditions
     type(t_grid),  intent(inout) :: grid               ! the grid of the model
     type(t_diag),  intent(inout) :: diag               ! diagnostic quantities
-    type(t_irrev), intent(inout) :: irrev              ! irreversible quantities
     integer,       intent(in)    :: total_step_counter ! time step counter
     logical,       intent(in)    :: lrad_update        ! radiation update switch
     real(wp),      intent(in)    :: t_0                ! Unix time
@@ -70,10 +69,10 @@ module mo_manage_pchevi
       endif
       ! Only the horizontal momentum is a forward tendency.
       if (rk_step==1) then
-        call expl_vector_tend(state_old,tend,diag,irrev,grid,rk_step,total_step_counter)
+        call expl_vector_tend(state_old,tend,diag,grid,rk_step,total_step_counter)
       endif
       if (rk_step==2) then
-        call expl_vector_tend(state_new,tend,diag,irrev,grid,rk_step,total_step_counter)
+        call expl_vector_tend(state_new,tend,diag,grid,rk_step,total_step_counter)
       endif
       ! time stepping for the horizontal momentum can be directly executed
       !$omp parallel workshare
@@ -85,10 +84,10 @@ module mo_manage_pchevi
       ! 2.) Explicit component of the generalized density equations.
       ! ------------------------------------------------------------
       if (rk_step==1) then
-        call expl_scalar_tend(grid,state_old,state_new,tend,diag,irrev,rk_step)
+        call expl_scalar_tend(grid,state_old,state_new,tend,diag,rk_step)
       endif
       if (rk_step==2) then
-        call expl_scalar_tend(grid,state_new,state_new,tend,diag,irrev,rk_step)
+        call expl_scalar_tend(grid,state_new,state_new,tend,diag,rk_step)
       endif
       
       ! 3.) implicit dynamic vertical solver
@@ -110,7 +109,7 @@ module mo_manage_pchevi
     
     ! saturation adjustment, calculation of latent heating rates, evaporation at the surface
     if (n_constituents>1) then
-      call moisturizer(state_new,diag,irrev,grid)
+      call moisturizer(state_new,diag,grid)
     endif
     
     ! calling the boundary conditions subroutine in real-data simulations

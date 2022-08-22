@@ -8,7 +8,7 @@ module phase_trans
   use run_nml,            only: ny,nx,nlays,dtime,wp
   use surface_nml,        only: lsfc_phase_trans
   use constants,          only: t_0,EPSILON_SECURITY,r_d,r_v
-  use mo_definitions,     only: t_state,t_diag,t_irrev,t_grid
+  use mo_definitions,     only: t_state,t_diag,t_grid
   use mo_dictionary,      only: saturation_pressure_over_ice,saturation_pressure_over_water, &
                                 enhancement_factor_over_water,enhancement_factor_over_ice, &
                                 phase_trans_heat
@@ -18,14 +18,13 @@ module phase_trans
   
   contains
   
-  subroutine calc_h2otracers_source_rates(state,diag,irrev,grid)
+  subroutine calc_h2otracers_source_rates(state,diag,grid)
   
     ! This subroutine calculates the phase transition rates.
   
     ! input arguments, output
     type(t_state), intent(in)    :: state ! the state with which to calculate the phase transition rates
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
     type(t_grid),  intent(in)    :: grid  ! grid properties
   
     ! local variables
@@ -90,7 +89,7 @@ module phase_trans
             ! temperature >= 0 °C
             if (diag%temperature(ji,jk,jl)>=t_0) then
               ! It is assumed that the still present ice vanishes within one time step.
-              irrev%mass_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)/dtime
+              diag%mass_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)/dtime
 
               !The amount of liquid water per volume that will evaporate.
               !In case the air cannot take all the water,not everything will evaporate.
@@ -101,17 +100,17 @@ module phase_trans
               ! 1.) the evaporation
               ! 2.) the melting of ice
 
-              irrev%mass_source_rates(ji,jk,jl,4) = (state%rho(ji,jk,jl,3) - phase_trans_density)/dtime
+              diag%mass_source_rates(ji,jk,jl,4) = (state%rho(ji,jk,jl,3) - phase_trans_density)/dtime
 
               ! the tendency for the water vapour
-              irrev%mass_source_rates(ji,jk,jl,5) = phase_trans_density/dtime
+              diag%mass_source_rates(ji,jk,jl,5) = phase_trans_density/dtime
 
               ! the heat source rates acting on the ice
-              irrev%heat_source_rates(ji,jk,jl) = irrev%mass_source_rates(ji,jk,jl,3) &
+              diag%heat_source_rates(ji,jk,jl) = diag%mass_source_rates(ji,jk,jl,3) &
               *phase_trans_heat(2,diag%temperature(ji,jk,jl))
 
               ! the heat source rates acting on the liquid water
-              irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
+              diag%heat_source_rates(ji,jk,jl) = diag%heat_source_rates(ji,jk,jl) &
               ! the evaporation
               - phase_trans_density*phase_trans_heat(0,t_0)/dtime
             ! temperature<0 °C
@@ -123,16 +122,16 @@ module phase_trans
               ! 1.) the freezing
               ! 2.) the phase transition through sublimation
 
-              irrev%mass_source_rates(ji,jk,jl,3) = (state%rho(ji,jk,jl,4) - phase_trans_density)/dtime
+              diag%mass_source_rates(ji,jk,jl,3) = (state%rho(ji,jk,jl,4) - phase_trans_density)/dtime
 
               ! It is assumed that the still present liquid water vanishes within one time step.
-              irrev%mass_source_rates(ji,jk,jl,4) = -state%rho(ji,jk,jl,4)/dtime
+              diag%mass_source_rates(ji,jk,jl,4) = -state%rho(ji,jk,jl,4)/dtime
 
               ! the tendency for the water vapour
-              irrev%mass_source_rates(ji,jk,jl,5) = phase_trans_density/dtime
+              diag%mass_source_rates(ji,jk,jl,5) = phase_trans_density/dtime
 
               ! the heat source rates acting on the ice
-              irrev%heat_source_rates(ji,jk,jl) = ( &
+              diag%heat_source_rates(ji,jk,jl) = ( &
               ! the freezing
               state%rho(ji,jk,jl,4)*phase_trans_heat(2,diag%temperature(ji,jk,jl)) &
               ! the sublimation
@@ -141,23 +140,23 @@ module phase_trans
           ! the case where the air is over-saturated
           else
             ! the vanishing of water vapour through the phase transition
-            irrev%mass_source_rates(ji,jk,jl,5) = diff_density/dtime
+            diag%mass_source_rates(ji,jk,jl,5) = diff_density/dtime
             ! temperature >= 0._wp °C
             if (diag%temperature(ji,jk,jl)>=t_0) then
               ! It is assumed that the still present ice vanishes within one time step.
-              irrev%mass_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)/dtime
+              diag%mass_source_rates(ji,jk,jl,3) = -state%rho(ji,jk,jl,3)/dtime
 
               ! The source rate for the liquid water consists of two terms:
               ! 1.) the condensation
               ! 2.) the melting of ice
 
-              irrev%mass_source_rates(ji,jk,jl,4) = (-diff_density + state%rho(ji,jk,jl,3))/dtime
+              diag%mass_source_rates(ji,jk,jl,4) = (-diff_density + state%rho(ji,jk,jl,3))/dtime
 
               ! the heat source rates acting on the ice
-              irrev%heat_source_rates(ji,jk,jl) = -state%rho(ji,jk,jl,3)*phase_trans_heat(2,diag%temperature(ji,jk,jl))/dtime
+              diag%heat_source_rates(ji,jk,jl) = -state%rho(ji,jk,jl,3)*phase_trans_heat(2,diag%temperature(ji,jk,jl))/dtime
 
               ! the heat source rates acting on the liquid water
-              irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
+              diag%heat_source_rates(ji,jk,jl) = diag%heat_source_rates(ji,jk,jl) &
               ! it is only affected by the condensation
               - diff_density*phase_trans_heat(0,diag%temperature(ji,jk,jl))/dtime
               ! temperature<0 °C
@@ -166,13 +165,13 @@ module phase_trans
               ! 1.) the resublimation
               ! 2.) the melting of ice
 
-              irrev%mass_source_rates(ji,jk,jl,3) = (-diff_density + state%rho(ji,jk,jl,4))/dtime
+              diag%mass_source_rates(ji,jk,jl,3) = (-diff_density + state%rho(ji,jk,jl,4))/dtime
 
               ! It is assumed that the liquid water disappears within one time step.
-              irrev%mass_source_rates(ji,jk,jl,4) = -state%rho(ji,jk,jl,4)/dtime
+              diag%mass_source_rates(ji,jk,jl,4) = -state%rho(ji,jk,jl,4)/dtime
 
               ! the heat source rates acting on the ice
-              irrev%heat_source_rates(ji,jk,jl) = &
+              diag%heat_source_rates(ji,jk,jl) = &
               ! the component through the resublimation
               (-diff_density*phase_trans_heat(1,diag%temperature(ji,jk,jl)) &
               ! the component through freezing
@@ -183,42 +182,42 @@ module phase_trans
 
           ! Precipitation
           ! -------------
-          irrev%mass_source_rates(ji,jk,jl,1) = 0._wp
-          irrev%mass_source_rates(ji,jk,jl,2) = 0._wp
+          diag%mass_source_rates(ji,jk,jl,1) = 0._wp
+          diag%mass_source_rates(ji,jk,jl,2) = 0._wp
           ! snow
           ! this only happens if the air is saturated
           if (diag%temperature(ji,jk,jl)<t_0 .and. diff_density<=0._wp) then
-            irrev%mass_source_rates(ji,jk,jl,1) = max(state%rho(ji,jk,jl,3) &
+            diag%mass_source_rates(ji,jk,jl,1) = max(state%rho(ji,jk,jl,3) &
             - max_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/dtime
             ! the snow creation comes at the cost of cloud ice particles
-            irrev%mass_source_rates(ji,jk,jl,3) = irrev%mass_source_rates(ji,jk,jl,3) &
-            - irrev%mass_source_rates(ji,jk,jl,1)
+            diag%mass_source_rates(ji,jk,jl,3) = diag%mass_source_rates(ji,jk,jl,3) &
+            - diag%mass_source_rates(ji,jk,jl,1)
           endif
           ! rain
           if (diag%temperature(ji,jk,jl)>=t_0 .and. diff_density<=0._wp) then
             ! this only happens if the air is saturated
-            irrev%mass_source_rates(ji,jk,jl,2) = max(state%rho(ji,jk,jl,4) &
+            diag%mass_source_rates(ji,jk,jl,2) = max(state%rho(ji,jk,jl,4) &
             - max_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/dtime
             ! the rain creation comes at the cost of cloud water particles
-            irrev%mass_source_rates(ji,jk,jl,4) = irrev%mass_source_rates(ji,jk,jl,4) &
-            - irrev%mass_source_rates(ji,jk,jl,2)
+            diag%mass_source_rates(ji,jk,jl,4) = diag%mass_source_rates(ji,jk,jl,4) &
+            - diag%mass_source_rates(ji,jk,jl,2)
           endif
 
           ! turning of snow to rain
           if (diag%temperature(ji,jk,jl)>=t_0 .and. state%rho(ji,jk,jl,1)>0._wp) then
-            irrev%mass_source_rates(ji,jk,jl,1) = -state%rho(ji,jk,jl,1)/dtime
-            irrev%mass_source_rates(ji,jk,jl,2) = irrev%mass_source_rates(ji,jk,jl,2) &
-            - irrev%mass_source_rates(ji,jk,jl,1)
-            irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
-            + irrev%mass_source_rates(ji,jk,jl,1)*phase_trans_heat(2,t_0)
+            diag%mass_source_rates(ji,jk,jl,1) = -state%rho(ji,jk,jl,1)/dtime
+            diag%mass_source_rates(ji,jk,jl,2) = diag%mass_source_rates(ji,jk,jl,2) &
+            - diag%mass_source_rates(ji,jk,jl,1)
+            diag%heat_source_rates(ji,jk,jl) = diag%heat_source_rates(ji,jk,jl) &
+            + diag%mass_source_rates(ji,jk,jl,1)*phase_trans_heat(2,t_0)
           endif
           ! turning of rain to snow
           if (diag%temperature(ji,jk,jl)<t_0 .and. state%rho(ji,jk,jl,2)>0._wp) then
-            irrev%mass_source_rates(ji,jk,jl,2) = -state%rho(ji,jk,jl,2)/dtime
-            irrev%mass_source_rates(ji,jk,jl,1) = irrev%mass_source_rates(ji,jk,jl,1) &
-            - irrev%mass_source_rates(ji,jk,jl,2)
-            irrev%heat_source_rates(ji,jk,jl) = irrev%heat_source_rates(ji,jk,jl) &
-            - irrev%mass_source_rates(ji,jk,jl,2)*phase_trans_heat(2,t_0)
+            diag%mass_source_rates(ji,jk,jl,2) = -state%rho(ji,jk,jl,2)/dtime
+            diag%mass_source_rates(ji,jk,jl,1) = diag%mass_source_rates(ji,jk,jl,1) &
+            - diag%mass_source_rates(ji,jk,jl,2)
+            diag%heat_source_rates(ji,jk,jl) = diag%heat_source_rates(ji,jk,jl) &
+            - diag%mass_source_rates(ji,jk,jl,2)*phase_trans_heat(2,t_0)
           endif
           
         enddo
@@ -245,7 +244,7 @@ module phase_trans
           layer_thickness = grid%z_w(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1)
 
           ! evporation,sublimation
-          irrev%mass_source_rates(ji,jk,nlays,5) = irrev%mass_source_rates(ji,jk,nlays,5) &
+          diag%mass_source_rates(ji,jk,nlays,5) = diag%mass_source_rates(ji,jk,nlays,5) &
           + max(0._wp,diff_density_sfc/diag%scalar_flux_resistance(ji,jk))/layer_thickness
 
           ! calculating the latent heat flux density affecting the surface

@@ -6,7 +6,7 @@ module explicit_scalar_tendencies
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
   use constants,             only: c_d_p
-  use mo_definitions,        only: wp,t_grid,t_state,t_diag,t_irrev,t_tend
+  use mo_definitions,        only: wp,t_grid,t_state,t_diag,t_tend
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
   use divergence_operators,  only: div_h,div_h_tracers,add_vertical_div
   use run_nml,               only: dtime
@@ -20,7 +20,7 @@ module explicit_scalar_tendencies
   
   contains
   
-  subroutine expl_scalar_tend(grid,state_scalar,state_vector,tend,diag,irrev,rk_step)
+  subroutine expl_scalar_tend(grid,state_scalar,state_vector,tend,diag,rk_step)
   
     ! This subroutine manages the calculation of the explicit part of the scalar tendencies.
   
@@ -29,7 +29,6 @@ module explicit_scalar_tendencies
     type(t_state), intent(in)    :: state_vector ! state from which to use the wind
     type(t_tend),  intent(inout) :: tend         ! state which will contain the tendencies
     type(t_diag),  intent(inout) :: diag         ! diagnostic quantities
-    type(t_irrev), intent(inout) :: irrev        ! irreversible quantities
     integer,       intent(in)    :: rk_step      ! RK substep index
     
     ! local variables
@@ -50,18 +49,18 @@ module explicit_scalar_tendencies
     ! Temperature diffusion gets updated here,but only at the first RK step and if heat conduction is switched on.
     if (ltemp_diff_h) then
       ! Now we need to calculate the temperature diffusion coefficients.
-      call temp_diffusion_coeffs(state_scalar,diag,irrev,grid)
+      call temp_diffusion_coeffs(state_scalar,diag,grid)
       ! The diffusion of the temperature depends on its gradient.
       call grad(diag%temperature,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
       ! Now the diffusive temperature flux density can be obtained.
-      call scalar_times_vector_h(irrev%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
+      call scalar_times_vector_h(diag%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
       diag%flux_density_u,diag%flux_density_v)
       ! The divergence of the diffusive temperature flux density is the diffusive temperature heating.
-      call div_h(diag%flux_density_u,diag%flux_density_v,irrev%temp_diff_heating,grid)
+      call div_h(diag%flux_density_u,diag%flux_density_v,diag%temp_diff_heating,grid)
       ! vertical temperature diffusion
       if (ltemp_diff_v) then
-        call scalar_times_vector_v(irrev%scalar_diff_coeff_v,diag%w_placeholder,diag%flux_density_w)
-        call add_vertical_div(diag%flux_density_w,irrev%temp_diff_heating,grid)
+        call scalar_times_vector_v(diag%scalar_diff_coeff_v,diag%w_placeholder,diag%flux_density_w)
+        call add_vertical_div(diag%flux_density_w,diag%temp_diff_heating,grid)
       endif
     endif
     
@@ -90,18 +89,18 @@ module explicit_scalar_tendencies
         diff_switch = 1
         ! firstly, we need to calculate the mass diffusion coeffcients
         if (jc==1) then
-          call mass_diffusion_coeffs(state_scalar,diag,irrev,grid)
+          call mass_diffusion_coeffs(state_scalar,diag,grid)
         endif
         ! The diffusion of the mass density depends on its gradient.
         call grad(state_scalar%rho(:,:,:,jc),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
         ! Now the diffusive mass flux density can be obtained.
-        call scalar_times_vector_h(irrev%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
+        call scalar_times_vector_h(diag%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
         diag%u_placeholder,diag%v_placeholder)
         ! The divergence of the diffusive mass flux density is the diffusive mass source rate.
         call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
         ! vertical mass diffusion
         if (lmass_diff_v) then
-          call scalar_times_vector_v(irrev%scalar_diff_coeff_v,diag%w_placeholder,diag%w_placeholder)
+          call scalar_times_vector_v(diag%scalar_diff_coeff_v,diag%w_placeholder,diag%w_placeholder)
           call add_vertical_div(diag%w_placeholder,diag%scalar_placeholder,grid)
         endif
       endif
@@ -126,8 +125,8 @@ module explicit_scalar_tendencies
         !$omp parallel workshare
         tend%rhotheta_v = -diag%flux_density_div &
         ! diabatic heating rates
-        + (irrev%heating_diss + diag%radiation_tendency + irrev%heat_source_rates &
-        + irrev%temp_diff_heating) &
+        + (diag%heating_diss + diag%radiation_tendency + diag%heat_source_rates &
+        + diag%temp_diff_heating) &
         /(c_d_p*(grid%exner_bg+state_scalar%exner_pert))
         !$omp end parallel workshare
         
@@ -137,30 +136,29 @@ module explicit_scalar_tendencies
         
   end subroutine
   
-  subroutine moisturizer(state,diag,irrev,grid)
+  subroutine moisturizer(state,diag,grid)
   
     ! This subroutine manages the calculation of the phase transition rates.
     
     type(t_state),intent(inout) :: state ! the state with which to calculate the phase transition rates
     type(t_diag), intent(inout) :: diag  ! diagnostic quantities
-    type(t_irrev),intent(inout) :: irrev ! irreversible quantities (phase transitions are irreversible)
     type(t_grid), intent(in)    :: grid  ! grid properties
       
     if (n_constituents>1) then
     
       ! calculating the source rates
-      call calc_h2otracers_source_rates(state,diag,irrev,grid)
+      call calc_h2otracers_source_rates(state,diag,grid)
       
       ! condensates
       !$omp parallel workshare
       state%rho(:,:,:,1:n_condensed_constituents) = state%rho(:,:,:,1:n_condensed_constituents) &
-      + dtime*irrev%mass_source_rates(:,:,:,1:n_condensed_constituents)
+      + dtime*diag%mass_source_rates(:,:,:,1:n_condensed_constituents)
       !$omp end parallel workshare
       
       ! water vapour
       !$omp parallel workshare
       state%rho(:,:,:,n_constituents) = state%rho(:,:,:,n_constituents) &
-      + dtime*irrev%mass_source_rates(:,:,:,n_constituents-1)
+      + dtime*diag%mass_source_rates(:,:,:,n_constituents-1)
       !$omp end parallel workshare
       
     endif

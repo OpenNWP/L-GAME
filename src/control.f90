@@ -13,7 +13,7 @@ program control
                                        snow_velocity,rain_velocity
   use diff_nml,                  only: diff_nml_setup
   use surface_nml,               only: surface_nml_setup,nsoillays
-  use mo_definitions,            only: t_grid,t_state,wp,t_diag,t_tend,t_bc,t_irrev
+  use mo_definitions,            only: t_grid,t_state,wp,t_diag,t_tend,t_bc
   use grid_generator,            only: grid_setup,bg_setup
   use set_initial_state,         only: restart,ideal_init
   use mo_write_out,              only: write_output
@@ -36,7 +36,6 @@ program control
   type(t_diag)      :: diag                            ! diagnostic quantities
   type(t_tend)      :: tend                            ! state containing the tendency
   type(t_bc)        :: bc                              ! boundary conditions
-  type(t_irrev)     :: irrev                           ! irreversible quantities
   real(wp)          :: normal_dist_min_vert            ! minimum vertical gridpoint distance
   logical           :: lrad_update                     ! radiation update switch
   real(wp)          :: t_rad_update                    ! radiation update time
@@ -361,39 +360,38 @@ program control
   diag%dv_dz = 0._wp
   allocate(diag%n_squared(ny,nx,nlays))
   diag%n_squared = 0._wp
-  ! type containing irreversible quantities
-  allocate(irrev%tke(ny,nx,nlays))
-  irrev%tke = 0._wp
-  allocate(irrev%viscosity_molecular(ny,nx,nlays))
-  irrev%viscosity_molecular = 0._wp
-  allocate(irrev%viscosity_coeff_div(ny,nx,nlays))
-  irrev%viscosity_coeff_div = 0._wp
-  allocate(irrev%viscosity_coeff_curl(ny,nx,nlays))
-  irrev%viscosity_coeff_curl = 0._wp
-  allocate(irrev%viscosity_coeff_curl_dual(ny+1,nx+1,nlays))
-  irrev%viscosity_coeff_curl_dual = 0._wp
-  allocate(irrev%vert_hor_viscosity_u(ny,nx+1,nlays+1))
-  irrev%vert_hor_viscosity_u = 0._wp
-  allocate(irrev%vert_hor_viscosity_v(ny+1,nx,nlays+1))
-  irrev%vert_hor_viscosity_v = 0._wp
-  allocate(irrev%scalar_diff_coeff_h(ny,nx,nlays))
-  irrev%scalar_diff_coeff_h = 0._wp
-  allocate(irrev%scalar_diff_coeff_v(ny,nx,nlays))
-  irrev%scalar_diff_coeff_v = 0._wp
-  allocate(irrev%mom_diff_tend_x(ny,nx+1,nlays))
-  irrev%mom_diff_tend_x = 0._wp
-  allocate(irrev%mom_diff_tend_y(ny+1,nx,nlays))
-  irrev%mom_diff_tend_y = 0._wp
-  allocate(irrev%mom_diff_tend_z(ny,nx,nlays+1))
-  irrev%mom_diff_tend_z = 0._wp
-  allocate(irrev%heating_diss(ny,nx,nlays))
-  irrev%heating_diss = 0._wp
-  allocate(irrev%mass_source_rates(ny,nx,nlays,n_condensed_constituents+1))
-  irrev%mass_source_rates = 0._wp
-  allocate(irrev%heat_source_rates(ny,nx,nlays))
-  irrev%heat_source_rates = 0._wp
-  allocate(irrev%temp_diff_heating(ny,nx,nlays))
-  irrev%temp_diff_heating = 0._wp
+  allocate(diag%tke(ny,nx,nlays))
+  diag%tke = 0._wp
+  allocate(diag%viscosity_molecular(ny,nx,nlays))
+  diag%viscosity_molecular = 0._wp
+  allocate(diag%viscosity_coeff_div(ny,nx,nlays))
+  diag%viscosity_coeff_div = 0._wp
+  allocate(diag%viscosity_coeff_curl(ny,nx,nlays))
+  diag%viscosity_coeff_curl = 0._wp
+  allocate(diag%viscosity_coeff_curl_dual(ny+1,nx+1,nlays))
+  diag%viscosity_coeff_curl_dual = 0._wp
+  allocate(diag%vert_hor_viscosity_u(ny,nx+1,nlays+1))
+  diag%vert_hor_viscosity_u = 0._wp
+  allocate(diag%vert_hor_viscosity_v(ny+1,nx,nlays+1))
+  diag%vert_hor_viscosity_v = 0._wp
+  allocate(diag%scalar_diff_coeff_h(ny,nx,nlays))
+  diag%scalar_diff_coeff_h = 0._wp
+  allocate(diag%scalar_diff_coeff_v(ny,nx,nlays))
+  diag%scalar_diff_coeff_v = 0._wp
+  allocate(diag%mom_diff_tend_x(ny,nx+1,nlays))
+  diag%mom_diff_tend_x = 0._wp
+  allocate(diag%mom_diff_tend_y(ny+1,nx,nlays))
+  diag%mom_diff_tend_y = 0._wp
+  allocate(diag%mom_diff_tend_z(ny,nx,nlays+1))
+  diag%mom_diff_tend_z = 0._wp
+  allocate(diag%heating_diss(ny,nx,nlays))
+  diag%heating_diss = 0._wp
+  allocate(diag%mass_source_rates(ny,nx,nlays,n_condensed_constituents+1))
+  diag%mass_source_rates = 0._wp
+  allocate(diag%heat_source_rates(ny,nx,nlays))
+  diag%heat_source_rates = 0._wp
+  allocate(diag%temp_diff_heating(ny,nx,nlays))
+  diag%temp_diff_heating = 0._wp
   write(*,*) "... finished."
   
   ! firstly, the grid generator needs to be called to calculate the grid properties
@@ -463,9 +461,9 @@ program control
 
     ! this is the RKHEVI routine performing the time stepping
     if (mod(timestep_counter,2)==0) then
-      call pchevi(state_1,state_2,tend,bc,grid,diag,irrev,timestep_counter,lrad_update,t_0)
+      call pchevi(state_1,state_2,tend,bc,grid,diag,timestep_counter,lrad_update,t_0)
     else
-      call pchevi(state_2,state_1,tend,bc,grid,diag,irrev,timestep_counter,lrad_update,t_0)
+      call pchevi(state_2,state_1,tend,bc,grid,diag,timestep_counter,lrad_update,t_0)
     endif
     
     ! managing the calls to the output routine
@@ -624,23 +622,22 @@ program control
   deallocate(diag%du_dz)
   deallocate(diag%dv_dz)
   deallocate(diag%n_squared)
-  ! type containing irreversible quantities
-  deallocate(irrev%tke)
-  deallocate(irrev%viscosity_molecular)
-  deallocate(irrev%viscosity_coeff_div)
-  deallocate(irrev%viscosity_coeff_curl)
-  deallocate(irrev%viscosity_coeff_curl_dual)
-  deallocate(irrev%vert_hor_viscosity_u)
-  deallocate(irrev%vert_hor_viscosity_v)
-  deallocate(irrev%scalar_diff_coeff_h)
-  deallocate(irrev%scalar_diff_coeff_v)
-  deallocate(irrev%mom_diff_tend_x)
-  deallocate(irrev%mom_diff_tend_y)
-  deallocate(irrev%mom_diff_tend_z)
-  deallocate(irrev%heating_diss)
-  deallocate(irrev%mass_source_rates)
-  deallocate(irrev%heat_source_rates)
-  deallocate(irrev%temp_diff_heating)
+  deallocate(diag%tke)
+  deallocate(diag%viscosity_molecular)
+  deallocate(diag%viscosity_coeff_div)
+  deallocate(diag%viscosity_coeff_curl)
+  deallocate(diag%viscosity_coeff_curl_dual)
+  deallocate(diag%vert_hor_viscosity_u)
+  deallocate(diag%vert_hor_viscosity_v)
+  deallocate(diag%scalar_diff_coeff_h)
+  deallocate(diag%scalar_diff_coeff_v)
+  deallocate(diag%mom_diff_tend_x)
+  deallocate(diag%mom_diff_tend_y)
+  deallocate(diag%mom_diff_tend_z)
+  deallocate(diag%heating_diss)
+  deallocate(diag%mass_source_rates)
+  deallocate(diag%heat_source_rates)
+  deallocate(diag%temp_diff_heating)
   write(*,*) "... finished."
   write(*,*) "L-GAME over."
   

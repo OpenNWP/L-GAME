@@ -170,13 +170,7 @@ module mo_definitions
     real(wp), allocatable :: flux_density_div(:,:,:)          ! placeholder for flux density divergences
     real(wp), allocatable :: du_dz(:,:,:)                     ! verticl gradient of u
     real(wp), allocatable :: dv_dz(:,:,:)                     ! verticl gradient of v
-    real(wp), allocatable :: n_squared(:,:,:)                 ! squared Brunt-Väisälä frequency
-  
-  end type t_diag
-  
-  type t_irrev
-    
-    ! type cotaining irreversible quantities
+    real(wp), allocatable :: n_squared(:,:,:)                 ! squared Brunt-Väisälä frequency    ! type cotaining irreversible quantities
     real(wp), allocatable :: tke(:,:,:)                       ! specific turbulent kinetic energy
     real(wp), allocatable :: viscosity_molecular(:,:,:)       ! molecular diffusion coefficient
     real(wp), allocatable :: viscosity_coeff_div(:,:,:)       ! efficient viscosity acting on divergent movements (Eddies + molecular)
@@ -194,7 +188,7 @@ module mo_definitions
     real(wp), allocatable :: heat_source_rates(:,:,:)         ! heat source rates due to phase transitions and cloud physics
     real(wp), allocatable :: temp_diff_heating(:,:,:)         ! heating due to temperature diffusion
   
-  end type t_irrev
+  end type t_diag
   
 end module mo_definitions
 

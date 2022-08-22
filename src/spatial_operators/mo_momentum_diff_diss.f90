@@ -5,7 +5,7 @@ module momentum_diff_diss
 
   ! This module handles momentum diffusion and dissipation.
   
-  use mo_definitions,           only: t_grid,t_diag,t_irrev,t_state
+  use mo_definitions,           only: t_grid,t_diag,t_state
   use divergence_operators,     only: div_h,add_vertical_div
   use gradient_operators,       only: grad_hor,grad_vert_cov
   use run_nml,                  only: ny,nx,nlays,wp
@@ -21,13 +21,12 @@ module momentum_diff_diss
   
   contains
   
-  subroutine mom_diff_h(state,diag,irrev,grid)
+  subroutine mom_diff_h(state,diag,grid)
   
     ! This subroutine handles horizontal momentum diffusion.
     
     type(t_state), intent(in)    :: state ! state with which to calculate the horizontal diffusion
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
@@ -45,16 +44,16 @@ module momentum_diff_diss
     ! Computing the necessary diffusion coefficients
     ! ----------------------------------------------
     ! computing the relevant diffusion coefficient
-    call hor_div_viscosity(state,diag,diag%scalar_placeholder,irrev,grid)
+    call hor_div_viscosity(state,diag,diag%scalar_placeholder,grid)
     ! calculating the diffusion coefficient acting on rotational movements
-    call hor_curl_viscosity(state,diag,irrev,grid)
+    call hor_curl_viscosity(state,diag,grid)
     
     ! Computing the gradient of divergence component
     ! ----------------------------------------------
     ! multiplying the divergence by the diffusion coefficient acting on divergent movements
-    call scalar_times_scalar(irrev%viscosity_coeff_div,diag%scalar_placeholder,diag%scalar_placeholder)
+    call scalar_times_scalar(diag%viscosity_coeff_div,diag%scalar_placeholder,diag%scalar_placeholder)
     ! calculating the horizontal gradient of the divergence
-    call grad_hor(diag%scalar_placeholder,irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,grid)
+    call grad_hor(diag%scalar_placeholder,diag%mom_diff_tend_x,diag%mom_diff_tend_y,diag%mom_diff_tend_z,grid)
     
     ! Computing the curl of vorticity component
     ! -----------------------------------------
@@ -62,8 +61,8 @@ module momentum_diff_diss
     do ji=1,ny
       do jk=1,nx+1
         do jl=1,nlays
-          diag%u_placeholder(ji,jk,jl) = (irrev%viscosity_coeff_curl_dual(ji+1,jk,jl)*diag%zeta_z(ji+1,jk,jl) - &
-          irrev%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
+          diag%u_placeholder(ji,jk,jl) = (diag%viscosity_coeff_curl_dual(ji+1,jk,jl)*diag%zeta_z(ji+1,jk,jl) - &
+          diag%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
           
           ! terrain-following correction
           slope = (grid%z_area_dual_z(ji+1,jk,jl) - grid%z_area_dual_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
@@ -71,11 +70,11 @@ module momentum_diff_diss
           lower_index = min(nlays,jl+1)
           ! computing the vertical gradient of the vertical vorticity (times the respective diffusion coefficient)
           ! and averaging it to the vector point
-          vertical_gradient = 0.5_wp*(irrev%viscosity_coeff_curl_dual(ji+1,jk,upper_index)*diag%zeta_z(ji+1,jk,upper_index) &
-          - irrev%viscosity_coeff_curl_dual(ji+1,jk,lower_index)*diag%zeta_z(ji+1,jk,lower_index)) &
+          vertical_gradient = 0.5_wp*(diag%viscosity_coeff_curl_dual(ji+1,jk,upper_index)*diag%zeta_z(ji+1,jk,upper_index) &
+          - diag%viscosity_coeff_curl_dual(ji+1,jk,lower_index)*diag%zeta_z(ji+1,jk,lower_index)) &
           /(grid%z_area_dual_z(ji+1,jk,upper_index) - grid%z_area_dual_z(ji+1,jk,lower_index)) &
-          + 0.5_wp*(irrev%viscosity_coeff_curl_dual(ji,jk,upper_index)*diag%zeta_z(ji,jk,upper_index) &
-          - irrev%viscosity_coeff_curl_dual(ji,jk,lower_index)*diag%zeta_z(ji,jk,lower_index)) &
+          + 0.5_wp*(diag%viscosity_coeff_curl_dual(ji,jk,upper_index)*diag%zeta_z(ji,jk,upper_index) &
+          - diag%viscosity_coeff_curl_dual(ji,jk,lower_index)*diag%zeta_z(ji,jk,lower_index)) &
           /(grid%z_area_dual_z(ji,jk,upper_index) - grid%z_area_dual_z(ji,jk,lower_index))
           ! adding the terrain-following correction
           diag%u_placeholder(ji,jk,jl) = diag%u_placeholder(ji,jk,jl) - slope*vertical_gradient
@@ -88,8 +87,8 @@ module momentum_diff_diss
     do ji=1,ny+1
       do jk=1,nx
         do jl=1,nlays
-          diag%v_placeholder(ji,jk,jl) = (irrev%viscosity_coeff_curl_dual(ji,jk+1,jl)*diag%zeta_z(ji,jk+1,jl) - &
-          irrev%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
+          diag%v_placeholder(ji,jk,jl) = (diag%viscosity_coeff_curl_dual(ji,jk+1,jl)*diag%zeta_z(ji,jk+1,jl) - &
+          diag%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
           
           ! terrain-following correction
           slope = (grid%z_area_dual_z(ji,jk+1,jl) - grid%z_area_dual_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
@@ -97,11 +96,11 @@ module momentum_diff_diss
           lower_index = min(nlays,jl+1)
           ! computing the vertical gradient of the vertical vorticity (times the respective diffusion coefficient)
           ! and averaging it to the vector point
-          vertical_gradient = 0.5_wp*(irrev%viscosity_coeff_curl_dual(ji,jk+1,upper_index)*diag%zeta_z(ji,jk+1,upper_index) &
-          - irrev%viscosity_coeff_curl_dual(ji,jk+1,lower_index)*diag%zeta_z(ji,jk+1,lower_index)) &
+          vertical_gradient = 0.5_wp*(diag%viscosity_coeff_curl_dual(ji,jk+1,upper_index)*diag%zeta_z(ji,jk+1,upper_index) &
+          - diag%viscosity_coeff_curl_dual(ji,jk+1,lower_index)*diag%zeta_z(ji,jk+1,lower_index)) &
           /(grid%z_area_dual_z(ji,jk+1,upper_index) - grid%z_area_dual_z(ji,jk+1,lower_index)) &
-          + 0.5_wp*(irrev%viscosity_coeff_curl_dual(ji,jk,upper_index)*diag%zeta_z(ji,jk,upper_index) &
-          - irrev%viscosity_coeff_curl_dual(ji,jk,lower_index)*diag%zeta_z(ji,jk,lower_index)) &
+          + 0.5_wp*(diag%viscosity_coeff_curl_dual(ji,jk,upper_index)*diag%zeta_z(ji,jk,upper_index) &
+          - diag%viscosity_coeff_curl_dual(ji,jk,lower_index)*diag%zeta_z(ji,jk,lower_index)) &
           /(grid%z_area_dual_z(ji,jk,upper_index) - grid%z_area_dual_z(ji,jk,lower_index))
           ! adding the terrain-following correction
           diag%v_placeholder(ji,jk,jl) = diag%v_placeholder(ji,jk,jl) - slope*vertical_gradient
@@ -115,16 +114,16 @@ module momentum_diff_diss
     do ji=1,ny
       do jl=1,nlays
         do jk=2,nx
-          irrev%mom_diff_tend_x(ji,jk,jl) = (irrev%mom_diff_tend_x(ji,jk,jl) + diag%u_placeholder(ji,jk,jl)) &
+          diag%mom_diff_tend_x(ji,jk,jl) = (diag%mom_diff_tend_x(ji,jk,jl) + diag%u_placeholder(ji,jk,jl)) &
           /(0.5_wp*(sum(state%rho(ji,jk-1,jl,:)) + sum(state%rho(ji,jk,jl,:))))
         enddo
         
         ! periodic boundary conditions
         if (lperiodic) then
-          irrev%mom_diff_tend_x(ji,1,jl) = (irrev%mom_diff_tend_x(ji,1,jl) + diag%u_placeholder(ji,1,jl)) &
+          diag%mom_diff_tend_x(ji,1,jl) = (diag%mom_diff_tend_x(ji,1,jl) + diag%u_placeholder(ji,1,jl)) &
           /(0.5_wp*(sum(state%rho(ji,nx,jl,:)) + sum(state%rho(ji,1,jl,:))))
         endif
-        irrev%mom_diff_tend_x(ji,nx+1,jl) = irrev%mom_diff_tend_x(ji,1,jl)
+        diag%mom_diff_tend_x(ji,nx+1,jl) = diag%mom_diff_tend_x(ji,1,jl)
         
       enddo
     enddo
@@ -134,16 +133,16 @@ module momentum_diff_diss
     do jk=1,nx
       do jl=1,nlays
         do ji=2,ny
-          irrev%mom_diff_tend_y(ji,jk,jl) = (irrev%mom_diff_tend_y(ji,jk,jl) + diag%v_placeholder(ji,jk,jl)) &
+          diag%mom_diff_tend_y(ji,jk,jl) = (diag%mom_diff_tend_y(ji,jk,jl) + diag%v_placeholder(ji,jk,jl)) &
           /(0.5_wp*(sum(state%rho(ji-1,jk,jl,:)) + sum(state%rho(ji,jk,jl,:))))
         enddo
         
         ! periodic boundary conditions
         if (lperiodic) then
-          irrev%mom_diff_tend_y(1,jk,jl) = (irrev%mom_diff_tend_y(1,jk,jl) + diag%v_placeholder(1,jk,jl)) &
+          diag%mom_diff_tend_y(1,jk,jl) = (diag%mom_diff_tend_y(1,jk,jl) + diag%v_placeholder(1,jk,jl)) &
           /(0.5_wp*(sum(state%rho(ny,jk,jl,:)) + sum(state%rho(1,jk,jl,:))))
         endif
-        irrev%mom_diff_tend_y(ny+1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl)
+        diag%mom_diff_tend_y(ny+1,jk,jl) = diag%mom_diff_tend_y(1,jk,jl)
         
       enddo
     enddo
@@ -151,13 +150,12 @@ module momentum_diff_diss
   
   end subroutine mom_diff_h
 
-  subroutine mom_diff_v(state,diag,irrev,grid)
+  subroutine mom_diff_v(state,diag,grid)
   
     ! This subroutine handles vertical momentum diffusion.
     
     type(t_state), intent(in)    :: state ! state with which to calculate the horizontal diffusion
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
@@ -215,21 +213,21 @@ module momentum_diff_diss
     do ji=1,ny
       do jl=1,nlays
         do jk=2,nx
-          irrev%mom_diff_tend_x(ji,jk,jl) = irrev%mom_diff_tend_x(ji,jk,jl) &
-          + (irrev%vert_hor_viscosity_u(ji,jk,jl)*diag%du_dz(ji,jk,jl) &
-          - irrev%vert_hor_viscosity_u(ji,jk,jl+1)*diag%du_dz(ji,jk,jl+1)) &
+          diag%mom_diff_tend_x(ji,jk,jl) = diag%mom_diff_tend_x(ji,jk,jl) &
+          + (diag%vert_hor_viscosity_u(ji,jk,jl)*diag%du_dz(ji,jk,jl) &
+          - diag%vert_hor_viscosity_u(ji,jk,jl+1)*diag%du_dz(ji,jk,jl+1)) &
           /(0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl) - grid%z_w(ji,jk-1,jl+1) - grid%z_w(ji,jk,jl+1))) &
           /(0.5_wp*(sum(state%rho(ji,jk-1,jl,:)) + sum(state%rho(ji,jk,jl,:))))
         enddo
       
         ! periodic boundary conditions
         if (lperiodic) then
-          irrev%mom_diff_tend_x(ji,1,jl) = irrev%mom_diff_tend_x(ji,1,jl) &
-          + (irrev%vert_hor_viscosity_u(ji,1,jl)*diag%du_dz(ji,1,jl) &
-          - irrev%vert_hor_viscosity_u(ji,1,jl+1)*diag%du_dz(ji,1,jl+1)) &
+          diag%mom_diff_tend_x(ji,1,jl) = diag%mom_diff_tend_x(ji,1,jl) &
+          + (diag%vert_hor_viscosity_u(ji,1,jl)*diag%du_dz(ji,1,jl) &
+          - diag%vert_hor_viscosity_u(ji,1,jl+1)*diag%du_dz(ji,1,jl+1)) &
           /(0.5_wp*(grid%z_w(ji,nx,jl) + grid%z_w(ji,1,jl) - grid%z_w(ji,nx,jl+1) - grid%z_w(ji,1,jl+1))) &
           /(0.5_wp*(sum(state%rho(ji,nx,jl,:)) + sum(state%rho(ji,1,jl,:))))
-          irrev%mom_diff_tend_x(ji,nx+1,jl) = irrev%mom_diff_tend_x(ji,1,jl)
+          diag%mom_diff_tend_x(ji,nx+1,jl) = diag%mom_diff_tend_x(ji,1,jl)
         endif
       
       enddo
@@ -240,21 +238,21 @@ module momentum_diff_diss
     do jk=1,nx
       do jl=1,nlays
         do ji=2,ny
-          irrev%mom_diff_tend_y(ji,jk,jl) = irrev%mom_diff_tend_y(ji,jk,jl) &
-          + (irrev%vert_hor_viscosity_v(ji,jk,jl)*diag%dv_dz(ji,jk,jl) &
-          - irrev%vert_hor_viscosity_v(ji,jk,jl+1)*diag%dv_dz(ji,jk,jl+1)) &
+          diag%mom_diff_tend_y(ji,jk,jl) = diag%mom_diff_tend_y(ji,jk,jl) &
+          + (diag%vert_hor_viscosity_v(ji,jk,jl)*diag%dv_dz(ji,jk,jl) &
+          - diag%vert_hor_viscosity_v(ji,jk,jl+1)*diag%dv_dz(ji,jk,jl+1)) &
           /(0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl) - grid%z_w(ji-1,jk,jl+1) - grid%z_w(ji,jk,jl+1))) &
           /(0.5_wp*(sum(state%rho(ji-1,jk,jl,:)) + sum(state%rho(ji,jk,jl,:))))
         enddo
       
         ! periodic boundary conditions
         if (lperiodic) then
-          irrev%mom_diff_tend_y(1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl) &
-          + (irrev%vert_hor_viscosity_v(1,jk,jl)*diag%dv_dz(1,jk,jl) &
-          - irrev%vert_hor_viscosity_v(1,jk,jl+1)*diag%dv_dz(1,jk,jl+1)) &
+          diag%mom_diff_tend_y(1,jk,jl) = diag%mom_diff_tend_y(1,jk,jl) &
+          + (diag%vert_hor_viscosity_v(1,jk,jl)*diag%dv_dz(1,jk,jl) &
+          - diag%vert_hor_viscosity_v(1,jk,jl+1)*diag%dv_dz(1,jk,jl+1)) &
           /(0.5_wp*(grid%z_w(ny,jk,jl) + grid%z_w(1,jk,jl) - grid%z_w(ny,jk,jl+1) - grid%z_w(1,jk,jl+1))) &
           /(0.5_wp*(sum(state%rho(ny,jk,jl,:)) + sum(state%rho(1,jk,jl,:))))
-          irrev%mom_diff_tend_y(ny+1,jk,jl) = irrev%mom_diff_tend_y(1,jk,jl)
+          diag%mom_diff_tend_y(ny+1,jk,jl) = diag%mom_diff_tend_y(1,jk,jl)
         endif
       
       enddo
@@ -270,9 +268,9 @@ module momentum_diff_diss
     ! computing something like dw/dz
     call add_vertical_div(state%wind_w,diag%scalar_placeholder,grid)
     ! computing and multiplying by the respective diffusion coefficient
-    call vert_vert_mom_viscosity(state,diag,irrev)
+    call vert_vert_mom_viscosity(state,diag)
     ! taking the second derivative to compute the diffusive tendency
-    call grad_vert_cov(diag%scalar_placeholder,irrev%mom_diff_tend_z,grid)
+    call grad_vert_cov(diag%scalar_placeholder,diag%mom_diff_tend_z,grid)
 
     ! 3.) horizontal diffusion of vertical velocity
     ! ---------------------------------------------
@@ -290,9 +288,9 @@ module momentum_diff_diss
     ! multiplying by the already computed diffusion coefficient
     !$omp parallel do private(jl)
     do jl=1,nlays
-      diag%u_placeholder(:,:,jl) = 0.5_wp*(irrev%vert_hor_viscosity_u(:,:,jl) + irrev%vert_hor_viscosity_u(:,:,jl+1)) &
+      diag%u_placeholder(:,:,jl) = 0.5_wp*(diag%vert_hor_viscosity_u(:,:,jl) + diag%vert_hor_viscosity_u(:,:,jl+1)) &
       *diag%u_placeholder(:,:,jl)
-      diag%v_placeholder(:,:,jl) = 0.5_wp*(irrev%vert_hor_viscosity_v(:,:,jl) + irrev%vert_hor_viscosity_v(:,:,jl+1)) &
+      diag%v_placeholder(:,:,jl) = 0.5_wp*(diag%vert_hor_viscosity_v(:,:,jl) + diag%vert_hor_viscosity_v(:,:,jl+1)) &
       *diag%v_placeholder(:,:,jl)
     enddo
     !$omp end parallel do
@@ -304,10 +302,10 @@ module momentum_diff_diss
     do ji=1,ny
       do jk=1,nx
         do jl=2,nlays
-          irrev%mom_diff_tend_z(ji,jk,jl) = irrev%mom_diff_tend_z(ji,jk,jl) + &
+          diag%mom_diff_tend_z(ji,jk,jl) = diag%mom_diff_tend_z(ji,jk,jl) + &
           0.5_wp*(diag%scalar_placeholder(ji,jk,jl-1) + diag%scalar_placeholder(ji,jk,jl))
           ! dividing by the density
-          irrev%mom_diff_tend_z(ji,jk,jl) = irrev%mom_diff_tend_z(ji,jk,jl)/ &
+          diag%mom_diff_tend_z(ji,jk,jl) = diag%mom_diff_tend_z(ji,jk,jl)/ &
           (0.5_wp*(sum(state%rho(ji,jk,jl-1,:)) + sum(state%rho(ji,jk,jl,:))))
         enddo
       enddo
@@ -316,13 +314,13 @@ module momentum_diff_diss
 
   end subroutine mom_diff_v
   
-  subroutine simple_dissipation_rate(state,irrev,grid)
+  subroutine simple_dissipation_rate(state,diag,grid)
   
     ! This subroutine calculates a simplified dissipation rate.
     
     ! input arguments and output
     type(t_state), intent(in)    :: state ! the state with which to calculate the dissipation rates
-    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
@@ -330,13 +328,13 @@ module momentum_diff_diss
     
     ! calculating the inner product of the momentum diffusion acceleration and the wind
     call inner(state%wind_u,state%wind_v,state%wind_w, &
-    irrev%mom_diff_tend_x,irrev%mom_diff_tend_y,irrev%mom_diff_tend_z,irrev%heating_diss,grid)
+    diag%mom_diff_tend_x,diag%mom_diff_tend_y,diag%mom_diff_tend_z,diag%heating_diss,grid)
     
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
         do jl=1,nlays
-          irrev%heating_diss(ji,jk,jl) = -density_gas(state,ji,jk,jl)*irrev%heating_diss(ji,jk,jl)
+          diag%heating_diss(ji,jk,jl) = -density_gas(state,ji,jk,jl)*diag%heating_diss(ji,jk,jl)
         enddo
       enddo
     enddo

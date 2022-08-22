@@ -5,7 +5,7 @@ module mo_pbl
 
   ! This module computes everything related to the planetary boundary layer.
   
-  use mo_definitions, only: wp,t_state,t_grid,t_diag,t_irrev
+  use mo_definitions, only: wp,t_state,t_grid,t_diag
   use run_nml,        only: ny,nx,nlays,dtime
   use constants,      only: EPSILON_SECURITY,M_PI,gravity
   use surface_nml,    only: lprog_soil_temp
@@ -107,13 +107,12 @@ module mo_pbl
 
   end subroutine update_sfc_turb_quantities
   
-  subroutine pbl_wind_tendency(state,diag,irrev,grid)
+  subroutine pbl_wind_tendency(state,diag,grid)
   
     ! This subroutine computes the interaction of the horizontal wind with the surface.
     
     type(t_state), intent(in)    :: state ! state with which to calculate the horizontal diffusion
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_irrev), intent(inout) :: irrev ! irreversible quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
@@ -145,7 +144,7 @@ module mo_pbl
           endif
 
           ! adding the momentum flux into the surface as an acceleration
-          irrev%mom_diff_tend_x(ji,jk,nlays) = irrev%mom_diff_tend_x(ji,jk,nlays) - &
+          diag%mom_diff_tend_x(ji,jk,nlays) = diag%mom_diff_tend_x(ji,jk,nlays) - &
           wind_rescale_factor*state%wind_u(ji,jk,nlays)/flux_resistance/layer_thickness
           
         enddo
@@ -172,10 +171,10 @@ module mo_pbl
           endif
 
           ! adding the momentum flux into the surface as an acceleration
-          irrev%mom_diff_tend_x(ji,1,nlays) = irrev%mom_diff_tend_x(ji,1,nlays) - &
+          diag%mom_diff_tend_x(ji,1,nlays) = diag%mom_diff_tend_x(ji,1,nlays) - &
           wind_rescale_factor*state%wind_u(ji,1,nlays)/flux_resistance/layer_thickness
           
-          irrev%mom_diff_tend_x(ji,nx+1,nlays) = irrev%mom_diff_tend_x(ji,1,nlays)
+          diag%mom_diff_tend_x(ji,nx+1,nlays) = diag%mom_diff_tend_x(ji,1,nlays)
           
         endif
         
@@ -206,7 +205,7 @@ module mo_pbl
           endif
 
           ! adding the momentum flux into the surface as an acceleration
-          irrev%mom_diff_tend_y(ji,jk,nlays) = irrev%mom_diff_tend_y(ji,jk,nlays) - &
+          diag%mom_diff_tend_y(ji,jk,nlays) = diag%mom_diff_tend_y(ji,jk,nlays) - &
           wind_rescale_factor*state%wind_v(ji,jk,nlays)/flux_resistance/layer_thickness
           
         enddo
@@ -232,10 +231,10 @@ module mo_pbl
           endif
 
           ! adding the momentum flux into the surface as an acceleration
-          irrev%mom_diff_tend_y(1,jk,nlays) = irrev%mom_diff_tend_y(1,jk,nlays) - &
+          diag%mom_diff_tend_y(1,jk,nlays) = diag%mom_diff_tend_y(1,jk,nlays) - &
           wind_rescale_factor*state%wind_v(1,jk,nlays)/flux_resistance/layer_thickness
           
-          irrev%mom_diff_tend_y(ny+1,jk,nlays) = irrev%mom_diff_tend_y(1,jk,nlays)
+          diag%mom_diff_tend_y(ny+1,jk,nlays) = diag%mom_diff_tend_y(1,jk,nlays)
           
         endif
         
