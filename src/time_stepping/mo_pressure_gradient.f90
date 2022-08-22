@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module pressure_gradient
+module mo_pressure_gradient
 
   ! This module manages the handling of the explicit component of the pressure gradient.
 
@@ -62,7 +62,7 @@ module pressure_gradient
     
   end subroutine manage_pressure_gradient
 
-end module pressure_gradient
+end module mo_pressure_gradient
 
 
 
