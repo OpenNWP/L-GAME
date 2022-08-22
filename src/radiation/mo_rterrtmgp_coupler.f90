@@ -20,7 +20,7 @@ module mo_rrtmgp_coupler
                                   ty_optical_props_arry
   use mo_cloud_optics,            only: ty_cloud_optics
   use mo_load_cloud_coefficients, only: load_cld_lutcoeff,load_cld_padecoeff
-  use dictionary,                 only: molar_fraction_in_dry_air,calc_o3_vmr
+  use mo_dictionary,              only: molar_fraction_in_dry_air,calc_o3_vmr
   use rad_nml,                    only: rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
                                         cloud_coefficients_file_sw,cloud_coefficients_file_lw
   use constituents_nml,           only: n_condensed_constituents,n_constituents

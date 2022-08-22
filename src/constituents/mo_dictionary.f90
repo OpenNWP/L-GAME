@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module dictionary
+module mo_dictionary
 
   ! In this module, properties of the constituents are being stored.
   
@@ -270,7 +270,7 @@ module dictionary
 
     end function enhancement_factor_over_ice
 
-end module dictionary
+end module mo_dictionary
 
 
 

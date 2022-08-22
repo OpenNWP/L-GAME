@@ -9,7 +9,7 @@ module mo_derived
   use run_nml,          only: ny,nx,nlays
   use constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0
   use constituents_nml, only: n_condensed_constituents,n_gaseous_constituents,n_constituents
-  use dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water
+  use mo_dictionary,    only: saturation_pressure_over_ice,saturation_pressure_over_water
   
   implicit none
   

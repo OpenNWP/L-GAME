@@ -9,7 +9,7 @@ module phase_trans
   use surface_nml,        only: lsfc_phase_trans
   use constants,          only: t_0,EPSILON_SECURITY,r_d,r_v
   use mo_definitions,     only: t_state,t_diag,t_irrev,t_grid
-  use dictionary,         only: saturation_pressure_over_ice,saturation_pressure_over_water, &
+  use mo_dictionary,      only: saturation_pressure_over_ice,saturation_pressure_over_water, &
                                 enhancement_factor_over_water,enhancement_factor_over_ice, &
                                 phase_trans_heat
   use mo_derived,         only: rel_humidity
