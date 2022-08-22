@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module manage_pchevi
+module mo_manage_pchevi
 
   ! In this module, the RKHEVI time stepping is managed.
 
@@ -120,7 +120,7 @@ module manage_pchevi
     
   end subroutine pchevi
 
-end module manage_pchevi
+end module mo_manage_pchevi
 
 
 
