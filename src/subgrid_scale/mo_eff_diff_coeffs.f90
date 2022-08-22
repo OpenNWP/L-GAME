@@ -8,11 +8,11 @@ module effective_diff_coeffs
   use run_nml,              only: ny,nx,nlays,dtime
   use mo_definitions,       only: wp,t_state,t_diag,t_irrev,t_grid
   use diff_nml,             only: diff_h_smag_div,diff_h_smag_rot,lmom_diff_h,ltemp_diff_h
-  use derived_quantities,   only: calc_diffusion_coeff
+  use mo_derived,           only: calc_diffusion_coeff
   use constituents_nml,     only: n_condensed_constituents
   use tke,                  only: tke_update
   use divergence_operators, only: div_h
-  use derived_quantities,   only: density_gas,spec_heat_cap_diagnostics_v
+  use mo_derived,           only: density_gas,spec_heat_cap_diagnostics_v
   use bc_nml,               only: lperiodic
   
   implicit none

@@ -7,7 +7,7 @@ module tke
   
   use mo_definitions,     only: wp,t_state,t_diag,t_irrev,t_grid
   use run_nml,            only: ny,nx,nlays,dtime
-  use derived_quantities, only: density_gas
+  use mo_derived,         only: density_gas
   use constants,          only: M_PI
   use gradient_operators, only: grad
   use inner_product,      only: inner

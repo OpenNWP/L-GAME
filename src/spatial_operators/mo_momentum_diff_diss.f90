@@ -11,7 +11,7 @@ module momentum_diff_diss
   use run_nml,                  only: ny,nx,nlays,wp
   use diff_nml,                 only: h_prandtl
   use inner_product,            only: inner
-  use derived_quantities,       only: density_gas
+  use mo_derived,               only: density_gas
   use effective_diff_coeffs,    only: hor_div_viscosity,vert_vert_mom_viscosity,hor_curl_viscosity
   use multiplications,          only: scalar_times_scalar
   use bc_nml,                   only: lperiodic

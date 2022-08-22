@@ -13,7 +13,7 @@ module manage_pchevi
   use explicit_scalar_tendencies, only: expl_scalar_tend,moisturizer
   use column_solvers,             only: three_band_solver_ver,three_band_solver_gen_densities
   use boundaries,                 only: update_boundaries
-  use derived_quantities,         only: temperature_diagnostics
+  use mo_derived,                 only: temperature_diagnostics
   use constituents_nml,           only: n_constituents
   use diff_nml,                   only: lmom_diff_v
   use surface_nml,                only: lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl

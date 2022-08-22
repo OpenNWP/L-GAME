@@ -12,7 +12,7 @@ module phase_trans
   use dictionary,         only: saturation_pressure_over_ice,saturation_pressure_over_water, &
                                 enhancement_factor_over_water,enhancement_factor_over_ice, &
                                 phase_trans_heat
-  use derived_quantities, only: rel_humidity
+  use mo_derived,         only: rel_humidity
   
   implicit none
   

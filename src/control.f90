@@ -24,7 +24,7 @@ program control
   use mo_manage_radiation_calls, only: call_radiation
   use boundaries,                only: setup_bc_factor,read_boundaries
   use mo_rrtmgp_coupler,         only: radiation_init
-  use derived_quantities,        only: temperature_diagnostics
+  use mo_derived,                only: temperature_diagnostics
   
   implicit none
 
