@@ -27,7 +27,7 @@ src/constituents/mo_derived.f90
 src/constituents/mo_dictionary.f90
 src/constituents/mo_phase_trans.f90
 src/subgrid_scale/mo_eff_diff_coeffs.f90
-src/subgrid_scale/mo_planetary_boundary_layer.f90
+src/subgrid_scale/mo_pbl.f90
 src/subgrid_scale/mo_tke.f90
 src/spatial_operators/mo_vorticity_flux.f90
 src/spatial_operators/mo_multiplications.f90
