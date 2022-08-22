@@ -11,7 +11,7 @@ module manage_pchevi
   use pressure_gradient,          only: manage_pressure_gradient
   use explicit_vector_tendencies, only: expl_vector_tend
   use explicit_scalar_tendencies, only: expl_scalar_tend,moisturizer
-  use column_solvers,             only: three_band_solver_ver,three_band_solver_gen_densities
+  use mo_column_solvers,          only: three_band_solver_ver,three_band_solver_gen_densities
   use boundaries,                 only: update_boundaries
   use mo_derived,                 only: temperature_diagnostics
   use constituents_nml,           only: n_constituents

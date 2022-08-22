@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module column_solvers
+module mo_column_solvers
 
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
@@ -532,7 +532,7 @@ module column_solvers
   
   end subroutine thomas_algorithm
 
-end module column_solvers
+end module mo_column_solvers
 
 
 
