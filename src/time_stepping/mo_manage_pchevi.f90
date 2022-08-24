@@ -12,7 +12,7 @@ module mo_manage_pchevi
   use mo_explicit_vector_tendencies, only: expl_vector_tend
   use mo_explicit_scalar_tendencies, only: expl_scalar_tend,moisturizer
   use mo_column_solvers,             only: three_band_solver_ver,three_band_solver_gen_densities
-  use boundaries,                    only: update_boundaries
+  use mo_boundaries,                 only: update_boundaries
   use mo_derived,                    only: temperature_diagnostics
   use mo_constituents_nml,           only: n_constituents
   use mo_diff_nml,                   only: lmom_diff_v

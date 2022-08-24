@@ -1,15 +1,15 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module read_write_grid
+module mo_read_write_grid
 
   ! This module reads the grid from a file or writes the grid to a file. This is useful for efficiency.
   
   use netcdf
-  use mo_definitions,    only: t_grid,wp
-  use set_initial_state, only: nc_check
-  use mo_io_nml,         only: grid_filename,land_sea_filename
-  use mo_run_nml,        only: ny,nx,nlays
+  use mo_definitions,       only: t_grid,wp
+  use mo_set_initial_state, only: nc_check
+  use mo_io_nml,            only: grid_filename,land_sea_filename
+  use mo_run_nml,           only: ny,nx,nlays
   
   implicit none
   
@@ -187,7 +187,7 @@ module read_write_grid
   
   end subroutine read_land_sea
 
-end module read_write_grid
+end module mo_read_write_grid
 
 
 

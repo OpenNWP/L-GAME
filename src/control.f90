@@ -14,15 +14,15 @@ program control
   use mo_diff_nml,                  only: diff_nml_setup
   use mo_surface_nml,               only: surface_nml_setup,nsoillays
   use mo_definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_bc
-  use grid_generator,               only: grid_setup,bg_setup
-  use set_initial_state,            only: restart,ideal_init
+  use mo_grid_generator,            only: grid_setup,bg_setup
+  use mo_set_initial_state,         only: restart,ideal_init
   use mo_write_out,                 only: write_output
   use mo_manage_pchevi,             only: pchevi
   use mo_linear_combine_two_states, only: lin_combination
   use mo_bc_nml,                    only: bc_nml_setup,lperiodic,t_latest_bc,dtime_bc
   use mo_rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
   use mo_manage_radiation_calls,    only: call_radiation
-  use boundaries,                   only: setup_bc_factor,read_boundaries
+  use mo_boundaries,                only: setup_bc_factor,read_boundaries
   use mo_rrtmgp_coupler,            only: radiation_init
   use mo_derived,                   only: temperature_diagnostics
   

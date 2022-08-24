@@ -5,12 +5,12 @@ module mo_write_out
 
   ! This module handles everything dealing with IO.
 
-  use mo_definitions,      only: t_state,wp,t_diag,t_grid
+  use mo_definitions,       only: t_state,wp,t_diag,t_grid
   use netcdf
-  use mo_run_nml,          only: ny,nx,nlays,scenario,run_id
-  use mo_constituents_nml, only: n_condensed_constituents,n_gaseous_constituents,n_constituents
-  use mo_derived,          only: rel_humidity
-  use set_initial_state,   only: bg_temp,bg_pres,geopot,nc_check
+  use mo_run_nml,           only: ny,nx,nlays,scenario,run_id
+  use mo_constituents_nml,  only: n_condensed_constituents,n_gaseous_constituents,n_constituents
+  use mo_derived,           only: rel_humidity
+  use mo_set_initial_state, only: bg_temp,bg_pres,geopot,nc_check
 
   implicit none
   

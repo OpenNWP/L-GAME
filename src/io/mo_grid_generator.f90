@@ -3,7 +3,7 @@
 
 ! This file contains the calculation of the grid properties as well as some type definitions.
 
-module grid_generator
+module mo_grid_generator
 
   use netcdf
   use mo_definitions,        only: wp,t_grid
@@ -16,10 +16,9 @@ module grid_generator
   use mo_gradient_operators, only: grad,grad_hor_cov
   use mo_io_nml,             only: lwrite_grid,lread_oro,lread_land_sea,lset_oro, &
                                    oro_raw_filename
-  use read_write_grid,       only: write_grid,read_oro,read_land_sea
-  use set_initial_state,     only: bg_temp,bg_pres,geopot
+  use mo_read_write_grid,    only: write_grid,read_oro,read_land_sea
+  use mo_set_initial_state,  only: bg_temp,bg_pres,geopot,nc_check
   use mo_bc_nml,             only: lperiodic
-  use set_initial_state,     only: nc_check
 
   implicit none
   
@@ -1169,7 +1168,7 @@ module grid_generator
 
   end subroutine calc_local_j
 
-end module grid_generator
+end module mo_grid_generator
 
 
 

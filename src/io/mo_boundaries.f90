@@ -1,16 +1,16 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module boundaries
+module mo_boundaries
 
   ! This module handles everything dealing with boundary conditions.
 
-  use mo_definitions,      only: t_state,t_bc,t_grid,wp
-  use mo_run_nml,          only: ny,nx,nlays,t_init
-  use mo_bc_nml,           only: n_swamp,bc_root_filename,bc_root_filename,dtime_bc,t_latest_bc
-  use constants,           only: M_PI,p_0,r_d,c_d_v
-  use mo_constituents_nml, only: n_condensed_constituents
-  use set_initial_state,   only: read_from_nc
+  use mo_definitions,       only: t_state,t_bc,t_grid,wp
+  use mo_run_nml,           only: ny,nx,nlays,t_init
+  use mo_bc_nml,            only: n_swamp,bc_root_filename,bc_root_filename,dtime_bc,t_latest_bc
+  use constants,            only: M_PI,p_0,r_d,c_d_v
+  use mo_constituents_nml,  only: n_condensed_constituents
+  use mo_set_initial_state, only: read_from_nc
 
   implicit none
   
@@ -178,7 +178,7 @@ module boundaries
     
   end function int2string
 
-end module boundaries
+end module mo_boundaries
 
 
 
