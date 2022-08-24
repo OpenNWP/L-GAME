@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module vorticities
+module mo_vorticities
 
   ! This module contains the calculation of the vorticities.
 
@@ -9,7 +9,7 @@ module vorticities
   use run_nml,          only: ny,nx,nlays,nlays_oro,toa,lcorio,llinear
   use constants,        only: r_e
   use constituents_nml, only: n_condensed_constituents
-  use averaging,        only: horizontal_covariant_x,horizontal_covariant_y
+  use mo_averaging,     only: horizontal_covariant_x,horizontal_covariant_y
   use bc_nml,           only: lperiodic
   
   implicit none
@@ -472,7 +472,7 @@ module vorticities
   
   end function rel_vort_z_local
 
-end module vorticities
+end module mo_vorticities
 
 
 

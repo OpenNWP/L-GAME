@@ -1,13 +1,13 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module gradient_operators
+module mo_gradient_operators
 
   ! This module is a collection of gradient operators.
 
   use mo_definitions, only: t_grid,wp
   use run_nml,        only: ny,nx,nlays,toa
-  use averaging,      only: hor_cov_to_con
+  use mo_averaging,   only: hor_cov_to_con
   use bc_nml,         only: lperiodic
     
   implicit none
@@ -137,7 +137,7 @@ module gradient_operators
   
   end subroutine grad_hor
 
-end module gradient_operators
+end module mo_gradient_operators
 
 
 

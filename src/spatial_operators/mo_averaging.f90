@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module averaging
+module mo_averaging
 
   ! This module contains averaging operators.
 
@@ -210,7 +210,7 @@ module averaging
   
   end function horizontal_covariant_y
 
-end module averaging
+end module mo_averaging
 
 
 

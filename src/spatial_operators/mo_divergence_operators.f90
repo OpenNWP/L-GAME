@@ -1,13 +1,13 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module divergence_operators
+module mo_divergence_operators
 
   ! The calculation of the horizontal divergence operator is executed in this module.
 
   use mo_definitions, only: wp,t_grid
   use run_nml,        only: ny,nx,nlays,nlays_oro,dtime
-  use averaging,      only: vertical_contravariant_corr
+  use mo_averaging,   only: vertical_contravariant_corr
   
   implicit none
   
@@ -183,7 +183,7 @@ module divergence_operators
     
   end subroutine add_vertical_div
 
-end module divergence_operators
+end module mo_divergence_operators
 
 
 

@@ -5,12 +5,12 @@ module mo_tke
   
   ! This module computes everything related to the turbulent kinetic energy (TKE).
   
-  use mo_definitions,     only: wp,t_state,t_diag,t_grid
-  use run_nml,            only: ny,nx,nlays,dtime
-  use mo_derived,         only: density_gas
-  use constants,          only: M_PI
-  use gradient_operators, only: grad
-  use inner_product,      only: inner
+  use mo_definitions,        only: wp,t_state,t_diag,t_grid
+  use run_nml,               only: ny,nx,nlays,dtime
+  use mo_derived,            only: density_gas
+  use constants,             only: M_PI
+  use mo_gradient_operators, only: grad
+  use mo_inner_product,      only: inner
   
   implicit none
   

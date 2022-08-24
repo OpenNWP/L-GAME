@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module linear_combine_two_states
+module mo_linear_combine_two_states
 
   ! This module contains functionality to interpolate two states.
 
@@ -35,7 +35,7 @@ module linear_combine_two_states
   
   end subroutine lin_combination
 
-end module linear_combine_two_states
+end module mo_linear_combine_two_states
 
 
 

@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module inner_product
+module mo_inner_product
 
   ! The calculation of the inner product is executed in this module.
 
@@ -47,7 +47,7 @@ module inner_product
   
   end subroutine inner
 
-end module inner_product
+end module mo_inner_product
 
 
 

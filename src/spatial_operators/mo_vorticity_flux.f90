@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module vorticity_flux
+module mo_vorticity_flux
 
   ! This module computes the vorticity flux term.
   
@@ -169,7 +169,7 @@ module vorticity_flux
   
   end subroutine calc_vorticity_flux_term
 
-end module vorticity_flux
+end module mo_vorticity_flux
 
 
 
