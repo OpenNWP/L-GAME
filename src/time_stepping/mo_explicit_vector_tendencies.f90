@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module explicit_vector_tendencies
+module mo_explicit_vector_tendencies
 
   ! This module manages the calculation of the explicit part of the wind tendencies.
 
@@ -132,7 +132,7 @@ module explicit_vector_tendencies
     
   end subroutine expl_vector_tend
 
-end module explicit_vector_tendencies
+end module mo_explicit_vector_tendencies
 
 
 
