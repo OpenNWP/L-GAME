@@ -10,7 +10,7 @@ module explicit_scalar_tendencies
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
   use divergence_operators,  only: div_h,div_h_tracers,add_vertical_div
   use run_nml,               only: dtime
-  use phase_trans,           only: calc_h2otracers_source_rates
+  use mo_phase_trans,        only: calc_h2otracers_source_rates
   use constituents_nml,      only: n_condensed_constituents,n_constituents
   use diff_nml,              only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
   use effective_diff_coeffs, only: temp_diffusion_coeffs,mass_diffusion_coeffs

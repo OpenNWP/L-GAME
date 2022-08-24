@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME),which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module phase_trans
+module mo_phase_trans
 
   ! In this module, phase transition rates are being calculated.
   
@@ -263,7 +263,7 @@ module phase_trans
   
   end subroutine calc_h2otracers_source_rates
 
-end module phase_trans
+end module mo_phase_trans
 
 
 
