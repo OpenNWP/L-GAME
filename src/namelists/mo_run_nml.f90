@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module run_nml
+module mo_run_nml
 
   ! This is the namelist that configures the basic run properties of a model integration.
   
@@ -185,7 +185,7 @@ module run_nml
     
   end function month_day_vector
   
-end module run_nml
+end module mo_run_nml
 
 
 

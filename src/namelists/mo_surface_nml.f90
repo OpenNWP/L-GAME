@@ -1,12 +1,12 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module surface_nml
+module mo_surface_nml
 
   ! This namelist defines the surface properties.
 
   use mo_definitions, only: wp
-  use diff_nml,       only: lmom_diff_h
+  use mo_diff_nml,    only: lmom_diff_h
   
   implicit none
   
@@ -48,7 +48,7 @@ module surface_nml
   
   end subroutine surface_nml_setup
 
-end module surface_nml
+end module mo_surface_nml
 
 
 

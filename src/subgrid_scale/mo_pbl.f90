@@ -6,11 +6,11 @@ module mo_pbl
   ! This module computes everything related to the planetary boundary layer.
   
   use mo_definitions, only: wp,t_state,t_grid,t_diag
-  use run_nml,        only: ny,nx,nlays,dtime
+  use mo_run_nml,     only: ny,nx,nlays,dtime
   use constants,      only: EPSILON_SECURITY,M_PI,gravity
-  use surface_nml,    only: lprog_soil_temp
-  use diff_nml,       only: h_prandtl,karman
-  use bc_nml,         only: lperiodic
+  use mo_surface_nml, only: lprog_soil_temp
+  use mo_diff_nml,    only: h_prandtl,karman
+  use mo_bc_nml,      only: lperiodic
   
   implicit none
   

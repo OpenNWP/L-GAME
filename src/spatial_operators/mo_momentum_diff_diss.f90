@@ -8,13 +8,13 @@ module mo_momentum_diff_diss
   use mo_definitions,          only: t_grid,t_diag,t_state
   use mo_divergence_operators, only: div_h,add_vertical_div
   use mo_gradient_operators,   only: grad_hor,grad_vert_cov
-  use run_nml,                 only: ny,nx,nlays,wp
-  use diff_nml,                only: h_prandtl
+  use mo_run_nml,              only: ny,nx,nlays,wp
+  use mo_diff_nml,             only: h_prandtl
   use mo_inner_product,        only: inner
   use mo_derived,              only: density_gas
   use effective_diff_coeffs,   only: hor_div_viscosity,vert_vert_mom_viscosity,hor_curl_viscosity
   use mo_multiplications,      only: scalar_times_scalar
-  use bc_nml,                  only: lperiodic
+  use mo_bc_nml,               only: lperiodic
   use mo_vorticities,          only: rel_vort
   
   implicit none

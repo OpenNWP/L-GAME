@@ -5,12 +5,12 @@ module mo_vorticities
 
   ! This module contains the calculation of the vorticities.
 
-  use mo_definitions,   only: t_state,t_diag,t_grid,wp
-  use run_nml,          only: ny,nx,nlays,nlays_oro,toa,lcorio,llinear
-  use constants,        only: r_e
-  use constituents_nml, only: n_condensed_constituents
-  use mo_averaging,     only: horizontal_covariant_x,horizontal_covariant_y
-  use bc_nml,           only: lperiodic
+  use mo_definitions,      only: t_state,t_diag,t_grid,wp
+  use mo_run_nml,          only: ny,nx,nlays,nlays_oro,toa,lcorio,llinear
+  use constants,           only: r_e
+  use mo_constituents_nml, only: n_condensed_constituents
+  use mo_averaging,        only: horizontal_covariant_x,horizontal_covariant_y
+  use mo_bc_nml,           only: lperiodic
   
   implicit none
   

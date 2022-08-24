@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module io_nml
+module mo_io_nml
 
   ! This nameslist configures the IO behaviour of the model.
 
@@ -57,7 +57,7 @@ module io_nml
   
   end subroutine io_nml_setup
   
-end module io_nml
+end module mo_io_nml
 
 
 

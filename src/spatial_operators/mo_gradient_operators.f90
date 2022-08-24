@@ -6,9 +6,9 @@ module mo_gradient_operators
   ! This module is a collection of gradient operators.
 
   use mo_definitions, only: t_grid,wp
-  use run_nml,        only: ny,nx,nlays,toa
+  use mo_run_nml,     only: ny,nx,nlays,toa
   use mo_averaging,   only: hor_cov_to_con
-  use bc_nml,         only: lperiodic
+  use mo_bc_nml,      only: lperiodic
     
   implicit none
   

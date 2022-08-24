@@ -1,12 +1,12 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module constituents_nml
+module mo_constituents_nml
 
   ! This namelist defines the constituents of the model atmosphere.
 
   use mo_definitions, only: wp
-  use run_nml,        only: lmoist
+  use mo_run_nml,     only: lmoist
 
   implicit none
   
@@ -37,7 +37,7 @@ module constituents_nml
     
   end subroutine constituents_nml_setup
   
-end module constituents_nml
+end module mo_constituents_nml
 
 
 

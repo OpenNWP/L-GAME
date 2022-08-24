@@ -1,12 +1,12 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module bc_nml
+module mo_bc_nml
 
   ! In this namelist, the boundary conditions are configured.
   
   use mo_definitions, only: wp
-  use run_nml,        only: ny,nx
+  use mo_run_nml,     only: ny,nx
   
   implicit none
   
@@ -40,4 +40,4 @@ module bc_nml
   
   end subroutine bc_nml_setup
 
-end module bc_nml
+end module mo_bc_nml

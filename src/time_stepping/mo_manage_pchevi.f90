@@ -7,18 +7,18 @@ module mo_manage_pchevi
 
   use mo_definitions,                only: t_grid,t_state,t_diag,t_tend,t_bc,wp
   use mo_linear_combine_two_states,  only: lin_combination
-  use run_nml,                       only: dtime,ny,nx
+  use mo_run_nml,                    only: dtime,ny,nx
   use mo_pressure_gradient,          only: manage_pressure_gradient
   use mo_explicit_vector_tendencies, only: expl_vector_tend
   use mo_explicit_scalar_tendencies, only: expl_scalar_tend,moisturizer
   use mo_column_solvers,             only: three_band_solver_ver,three_band_solver_gen_densities
   use boundaries,                    only: update_boundaries
   use mo_derived,                    only: temperature_diagnostics
-  use constituents_nml,              only: n_constituents
-  use diff_nml,                      only: lmom_diff_v
-  use surface_nml,                   only: lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl
+  use mo_constituents_nml,           only: n_constituents
+  use mo_diff_nml,                   only: lmom_diff_v
+  use mo_surface_nml,                only: lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl
   use mo_pbl,                        only: update_sfc_turb_quantities
-  use bc_nml,                        only: lperiodic
+  use mo_bc_nml,                     only: lperiodic
   use mo_manage_radiation_calls,     only: call_radiation
 
   implicit none

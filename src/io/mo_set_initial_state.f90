@@ -5,13 +5,13 @@ module set_initial_state
 
   ! This module handles everything dealing with IO.
 
-  use mo_definitions,   only: t_state,wp,t_diag,t_grid
+  use mo_definitions,      only: t_state,wp,t_diag,t_grid
   use netcdf
-  use run_nml,          only: ny,nx,nlays,scenario,run_id,lplane,dx
-  use constituents_nml, only: n_condensed_constituents,n_constituents
-  use constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
-                              gravity,p_0_standard,r_e,t_grad_inv,M_PI,r_d,c_d_p,c_d_v
-  use io_nml,           only: restart_filename
+  use mo_run_nml,          only: ny,nx,nlays,scenario,run_id,lplane,dx
+  use mo_constituents_nml, only: n_condensed_constituents,n_constituents
+  use constants,           only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
+                                 gravity,p_0_standard,r_e,t_grad_inv,M_PI,r_d,c_d_p,c_d_v
+  use mo_io_nml,           only: restart_filename
 
   implicit none
   

@@ -8,8 +8,8 @@ module read_write_grid
   use netcdf
   use mo_definitions,    only: t_grid,wp
   use set_initial_state, only: nc_check
-  use io_nml,            only: grid_filename,land_sea_filename
-  use run_nml,           only: ny,nx,nlays
+  use mo_io_nml,         only: grid_filename,land_sea_filename
+  use mo_run_nml,        only: ny,nx,nlays
   
   implicit none
   

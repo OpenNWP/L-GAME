@@ -1,12 +1,12 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module rad_nml
+module mo_rad_nml
 
   ! In this namelist, the radiation is configured.
   
   use mo_definitions, only: wp
-  use run_nml,        only: dy
+  use mo_run_nml,     only: dy
   
   implicit none
   
@@ -42,4 +42,4 @@ module rad_nml
   
   end subroutine rad_nml_setup
 
-end module rad_nml
+end module mo_rad_nml

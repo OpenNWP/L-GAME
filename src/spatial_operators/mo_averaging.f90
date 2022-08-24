@@ -6,8 +6,8 @@ module mo_averaging
   ! This module contains averaging operators.
 
   use mo_definitions, only: t_grid,wp
-  use run_nml,        only: nlays,nlays_oro,ny,nx
-  use bc_nml,         only: lperiodic
+  use mo_run_nml,     only: nlays,nlays_oro,ny,nx
+  use mo_bc_nml,      only: lperiodic
   
   implicit none
   
