@@ -7,7 +7,7 @@ module mo_derived
   
   use mo_definitions,      only: wp,t_grid,t_state,t_diag
   use mo_run_nml,          only: ny,nx,nlays
-  use constants,           only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0
+  use mo_constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0
   use mo_constituents_nml, only: n_condensed_constituents,n_gaseous_constituents,n_constituents
   use mo_dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water
   

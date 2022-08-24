@@ -20,7 +20,7 @@ module mo_dictionary
   ! 11: N2O
 
   use mo_definitions, only: wp
-  use constants,      only: t_0,n_a,r_v,m_v
+  use mo_constants,   only: t_0,n_a,r_v,m_v
   
   implicit none
   

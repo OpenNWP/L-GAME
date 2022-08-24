@@ -6,7 +6,7 @@ module mo_run_nml
   ! This is the namelist that configures the basic run properties of a model integration.
   
   use mo_definitions, only: wp
-  use constants,      only: M_PI
+  use mo_constants,   only: M_PI
   
   implicit none
 

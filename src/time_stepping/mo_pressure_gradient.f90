@@ -5,7 +5,7 @@ module mo_pressure_gradient
 
   ! This module manages the handling of the explicit component of the pressure gradient.
 
-  use constants,             only: c_d_p
+  use mo_constants,          only: c_d_p
   use mo_gradient_operators, only: grad
   use mo_definitions,        only: t_state,t_diag,t_grid,wp
   use mo_multiplications,    only: scalar_times_vector

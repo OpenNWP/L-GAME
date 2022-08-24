@@ -7,7 +7,7 @@ module mo_pbl
   
   use mo_definitions, only: wp,t_state,t_grid,t_diag
   use mo_run_nml,     only: ny,nx,nlays,dtime
-  use constants,      only: EPSILON_SECURITY,M_PI,gravity
+  use mo_constants,   only: EPSILON_SECURITY,M_PI,gravity
   use mo_surface_nml, only: lprog_soil_temp
   use mo_diff_nml,    only: h_prandtl,karman
   use mo_bc_nml,      only: lperiodic

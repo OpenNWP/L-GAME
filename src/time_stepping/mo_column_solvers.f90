@@ -11,7 +11,7 @@ module mo_column_solvers
   use mo_definitions,      only: t_grid,t_state,t_tend,t_diag,wp
   use mo_diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
   use mo_surface_nml,      only: nsoillays,lprog_soil_temp,lsfc_sensible_heat_flux
-  use constants,           only: M_PI,r_d,c_d_v,c_d_p
+  use mo_constants,        only: M_PI,r_d,c_d_v,c_d_p
 
   implicit none
   

@@ -5,7 +5,7 @@ module mo_explicit_scalar_tendencies
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
-  use constants,                only: c_d_p
+  use mo_constants,             only: c_d_p
   use mo_definitions,           only: wp,t_grid,t_state,t_diag,t_tend
   use mo_multiplications,       only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
   use mo_divergence_operators,  only: div_h,div_h_tracers,add_vertical_div

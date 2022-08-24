@@ -9,7 +9,7 @@ module mo_grid_generator
   use mo_definitions,        only: wp,t_grid
   use mo_run_nml,            only: ny,nx,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
                                    lon_center,lplane
-  use constants,             only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
+  use mo_constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                    lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv, &
                                    r_d,c_d_p
   use mo_surface_nml,        only: nsoillays,orography_id

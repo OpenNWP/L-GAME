@@ -8,7 +8,7 @@ module mo_boundaries
   use mo_definitions,       only: t_state,t_bc,t_grid,wp
   use mo_run_nml,           only: ny,nx,nlays,t_init
   use mo_bc_nml,            only: n_swamp,bc_root_filename,bc_root_filename,dtime_bc,t_latest_bc
-  use constants,            only: M_PI,p_0,r_d,c_d_v
+  use mo_constants,         only: M_PI,p_0,r_d,c_d_v
   use mo_constituents_nml,  only: n_condensed_constituents
   use mo_set_initial_state, only: read_from_nc
 
