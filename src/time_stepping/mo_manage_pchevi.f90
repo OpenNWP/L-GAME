@@ -8,7 +8,7 @@ module mo_manage_pchevi
   use mo_definitions,                only: t_grid,t_state,t_diag,t_tend,t_bc,wp
   use mo_linear_combine_two_states,  only: lin_combination
   use mo_run_nml,                    only: dtime,ny,nx
-  use mo_pressure_gradient,          only: manage_pressure_gradient
+  use mo_pgrad,                      only: manage_pressure_gradient
   use mo_explicit_vector_tendencies, only: expl_vector_tend
   use mo_explicit_scalar_tendencies, only: expl_scalar_tend,moisturizer
   use mo_column_solvers,             only: three_band_solver_ver,three_band_solver_gen_densities

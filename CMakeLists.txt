@@ -22,7 +22,7 @@ src/time_stepping/mo_column_solvers.f90
 src/time_stepping/mo_explicit_vector_tendencies.f90
 src/time_stepping/mo_explicit_scalar_tendencies.f90
 src/time_stepping/mo_manage_pchevi.f90
-src/time_stepping/mo_pressure_gradient.f90
+src/time_stepping/mo_pgrad.f90
 src/constituents/mo_derived.f90
 src/constituents/mo_dictionary.f90
 src/constituents/mo_phase_trans.f90
