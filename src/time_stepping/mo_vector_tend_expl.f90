@@ -22,7 +22,7 @@ module mo_vector_tend_expl
   
   contains
 
-  subroutine expl_vector_tend(state,tend,diag,grid,rk_step,total_step_counter)
+  subroutine vector_tend_expl(state,tend,diag,grid,rk_step,total_step_counter)
   
     ! This subroutine manages the calculation of the explicit part of the wind tendencies.
   
@@ -130,7 +130,7 @@ module mo_vector_tend_expl
     + diag%mom_diff_tend_z)
     !$omp end parallel workshare
     
-  end subroutine expl_vector_tend
+  end subroutine vector_tend_expl
 
 end module mo_vector_tend_expl
 

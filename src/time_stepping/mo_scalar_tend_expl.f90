@@ -20,7 +20,7 @@ module mo_scalar_tend_expl
   
   contains
   
-  subroutine expl_scalar_tend(grid,state_scalar,state_vector,tend,diag,rk_step)
+  subroutine scalar_tend_expl(grid,state_scalar,state_vector,tend,diag,rk_step)
   
     ! This subroutine manages the calculation of the explicit part of the scalar tendencies.
   
@@ -134,7 +134,7 @@ module mo_scalar_tend_expl
       
     enddo
         
-  end subroutine
+  end subroutine scalar_tend_expl
   
   subroutine moisturizer(state,diag,grid)
   

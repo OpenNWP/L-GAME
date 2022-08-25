@@ -9,8 +9,8 @@ module mo_manage_pchevi
   use mo_linear_combine_two_states, only: lin_combination
   use mo_run_nml,                   only: dtime,ny,nx
   use mo_pgrad,                     only: manage_pressure_gradient
-  use mo_scalar_tend_expl,          only: expl_scalar_tend,moisturizer
-  use mo_vector_tend_expl,          only: expl_vector_tend
+  use mo_scalar_tend_expl,          only: scalar_tend_expl,moisturizer
+  use mo_vector_tend_expl,          only: vector_tend_expl
   use mo_column_solvers,            only: three_band_solver_ver,three_band_solver_gen_densities
   use mo_boundaries,                only: update_boundaries
   use mo_derived,                   only: temperature_diagnostics
@@ -69,10 +69,10 @@ module mo_manage_pchevi
       endif
       ! Only the horizontal momentum is a forward tendency.
       if (rk_step==1) then
-        call expl_vector_tend(state_old,tend,diag,grid,rk_step,total_step_counter)
+        call vector_tend_expl(state_old,tend,diag,grid,rk_step,total_step_counter)
       endif
       if (rk_step==2) then
-        call expl_vector_tend(state_new,tend,diag,grid,rk_step,total_step_counter)
+        call vector_tend_expl(state_new,tend,diag,grid,rk_step,total_step_counter)
       endif
       ! time stepping for the horizontal momentum can be directly executed
       !$omp parallel workshare
@@ -84,10 +84,10 @@ module mo_manage_pchevi
       ! 2.) Explicit component of the generalized density equations.
       ! ------------------------------------------------------------
       if (rk_step==1) then
-        call expl_scalar_tend(grid,state_old,state_new,tend,diag,rk_step)
+        call scalar_tend_expl(grid,state_old,state_new,tend,diag,rk_step)
       endif
       if (rk_step==2) then
-        call expl_scalar_tend(grid,state_new,state_new,tend,diag,rk_step)
+        call scalar_tend_expl(grid,state_new,state_new,tend,diag,rk_step)
       endif
       
       ! 3.) implicit dynamic vertical solver
