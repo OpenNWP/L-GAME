@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME),which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module mo_explicit_scalar_tendencies
+module mo_scalar_tend_expl
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
@@ -165,7 +165,7 @@ module mo_explicit_scalar_tendencies
   
   end subroutine moisturizer
 
-end module mo_explicit_scalar_tendencies
+end module mo_scalar_tend_expl
 
 
 

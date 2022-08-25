@@ -19,8 +19,8 @@ src/io/mo_set_initial_state.f90
 src/io/mo_write_out.f90
 src/io/mo_read_write_grid.f90
 src/time_stepping/mo_column_solvers.f90
-src/time_stepping/mo_explicit_vector_tendencies.f90
-src/time_stepping/mo_explicit_scalar_tendencies.f90
+src/time_stepping/mo_vector_tend_expl.f90
+src/time_stepping/mo_scalar_tend_expl.f90
 src/time_stepping/mo_manage_pchevi.f90
 src/time_stepping/mo_pgrad.f90
 src/constituents/mo_derived.f90
