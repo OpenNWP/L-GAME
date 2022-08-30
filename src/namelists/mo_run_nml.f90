@@ -21,11 +21,11 @@ module mo_run_nml
   real(wp)          :: sigma               ! vertical grid stretching parameter
   integer           :: run_span_min        ! run span in minutes
   real(wp)          :: t_init              ! epoch time stamp of the initialization
-  integer           :: start_year          ! year when to begin the model run
-  integer           :: start_month         ! month when to begin the model run
-  integer           :: start_day           ! day when to begin the model run
-  integer           :: start_hour          ! hour when to begin the model run
-  integer           :: start_minute        ! minute when to begin the model run
+  integer           :: start_year          ! year of the model run beginning
+  integer           :: start_month         ! month of the model run beginning
+  integer           :: start_day           ! day of the model run beginning
+  integer           :: start_hour          ! hour of the model run beginning
+  integer           :: start_minute        ! minute of the model run beginning
   logical           :: lrestart            ! switch for restart runs
   logical           :: lcorio              ! switch for the Coriolis force
   logical           :: lideal              ! switch for analytic test cases
