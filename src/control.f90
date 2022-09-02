@@ -47,6 +47,9 @@ program control
   write(*,*) "*                                 This is L-GAME                                 *"
   write(*,*) "*               Limited-area Geophysical Fluids Modeling Framework               *"
   write(*,*) "*                                                                                *"
+  write(*,*) "*                         Released under the MIT license.                        *"
+  write(*,*) "*         Visit https://github.com/OpenNWP/L-GAME for more information.          *"
+  write(*,*) "*                                                                                *"
   write(*,*) stars
 
   ! reading in all namelists so that we know what we have to do
