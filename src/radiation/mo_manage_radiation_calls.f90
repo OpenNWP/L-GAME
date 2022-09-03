@@ -13,7 +13,7 @@ module mo_manage_radiation_calls
   
   contains
   
-  subroutine call_radiation(state,grid,diag,time_coordinate)
+  subroutine update_rad_fluxes(state,grid,diag,time_coordinate)
   
     ! This subroutine calls RTE+RRTMGP in a parallelized way.
     
@@ -38,7 +38,7 @@ module mo_manage_radiation_calls
     
     write(*,*) "Update of radiative fluxes completed."
     
-  end subroutine call_radiation
+  end subroutine update_rad_fluxes
 
 end module mo_manage_radiation_calls
 

@@ -19,7 +19,7 @@ module mo_manage_pchevi
   use mo_surface_nml,               only: lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl
   use mo_pbl,                       only: update_sfc_turb_quantities
   use mo_bc_nml,                    only: lperiodic
-  use mo_manage_radiation_calls,    only: call_radiation
+  use mo_manage_radiation_calls,    only: update_rad_fluxes
 
   implicit none
 
@@ -47,7 +47,7 @@ module mo_manage_pchevi
     
     ! upating radiation if necessary
     if (lrad_update) then
-      call call_radiation(state_old,grid,diag,t_0)
+      call update_rad_fluxes(state_old,grid,diag,t_0)
     endif
     
     ! updating surface-related turbulence quantities if it is necessary

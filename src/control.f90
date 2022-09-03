@@ -21,7 +21,7 @@ program control
   use mo_linear_combine_two_states, only: lin_combination
   use mo_bc_nml,                    only: bc_nml_setup,lperiodic,t_latest_bc,dtime_bc
   use mo_rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
-  use mo_manage_radiation_calls,    only: call_radiation
+  use mo_manage_radiation_calls,    only: update_rad_fluxes
   use mo_boundaries,                only: setup_bc_factor,read_boundaries
   use mo_rrtmgp_coupler,            only: radiation_init
   use mo_derived,                   only: temperature_diagnostics
@@ -287,7 +287,7 @@ program control
   call temperature_diagnostics(state_1,diag,grid)
   if (lrad) then
     call radiation_init()
-    call call_radiation(state_1,grid,diag,t_0)
+    call update_rad_fluxes(state_1,grid,diag,t_0)
   endif
   ! setting the next time for the radiation update
   t_rad_update = t_rad_update+dtime_rad
