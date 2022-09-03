@@ -35,8 +35,8 @@ module mo_rad_nml
     cloud_coefficients_file_lw = "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-lw.nc"
     
     ! Open and read namelist file.
-    open(action="read", file="namelist.nml", newunit=fileunit)
-    read(nml=rad, unit=fileunit)
+    open(action="read",file="namelist.nml",newunit=fileunit)
+    read(nml=rad,unit=fileunit)
         
     close(fileunit)
   

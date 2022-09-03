@@ -33,8 +33,8 @@ module mo_bc_nml
     t_latest_bc = 0._wp
     
     ! Open and read namelist file.
-    open(action="read", file="namelist.nml", newunit=fileunit)
-    read(nml=bc, unit=fileunit)
+    open(action="read",file="namelist.nml",newunit=fileunit)
+    read(nml=bc,unit=fileunit)
     
     close(fileunit)
   

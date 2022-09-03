@@ -49,8 +49,8 @@ module mo_diff_nml
     karman = 0.4_wp
     
     ! Open and read namelist file.
-    open(action="read", file="namelist.nml", newunit=fileunit)
-    read(nml=diff, unit=fileunit)
+    open(action="read",file="namelist.nml",newunit=fileunit)
+    read(nml=diff,unit=fileunit)
         
     close(fileunit)
   

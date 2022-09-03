@@ -45,7 +45,7 @@ module mo_run_nml
 
   contains
 
-  subroutine run_nml_setup
+  subroutine run_nml_setup()
   
     ! local variables
     integer :: fileunit
@@ -79,8 +79,8 @@ module mo_run_nml
     lon_center = 0._wp
     
     ! open and read namelist file
-    open(action="read", file="namelist.nml", newunit=fileunit)
-    read(nml=run, unit=fileunit)
+    open(action="read",file="namelist.nml",newunit=fileunit)
+    read(nml=run,unit=fileunit)
         
     close(fileunit)
     
@@ -124,7 +124,7 @@ module mo_run_nml
       call exit(1)
     endif
     
-    write(*,*) "Time step: ", dtime, " s."
+    write(*,*) "Time step:",dtime,"s."
     
   end subroutine run_nml_setup
   

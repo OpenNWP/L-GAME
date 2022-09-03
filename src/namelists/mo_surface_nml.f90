@@ -35,8 +35,8 @@ module mo_surface_nml
     lpbl = .true.
     
     ! Open and read namelist file.
-    open(action="read", file="namelist.nml", newunit=fileunit)
-    read(nml=surface, unit=fileunit)
+    open(action="read",file="namelist.nml",newunit=fileunit)
+    read(nml=surface,unit=fileunit)
         
     close(fileunit)
   

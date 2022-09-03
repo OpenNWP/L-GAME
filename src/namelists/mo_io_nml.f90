@@ -41,8 +41,8 @@ module mo_io_nml
     oro_raw_filename = "etopo.nc"
     
     ! Open and read namelist file.
-    open(action="read", file="namelist.nml", newunit=fileunit)
-    read(nml=io, unit=fileunit)
+    open(action="read",file="namelist.nml",newunit=fileunit)
+    read(nml=io,unit=fileunit)
     
     close(fileunit)
     
