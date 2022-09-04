@@ -24,10 +24,10 @@ module mo_effective_diff_coeffs
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
     
     ! input arguments and output
-    type(t_state), intent(in)  :: state               ! the state variables of the model atmosphere
-    type(t_diag),  intent(out) :: diag                ! diagnostic quantities
-    real(wp),      intent(in)  :: divergence_h(:,:,:) ! divergence of the horizontal wind field
-    type(t_grid),  intent(in)  :: grid                ! grid quantities
+    type(t_state), intent(in)    :: state               ! the state variables of the model atmosphere
+    type(t_diag),  intent(inout) :: diag                ! diagnostic quantities
+    real(wp),      intent(in)    :: divergence_h(:,:,:) ! divergence of the horizontal wind field
+    type(t_grid),  intent(in)    :: grid                ! grid quantities
     
     ! local variables
     integer :: ji,jk,jl ! loop indices

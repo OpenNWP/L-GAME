@@ -67,6 +67,7 @@ module mo_manage_pchevi
       if (rk_step==1) then
         call manage_pressure_gradient(state_old,diag,grid,total_step_counter==0)
       endif
+      
       ! Only the horizontal momentum is a forward tendency.
       if (rk_step==1) then
         call vector_tend_expl(state_old,tend,diag,grid,rk_step,total_step_counter)
@@ -74,6 +75,7 @@ module mo_manage_pchevi
       if (rk_step==2) then
         call vector_tend_expl(state_new,tend,diag,grid,rk_step,total_step_counter)
       endif
+      
       ! time stepping for the horizontal momentum can be directly executed
       !$omp parallel workshare
       state_new%wind_u = state_old%wind_u + dtime*tend%wind_u
