@@ -17,6 +17,10 @@ run_span_min=0
 scenario="standard"
 /
 
+&constituents
+lmoist=.false.
+/
+
 &diff
 /
 

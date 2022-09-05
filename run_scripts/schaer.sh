@@ -26,6 +26,10 @@ lplane=.true.
 lmoist=.false.
 /
 
+&constituents
+lmoist=.false.
+/
+
 &diff
 lmom_diff_h=.true.
 diff_h_smag_rot=0.0

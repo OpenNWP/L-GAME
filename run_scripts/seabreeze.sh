@@ -32,6 +32,9 @@ sigma=1.0
 lplane=.true.
 /
 
+&constituents
+/
+
 &diff
 /
 

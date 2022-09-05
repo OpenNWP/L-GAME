@@ -27,6 +27,9 @@ start_hour=${BASH_ARGV[13]}
 start_minute=${BASH_ARGV[14]}
 /
 
+&constituents
+/
+
 &diff
 /
 
