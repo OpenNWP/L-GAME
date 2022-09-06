@@ -122,6 +122,11 @@ module mo_run_nml
       call exit(1)
     endif
     
+    if (nlays_oro>=nlays) then
+      write(*,*) "Error: it must be nlays_oro<nlays."
+      call exit(1)
+    endif
+    
     write(*,*) "Time step:",dtime,"s."
     
   end subroutine run_nml_setup
