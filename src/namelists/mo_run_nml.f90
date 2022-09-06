@@ -30,7 +30,6 @@ module mo_run_nml
   logical           :: lcorio              ! switch for the Coriolis force
   logical           :: lideal              ! switch for analytic test cases
   logical           :: lplane              ! plane geometry switch
-  logical           :: lmoist              ! moisture switch
   character(len=64) :: scenario            ! scenario for ideal runs
   character(len=64) :: run_id              ! ID of the model run
   logical           :: llinear             ! switch to turn momentum advection on or off
@@ -41,7 +40,7 @@ module mo_run_nml
   
   namelist /run/ny,nx,nlays,dy,dx,run_span_min,sigma, &
   toa,scenario,llinear,run_id,lcorio,nlays_oro,lat_center,lon_center, &
-  start_year,start_month,start_day,start_hour,start_minute,lplane,lmoist
+  start_year,start_month,start_day,start_hour,start_minute,lplane
 
   contains
 
@@ -68,7 +67,6 @@ module mo_run_nml
     lrestart = .false.
     lideal = .true.
     lplane = .false.
-    lmoist = .true.
     scenario = "standard"
     run_id = "ideal"
     llinear = .false.

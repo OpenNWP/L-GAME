@@ -22,7 +22,6 @@ nx=101
 toa=20000.0
 dy=2000
 dx=2000
-run_span_min=1440
 scenario="seabreeze"
 lcorio=.false.
 sigma=1.0
