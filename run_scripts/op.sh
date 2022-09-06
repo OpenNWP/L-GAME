@@ -27,10 +27,20 @@ start_hour=${BASH_ARGV[13]}
 start_minute=${BASH_ARGV[14]}
 /
 
+&io
+oro_raw_filename=${BASH_ARGV[15]}
+land_sea_filename=${BASH_ARGV[16]}
+restart_filename=${BASH_ARGV[17]}
+dt_write_min=15
+/
+
 &constituents
 /
 
 &diff
+/
+
+&rad
 /
 
 &surface
@@ -39,16 +49,6 @@ start_minute=${BASH_ARGV[14]}
 &bc
 dtime_bc=${BASH_ARGV[18]}
 bc_root_filename=${BASH_ARGV[19]}
-/
-
-&rad
-/
-
-&io
-oro_raw_filename=${BASH_ARGV[15]}
-land_sea_filename=${BASH_ARGV[16]}
-restart_filename=${BASH_ARGV[17]}
-dt_write_min=15
 /
 
 EOF

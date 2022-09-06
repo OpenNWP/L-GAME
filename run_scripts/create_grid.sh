@@ -17,6 +17,13 @@ run_span_min=0
 scenario="standard"
 /
 
+&io
+lread_oro=.false.
+lwrite_grid=.true.
+lread_land_sea=.false.
+lset_oro=.true.
+/
+
 &constituents
 lmoist=.false.
 /
@@ -24,21 +31,14 @@ lmoist=.false.
 &diff
 /
 
-&surface
-/
-
-&bc
-/
-
 &rad
 lrad=.false.
 /
 
-&io
-lread_oro=.false.
-lwrite_grid=.true.
-lread_land_sea=.false.
-lset_oro=.true.
+&surface
+/
+
+&bc
 /
 
 EOF

@@ -32,10 +32,19 @@ sigma=1.0
 lplane=.true.
 /
 
+&io
+lread_oro=.false.
+lread_land_sea=.false.
+dt_write_min=60
+/
+
 &constituents
 /
 
 &diff
+/
+
+&rad
 /
 
 &surface
@@ -44,15 +53,6 @@ orography_id=0
 
 &bc
 lperiodic=.true.
-/
-
-&rad
-/
-
-&io
-lread_oro=.false.
-lread_land_sea=.false.
-dt_write_min=60
 /
 
 EOF

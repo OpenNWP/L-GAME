@@ -16,10 +16,16 @@ lon_center=0.1199133716060684
 scenario="standard"
 /
 
+&io
+/
+
 &constituents
 /
 
 &diff
+/
+
+&rad
 /
 
 &surface
@@ -27,12 +33,6 @@ scenario="standard"
 
 &bc
 lperiodic=.true.
-/
-
-&rad
-/
-
-&io
 /
 
 EOF

@@ -25,10 +25,20 @@ sigma=1.0
 lplane=.true.
 /
 
+&io
+lread_oro=.false.
+lread_land_sea=.false.
+dt_write_min=60
+/
+
 &constituents
 /
 
 &diff
+/
+
+&rad
+lrad=.false.
 /
 
 &surface
@@ -40,16 +50,6 @@ lsfc_phase_trans=.false.
 
 &bc
 lperiodic=.true.
-/
-
-&rad
-lrad=.false.
-/
-
-&io
-lread_oro=.false.
-lread_land_sea=.false.
-dt_write_min=60
 /
 
 EOF

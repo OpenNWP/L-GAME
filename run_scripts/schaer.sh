@@ -26,6 +26,12 @@ lplane=.true.
 lmoist=.false.
 /
 
+&io
+lread_oro=.false.
+lread_land_sea=.false.
+dt_write_min=10
+/
+
 &constituents
 lmoist=.false.
 /
@@ -40,6 +46,10 @@ lmass_diff_h=.false.
 lmass_diff_v=.false.
 /
 
+&rad
+lrad=.false.
+/
+
 &surface
 orography_id=2
 lprog_soil_temp=.false.
@@ -49,16 +59,6 @@ lsfc_phase_trans=.false.
 
 &bc
 lperiodic=.true.
-/
-
-&rad
-lrad=.false.
-/
-
-&io
-lread_oro=.false.
-lread_land_sea=.false.
-dt_write_min=10
 /
 
 EOF
