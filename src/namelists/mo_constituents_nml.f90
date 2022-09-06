@@ -26,6 +26,7 @@ module mo_constituents_nml
     ! local variables
     integer :: fileunit
     
+    lmoist = .true.
     n_condensed_constituents = 5
     n_gaseous_constituents = 2
     

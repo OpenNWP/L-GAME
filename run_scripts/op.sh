@@ -31,7 +31,6 @@ start_minute=${BASH_ARGV[14]}
 oro_raw_filename=${BASH_ARGV[15]}
 land_sea_filename=${BASH_ARGV[16]}
 restart_filename=${BASH_ARGV[17]}
-dt_write_min=15
 /
 
 &constituents

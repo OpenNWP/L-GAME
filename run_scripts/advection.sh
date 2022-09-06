@@ -13,7 +13,6 @@ cat > namelist.nml << EOF
 run_id="$run_id"
 ny=3
 nx=301
-nlays=50
 nlays_oro=50
 toa=25000.0
 dy=1000
@@ -28,7 +27,6 @@ lplane=.true.
 &io
 lread_oro=.false.
 lread_land_sea=.false.
-dt_write_min=60
 /
 
 &constituents

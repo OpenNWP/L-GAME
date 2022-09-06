@@ -17,11 +17,8 @@ start_day=30
 start_hour=0
 start_minute=0
 lat_center=0.7853981633974483
-lon_center=0.0
 ny=3
 nx=101
-nlays=50
-nlays_oro=40
 toa=20000.0
 dy=2000
 dx=2000
@@ -35,7 +32,6 @@ lplane=.true.
 &io
 lread_oro=.false.
 lread_land_sea=.false.
-dt_write_min=60
 /
 
 &constituents

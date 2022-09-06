@@ -13,7 +13,6 @@ cat > namelist.nml << EOF
 run_id="$run_id"
 lat_center=0.8929595951304794
 lon_center=0.1199133716060684
-scenario="standard"
 /
 
 &io
