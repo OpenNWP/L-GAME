@@ -17,7 +17,8 @@ module mo_rad_nml
   character(len=128) :: cloud_coefficients_file_sw  ! name of the short wave cloud optics file
   character(len=128) :: cloud_coefficients_file_lw  ! name of the long wave cloud optics file
   
-  namelist /rad/lrad,dtime_rad
+  namelist /rad/lrad,dtime_rad,rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
+                cloud_coefficients_file_sw,cloud_coefficients_file_lw
   
   contains
   
