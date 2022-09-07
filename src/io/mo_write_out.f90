@@ -27,6 +27,7 @@ module mo_write_out
     type(t_grid),  intent(in)    :: grid                ! model grid
     
     ! local variables
+    logical           :: lcontains_nan             ! used for detecting if the model crashed
     integer           :: ncid                      ! ID of the NetCDF file
     integer           :: x_dimid                   ! ID of the x-dimension
     integer           :: y_dimid                   ! ID of the y-dimension
@@ -53,6 +54,15 @@ module mo_write_out
     real(wp)          :: upper_weight(ny,nx) ! interpolation weights
     
     write(*,*) "Writing output ..."
+    
+    ! check if the model has crashed
+    !$omp parallel workshare
+    lcontains_nan = any(isnan(state%exner_pert))
+    !$omp end parallel workshare
+    if (lcontains_nan) then
+      write(*,*) "Congratulations, the model crashed."
+      call exit(1)
+    endif
     
     ! creating the NetCDF file
     write(time_since_init_min_str,*) time_since_init_min
