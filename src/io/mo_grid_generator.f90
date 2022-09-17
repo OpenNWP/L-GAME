@@ -522,6 +522,13 @@ module mo_grid_generator
     enddo
     !$omp end parallel do
     
+    ! setting the layer thicknesses
+    !$omp parallel do private(jl)
+    do jl=1,nlays
+      grid%layer_thickness(:,:,jl) = grid%z_w(:,:,jl) - grid%z_w(:,:,jl+1)
+    enddo
+    !$omp end parallel do
+    
     ! setting the vertical distances between the scalar data points
     !$omp parallel do private(jl)
     do jl=1,nlays+1
