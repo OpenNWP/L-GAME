@@ -5,13 +5,16 @@ module mo_effective_diff_coeffs
   
   ! This module computes the effective diffusion coefficients.
   
-  use mo_run_nml,              only: ny,nx,nlays,dtime
+  use mo_run_nml,              only: ny,nx,nlays,dtime,dy
+  use mo_constants,            only: gravity
   use mo_definitions,          only: wp,t_state,t_diag,t_grid
-  use mo_diff_nml,             only: diff_h_smag_div,diff_h_smag_rot,lmom_diff_h,ltemp_diff_h
+  use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h
   use mo_derived,              only: calc_diffusion_coeff
   use mo_constituents_nml,     only: n_condensed_constituents
   use mo_tke,                  only: tke_update
   use mo_divergence_operators, only: div_h
+  use mo_gradient_operators,   only: grad_vert_cov
+  use mo_multiplications,      only: scalar_times_vector_v
   use mo_derived,              only: density_gas,spec_heat_cap_diagnostics_v
   use mo_bc_nml,               only: lperiodic
   
@@ -33,7 +36,15 @@ module mo_effective_diff_coeffs
     integer :: ji,jk,jl ! loop indices
     
     ! computing the eddy viscosity
-    diag%viscosity_coeff_div = diff_h_smag_div*grid%mean_velocity_area*abs(divergence_h)
+    !$omp parallel do private(ji,jk,jl)
+    do ji=1,ny
+      do jk=1,nx
+        do jl=1,nlays
+          diag%viscosity_coeff_div(ji,jk,jl) = tke2hor_diff_coeff(diag%tke(ji,jk,jl),dy)
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
     
     ! calculation of the molecular diffusion coefficient
     !$omp parallel do private(ji,jk,jl)
@@ -124,8 +135,7 @@ module mo_effective_diff_coeffs
     do ji=1,ny+1
       do jk=1,nx+1
         do jl=1,nlays
-          diag%viscosity_coeff_curl_dual(ji,jk,jl) = diag%viscosity_coeff_curl_dual(ji,jk,jl) &
-          + diff_h_smag_rot*grid%mean_velocity_area*abs(diag%zeta_z(ji,jk,jl))
+          diag%viscosity_coeff_curl_dual(ji,jk,jl) = diag%viscosity_coeff_curl_dual(ji,jk,jl)
         enddo
       enddo
     enddo
@@ -211,10 +221,10 @@ module mo_effective_diff_coeffs
           + diag%viscosity_molecular(ji,jk-1,jl) + diag%viscosity_molecular(ji,jk,jl)) &
           ! turbulent component
           + 0.25_wp*( &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji,jk-1,jl-1)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji,jk,jl-1)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji,jk-1,jl)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji,jk,jl)))
+          tke2vert_diff_coeff(diag%tke(ji,jk-1,jl-1),diag%n_squared(ji,jk-1,jl-1),grid%layer_thickness(ji,jk-1,jl-1)) + &
+          tke2vert_diff_coeff(diag%tke(ji,jk,jl-1),diag%n_squared(ji,jk,jl-1),grid%layer_thickness(ji,jk,jl-1)) + &
+          tke2vert_diff_coeff(diag%tke(ji,jk-1,jl),diag%n_squared(ji,jk-1,jl),grid%layer_thickness(ji,jk-1,jl)) + &
+          tke2vert_diff_coeff(diag%tke(ji,jk,jl),diag%n_squared(ji,jk,jl),grid%layer_thickness(ji,jk,jl)))
           
         enddo
         
@@ -227,10 +237,10 @@ module mo_effective_diff_coeffs
           + diag%viscosity_molecular(ji,nx,jl) + diag%viscosity_molecular(ji,1,jl)) &
           ! turbulent component
           + 0.25_wp*( &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji,nx,jl-1)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji,1,jl-1)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji,nx,jl)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji,1,jl)))
+          tke2vert_diff_coeff(diag%tke(ji,nx,jl-1),diag%n_squared(ji,nx,jl-1),grid%layer_thickness(ji,nx,jl-1)) + &
+          tke2vert_diff_coeff(diag%tke(ji,1,jl-1),diag%n_squared(ji,1,jl-1),grid%layer_thickness(ji,1,jl-1)) + &
+          tke2vert_diff_coeff(diag%tke(ji,nx,jl),diag%n_squared(ji,nx,jl),grid%layer_thickness(ji,nx,jl)) + &
+          tke2vert_diff_coeff(diag%tke(ji,1,jl),diag%n_squared(ji,1,jl),grid%layer_thickness(ji,1,jl)))
           
           diag%vert_hor_viscosity_u(ji,nx+1,jl) = diag%vert_hor_viscosity_u(ji,1,jl)
           
@@ -251,10 +261,10 @@ module mo_effective_diff_coeffs
           + diag%viscosity_molecular(ji-1,jk,jl) + diag%viscosity_molecular(ji,jk,jl)) &
           ! turbulent component
           + 0.25_wp*( &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji-1,jk,jl-1)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji,jk,jl-1)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji-1,jk,jl)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ji,jk,jl)))
+          tke2vert_diff_coeff(diag%tke(ji-1,jk,jl-1),diag%n_squared(ji-1,jk,jl-1),grid%layer_thickness(ji-1,jk,jl-1)) + &
+          tke2vert_diff_coeff(diag%tke(ji,jk,jl-1),diag%n_squared(ji,jk,jl-1),grid%layer_thickness(ji,jk,jl-1)) + &
+          tke2vert_diff_coeff(diag%tke(ji-1,jk,jl),diag%n_squared(ji-1,jk,jl),grid%layer_thickness(ji-1,jk,jl)) + &
+          tke2vert_diff_coeff(diag%tke(ji,jk,jl),diag%n_squared(ji,jk,jl),grid%layer_thickness(ji,jk,jl)))
           
         enddo
         
@@ -267,10 +277,10 @@ module mo_effective_diff_coeffs
           + diag%viscosity_molecular(ny,jk,jl) + diag%viscosity_molecular(1,jk,jl)) &
           ! turbulent component
           + 0.25_wp*( &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ny,jk,jl-1)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(1,jk,jl-1)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(ny,jk,jl)) + &
-          tke2vertical_diff_coeff(diag%viscosity_molecular(1,jk,jl)))
+          tke2vert_diff_coeff(diag%tke(ny,jk,jl-1),diag%n_squared(ny,jk,jl-1),grid%layer_thickness(ny,jk,jl-1)) + &
+          tke2vert_diff_coeff(diag%tke(1,jk,jl-1),diag%n_squared(1,jk,jl-1),grid%layer_thickness(1,jk,jl-1)) + &
+          tke2vert_diff_coeff(diag%tke(ny,jk,jl),diag%n_squared(ny,jk,jl),grid%layer_thickness(ny,jk,jl)) + &
+          tke2vert_diff_coeff(diag%tke(1,jk,jl),diag%n_squared(1,jk,jl),grid%layer_thickness(1,jk,jl)))
           
           diag%vert_hor_viscosity_v(ny+1,jk,jl) = diag%vert_hor_viscosity_v(1,jk,jl)
           
@@ -347,13 +357,14 @@ module mo_effective_diff_coeffs
   
   end subroutine vert_hor_mom_viscosity
   
-  subroutine vert_vert_mom_viscosity(state,diag)
+  subroutine vert_vert_mom_viscosity(state,diag,grid)
   
     ! This subroutine multiplies scalar_placeholder (containing dw/dz) by the diffusion coefficient acting on w because of w.
    
     ! input arguments and output
     type(t_state), intent(in)    :: state ! state
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
     real(wp) :: mom_diff_coeff        ! the diffusion coefficient
@@ -368,7 +379,7 @@ module mo_effective_diff_coeffs
           ! molecular viscosity
           = diag%viscosity_molecular(ji,jk,jl) &
           ! turbulent component
-          + tke2vertical_diff_coeff(diag%tke(ji,jk,jl))
+          + tke2vert_diff_coeff(diag%tke(ji,jk,jl),diag%n_squared(ji,jk,jl),grid%layer_thickness(ji,jk,jl))
 
           diag%scalar_placeholder(ji,jk,jl) = density_gas(state,ji,jk,jl)*mom_diff_coeff*diag%scalar_placeholder(ji,jk,jl)
         enddo
@@ -426,7 +437,7 @@ module mo_effective_diff_coeffs
           ! molecular component
           = density_gas(state,ji,jk,jl)*c_g_v*(diag%viscosity_molecular(ji,jk,jl) &
           ! turbulent component
-          + tke2vertical_diff_coeff(diag%tke(ji,jk,jl)))
+          + tke2vert_diff_coeff(diag%tke(ji,jk,jl),diag%n_squared(ji,jk,jl),grid%layer_thickness(ji,jk,jl)))
         enddo
       enddo
     enddo
@@ -481,7 +492,7 @@ module mo_effective_diff_coeffs
           ! molecular component
           = diag%viscosity_molecular(ji,jk,jl) &
           ! turbulent component
-          + tke2vertical_diff_coeff(diag%tke(ji,jk,jl))
+          + tke2vert_diff_coeff(diag%tke(ji,jk,jl),diag%n_squared(ji,jk,jl),grid%layer_thickness(ji,jk,jl))
         enddo
       enddo
     enddo
@@ -489,23 +500,99 @@ module mo_effective_diff_coeffs
     
   end subroutine mass_diffusion_coeffs
   
-  function tke2vertical_diff_coeff(tke)
+  subroutine update_n_squared(state,diag,grid)
     
-    ! This function returns the vertical kinematic eddy viscosity as a function of the specific TKE.
-	
-    ! input
-    real(wp), intent(in) :: tke                     ! specific turbulent kinetic energy (TKE)
-    ! output
-    real(wp)             :: tke2vertical_diff_coeff ! the result (vertical eddy viscosity im m^2/s)
+    ! This subroutine calculates the Brunt-Väisälä frequency.
     
-    ! local variable
-    real(wp) :: prop_constant ! semi-empirical constant
-	
-    prop_constant = 0.4_wp ! unit: m
-    ! calculating the result
-    tke2vertical_diff_coeff = prop_constant*tke**0.5_wp
-	
-  end function tke2vertical_diff_coeff
+    type(t_state), intent(in)    :: state ! state which to use for the calculation
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
+    
+    ! local variables
+    integer :: ji,jk,jl
+    
+    ! calculating the full virtual potential temperature
+    !$omp parallel workshare
+    diag%scalar_placeholder = grid%theta_v_bg+state%theta_v_pert
+    !$omp end parallel workshare
+    ! vertical gradient of the full virtual potential temperature
+    call grad_vert_cov(diag%scalar_placeholder,diag%w_placeholder,grid)
+    ! calculating the inverse full virtual potential temperature
+    !$omp parallel workshare
+    diag%scalar_placeholder = 1.0/diag%scalar_placeholder
+    !$omp end parallel workshare
+    call scalar_times_vector_v(diag%scalar_placeholder,diag%w_placeholder,diag%w_placeholder)
+    
+    ! multiplying by the gravity acceleration
+    !$omp parallel do private(ji,jk,jl)
+    do ji=1,ny
+      do jk=1,nx
+        do jl=2,nlays
+          diag%w_placeholder(ji,jk,jl) &
+          = gravity*diag%w_placeholder(ji,jk,jl)
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
+    
+    ! averaging vertically to the scalar points
+    !$omp parallel do private(ji,jk,jl)
+    do ji=1,ny
+      do jk=1,nx
+        do jl=1,nlays
+          if (jl==1) then
+            diag%n_squared(ji,jk,jl) = diag%w_placeholder(ji,jk,jl)
+          elseif (jl==nlays) then
+            diag%n_squared(ji,jk,jl) = diag%w_placeholder(ji,jk,jl+1)
+          else
+            diag%n_squared(ji,jk,jl) &
+            = grid%inner_product_weights(ji,jk,jl,7)*diag%w_placeholder(ji,jk,jl) &
+            + grid%inner_product_weights(ji,jk,jl,8)*diag%w_placeholder(ji,jk,jl+1)
+          endif
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
+    
+  end subroutine update_n_squared
+  
+  function tke2hor_diff_coeff(tke,effective_resolution)
+  
+    ! This function returns the horizontal kinematic eddy viscosity as a function of the specific TKE.
+    
+    real(wp), intent(in)  :: tke,effective_resolution
+    real(wp)              :: tke2hor_diff_coeff
+    
+    ! local variables
+    real(wp) :: mean_velocity,mean_free_path
+    
+    mean_velocity = (2._wp*tke)**0.5_wp
+    mean_free_path = effective_resolution/6._wp
+    tke2hor_diff_coeff = 1._wp/6._wp*mean_free_path*mean_velocity
+  
+  end function tke2hor_diff_coeff
+
+  function tke2vert_diff_coeff(tke,n_squared,layer_thickness)
+
+    ! This function returns the vertical kinematic eddy viscosity as a function of the specific TKE and the Brunt-Väisälä frequency.
+    
+    real(wp), intent(in)  :: tke,n_squared,layer_thickness
+    real(wp)              :: tke2vert_diff_coeff
+    
+    ! local variables
+    real(wp) :: tke_vert,mean_velocity,n_used,mean_free_path
+  
+    ! vertical component of the turbulent kinetic energy
+    tke_vert = 3._wp*1e-3_wp*tke
+  
+    mean_velocity = (2._wp*tke_vert)**0.5_wp
+    ! used Brunt-Väisälä frequency
+    n_used = (max(n_squared,1e-4_wp))**0.5_wp
+    mean_free_path = (2._wp*tke_vert)**0.5_wp/n_used
+    mean_free_path = min(mean_free_path,layer_thickness)
+    tke2vert_diff_coeff = 1._wp/6._wp*mean_free_path*mean_velocity
+    
+  end function tke2vert_diff_coeff
   
 end module mo_effective_diff_coeffs
 

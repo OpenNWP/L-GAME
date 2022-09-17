@@ -5,18 +5,20 @@ module mo_vector_tend_expl
 
   ! This module manages the calculation of the explicit part of the wind tendencies.
 
-  use mo_definitions,        only: t_grid,t_state,t_diag,t_tend,wp
-  use mo_inner_product,      only: inner
-  use mo_gradient_operators, only: grad
-  use mo_run_nml,            only: ny,nx,nlays,impl_weight,llinear,lcorio
-  use mo_constituents_nml,   only: n_condensed_constituents
-  use mo_vorticities,        only: calc_pot_vort
-  use mo_multiplications,    only: scalar_times_vector
-  use mo_vorticity_flux,     only: calc_vorticity_flux_term
-  use mo_diff_nml,           only: lmom_diff_h,lmom_diff_v
-  use mo_momentum_diff_diss, only: mom_diff_h,mom_diff_v,simple_dissipation_rate
-  use mo_pbl,                only: pbl_wind_tendency
-  use mo_surface_nml,        only: lpbl
+  use mo_definitions,           only: t_grid,t_state,t_diag,t_tend,wp
+  use mo_inner_product,         only: inner
+  use mo_gradient_operators,    only: grad
+  use mo_run_nml,               only: ny,nx,nlays,impl_weight,llinear,lcorio
+  use mo_constituents_nml,      only: n_condensed_constituents
+  use mo_vorticities,           only: calc_pot_vort
+  use mo_multiplications,       only: scalar_times_vector
+  use mo_vorticity_flux,        only: calc_vorticity_flux_term
+  use mo_diff_nml,              only: lmom_diff_h,lmom_diff_v,lmass_diff_h,ltemp_diff_h
+  use mo_momentum_diff_diss,    only: mom_diff_h,mom_diff_v,simple_dissipation_rate
+  use mo_effective_diff_coeffs, only: update_n_squared
+  use mo_tke,                   only: tke_update
+  use mo_pbl,                   only: pbl_wind_tendency
+  use mo_surface_nml,           only: lpbl
 
   implicit none
   
@@ -61,6 +63,12 @@ module mo_vector_tend_expl
     
     ! momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
     if (rk_step==1) then
+      ! updating the Brunt-Väisälä frequency and the TKE if any diffusion is switched on because it is required for computing the diffusion coefficients
+      if (lmom_diff_h .or. lmass_diff_h .or. ltemp_diff_h) then
+        call update_n_squared(state,diag,grid)
+        call tke_update(state,diag,grid)
+      endif
+      
       ! horizontal momentum diffusion
       if (lmom_diff_h) then
         call mom_diff_h(state,diag,grid)
