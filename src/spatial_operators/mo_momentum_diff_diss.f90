@@ -5,17 +5,17 @@ module mo_momentum_diff_diss
 
   ! This module handles momentum diffusion and dissipation.
   
-  use mo_definitions,           only: t_grid,t_diag,t_state
-  use mo_divergence_operators,  only: div_h,add_vertical_div
-  use mo_gradient_operators,    only: grad_hor,grad_vert_cov
-  use mo_run_nml,               only: ny,nx,nlays,wp
-  use mo_diff_nml,              only: h_prandtl
-  use mo_inner_product,         only: inner
-  use mo_derived,               only: density_gas
-  use mo_effective_diff_coeffs, only: hor_viscosity,vert_vert_mom_viscosity
-  use mo_multiplications,       only: scalar_times_scalar
-  use mo_bc_nml,                only: lperiodic
-  use mo_vorticities,           only: rel_vort
+  use mo_definitions,          only: t_grid,t_diag,t_state
+  use mo_divergence_operators, only: div_h,add_vertical_div
+  use mo_gradient_operators,   only: grad_hor,grad_vert_cov
+  use mo_run_nml,              only: ny,nx,nlays,wp
+  use mo_diff_nml,             only: h_prandtl
+  use mo_inner_product,        only: inner
+  use mo_derived,              only: density_gas
+  use mo_eff_diff_coeffs,      only: hor_viscosity,vert_vert_mom_viscosity
+  use mo_multiplications,      only: scalar_times_scalar
+  use mo_bc_nml,               only: lperiodic
+  use mo_vorticities,          only: rel_vort
   
   implicit none
   

@@ -1,11 +1,11 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-module mo_effective_diff_coeffs
+module mo_eff_diff_coeffs
   
   ! This module computes the effective diffusion coefficients.
   
-  use mo_run_nml,              only: ny,nx,nlays,dtime,dy
+  use mo_run_nml,              only: ny,nx,nlays,dtime,eff_hor_res
   use mo_constants,            only: gravity
   use mo_definitions,          only: wp,t_state,t_diag,t_grid
   use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h
@@ -38,7 +38,7 @@ module mo_effective_diff_coeffs
     do ji=1,ny
       do jk=1,nx
         do jl=1,nlays
-          diag%viscosity_coeff_div(ji,jk,jl) = tke2hor_diff_coeff(diag%tke(ji,jk,jl),dy)
+          diag%viscosity_coeff_div(ji,jk,jl) = tke2hor_diff_coeff(diag%tke(ji,jk,jl),eff_hor_res)
         enddo
       enddo
     enddo
@@ -120,10 +120,10 @@ module mo_effective_diff_coeffs
       do ji=2,ny
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*( &
-          tke2hor_diff_coeff(diag%tke(ji-1,jk-1,jl),dy) &
-          + tke2hor_diff_coeff(diag%tke(ji-1,jk,jl),dy) &
-          + tke2hor_diff_coeff(diag%tke(ji,jk-1,jl),dy) &
-          + tke2hor_diff_coeff(diag%tke(ji,jk,jl),dy))
+          tke2hor_diff_coeff(diag%tke(ji-1,jk-1,jl),eff_hor_res) &
+          + tke2hor_diff_coeff(diag%tke(ji-1,jk,jl),eff_hor_res) &
+          + tke2hor_diff_coeff(diag%tke(ji,jk-1,jl),eff_hor_res) &
+          + tke2hor_diff_coeff(diag%tke(ji,jk,jl),eff_hor_res))
         enddo
       enddo
       
@@ -132,21 +132,21 @@ module mo_effective_diff_coeffs
       
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
-          tke2hor_diff_coeff(diag%tke(1,jk-1,jl),dy) + tke2hor_diff_coeff(diag%tke(ny,jk-1,jl),dy) &
-          + tke2hor_diff_coeff(diag%tke(1,jk,jl),dy) + tke2hor_diff_coeff(diag%tke(ny,jk,jl),dy))
+          tke2hor_diff_coeff(diag%tke(1,jk-1,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ny,jk-1,jl),eff_hor_res) &
+          + tke2hor_diff_coeff(diag%tke(1,jk,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ny,jk,jl),eff_hor_res))
           diag%viscosity_coeff_curl_dual(ny+1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl)
         enddo
         do ji=2,ny
           diag%viscosity_coeff_curl_dual(ji,1,jl) = 0.25_wp*( &
-          tke2hor_diff_coeff(diag%tke(ji-1,nx,jl),dy) + tke2hor_diff_coeff(diag%tke(ji-1,1,jl),dy) &
-          + tke2hor_diff_coeff(diag%tke(ji,nx,jl),dy) + tke2hor_diff_coeff(diag%tke(ji,1,jl),dy))
+          tke2hor_diff_coeff(diag%tke(ji-1,nx,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ji-1,1,jl),eff_hor_res) &
+          + tke2hor_diff_coeff(diag%tke(ji,nx,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ji,1,jl),eff_hor_res))
           diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
         enddo
       
         ! corners
         diag%viscosity_coeff_curl_dual(1,1,jl) = 0.25*( &
-        tke2hor_diff_coeff(diag%tke(1,1,jl),dy) + tke2hor_diff_coeff(diag%tke(ny,1,jl),dy) &
-        + tke2hor_diff_coeff(diag%tke(1,nx,jl),dy) + tke2hor_diff_coeff(diag%tke(ny,nx,jl),dy))
+        tke2hor_diff_coeff(diag%tke(1,1,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ny,1,jl),eff_hor_res) &
+        + tke2hor_diff_coeff(diag%tke(1,nx,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ny,nx,jl),eff_hor_res))
         diag%viscosity_coeff_curl_dual(1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
         diag%viscosity_coeff_curl_dual(ny+1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
         diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
@@ -605,7 +605,7 @@ module mo_effective_diff_coeffs
     
   end function tke2vert_diff_coeff
   
-end module mo_effective_diff_coeffs
+end module mo_eff_diff_coeffs
 
 
 

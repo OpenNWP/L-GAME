@@ -16,6 +16,7 @@ module mo_run_nml
   integer           :: nlays_oro           ! number of levels following the orography
   real(wp)          :: dy                  ! mesh size in y direction at sea level
   real(wp)          :: dx                  ! mesh size in x direction at sea level at the equator
+  real(wp)          :: eff_hor_res         ! effective horizontal resolution
   real(wp)          :: dtime               ! time step
   real(wp)          :: toa                 ! top of atmosphere
   real(wp)          :: sigma               ! vertical grid stretching parameter
@@ -83,7 +84,8 @@ module mo_run_nml
     close(fileunit)
     
     ! this calculates the time step using the CFL criterion
-    dtime = 1.61_wp*sqrt(dx*dy)/1000._wp
+    eff_hor_res = sqrt(dx*dy)
+    dtime = 1.61_wp*eff_hor_res/1000._wp
     
     ! calculating the Unix time of the model start
     t_init = (start_year-1970)*365*24*3600 + leap_year_correction(start_year)*24*3600 &

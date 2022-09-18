@@ -5,16 +5,16 @@ module mo_scalar_tend_expl
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
-  use mo_constants,             only: c_d_p
-  use mo_definitions,           only: wp,t_grid,t_state,t_diag,t_tend
-  use mo_multiplications,       only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
-  use mo_divergence_operators,  only: div_h,div_h_tracers,add_vertical_div
-  use mo_run_nml,               only: dtime
-  use mo_phase_trans,           only: calc_h2otracers_source_rates
-  use mo_constituents_nml,      only: n_condensed_constituents,n_constituents
-  use mo_diff_nml,              only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
-  use mo_effective_diff_coeffs, only: temp_diffusion_coeffs,mass_diffusion_coeffs
-  use mo_gradient_operators,    only: grad
+  use mo_constants,            only: c_d_p
+  use mo_definitions,          only: wp,t_grid,t_state,t_diag,t_tend
+  use mo_multiplications,      only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
+  use mo_divergence_operators, only: div_h,div_h_tracers,add_vertical_div
+  use mo_run_nml,              only: dtime
+  use mo_phase_trans,          only: calc_h2otracers_source_rates
+  use mo_constituents_nml,     only: n_condensed_constituents,n_constituents
+  use mo_diff_nml,             only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
+  use mo_eff_diff_coeffs,      only: temp_diffusion_coeffs,mass_diffusion_coeffs
+  use mo_gradient_operators,   only: grad
 
   implicit none
   
