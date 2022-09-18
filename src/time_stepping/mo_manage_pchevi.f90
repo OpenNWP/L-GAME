@@ -42,20 +42,25 @@ module mo_manage_pchevi
     ! local variables
     integer :: rk_step ! index of the Runge-Kutta step
     
+    ! Preparations
+    ! ------------
+    
     ! diagnosing the temperature
     call temperature_diagnostics(state_old,diag,grid)
-    
-    ! upating radiation if necessary
-    if (lrad_update) then
-      call update_rad_fluxes(state_old,grid,diag,t_0)
-    endif
     
     ! updating surface-related turbulence quantities if it is necessary
     if (lsfc_sensible_heat_flux .or. lsfc_phase_trans .or. lpbl) then
       call update_sfc_turb_quantities(state_old,diag,grid)
     endif
     
-    ! loop over the two Runge-Kutta steps
+    ! upating radiation if necessary
+    if (lrad_update) then
+      call update_rad_fluxes(state_old,grid,diag,t_0)
+    endif
+      
+    ! Loop over the RK substeps
+    ! -------------------------
+    
     do rk_step=1,2
     
       ! state_old remains unchanged the whole time.

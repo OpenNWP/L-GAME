@@ -61,14 +61,13 @@ module mo_vector_tend_expl
       endif
     endif
     
-    ! momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
+    ! momentum diffusion and dissipation (only updated at the first RK step)
     if (rk_step==1) then
       ! updating the Brunt-Väisälä frequency and the TKE if any diffusion is switched on because it is required for computing the diffusion coefficients
       if (lmom_diff_h .or. lmass_diff_h .or. ltemp_diff_h) then
         call update_n_squared(state,diag,grid)
         call tke_update(state,diag,grid)
       endif
-      
       ! horizontal momentum diffusion
       if (lmom_diff_h) then
         call mom_diff_h(state,diag,grid)
@@ -77,13 +76,11 @@ module mo_vector_tend_expl
       if (lmom_diff_v) then
         call mom_diff_v(state,diag,grid)
       endif
-      
       ! planetary boundary layer
       if (lpbl) then
         call pbl_wind_tendency(state,diag,grid)
       endif
-      
-      ! dissipation
+      ! calculation of the dissipative heating rate
       if (lmom_diff_h .or. lpbl) then
         call simple_dissipation_rate(state,diag,grid)
       endif
@@ -95,7 +92,7 @@ module mo_vector_tend_expl
     endif
     old_weight = 1._wp - new_weight
     
-    ! adding up the explicit wind tendencies
+    ! Now the explicit forces are added up.
     
     ! x-direction
     !$omp parallel workshare
