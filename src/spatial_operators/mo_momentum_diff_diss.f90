@@ -13,7 +13,6 @@ module mo_momentum_diff_diss
   use mo_inner_product,        only: inner_product
   use mo_derived,              only: density_gas
   use mo_eff_diff_coeffs,      only: hor_viscosity,vert_vert_mom_viscosity
-  use mo_multiplications,      only: scalar_times_scalar
   use mo_bc_nml,               only: lperiodic
   use mo_vorticities,          only: rel_vort
   
@@ -49,7 +48,9 @@ module mo_momentum_diff_diss
     ! Computing the gradient of divergence component
     ! ----------------------------------------------
     ! multiplying the divergence by the diffusion coefficient acting on divergent movements
-    call scalar_times_scalar(diag%viscosity_coeff_div,diag%scalar_placeholder,diag%scalar_placeholder)
+    !$omp parallel workshare
+    diag%scalar_placeholder = diag%viscosity_coeff_div*diag%scalar_placeholder
+    !$omp end parallel workshare
     ! calculating the horizontal gradient of the divergence
     call grad_hor(diag%scalar_placeholder,diag%mom_diff_tend_x,diag%mom_diff_tend_y,diag%mom_diff_tend_z,grid)
     
