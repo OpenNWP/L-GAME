@@ -12,7 +12,7 @@ module mo_momentum_diff_diss
   use mo_diff_nml,              only: h_prandtl
   use mo_inner_product,         only: inner
   use mo_derived,               only: density_gas
-  use mo_effective_diff_coeffs, only: hor_div_viscosity,vert_vert_mom_viscosity,hor_curl_viscosity
+  use mo_effective_diff_coeffs, only: hor_viscosity,vert_vert_mom_viscosity
   use mo_multiplications,       only: scalar_times_scalar
   use mo_bc_nml,                only: lperiodic
   use mo_vorticities,           only: rel_vort
@@ -43,10 +43,8 @@ module mo_momentum_diff_diss
     
     ! Computing the necessary diffusion coefficients
     ! ----------------------------------------------
-    ! computing the relevant diffusion coefficient
-    call hor_div_viscosity(state,diag)
-    ! calculating the diffusion coefficient acting on rotational movements
-    call hor_curl_viscosity(state,diag)
+    ! calculating the effective horizontal kinematic viscosity
+    call hor_viscosity(state,diag)
     
     ! Computing the gradient of divergence component
     ! ----------------------------------------------

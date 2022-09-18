@@ -22,13 +22,13 @@ module mo_effective_diff_coeffs
   
   contains
   
-  subroutine hor_div_viscosity(state,diag)
+  subroutine hor_viscosity(state,diag)
   
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
     
     ! input arguments and output
-    type(t_state), intent(in)    :: state               ! the state variables of the model atmosphere
-    type(t_diag),  intent(inout) :: diag                ! diagnostic quantities
+    type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     
     ! local variables
     integer :: ji,jk,jl ! loop indices
@@ -71,19 +71,6 @@ module mo_effective_diff_coeffs
       enddo
     enddo
     !$omp end parallel do
-  
-  end subroutine hor_div_viscosity
-  
-  subroutine hor_curl_viscosity(state,diag)
-  
-    ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements.
-  
-    ! input arguments and output
-    type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
-    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    
-    ! local variables
-    integer :: ji,jk,jl ! loop indices
     
     ! initialization with zeros
     !$omp parallel workshare
@@ -219,7 +206,7 @@ module mo_effective_diff_coeffs
     enddo
     !$omp end parallel do
   
-  end subroutine hor_curl_viscosity
+  end subroutine hor_viscosity
   
   subroutine vert_hor_mom_viscosity(state,diag,grid)
   
@@ -433,8 +420,7 @@ module mo_effective_diff_coeffs
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h) then
     
-      call hor_div_viscosity(state,diag)
-      call hor_curl_viscosity(state,diag)
+      call hor_viscosity(state,diag)
       call tke_update(state,diag,grid)
       
       ! molecular viscosity
@@ -487,8 +473,7 @@ module mo_effective_diff_coeffs
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
     
-      call hor_div_viscosity(state,diag)
-      call hor_curl_viscosity(state,diag)
+      call hor_viscosity(state,diag)
       call tke_update(state,diag,grid)
       
       ! molecular viscosity
