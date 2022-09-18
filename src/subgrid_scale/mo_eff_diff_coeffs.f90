@@ -22,15 +22,13 @@ module mo_effective_diff_coeffs
   
   contains
   
-  subroutine hor_div_viscosity(state,diag,divergence_h,grid)
+  subroutine hor_div_viscosity(state,diag)
   
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
     
     ! input arguments and output
     type(t_state), intent(in)    :: state               ! the state variables of the model atmosphere
     type(t_diag),  intent(inout) :: diag                ! diagnostic quantities
-    real(wp),      intent(in)    :: divergence_h(:,:,:) ! divergence of the horizontal wind field
-    type(t_grid),  intent(in)    :: grid                ! grid quantities
     
     ! local variables
     integer :: ji,jk,jl ! loop indices
@@ -76,14 +74,13 @@ module mo_effective_diff_coeffs
   
   end subroutine hor_div_viscosity
   
-  subroutine hor_curl_viscosity(state,diag,grid)
+  subroutine hor_curl_viscosity(state,diag)
   
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements.
   
     ! input arguments and output
     type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
     integer :: ji,jk,jl ! loop indices
@@ -129,15 +126,46 @@ module mo_effective_diff_coeffs
     
     enddo
     !$omp end parallel do
-    
+        
     ! turbulent component
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny+1
-      do jk=1,nx+1
-        do jl=1,nlays
-          diag%viscosity_coeff_curl_dual(ji,jk,jl) = diag%viscosity_coeff_curl_dual(ji,jk,jl)
+    do jl=1,nlays
+      do ji=2,ny
+        do jk=2,nx
+          diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*( &
+          tke2hor_diff_coeff(diag%tke(ji-1,jk-1,jl),dy) &
+          + tke2hor_diff_coeff(diag%tke(ji-1,jk,jl),dy) &
+          + tke2hor_diff_coeff(diag%tke(ji,jk-1,jl),dy) &
+          + tke2hor_diff_coeff(diag%tke(ji,jk,jl),dy))
         enddo
       enddo
+      
+      ! periodic boundary conditions
+      if (lperiodic) then
+      
+        do jk=2,nx
+          diag%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
+          tke2hor_diff_coeff(diag%tke(1,jk-1,jl),dy) + tke2hor_diff_coeff(diag%tke(ny,jk-1,jl),dy) &
+          + tke2hor_diff_coeff(diag%tke(1,jk,jl),dy) + tke2hor_diff_coeff(diag%tke(ny,jk,jl),dy))
+          diag%viscosity_coeff_curl_dual(ny+1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl)
+        enddo
+        do ji=2,ny
+          diag%viscosity_coeff_curl_dual(ji,1,jl) = 0.25_wp*( &
+          tke2hor_diff_coeff(diag%tke(ji-1,nx,jl),dy) + tke2hor_diff_coeff(diag%tke(ji-1,1,jl),dy) &
+          + tke2hor_diff_coeff(diag%tke(ji,nx,jl),dy) + tke2hor_diff_coeff(diag%tke(ji,1,jl),dy))
+          diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
+        enddo
+      
+        ! corners
+        diag%viscosity_coeff_curl_dual(1,1,jl) = 0.25*( &
+        tke2hor_diff_coeff(diag%tke(1,1,jl),dy) + tke2hor_diff_coeff(diag%tke(ny,1,jl),dy) &
+        + tke2hor_diff_coeff(diag%tke(1,nx,jl),dy) + tke2hor_diff_coeff(diag%tke(ny,nx,jl),dy))
+        diag%viscosity_coeff_curl_dual(1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_coeff_curl_dual(ny+1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        
+      endif
+    
     enddo
     !$omp end parallel do
     
@@ -405,9 +433,8 @@ module mo_effective_diff_coeffs
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h) then
     
-      call div_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
-      call hor_div_viscosity(state,diag,diag%scalar_placeholder,grid)
-      call hor_curl_viscosity(state,diag,grid)
+      call hor_div_viscosity(state,diag)
+      call hor_curl_viscosity(state,diag)
       call tke_update(state,diag,grid)
       
       ! molecular viscosity
@@ -460,9 +487,8 @@ module mo_effective_diff_coeffs
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
     
-      call div_h(state%wind_u,state%wind_v,diag%scalar_placeholder,grid)
-      call hor_div_viscosity(state,diag,diag%scalar_placeholder,grid)
-      call hor_curl_viscosity(state,diag,grid)
+      call hor_div_viscosity(state,diag)
+      call hor_curl_viscosity(state,diag)
       call tke_update(state,diag,grid)
       
       ! molecular viscosity

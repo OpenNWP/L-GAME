@@ -44,9 +44,9 @@ module mo_momentum_diff_diss
     ! Computing the necessary diffusion coefficients
     ! ----------------------------------------------
     ! computing the relevant diffusion coefficient
-    call hor_div_viscosity(state,diag,diag%scalar_placeholder,grid)
+    call hor_div_viscosity(state,diag)
     ! calculating the diffusion coefficient acting on rotational movements
-    call hor_curl_viscosity(state,diag,grid)
+    call hor_curl_viscosity(state,diag)
     
     ! Computing the gradient of divergence component
     ! ----------------------------------------------
