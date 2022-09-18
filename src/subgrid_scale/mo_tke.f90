@@ -10,7 +10,7 @@ module mo_tke
   use mo_derived,            only: density_gas
   use mo_constants,          only: M_PI
   use mo_gradient_operators, only: grad
-  use mo_inner_product,      only: inner
+  use mo_inner_product,      only: inner_product
   
   implicit none
   
@@ -31,7 +31,7 @@ module mo_tke
     
     ! computing the advection
     call grad(diag%tke,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
-    call inner(state%wind_u,state%wind_v,state%wind_w,diag%u_placeholder,diag%v_placeholder, &
+    call inner_product(state%wind_u,state%wind_v,state%wind_w,diag%u_placeholder,diag%v_placeholder, &
     diag%w_placeholder,diag%scalar_placeholder,grid)
     
     !$omp parallel do private(ji,jk,jl,decay_constant)

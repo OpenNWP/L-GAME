@@ -10,7 +10,7 @@ module mo_momentum_diff_diss
   use mo_gradient_operators,   only: grad_hor,grad_vert_cov
   use mo_run_nml,              only: ny,nx,nlays,wp
   use mo_diff_nml,             only: h_prandtl
-  use mo_inner_product,        only: inner
+  use mo_inner_product,        only: inner_product
   use mo_derived,              only: density_gas
   use mo_eff_diff_coeffs,      only: hor_viscosity,vert_vert_mom_viscosity
   use mo_multiplications,      only: scalar_times_scalar
@@ -325,7 +325,7 @@ module mo_momentum_diff_diss
     integer :: ji,jk,jl ! loop indices
     
     ! calculating the inner product of the momentum diffusion acceleration and the wind
-    call inner(state%wind_u,state%wind_v,state%wind_w, &
+    call inner_product(state%wind_u,state%wind_v,state%wind_w, &
     diag%mom_diff_tend_x,diag%mom_diff_tend_y,diag%mom_diff_tend_z,diag%heating_diss,grid)
     
     !$omp parallel do private(ji,jk,jl)
