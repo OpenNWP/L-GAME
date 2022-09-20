@@ -99,6 +99,7 @@ module mo_set_initial_state
         state%wind_v = 0._wp
         !$omp end parallel workshare
         
+        ! temperature in the whole atmosphere and pressure in the lowest layer
         !$omp parallel do private(ji,jk,jl)
         do ji=1,ny
           do jk=1,nx
@@ -127,8 +128,8 @@ module mo_set_initial_state
         enddo
         !$omp end parallel do
     
-        !$omp parallel workshare
         ! condensates
+        !$omp parallel workshare
         state%rho(:,:,:,1:n_condensed_constituents) = 0._wp
         !$omp end parallel workshare
 
@@ -242,20 +243,20 @@ module mo_set_initial_state
     ! This subroutine reads a model state from a NetCDF file.
     
     ! input arguments and output
-    real(wp),          intent(out) :: rho(:,:,:,:)    ! mass densities
+    real(wp),          intent(out) :: rho(:,:,:,:)      ! mass densities
     real(wp),          intent(out) :: rhotheta_v(:,:,:) ! virtual potential temperature density
-    real(wp),          intent(out) :: wind_u(:,:,:)   ! u-wind
-    real(wp),          intent(out) :: wind_v(:,:,:)   ! v-wind
-    real(wp),          intent(out) :: wind_w(:,:,:)   ! w-wind
-    character(len=64), intent(in)  :: filename        ! filename to read from
+    real(wp),          intent(out) :: wind_u(:,:,:)     ! u-wind
+    real(wp),          intent(out) :: wind_v(:,:,:)     ! v-wind
+    real(wp),          intent(out) :: wind_w(:,:,:)     ! w-wind
+    character(len=64), intent(in)  :: filename          ! filename to read from
     
     ! local variables
-    integer :: ncid           ! ID of the NetCDF file
-    integer :: varid_rho      ! variable ID of the densities
+    integer :: ncid             ! ID of the NetCDF file
+    integer :: varid_rho        ! variable ID of the densities
     integer :: varid_rhotheta_v ! variable ID of the virtual potential temperature density
-    integer :: varid_u        ! variable ID of the u-wind
-    integer :: varid_v        ! variable ID of the v-wind
-    integer :: varid_w        ! variable ID of the w-wind
+    integer :: varid_u          ! variable ID of the u-wind
+    integer :: varid_v          ! variable ID of the v-wind
+    integer :: varid_w          ! variable ID of the w-wind
     
     ! opening the NetCDF file
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
@@ -282,7 +283,7 @@ module mo_set_initial_state
   subroutine unessential_ideal_init(state,diag,grid,pres_lowest_layer)
   
     ! setting the unessential quantities of an ideal initial state
-    ! scalar_placeholder is the temperature here
+    ! scalar_placeholder is the virtual temperature here
     
     type(t_state), intent(inout) :: state                  ! state to work with
     type(t_diag),  intent(in)    :: diag                   ! diagnostic quantities
@@ -368,9 +369,9 @@ module mo_set_initial_state
     real(wp)             :: bg_pres ! the result
 
     if (height<inv_height) then  
-      bg_pres = p_0_standard*(1 - lapse_rate*height/surface_temp)**(gravity/(r_d*lapse_rate))
+      bg_pres = p_0_standard*(1._wp-lapse_rate*height/surface_temp)**(gravity/(r_d*lapse_rate))
     elseif (height<tropo_height) then
-      bg_pres = p_0_standard*(1 - lapse_rate*tropo_height/surface_temp)**(gravity/(r_d*lapse_rate)) &
+      bg_pres = p_0_standard*(1._wp-lapse_rate*tropo_height/surface_temp)**(gravity/(r_d*lapse_rate)) &
       *exp(-gravity*(height - tropo_height)/(r_d*(surface_temp - lapse_rate*tropo_height)))
     else
       write(*,*) "Argument of bg_pres is above the inversion height. This is unrealistic in the lowest layer."
