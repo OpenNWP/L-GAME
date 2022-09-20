@@ -40,13 +40,13 @@ module mo_tke
         do jl=1,nlays
           ! calculating the decay constant
           decay_constant = 8._wp*M_PI**2/grid%mean_velocity_area*(diag%viscosity_coeff_div(ji,jk,jl) &
-          + diag%viscosity_coeff_curl(ji,jk,jl))/sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents))
+          + diag%viscosity_coeff_curl(ji,jk,jl))/state%rho(ji,jk,jl,n_condensed_constituents+1)
           
           diag%tke(ji,jk,jl) = diag%tke(ji,jk,jl) + dtime*( &
           ! advection
           -diag%scalar_placeholder(ji,jk,jl) &
           ! production of TKE through generation of resolved energy
-          + diag%heating_diss(ji,jk,jl)/sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents)) &
+          + diag%heating_diss(ji,jk,jl)/state%rho(ji,jk,jl,n_condensed_constituents+1) &
           ! decay through molecular dissipation
           - decay_constant*diag%tke(ji,jk,jl) &
           )

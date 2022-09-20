@@ -114,13 +114,15 @@ module mo_momentum_diff_diss
       do jl=1,nlays
         do jk=2,nx
           diag%mom_diff_tend_x(ji,jk,jl) = (diag%mom_diff_tend_x(ji,jk,jl) + diag%u_placeholder(ji,jk,jl)) &
-          /(0.5_wp*(sum(state%rho(ji,jk-1,jl,:)) + sum(state%rho(ji,jk,jl,:))))
+          /(0.5_wp*(sum(state%rho(ji,jk-1,jl,1:n_condensed_constituents+1)) &
+                  + sum(state%rho(ji,jk,jl,1:n_condensed_constituents+1))))
         enddo
         
         ! periodic boundary conditions
         if (lperiodic) then
           diag%mom_diff_tend_x(ji,1,jl) = (diag%mom_diff_tend_x(ji,1,jl) + diag%u_placeholder(ji,1,jl)) &
-          /(0.5_wp*(sum(state%rho(ji,nx,jl,:)) + sum(state%rho(ji,1,jl,:))))
+          /(0.5_wp*(sum(state%rho(ji,nx,jl,1:n_condensed_constituents+1)) &
+                  + sum(state%rho(ji,1,jl,1:n_condensed_constituents+1))))
         endif
         diag%mom_diff_tend_x(ji,nx+1,jl) = diag%mom_diff_tend_x(ji,1,jl)
         
@@ -133,13 +135,15 @@ module mo_momentum_diff_diss
       do jl=1,nlays
         do ji=2,ny
           diag%mom_diff_tend_y(ji,jk,jl) = (diag%mom_diff_tend_y(ji,jk,jl) + diag%v_placeholder(ji,jk,jl)) &
-          /(0.5_wp*(sum(state%rho(ji-1,jk,jl,:)) + sum(state%rho(ji,jk,jl,:))))
+          /(0.5_wp*(sum(state%rho(ji-1,jk,jl,1:n_condensed_constituents+1)) &
+                  + sum(state%rho(ji,jk,jl,1:n_condensed_constituents+1))))
         enddo
         
         ! periodic boundary conditions
         if (lperiodic) then
           diag%mom_diff_tend_y(1,jk,jl) = (diag%mom_diff_tend_y(1,jk,jl) + diag%v_placeholder(1,jk,jl)) &
-          /(0.5_wp*(sum(state%rho(ny,jk,jl,:)) + sum(state%rho(1,jk,jl,:))))
+          /(0.5_wp*(sum(state%rho(ny,jk,jl,1:n_condensed_constituents+1)) &
+                  + sum(state%rho(1,jk,jl,1:n_condensed_constituents+1))))
         endif
         diag%mom_diff_tend_y(ny+1,jk,jl) = diag%mom_diff_tend_y(1,jk,jl)
         
@@ -216,7 +220,8 @@ module mo_momentum_diff_diss
           + (diag%vert_hor_viscosity_u(ji,jk,jl)*diag%du_dz(ji,jk,jl) &
           - diag%vert_hor_viscosity_u(ji,jk,jl+1)*diag%du_dz(ji,jk,jl+1)) &
           /(0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl) - grid%z_w(ji,jk-1,jl+1) - grid%z_w(ji,jk,jl+1))) &
-          /(0.5_wp*(sum(state%rho(ji,jk-1,jl,:)) + sum(state%rho(ji,jk,jl,:))))
+          /(0.5_wp*(sum(state%rho(ji,jk-1,jl,1:n_condensed_constituents+1)) &
+                  + sum(state%rho(ji,jk,jl,1:n_condensed_constituents+1))))
         enddo
       
         ! periodic boundary conditions
@@ -225,7 +230,8 @@ module mo_momentum_diff_diss
           + (diag%vert_hor_viscosity_u(ji,1,jl)*diag%du_dz(ji,1,jl) &
           - diag%vert_hor_viscosity_u(ji,1,jl+1)*diag%du_dz(ji,1,jl+1)) &
           /(0.5_wp*(grid%z_w(ji,nx,jl) + grid%z_w(ji,1,jl) - grid%z_w(ji,nx,jl+1) - grid%z_w(ji,1,jl+1))) &
-          /(0.5_wp*(sum(state%rho(ji,nx,jl,:)) + sum(state%rho(ji,1,jl,:))))
+          /(0.5_wp*(sum(state%rho(ji,nx,jl,1:n_condensed_constituents+1)) &
+                  + sum(state%rho(ji,1,jl,1:n_condensed_constituents+1))))
           diag%mom_diff_tend_x(ji,nx+1,jl) = diag%mom_diff_tend_x(ji,1,jl)
         endif
       
@@ -241,7 +247,8 @@ module mo_momentum_diff_diss
           + (diag%vert_hor_viscosity_v(ji,jk,jl)*diag%dv_dz(ji,jk,jl) &
           - diag%vert_hor_viscosity_v(ji,jk,jl+1)*diag%dv_dz(ji,jk,jl+1)) &
           /(0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl) - grid%z_w(ji-1,jk,jl+1) - grid%z_w(ji,jk,jl+1))) &
-          /(0.5_wp*(sum(state%rho(ji-1,jk,jl,:)) + sum(state%rho(ji,jk,jl,:))))
+          /(0.5_wp*(sum(state%rho(ji-1,jk,jl,1:n_condensed_constituents+1)) &
+                  + sum(state%rho(ji,jk,jl,1:n_condensed_constituents+1))))
         enddo
       
         ! periodic boundary conditions
@@ -250,7 +257,8 @@ module mo_momentum_diff_diss
           + (diag%vert_hor_viscosity_v(1,jk,jl)*diag%dv_dz(1,jk,jl) &
           - diag%vert_hor_viscosity_v(1,jk,jl+1)*diag%dv_dz(1,jk,jl+1)) &
           /(0.5_wp*(grid%z_w(ny,jk,jl) + grid%z_w(1,jk,jl) - grid%z_w(ny,jk,jl+1) - grid%z_w(1,jk,jl+1))) &
-          /(0.5_wp*(sum(state%rho(ny,jk,jl,:)) + sum(state%rho(1,jk,jl,:))))
+          /(0.5_wp*(sum(state%rho(ny,jk,jl,1:n_condensed_constituents+1)) &
+                  + sum(state%rho(1,jk,jl,1:n_condensed_constituents+1))))
           diag%mom_diff_tend_y(ny+1,jk,jl) = diag%mom_diff_tend_y(1,jk,jl)
         endif
       
@@ -305,7 +313,8 @@ module mo_momentum_diff_diss
           0.5_wp*(diag%scalar_placeholder(ji,jk,jl-1) + diag%scalar_placeholder(ji,jk,jl))
           ! dividing by the density
           diag%mom_diff_tend_z(ji,jk,jl) = diag%mom_diff_tend_z(ji,jk,jl)/ &
-          (0.5_wp*(sum(state%rho(ji,jk,jl-1,:)) + sum(state%rho(ji,jk,jl,:))))
+          (0.5_wp*(sum(state%rho(ji,jk,jl-1,1:n_condensed_constituents+1)) &
+                 + sum(state%rho(ji,jk,jl,1:n_condensed_constituents+1))))
         enddo
       enddo
     enddo
@@ -333,7 +342,7 @@ module mo_momentum_diff_diss
     do ji=1,ny
       do jk=1,nx
         do jl=1,nlays
-          diag%heating_diss(ji,jk,jl) = -sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents)) &
+          diag%heating_diss(ji,jk,jl) = -sum(state%rho(ji,jk,jl,1:n_condensed_constituents+1)) &
                                          *diag%heating_diss(ji,jk,jl)
         enddo
       enddo
