@@ -10,12 +10,12 @@ module mo_eff_diff_coeffs
   use mo_definitions,          only: wp,t_state,t_diag,t_grid
   use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h
   use mo_derived,              only: calc_diffusion_coeff
-  use mo_constituents_nml,     only: n_condensed_constituents
+  use mo_constituents_nml,     only: n_constituents,n_condensed_constituents
   use mo_tke,                  only: tke_update
   use mo_divergence_operators, only: div_h
   use mo_gradient_operators,   only: grad_vert_cov
   use mo_multiplications,      only: scalar_times_vector_v
-  use mo_derived,              only: density_gas,spec_heat_cap_diagnostics_v
+  use mo_derived,              only: spec_heat_cap_diagnostics_v
   use mo_bc_nml,               only: lperiodic
   
   implicit none
@@ -66,7 +66,8 @@ module mo_eff_diff_coeffs
     do ji=1,ny
       do jk=1,nx
         do jl=1,nlays
-          diag%viscosity_coeff_div(ji,jk,jl) = density_gas(state,ji,jk,jl)*diag%viscosity_coeff_div(ji,jk,jl)
+          diag%viscosity_coeff_div(ji,jk,jl) = sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents)) &
+                                               *diag%viscosity_coeff_div(ji,jk,jl)
         enddo
       enddo
     enddo
@@ -161,8 +162,12 @@ module mo_eff_diff_coeffs
     do jl=1,nlays
       do ji=2,ny
         do jk=2,nx
-          diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*(density_gas(state,ji-1,jk-1,jl)+density_gas(state,ji-1,jk,jl) &
-          + density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl))*diag%viscosity_coeff_curl_dual(ji,jk,jl)
+          diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*( &
+          sum(state%rho(ji-1,jk-1,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji-1,jk,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,jk-1,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents))) &
+          *diag%viscosity_coeff_curl_dual(ji,jk,jl)
         enddo
       enddo
       
@@ -171,21 +176,30 @@ module mo_eff_diff_coeffs
       
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl) &
-          *(0.25_wp*(density_gas(state,1,jk-1,jl) + density_gas(state,ny,jk-1,jl) &
-          + density_gas(state,1,jk,jl) + density_gas(state,ny,jk,jl)))
+          *(0.25_wp*( &
+          sum(state%rho(1,jk-1,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ny,jk-1,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(1,jk,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ny,jk,jl,n_condensed_constituents+1:n_constituents))))
           diag%viscosity_coeff_curl_dual(ny+1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl)
         enddo
         do ji=2,ny
           diag%viscosity_coeff_curl_dual(ji,1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl) &
-          *(0.25_wp*(density_gas(state,ji-1,nx,jl)+density_gas(state,ji-1,1,jl) &
-          + density_gas(state,ji,nx,jl)+density_gas(state,ji,1,jl)))
+          *(0.25_wp*( &
+          sum(state%rho(ji-1,nx,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji-1,1,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,nx,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,1,jl,n_condensed_constituents+1:n_constituents))))
           diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
         enddo
       
         ! corners
         diag%viscosity_coeff_curl_dual(1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl) &
-        *(0.25_wp*(density_gas(state,ny,nx,jl)+density_gas(state,ny,1,jl) &
-        + density_gas(state,1,nx,jl)+density_gas(state,1,1,jl)))
+        *(0.25_wp*( &
+        sum(state%rho(ny,nx,jl,n_condensed_constituents+1:n_constituents)) &
+        + sum(state%rho(ny,1,jl,n_condensed_constituents+1:n_constituents)) &
+        + sum(state%rho(1,nx,jl,n_condensed_constituents+1:n_constituents)) &
+        + sum(state%rho(1,1,jl,n_condensed_constituents+1:n_constituents))))
         diag%viscosity_coeff_curl_dual(1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
         diag%viscosity_coeff_curl_dual(ny+1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
         diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
@@ -313,8 +327,10 @@ module mo_eff_diff_coeffs
           diag%vert_hor_viscosity_u(ji,jk,jl) = diag%vert_hor_viscosity_u(ji,jk,jl) &
           ! molecular component
           *0.25_wp*( &
-          density_gas(state,ji,jk-1,jl-1) + density_gas(state,ji,jk,jl-1) &
-          + density_gas(state,ji,jk-1,jl) + density_gas(state,ji,jk,jl))
+          sum(state%rho(ji,jk-1,jl-1,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,jk,jl-1,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,jk-1,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents)))
           
         enddo
         
@@ -323,8 +339,10 @@ module mo_eff_diff_coeffs
           diag%vert_hor_viscosity_u(ji,1,jl) = diag%vert_hor_viscosity_u(ji,1,jl) &
           ! molecular component
           *0.25_wp*( &
-          density_gas(state,ji,nx,jl-1) + density_gas(state,ji,1,jl-1) &
-          + density_gas(state,ji,nx,jl) + density_gas(state,ji,1,jl))
+          sum(state%rho(ji,nx,jl-1,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,1,jl-1,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,nx,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,1,jl,n_condensed_constituents+1:n_constituents)))
         endif
         
       enddo
@@ -338,8 +356,10 @@ module mo_eff_diff_coeffs
           diag%vert_hor_viscosity_v(ji,jk,jl) = diag%vert_hor_viscosity_v(ji,jk,jl) &
           ! molecular component
           *0.25_wp*( &
-          density_gas(state,ji-1,jk,jl-1) + density_gas(state,ji,jk,jl-1) &
-          + diag%viscosity_molecular(ji-1,jk,jl) + density_gas(state,ji,jk,jl))
+          sum(state%rho(ji-1,jk,jl-1,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,jk,jl-1,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji-1,jk,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents)))
           
         enddo
         
@@ -348,8 +368,10 @@ module mo_eff_diff_coeffs
           diag%vert_hor_viscosity_v(1,jk,jl) = diag%vert_hor_viscosity_v(1,jk,jl) &
           ! molecular component
           *0.25_wp*( &
-          density_gas(state,ny,jk,jl-1) + density_gas(state,1,jk,jl-1) &
-          + density_gas(state,ny,jk,jl) + density_gas(state,1,jk,jl))
+          sum(state%rho(ny,jk,jl-1,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(1,jk,jl-1,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(ny,jk,jl,n_condensed_constituents+1:n_constituents)) &
+          + sum(state%rho(1,jk,jl,n_condensed_constituents+1:n_constituents)))
           
         endif
         
@@ -396,7 +418,8 @@ module mo_eff_diff_coeffs
           ! turbulent component
           + tke2vert_diff_coeff(diag%tke(ji,jk,jl),diag%n_squared(ji,jk,jl),grid%layer_thickness(ji,jk,jl))
 
-          diag%scalar_placeholder(ji,jk,jl) = density_gas(state,ji,jk,jl)*mom_diff_coeff*diag%scalar_placeholder(ji,jk,jl)
+          diag%scalar_placeholder(ji,jk,jl) = sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents)) &
+                                              *mom_diff_coeff*diag%scalar_placeholder(ji,jk,jl)
         enddo
       enddo
     enddo
@@ -448,7 +471,8 @@ module mo_eff_diff_coeffs
           ! vertical diffusion coefficient
           diag%scalar_diff_coeff_v(ji,jk,jl) &
           ! molecular component
-          = density_gas(state,ji,jk,jl)*c_g_v*(diag%viscosity_molecular(ji,jk,jl) &
+          = sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents)) &
+          *c_g_v*(diag%viscosity_molecular(ji,jk,jl) &
           ! turbulent component
           + tke2vert_diff_coeff(diag%tke(ji,jk,jl),diag%n_squared(ji,jk,jl),grid%layer_thickness(ji,jk,jl)))
         enddo
@@ -497,7 +521,7 @@ module mo_eff_diff_coeffs
           ! horizontal diffusion coefficient
           diag%scalar_diff_coeff_h(ji,jk,jl) &
           = 0.5_wp*(diag%viscosity_coeff_div(ji,jk,jl) + diag%viscosity_coeff_curl(ji,jk,jl)) &
-          /density_gas(state,ji,jk,jl)
+          /sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents))
           ! vertical diffusion coefficient
           diag%scalar_diff_coeff_v(ji,jk,jl) &
           ! molecular component

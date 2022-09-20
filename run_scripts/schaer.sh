@@ -14,7 +14,7 @@ run_id="$run_id"
 ny=3
 nx=401
 nlays=65
-nlays_oro=65
+nlays_oro=64
 toa=19500.0
 dy=500
 dx=500
@@ -36,7 +36,7 @@ lmoist=.false.
 /
 
 &diff
-diff_h_smag_rot=0.0
+lmom_diff_h=.true.
 lmom_diff_v=.false.
 ltemp_diff_v=.false.
 lmass_diff_h=.false.

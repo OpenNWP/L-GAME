@@ -133,27 +133,6 @@ module mo_derived
     
   end function gas_constant_diagnostics
 
-  function density_gas(state,ji,jk,jl)
-    
-    ! This function calculates the density of the gas phase at a certain gridpoint.
-    
-    ! input arguments
-    type(t_state), intent(in) :: state       ! state with which to calculate the result
-    integer,       intent(in) :: ji,jk,jl    ! indices of the gridpoint
-    ! output
-    real(wp)                  :: density_gas ! the result
-    
-    ! local variables
-    integer :: jc ! index of the constituent
-    
-    density_gas = 0._wp
-    
-    do jc=1,n_gaseous_constituents
-      density_gas = density_gas + state%rho(ji,jk,jl,n_condensed_constituents+jc)
-    enddo
-    
-  end function density_gas
-
   function rel_humidity(abs_humidity,temperature)
     
     ! This function returns the relative humidity as a function of the absolute humidity in kg/m^3 and the temperature in K.

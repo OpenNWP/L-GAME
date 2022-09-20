@@ -10,8 +10,8 @@ module mo_momentum_diff_diss
   use mo_gradient_operators,   only: grad_hor,grad_vert_cov
   use mo_run_nml,              only: ny,nx,nlays,wp
   use mo_diff_nml,             only: h_prandtl
+  use mo_constituents_nml,     only: n_constituents,n_condensed_constituents
   use mo_inner_product,        only: inner_product
-  use mo_derived,              only: density_gas
   use mo_eff_diff_coeffs,      only: hor_viscosity,vert_vert_mom_viscosity
   use mo_bc_nml,               only: lperiodic
   use mo_vorticities,          only: rel_vort
@@ -333,7 +333,8 @@ module mo_momentum_diff_diss
     do ji=1,ny
       do jk=1,nx
         do jl=1,nlays
-          diag%heating_diss(ji,jk,jl) = -density_gas(state,ji,jk,jl)*diag%heating_diss(ji,jk,jl)
+          diag%heating_diss(ji,jk,jl) = -sum(state%rho(ji,jk,jl,n_condensed_constituents+1:n_constituents)) &
+                                         *diag%heating_diss(ji,jk,jl)
         enddo
       enddo
     enddo

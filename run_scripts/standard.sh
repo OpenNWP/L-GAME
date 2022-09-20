@@ -19,6 +19,7 @@ lon_center=0.1199133716060684
 /
 
 &constituents
+lmoist=.true.
 /
 
 &diff
