@@ -9,7 +9,7 @@ module mo_manage_pchevi
   use mo_linear_combine_two_states, only: lin_combination
   use mo_run_nml,                   only: dtime,ny,nx
   use mo_pgrad,                     only: manage_pressure_gradient
-  use mo_scalar_tend_expl,          only: scalar_tend_expl,moisturizer
+  use mo_scalar_tend_expl,          only: scalar_tend_expl
   use mo_vector_tend_expl,          only: vector_tend_expl
   use mo_column_solvers,            only: three_band_solver_ver,three_band_solver_gen_densities
   use mo_boundaries,                only: update_boundaries
@@ -113,11 +113,6 @@ module mo_manage_pchevi
       endif
       
     enddo
-    
-    ! saturation adjustment, calculation of latent heating rates, evaporation at the surface
-    if (n_constituents>1) then
-      call moisturizer(state_new,diag,grid)
-    endif
     
     ! calling the boundary conditions subroutine in real-data simulations
     if (.not. lperiodic) then

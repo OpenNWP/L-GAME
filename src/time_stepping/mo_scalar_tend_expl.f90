@@ -135,35 +135,6 @@ module mo_scalar_tend_expl
     enddo
         
   end subroutine scalar_tend_expl
-  
-  subroutine moisturizer(state,diag,grid)
-  
-    ! This subroutine manages the calculation of the phase transition rates.
-    
-    type(t_state),intent(inout) :: state ! the state with which to calculate the phase transition rates
-    type(t_diag), intent(inout) :: diag  ! diagnostic quantities
-    type(t_grid), intent(in)    :: grid  ! grid properties
-      
-    if (n_constituents>1) then
-    
-      ! calculating the source rates
-      call calc_h2otracers_source_rates(state,diag,grid)
-      
-      ! condensates
-      !$omp parallel workshare
-      state%rho(:,:,:,1:n_condensed_constituents) = state%rho(:,:,:,1:n_condensed_constituents) &
-      + dtime*diag%mass_source_rates(:,:,:,1:n_condensed_constituents)
-      !$omp end parallel workshare
-      
-      ! water vapour
-      !$omp parallel workshare
-      state%rho(:,:,:,n_constituents) = state%rho(:,:,:,n_constituents) &
-      + dtime*diag%mass_source_rates(:,:,:,n_constituents-1)
-      !$omp end parallel workshare
-      
-    endif
-  
-  end subroutine moisturizer
 
 end module mo_scalar_tend_expl
 
