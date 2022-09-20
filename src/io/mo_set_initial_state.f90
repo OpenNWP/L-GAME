@@ -26,7 +26,7 @@ module mo_set_initial_state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    real(wp) :: pres_lowest_layer(ny,nx)              ! pressure in the lowest layer
+    real(wp) :: pres_lowest_layer(ny,nx)                    ! pressure in the lowest layer
     real(wp) :: n_squared                                   ! Brunt-Väisälä frequency for the Schär test case
     real(wp) :: gravity_local                               ! gravity acceleration
     real(wp) :: delta_z                                     ! delta z
