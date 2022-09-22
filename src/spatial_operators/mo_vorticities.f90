@@ -6,7 +6,7 @@ module mo_vorticities
   ! This module contains the calculation of the vorticities.
 
   use mo_definitions,      only: t_state,t_diag,t_grid,wp
-  use mo_run_nml,          only: ny,nx,nlays,nlays_oro,toa,lcorio,llinear
+  use mo_run_nml,          only: ny,nx,nlays,nlays_oro,toa,lcorio,llinear,nlays_flat
   use mo_constants,        only: r_e
   use mo_constituents_nml, only: n_condensed_constituents
   use mo_averaging,        only: horizontal_covariant_x,horizontal_covariant_y
@@ -429,7 +429,7 @@ module mo_vorticities
     endif
     
     ! flat layers
-    if (jl<=nlays-nlays_oro) then
+    if (jl<=nlays_flat) then
       rel_vort_z_local = rel_vort_z_local &
       + sign_vector(1)*grid%dy(j_i(1),j_k(1),jl)*state%wind_v(j_i(1),j_k(1),jl) &
       + sign_vector(2)*grid%dx(j_i(2),j_k(2),jl)*state%wind_u(j_i(2),j_k(2),jl) &

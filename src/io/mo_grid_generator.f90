@@ -8,7 +8,7 @@ module mo_grid_generator
   use netcdf
   use mo_definitions,        only: wp,t_grid
   use mo_run_nml,            only: ny,nx,nlays,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
-                                   lon_center,lplane
+                                   lon_center,lplane,nlays_flat
   use mo_constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                    lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv, &
                                    r_d,c_d_p
@@ -388,8 +388,8 @@ module mo_grid_generator
           sigma_z = z_rel**sigma
           A = sigma_z*toa ! the height without orography
           ! B corrects for orography
-          if (jl>=nlays-nlays_oro+1._wp) then
-            B = (jl-(nlays-nlays_oro+1._wp))/nlays_oro
+          if (jl>=nlays_flat+1._wp) then
+            B = (jl-(nlays_flat+1._wp))/nlays_oro
           else
             B = 0._wp
           endif
@@ -399,7 +399,7 @@ module mo_grid_generator
         ! doing a check
         if (ji==1 .and. jk==1) then
           max_oro = maxval(grid%z_w(:,:,nlays+1))
-          if (max_oro >= vertical_vector_pre(nlays-nlays_oro+1)) then
+          if (max_oro >= vertical_vector_pre(nlays_flat+1)) then
             write(*,*) "Maximum of orography larger or equal to the height of the lowest flat level."
             write(*,*) "Aborting."
             call exit(1)

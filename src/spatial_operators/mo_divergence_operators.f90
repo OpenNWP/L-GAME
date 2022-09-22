@@ -6,7 +6,7 @@ module mo_divergence_operators
   ! The calculation of the horizontal divergence operator is executed in this module.
 
   use mo_definitions, only: wp,t_grid
-  use mo_run_nml,     only: ny,nx,nlays,nlays_oro,dtime
+  use mo_run_nml,     only: ny,nx,nlays,nlays_oro,dtime,nlays_flat
   use mo_averaging,   only: vertical_contravariant_corr
   
   implicit none
@@ -45,13 +45,13 @@ module mo_divergence_operators
           
           ! the vertical component
           comp_v = 0._wp
-          if (jl==nlays-nlays_oro) then
+          if (jl==nlays_flat) then
             contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
             comp_v = -contra_lower*grid%area_z(ji,jk,jl+1)
           elseif (jl==nlays) then
             contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
             comp_v = contra_upper*grid%area_z(ji,jk,jl)
-          elseif (jl>nlays-nlays_oro) then
+          elseif (jl>nlays_flat) then
             contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
             contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
             comp_v &
@@ -105,7 +105,7 @@ module mo_divergence_operators
           
           ! the vertical component
           comp_v = 0._wp
-          if (jl==nlays-nlays_oro) then
+          if (jl==nlays_flat) then
             contra_lower = vertical_contravariant_corr(wind_field_x,wind_field_y,ji,jk,jl+1,grid)
             if (contra_lower<=0._wp) then
               density_lower = density_field(ji,jk,jl)
@@ -121,7 +121,7 @@ module mo_divergence_operators
               density_upper = density_field(ji,jk,jl)
             endif
             comp_v = density_upper*contra_upper*grid%area_z(ji,jk,jl)
-          elseif (jl>nlays-nlays_oro) then
+          elseif (jl>nlays_flat) then
             contra_upper = vertical_contravariant_corr(wind_field_x,wind_field_y,ji,jk,jl,grid)
             if (contra_upper<=0._wp) then
               density_upper = density_field(ji,jk,jl-1)

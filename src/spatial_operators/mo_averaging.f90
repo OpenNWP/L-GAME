@@ -6,7 +6,7 @@ module mo_averaging
   ! This module contains averaging operators.
 
   use mo_definitions, only: t_grid,wp
-  use mo_run_nml,     only: nlays,nlays_oro,ny,nx
+  use mo_run_nml,     only: nlays,nlays_oro,ny,nx,nlays_flat
   use mo_bc_nml,      only: lperiodic
   
   implicit none
@@ -26,9 +26,9 @@ module mo_averaging
     real(wp) :: vertical_contravariant_corr
     vertical_contravariant_corr = 0._wp
     
-    if (jl>=nlays-nlays_oro+1) then
+    if (jl>=nlays_flat+1) then
       ! highest level following orography
-      if (jl==nlays-nlays_oro+1) then
+      if (jl==nlays_flat+1) then
         vertical_contravariant_corr = vertical_contravariant_corr &
         - 0.5_wp*vector_field_x(ji,jk+1,jl)*grid%slope_x(ji,jk+1,jl)*grid%inner_product_weights(ji,jk,jl,1) &
         - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,2) &
@@ -66,7 +66,7 @@ module mo_averaging
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx+1
-        do jl=1,nlays
+        do jl=nlays_flat+1,nlays
           result_field_x(ji,jk,jl) = result_field_x(ji,jk,jl) &
           - grid%slope_x(ji,jk,jl)*remap_ver2hor_x(result_field_z,grid,ji,jk,jl)
         enddo
@@ -78,7 +78,7 @@ module mo_averaging
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny+1
       do jk=1,nx
-        do jl=1,nlays
+        do jl=nlays_flat+1,nlays
           result_field_y(ji,jk,jl) = result_field_y(ji,jk,jl) &
           - grid%slope_y(ji,jk,jl)*remap_ver2hor_y(result_field_z,grid,ji,jk,jl)
         enddo
@@ -184,7 +184,7 @@ module mo_averaging
     
     horizontal_covariant_x = hor_comp_x(ji,jk,jl)
     
-    if (jl>nlays-nlays_oro) then
+    if (jl>nlays_flat) then
       horizontal_covariant_x = horizontal_covariant_x + grid%slope_x(ji,jk,jl)*remap_ver2hor_x(vert_comp,grid,ji,jk,jl)
     endif
     
@@ -204,7 +204,7 @@ module mo_averaging
   
     horizontal_covariant_y = hor_comp_y(ji,jk,jl)
     
-    if (jl>nlays-nlays_oro) then
+    if (jl>nlays_flat) then
       horizontal_covariant_y = horizontal_covariant_y + grid%slope_y(ji,jk,jl)*remap_ver2hor_y(vert_comp,grid,ji,jk,jl)
     endif
   

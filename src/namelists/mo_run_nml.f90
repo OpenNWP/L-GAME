@@ -13,7 +13,8 @@ module mo_run_nml
   integer           :: ny                  ! number of gridpoints in y-direction
   integer           :: nx                  ! number of gridpoints in x-direction
   integer           :: nlays               ! number of layers
-  integer           :: nlays_oro           ! number of levels following the orography
+  integer           :: nlays_oro           ! number of layers following the orography
+  integer           :: nlays_flat          ! number of flat layers
   real(wp)          :: dy                  ! mesh size in y direction at sea level
   real(wp)          :: dx                  ! mesh size in x direction at sea level at the equator
   real(wp)          :: eff_hor_res         ! effective horizontal resolution
@@ -54,6 +55,7 @@ module mo_run_nml
     nx = 35
     nlays = 50
     nlays_oro = 40
+    nlays_flat = nlays-nlays_oro
     dy = 25e3_wp
     dx = 25e3_wp
     run_span_min = 1440
