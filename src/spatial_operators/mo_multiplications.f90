@@ -163,25 +163,6 @@ module mo_multiplications
     !$omp end parallel do
   
   end subroutine scalar_times_vector_v
-  
-  subroutine scalar_times_vector(scalar_field,in_vector_x,in_vector_y,in_vector_z, &
-                   result_field_x,result_field_y,result_field_z)
-  
-    ! This subroutine of a scalar with a vector field.
-    
-    real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
-    real(wp), intent(in)    :: in_vector_x(:,:,:)    ! input vector field, x-component
-    real(wp), intent(in)    :: in_vector_y(:,:,:)    ! input vector field, y-component
-    real(wp), intent(in)    :: in_vector_z(:,:,:)    ! input vector field, z-component
-    real(wp), intent(inout) :: result_field_x(:,:,:) ! output vector field, x-component
-    real(wp), intent(inout) :: result_field_y(:,:,:) ! output vector field, y-component
-    real(wp), intent(inout) :: result_field_z(:,:,:) ! output vector field, z-component
-    
-    ! this subroutine just calls the horizontal and vertical subroutines one after the other
-    call scalar_times_vector_h(scalar_field,in_vector_x,in_vector_y,result_field_x,result_field_y)
-    call scalar_times_vector_v(scalar_field,in_vector_z,result_field_z)
-  
-  end subroutine scalar_times_vector
 
 end module mo_multiplications
 

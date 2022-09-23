@@ -11,7 +11,7 @@ module mo_vector_tend_expl
   use mo_run_nml,            only: ny,nx,nlays,impl_weight,llinear,lcorio
   use mo_constituents_nml,   only: n_condensed_constituents
   use mo_vorticities,        only: calc_pot_vort
-  use mo_multiplications,    only: scalar_times_vector
+  use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v
   use mo_vorticity_flux,     only: calc_vorticity_flux_term
   use mo_diff_nml,           only: lmom_diff_h,lmom_diff_v,lmass_diff_h,ltemp_diff_h
   use mo_momentum_diff_diss, only: mom_diff_h,mom_diff_v,simple_dissipation_rate
@@ -46,8 +46,9 @@ module mo_vector_tend_expl
     ! momentum advection
     if ((rk_step==2 .or. total_step_counter==0) .and. ((.not. llinear) .or. lcorio)) then
       ! calculating the mass flux density
-      call scalar_times_vector(state%rho(:,:,:,n_condensed_constituents+1),state%wind_u,state%wind_v,state%wind_w, &
-      diag%u_placeholder,diag%v_placeholder,diag%w_placeholder)
+      call scalar_times_vector_h(state%rho(:,:,:,n_condensed_constituents+1),state%wind_u,state%wind_v, &
+      diag%u_placeholder,diag%v_placeholder)
+      call scalar_times_vector_v(state%rho(:,:,:,n_condensed_constituents+1),state%wind_w,diag%w_placeholder)
       ! calculating the potential vorticity
       call calc_pot_vort(state,diag,grid)
       ! calculating the potential voritcity flux term

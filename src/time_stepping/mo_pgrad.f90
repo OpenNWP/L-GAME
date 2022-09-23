@@ -8,7 +8,7 @@ module mo_pgrad
   use mo_constants,          only: c_d_p
   use mo_gradient_operators, only: grad
   use mo_definitions,        only: t_state,t_diag,t_grid,wp
-  use mo_multiplications,    only: scalar_times_vector
+  use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v
 
   implicit none
   
@@ -40,16 +40,18 @@ module mo_pgrad
     diag%scalar_placeholder = c_d_p*(grid%theta_v_bg + state%theta_v_pert)
     !$omp end parallel workshare
     ! multiplying the perturbed Exner pressure gradient by the full virtual potential temperature
-    call scalar_times_vector(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
-    diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w)
+    call scalar_times_vector_h(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
+    diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
+    call scalar_times_vector_v(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_w)
     
     ! the linear pressure gradient term
     !$omp parallel workshare
     diag%scalar_placeholder = c_d_p*state%theta_v_pert
     !$omp end parallel workshare
     ! multiplying the background Exner pressure gradient by the perturbed virtual potential temperature
-    call scalar_times_vector(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
-    grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v,diag%p_grad_acc_neg_l_w)
+    call scalar_times_vector_h(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
+    diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
+    call scalar_times_vector_v(diag%scalar_placeholder,grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_w)
     
     ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
     if (lfirst) then
