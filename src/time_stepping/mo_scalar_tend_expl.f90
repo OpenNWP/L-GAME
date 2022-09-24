@@ -14,7 +14,7 @@ module mo_scalar_tend_expl
   use mo_constituents_nml,     only: n_condensed_constituents,n_constituents
   use mo_diff_nml,             only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
   use mo_eff_diff_coeffs,      only: temp_diffusion_coeffs,mass_diffusion_coeffs
-  use mo_gradient_operators,   only: grad
+  use mo_gradient_operators,   only: grad_hor,grad_vert
 
   implicit none
   
@@ -51,7 +51,8 @@ module mo_scalar_tend_expl
       ! Now we need to calculate the temperature diffusion coefficients.
       call temp_diffusion_coeffs(state_scalar,diag,grid)
       ! The diffusion of the temperature depends on its gradient.
-      call grad(diag%temperature,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
+      call grad_vert(diag%temperature,diag%w_placeholder,grid)
+      call grad_hor(diag%temperature,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
       ! Now the diffusive temperature flux density can be obtained.
       call scalar_times_vector_h(diag%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
       diag%flux_density_u,diag%flux_density_v)
@@ -92,7 +93,8 @@ module mo_scalar_tend_expl
           call mass_diffusion_coeffs(state_scalar,diag,grid)
         endif
         ! The diffusion of the mass density depends on its gradient.
-        call grad(state_scalar%rho(:,:,:,jc),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
+        call grad_vert(state_scalar%rho(:,:,:,jc),diag%w_placeholder,grid)
+        call grad_hor(state_scalar%rho(:,:,:,jc),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
         ! Now the diffusive mass flux density can be obtained.
         call scalar_times_vector_h(diag%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
         diag%u_placeholder,diag%v_placeholder)

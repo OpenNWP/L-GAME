@@ -7,7 +7,7 @@ module mo_vector_tend_expl
 
   use mo_definitions,        only: t_grid,t_state,t_diag,t_tend,wp
   use mo_inner_product,      only: inner_product
-  use mo_gradient_operators, only: grad
+  use mo_gradient_operators, only: grad_hor,grad_vert
   use mo_run_nml,            only: ny,nx,nlays,impl_weight,llinear,lcorio
   use mo_constituents_nml,   only: n_condensed_constituents
   use mo_vorticities,        only: calc_pot_vort
@@ -58,7 +58,8 @@ module mo_vector_tend_expl
         ! Kinetic energy is prepared for the gradient term of the Lamb transformation.
         call inner_product(state%wind_u,state%wind_v,state%wind_w,state%wind_u,state%wind_v,state%wind_w,diag%v_squared,grid)
         ! taking the gradient of the kinetic energy
-        call grad(diag%v_squared,diag%v_squared_grad_x,diag%v_squared_grad_y,diag%v_squared_grad_z,grid)
+        call grad_vert(diag%v_squared,diag%v_squared_grad_z,grid)
+        call grad_hor(diag%v_squared,diag%v_squared_grad_x,diag%v_squared_grad_y,diag%v_squared_grad_z,grid)
       endif
     endif
     

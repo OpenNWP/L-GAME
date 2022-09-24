@@ -62,7 +62,7 @@ module mo_gradient_operators
 
   end subroutine grad_hor_cov
   
-  subroutine grad_vert_cov(scalar_field,result_field,grid)
+  subroutine grad_vert(scalar_field,result_field,grid)
 
     ! This subroutine computes the vertical covariant gradient of a scalar field.
     
@@ -81,59 +81,23 @@ module mo_gradient_operators
     enddo
     !$omp end parallel do
 
-  end subroutine grad_vert_cov
-  
-  subroutine grad_cov(scalar_field,result_field_x,result_field_y,result_field_z,grid)
-  
-    ! This subroutine computes the covariant gradient of a scalar field.
-    
-    ! input arguments and output
-    real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
-    real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
-    real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
-    real(wp),     intent(inout) :: result_field_z(:,:,:) ! z-component of resulting vector field
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
-    
-    call grad_hor_cov(scalar_field,result_field_x,result_field_y,grid)
-    call grad_vert_cov(scalar_field,result_field_z,grid)
-  
-  end subroutine grad_cov
-  
-  subroutine grad(scalar_field,result_field_x,result_field_y,result_field_z,grid)
-  
-    ! This subroutine computes the covariant gradient of a scalar field.
-    
-    ! input arguments and output
-    real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
-    real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
-    real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
-    real(wp),     intent(inout) :: result_field_z(:,:,:) ! z-component of resulting vector field
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
-    
-    ! covariant gradient
-    call grad_cov(scalar_field,result_field_x,result_field_y,result_field_z,grid)
-    ! correction for terrain
-    call hor_cov_to_con(result_field_x,result_field_y,result_field_z,grid)
-  
-  end subroutine grad
+  end subroutine grad_vert
   
   subroutine grad_hor(scalar_field,result_field_x,result_field_y,result_field_z,grid)
   
     ! This subroutine computes the covariant gradient of a scalar field.
+    ! result_field_z must be computed already
     
     ! input arguments and output
     real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
     real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
     real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
-    real(wp),     intent(inout) :: result_field_z(:,:,:) ! z-component of resulting vector field
+    real(wp),     intent(in)    :: result_field_z(:,:,:) ! z-component of resulting vector field
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
-    ! calling the gradient
-    call grad(scalar_field,result_field_x,result_field_y,result_field_z,grid)
-    ! setting the vertical component to zero
-    !$omp parallel workshare
-    result_field_z = 0._wp
-    !$omp end parallel workshare
+    call grad_hor_cov(scalar_field,result_field_x,result_field_y,grid)
+    ! correction for terrain
+    call hor_cov_to_con(result_field_x,result_field_y,result_field_z,grid)
   
   end subroutine grad_hor
 

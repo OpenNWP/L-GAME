@@ -13,7 +13,7 @@ module mo_grid_generator
                                    lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv, &
                                    r_d,c_d_p
   use mo_surface_nml,        only: nsoillays,orography_id
-  use mo_gradient_operators, only: grad,grad_hor_cov
+  use mo_gradient_operators, only: grad_hor_cov,grad_hor,grad_vert
   use mo_io_nml,             only: lwrite_grid,lread_oro,lread_land_sea,lset_oro, &
                                    oro_raw_filename
   use mo_read_write_grid,    only: write_grid,read_oro,read_land_sea
@@ -887,7 +887,8 @@ module mo_grid_generator
     !$omp end parallel do
     
     ! calculating the gradient of the background Exner pressure (only needs to be done once)
-    call grad(grid%exner_bg,grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
+    call grad_vert(grid%exner_bg,grid%exner_bg_grad_w,grid)
+    call grad_hor(grid%exner_bg,grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
   
   end subroutine bg_setup
   

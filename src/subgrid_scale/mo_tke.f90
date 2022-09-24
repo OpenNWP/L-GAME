@@ -9,7 +9,7 @@ module mo_tke
   use mo_run_nml,            only: ny,nx,nlays,dtime
   use mo_constituents_nml,   only: n_condensed_constituents,n_constituents
   use mo_constants,          only: M_PI
-  use mo_gradient_operators, only: grad
+  use mo_gradient_operators, only: grad_hor,grad_vert
   use mo_inner_product,      only: inner_product
   
   implicit none
@@ -30,7 +30,8 @@ module mo_tke
     integer  :: ji,jk,jl       ! loop variables
     
     ! computing the advection
-    call grad(diag%tke,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
+    call grad_vert(diag%tke,diag%w_placeholder,grid)
+    call grad_hor(diag%tke,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
     call inner_product(state%wind_u,state%wind_v,state%wind_w,diag%u_placeholder,diag%v_placeholder, &
     diag%w_placeholder,diag%scalar_placeholder,grid)
     

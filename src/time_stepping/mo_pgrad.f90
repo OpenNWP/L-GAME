@@ -6,7 +6,7 @@ module mo_pgrad
   ! This module manages the handling of the explicit component of the pressure gradient.
 
   use mo_constants,          only: c_d_p
-  use mo_gradient_operators, only: grad
+  use mo_gradient_operators, only: grad_vert,grad_hor
   use mo_definitions,        only: t_state,t_diag,t_grid,wp
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v
 
@@ -34,7 +34,8 @@ module mo_pgrad
     
     ! the nonlinear pressure gradient term
     ! calculating the gradient of the perturbed Exner pressure
-    call grad(state%exner_pert,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
+    call grad_vert(state%exner_pert,diag%p_grad_acc_neg_nl_w,grid)
+    call grad_hor(state%exner_pert,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
     ! calculating the full virtual potential temperature
     !$omp parallel workshare
     diag%scalar_placeholder = c_d_p*(grid%theta_v_bg + state%theta_v_pert)

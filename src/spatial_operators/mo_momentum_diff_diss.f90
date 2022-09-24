@@ -7,7 +7,7 @@ module mo_momentum_diff_diss
   
   use mo_definitions,          only: t_grid,t_diag,t_state
   use mo_divergence_operators, only: div_h,add_vertical_div
-  use mo_gradient_operators,   only: grad_hor,grad_vert_cov
+  use mo_gradient_operators,   only: grad_hor,grad_vert
   use mo_run_nml,              only: ny,nx,nlays,wp
   use mo_diff_nml,             only: h_prandtl
   use mo_constituents_nml,     only: n_constituents,n_condensed_constituents
@@ -277,7 +277,7 @@ module mo_momentum_diff_diss
     ! computing and multiplying by the respective diffusion coefficient
     call vert_vert_mom_viscosity(state,diag,grid)
     ! taking the second derivative to compute the diffusive tendency
-    call grad_vert_cov(diag%scalar_placeholder,diag%mom_diff_tend_z,grid)
+    call grad_vert(diag%scalar_placeholder,diag%mom_diff_tend_z,grid)
 
     ! 3.) horizontal diffusion of vertical velocity
     ! ---------------------------------------------

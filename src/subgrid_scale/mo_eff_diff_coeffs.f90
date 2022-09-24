@@ -13,7 +13,7 @@ module mo_eff_diff_coeffs
   use mo_constituents_nml,     only: n_constituents,n_condensed_constituents
   use mo_tke,                  only: tke_update
   use mo_divergence_operators, only: div_h
-  use mo_gradient_operators,   only: grad_vert_cov
+  use mo_gradient_operators,   only: grad_vert
   use mo_multiplications,      only: scalar_times_vector_v
   use mo_derived,              only: spec_heat_cap_diagnostics_v
   use mo_bc_nml,               only: lperiodic
@@ -551,7 +551,7 @@ module mo_eff_diff_coeffs
     diag%scalar_placeholder = grid%theta_v_bg+state%theta_v_pert
     !$omp end parallel workshare
     ! vertical gradient of the full virtual potential temperature
-    call grad_vert_cov(diag%scalar_placeholder,diag%w_placeholder,grid)
+    call grad_vert(diag%scalar_placeholder,diag%w_placeholder,grid)
     ! calculating the inverse full virtual potential temperature
     !$omp parallel workshare
     diag%scalar_placeholder = 1.0/diag%scalar_placeholder
