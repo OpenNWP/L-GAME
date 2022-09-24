@@ -51,43 +51,6 @@ module mo_averaging
   
   end function vertical_contravariant_corr
   
-  subroutine hor_cov_to_con(result_field_x,result_field_y,result_field_z,grid)
-  
-    ! This subroutine computes the terrain correction of the gradient.
-    real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
-    real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
-    real(wp),     intent(in)    :: result_field_z(:,:,:) ! z-component of resulting vector field
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
-  
-    ! local variables
-    integer :: ji,jk,jl ! loop indices
-    
-    ! correction to the x-component
-    !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jk=1,nx+1
-        do jl=nlays_flat+1,nlays
-          result_field_x(ji,jk,jl) = result_field_x(ji,jk,jl) &
-          - grid%slope_x(ji,jk,jl)*remap_ver2hor_x(result_field_z,grid,ji,jk,jl)
-        enddo
-      enddo
-    enddo
-    !$omp end parallel do
-    
-    ! correction to the y-component
-    !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny+1
-      do jk=1,nx
-        do jl=nlays_flat+1,nlays
-          result_field_y(ji,jk,jl) = result_field_y(ji,jk,jl) &
-          - grid%slope_y(ji,jk,jl)*remap_ver2hor_y(result_field_z,grid,ji,jk,jl)
-        enddo
-      enddo
-    enddo
-    !$omp end parallel do
-  
-  end subroutine hor_cov_to_con
-  
   function remap_ver2hor_x(vertical_cov,grid,ji,jk,jl)
   
     ! This function remaps a vertical covariant component of

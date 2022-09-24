@@ -6,8 +6,8 @@ module mo_gradient_operators
   ! This module is a collection of gradient operators.
 
   use mo_definitions, only: t_grid,wp
-  use mo_run_nml,     only: ny,nx,nlays,toa
-  use mo_averaging,   only: hor_cov_to_con
+  use mo_run_nml,     only: ny,nx,nlays,toa,nlays_flat
+  use mo_averaging,   only: remap_ver2hor_x,remap_ver2hor_y
   use mo_bc_nml,      only: lperiodic
     
   implicit none
@@ -95,9 +95,36 @@ module mo_gradient_operators
     real(wp),     intent(in)    :: result_field_z(:,:,:) ! z-component of resulting vector field
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
+    ! local variables
+    integer :: ji,jk,jl ! loop indices
+    
     call grad_hor_cov(scalar_field,result_field_x,result_field_y,grid)
+
     ! correction for terrain
-    call hor_cov_to_con(result_field_x,result_field_y,result_field_z,grid)
+    
+    ! correction to the x-component
+    !$omp parallel do private(ji,jk,jl)
+    do ji=1,ny
+      do jk=1,nx+1
+        do jl=nlays_flat+1,nlays
+          result_field_x(ji,jk,jl) = result_field_x(ji,jk,jl) &
+          - grid%slope_x(ji,jk,jl)*remap_ver2hor_x(result_field_z,grid,ji,jk,jl)
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
+    
+    ! correction to the y-component
+    !$omp parallel do private(ji,jk,jl)
+    do ji=1,ny+1
+      do jk=1,nx
+        do jl=nlays_flat+1,nlays
+          result_field_y(ji,jk,jl) = result_field_y(ji,jk,jl) &
+          - grid%slope_y(ji,jk,jl)*remap_ver2hor_y(result_field_z,grid,ji,jk,jl)
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
   
   end subroutine grad_hor
 
