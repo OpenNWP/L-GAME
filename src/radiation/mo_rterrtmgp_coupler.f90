@@ -15,9 +15,7 @@ module mo_rrtmgp_coupler
   use mo_source_functions,        only: ty_source_func_lw
   use mo_rte_sw,                  only: rte_sw
   use mo_rte_lw,                  only: rte_lw
-  use mo_optical_props,           only: ty_optical_props_1scl, &
-                                  ty_optical_props_2str, &
-                                  ty_optical_props_arry
+  use mo_optical_props,           only: ty_optical_props_1scl,ty_optical_props_2str,ty_optical_props_arry
   use mo_cloud_optics,            only: ty_cloud_optics
   use mo_load_cloud_coefficients, only: load_cld_lutcoeff,load_cld_padecoeff
   use mo_dictionary,              only: molar_fraction_in_dry_air,calc_o3_vmr
@@ -32,9 +30,6 @@ module mo_rrtmgp_coupler
   integer, parameter :: n_sw_bands = 14
   ! the number of bands in the long wave region
   integer, parameter :: n_lw_bands = 16
-  ! used for C interoperability
-  integer            :: zero = 0
-  integer            :: one = 1
 
   character(len = 3),dimension(wp) :: active_gases = (/ &
    "N2 ","O2 ","CH4","O3 ","CO2","H2O","N2O","CO " &
@@ -625,31 +620,21 @@ module mo_rrtmgp_coupler
   
   end function coszenith
   
-  subroutine set_vol_mix_ratios(mass_densities,sw_bool,n_day_points,nx, &
-  nlays,n_scalars,n_condensed_constituents,day_indices,z_scalar, &
-  gas_concentrations)
+  subroutine set_vol_mix_ratios(mass_densities,sw_bool,n_day_points,nx,nlays,n_scalars,n_condensed_constituents, &
+                                day_indices,z_scalar,gas_concentrations)
     
-    ! computes volume mixing ratios out of the model variables
+    ! This subroutine computes volume mixing ratios based on the model variables.
     
-    ! mass densities of the constituents
-    real(wp), intent(in)              :: mass_densities(:)
-    ! short wave switch
-    logical,  intent(in)              :: sw_bool
-    ! as usual
-    integer,  intent(in)              :: n_day_points
-    ! as usual
-    integer,  intent(in)              :: nx
-    ! as usual
-    integer,  intent(in)              :: nlays
-    ! as usual
-    integer,  intent(in)              :: n_scalars
-    ! as usual
-    integer,  intent(in)              :: n_condensed_constituents
-    ! the indices of the points where it is day
-    integer,  intent(in)              :: day_indices(nx)
-    ! z coordinates of scalar data points
-    real(wp), intent(in)              :: z_scalar(n_scalars)
-    type(ty_gas_concs), intent(inout) :: gas_concentrations
+    real(wp),          intent(in)    :: mass_densities(:)        ! mass densities of the constituents
+    logical,           intent(in)    :: sw_bool                  ! short wave switch
+    integer,           intent(in)    :: n_day_points             ! as usual
+    integer,           intent(in)    :: nx                       ! as usual
+    integer,           intent(in)    :: nlays                    ! as usual
+    integer,           intent(in)    :: n_scalars                ! as usual
+    integer,           intent(in)    :: n_condensed_constituents ! as usual
+    integer,           intent(in)    :: day_indices(nx)          ! the indices of the points where it is day
+    real(wp),          intent(in)    :: z_scalar(n_scalars)      ! z coordinates of scalar data points
+    type(ty_gas_concs),intent(inout) :: gas_concentrations       ! the gas concentrations object to to fill
     
     ! the volume mixing ratio of a gas
     real(wp) :: vol_mix_ratio(nx,nlays)
@@ -724,14 +709,11 @@ module mo_rrtmgp_coupler
   
   subroutine init_fluxes(fluxes,n_hor,n_vert)
   
-    ! this subroutine initializes a flux object
+    ! This subroutine initializes a flux object.
     
-    ! the fluxes to initialize
-    type(ty_fluxes_broadband), intent(inout) :: fluxes
-    ! the number of columns
-    integer,                   intent(in)    :: n_hor
-    ! the number of levels
-    integer,                   intent(in)    :: n_vert
+    type(ty_fluxes_broadband),intent(inout) :: fluxes ! the fluxes to initialize
+    integer,                  intent(in)    :: n_hor  ! the number of columns
+    integer,                  intent(in)    :: n_vert ! the number of levels
  	
  	! broad band fluxes
     allocate(fluxes%flux_up(n_hor,n_vert))
@@ -758,9 +740,9 @@ module mo_rrtmgp_coupler
   
   subroutine free_fluxes(fluxes)
   
-    ! freeing a flux object
-    ! the fluxes to free
-    type(ty_fluxes_broadband), intent(inout) :: fluxes
+    ! This subroutine frees a flux object.
+    
+    type(ty_fluxes_broadband),intent(inout) :: fluxes ! the fluxes to free
     
     if (associated(fluxes%flux_up)) deallocate(fluxes%flux_up)
     if (associated(fluxes%flux_dn)) deallocate(fluxes%flux_dn)
