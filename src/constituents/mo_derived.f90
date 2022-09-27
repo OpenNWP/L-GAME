@@ -8,8 +8,8 @@ module mo_derived
   use mo_definitions,      only: wp,t_grid,t_state,t_diag
   use mo_run_nml,          only: ny,nx,nlays
   use mo_constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0
-  use mo_constituents_nml, only: n_condensed_constituents,n_gaseous_constituents,n_constituents
-  use mo_dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water
+  use mo_constituents_nml, only: n_condensed_constituents,n_gaseous_constituents,n_constituents,lmoist
+  use mo_dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water,c_p_cond
   
   implicit none
   
@@ -157,6 +157,29 @@ module mo_derived
     rel_humidity = vapour_pressure/saturation_pressure
     
   end function rel_humidity
+  
+  function c_v_mass_weighted_air(rho,temperature,ji,jk,jl)
+  
+    ! This function calculates the mass-weighted c_v of the air.
+    
+    real(wp), intent(in) :: rho(ny,nx,nlays,n_constituents),temperature(ny,nx,nlays)
+    integer,  intent(in) :: ji,jk,jl
+    real(wp)             :: c_v_mass_weighted_air
+    
+    ! local variables
+    integer :: jc
+    
+    c_v_mass_weighted_air = 0._wp
+    do jc=1,n_condensed_constituents
+      ! It is correct to use c_p here because the compression of the condensates has almost no effect on the air pressure.
+      c_v_mass_weighted_air = c_v_mass_weighted_air + rho(ji,jk,jl,jc)*c_p_cond(jc,temperature(ji,jk,jl))
+    enddo
+    c_v_mass_weighted_air = c_v_mass_weighted_air + rho(ji,jk,jl,n_condensed_constituents+1)*c_d_v
+    if (lmoist) then
+      c_v_mass_weighted_air = c_v_mass_weighted_air + rho(ji,jk,jl,n_condensed_constituents+2)*c_v_v
+    endif
+  
+  end function c_v_mass_weighted_air
 
   function calc_diffusion_coeff(temperature,density)
   

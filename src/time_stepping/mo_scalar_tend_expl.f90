@@ -127,7 +127,7 @@ module mo_scalar_tend_expl
         !$omp parallel workshare
         tend%rhotheta_v = -diag%flux_density_div &
         ! diabatic heating rates
-        + (diag%heating_diss + diag%radiation_tendency + diag%heat_source_rates &
+        + (diag%heating_diss + diag%radiation_tendency + diag%phase_trans_heating_rate &
         + diag%temp_diff_heating) &
         /(c_d_p*(grid%exner_bg+state_scalar%exner_pert))
         !$omp end parallel workshare

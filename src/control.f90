@@ -245,8 +245,8 @@ program control
   allocate(diag%mom_diff_tend_y(ny+1,nx,nlays))
   allocate(diag%mom_diff_tend_z(ny,nx,nlays+1))
   allocate(diag%heating_diss(ny,nx,nlays))
-  allocate(diag%mass_source_rates(ny,nx,nlays,n_condensed_constituents+1))
-  allocate(diag%heat_source_rates(ny,nx,nlays))
+  allocate(diag%phase_trans_rates(ny,nx,nlays,n_condensed_constituents+1))
+  allocate(diag%phase_trans_heating_rate(ny,nx,nlays))
   allocate(diag%temp_diff_heating(ny,nx,nlays))
   write(*,*) "... finished."
   
@@ -492,8 +492,8 @@ program control
   deallocate(diag%mom_diff_tend_y)
   deallocate(diag%mom_diff_tend_z)
   deallocate(diag%heating_diss)
-  deallocate(diag%mass_source_rates)
-  deallocate(diag%heat_source_rates)
+  deallocate(diag%phase_trans_rates)
+  deallocate(diag%phase_trans_heating_rate)
   deallocate(diag%temp_diff_heating)
   write(*,*) "... finished."
   write(*,*) "L-GAME over."

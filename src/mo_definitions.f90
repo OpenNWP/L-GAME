@@ -185,8 +185,8 @@ module mo_definitions
     real(wp), allocatable :: mom_diff_tend_y(:,:,:)           ! tendency due to momentum diffusion in y-direction
     real(wp), allocatable :: mom_diff_tend_z(:,:,:)           ! tendency due to momentum diffusion in z-direction
     real(wp), allocatable :: heating_diss(:,:,:)              ! dissipative heating power density
-    real(wp), allocatable :: mass_source_rates(:,:,:,:)       ! mass source rates due to phase transitions and cloud physics
-    real(wp), allocatable :: heat_source_rates(:,:,:)         ! heat source rates due to phase transitions and cloud physics
+    real(wp), allocatable :: phase_trans_rates(:,:,:,:)       ! mass source rates due to phase transitions and cloud physics
+    real(wp), allocatable :: phase_trans_heating_rate(:,:,:)  ! heat source rates due to phase transitions and cloud physics
     real(wp), allocatable :: temp_diff_heating(:,:,:)         ! heating due to temperature diffusion
   
   end type t_diag
