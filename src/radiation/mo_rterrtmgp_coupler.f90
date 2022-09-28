@@ -555,12 +555,12 @@ module mo_rrtmgp_coupler
     
     ! This subroutine computes volume mixing ratios based on the model variables.
     
-    real(wp),          intent(in)    :: rho(:,:,:)         ! mass densities of the constituents
-    logical,           intent(in)    :: sw_bool            ! short wave switch
-    integer,           intent(in)    :: n_day_points       ! as usual
-    integer,           intent(in)    :: day_indices(nx)    ! the indices of the points where it is day
-    real(wp),          intent(in)    :: z_scalar(nx,nlays) ! z coordinates of scalar data points
-    type(ty_gas_concs),intent(inout) :: gas_concentrations ! the gas concentrations object to to fill
+    real(wp),          intent(in)    :: rho(nx,nlays,n_constituents) ! mass densities of the constituents
+    logical,           intent(in)    :: sw_bool                      ! short wave switch
+    integer,           intent(in)    :: n_day_points                 ! as usual
+    integer,           intent(in)    :: day_indices(nx)              ! the indices of the points where it is day
+    real(wp),          intent(in)    :: z_scalar(nx,nlays)           ! z coordinates of scalar data points
+    type(ty_gas_concs),intent(inout) :: gas_concentrations           ! the gas concentrations object to to fill
     
     ! local variables
     real(wp) :: vol_mix_ratio(nx,nlays) ! the volume mixing ratio of a gas
