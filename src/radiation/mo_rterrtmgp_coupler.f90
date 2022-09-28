@@ -491,11 +491,9 @@ module mo_rrtmgp_coupler
   
     ! This function calculates the cosine of the zenith angle at a given point and time.
   
-  	! the coordinates of the place we look at
-    real(wp), intent(in) :: lat
-    real(wp), intent(in) :: lon
-    ! the unix time stamp of the time
-    real(wp), intent(in) :: t
+    real(wp), intent(in) :: lat ! the latitude of the place we look at
+    real(wp), intent(in) :: lon ! the longitude of the place we look at
+    real(wp), intent(in) :: t   ! the unix time stamp of the time
     
     ! local variables
     real(wp) :: normal_vector_rel2_earth(3)
