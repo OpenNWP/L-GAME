@@ -247,6 +247,7 @@ program control
   allocate(diag%phase_trans_rates(ny,nx,nlays,n_condensed_constituents+1))
   allocate(diag%phase_trans_heating_rate(ny,nx,nlays))
   allocate(diag%temp_diff_heating(ny,nx,nlays))
+  allocate(diag%condensates_sediment_heat(ny,nx,nlays))
   write(*,*) "... finished."
   
   ! firstly, the grid generator needs to be called to calculate the grid properties
@@ -494,6 +495,7 @@ program control
   deallocate(diag%phase_trans_rates)
   deallocate(diag%phase_trans_heating_rate)
   deallocate(diag%temp_diff_heating)
+  deallocate(diag%condensates_sediment_heat)
   write(*,*) "... finished."
   write(*,*) "L-GAME over."
   
