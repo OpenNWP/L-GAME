@@ -5,7 +5,7 @@ module mo_eff_diff_coeffs
   
   ! This module computes the effective diffusion coefficients.
   
-  use mo_run_nml,              only: ny,nx,nlays,dtime,eff_hor_res
+  use mo_run_nml,              only: ny,nx,nlays,nlevs,dtime,eff_hor_res
   use mo_constants,            only: gravity
   use mo_definitions,          only: wp,t_state,t_diag,t_grid
   use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h
@@ -383,13 +383,13 @@ module mo_eff_diff_coeffs
     ! for now, we set the vertical diffusion coefficient at the TOA equal to the vertical diffusion coefficient in the layer below
     diag%vert_hor_viscosity_u(:,:,1) = diag%vert_hor_viscosity_u(:,:,2)
     ! for now, we set the vertical diffusion coefficient at the surface equal to the vertical diffusion coefficient in the layer above
-    diag%vert_hor_viscosity_u(:,:,nlays+1) = diag%vert_hor_viscosity_u(:,:,nlays)
+    diag%vert_hor_viscosity_u(:,:,nlevs) = diag%vert_hor_viscosity_u(:,:,nlays)
     !$omp end parallel workshare
     !$omp parallel workshare
     ! for now, we set the vertical diffusion coefficient at the TOA equal to the vertical diffusion coefficient in the layer below
     diag%vert_hor_viscosity_v(:,:,1) = diag%vert_hor_viscosity_v(:,:,2)
     ! for now, we set the vertical diffusion coefficient at the surface equal to the vertical diffusion coefficient in the layer above
-    diag%vert_hor_viscosity_v(:,:,nlays+1) = diag%vert_hor_viscosity_v(:,:,nlays)
+    diag%vert_hor_viscosity_v(:,:,nlevs) = diag%vert_hor_viscosity_v(:,:,nlays)
     !$omp end parallel workshare
   
   end subroutine vert_hor_mom_viscosity

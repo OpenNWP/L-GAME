@@ -8,7 +8,7 @@ module mo_momentum_diff_diss
   use mo_definitions,          only: t_grid,t_diag,t_state
   use mo_divergence_operators, only: div_h,add_vertical_div
   use mo_gradient_operators,   only: grad_hor,grad_vert
-  use mo_run_nml,              only: ny,nx,nlays,wp
+  use mo_run_nml,              only: ny,nx,nlays,nlevs,wp
   use mo_diff_nml,             only: h_prandtl
   use mo_constituents_nml,     only: n_constituents,n_condensed_constituents
   use mo_inner_product,        only: inner_product
@@ -181,33 +181,33 @@ module mo_momentum_diff_diss
     ! calculation at the surface
     !$omp parallel do private(jk)
     do jk=2,nx
-      diag%du_dz(:,jk,nlays+1) = state%wind_u(:,jk,nlays)/(grid%z_u(:,jk,nlays) &
-      - 0.5_wp*(grid%z_w(:,jk-1,nlays+1)+grid%z_w(:,jk,nlays+1)))
+      diag%du_dz(:,jk,nlevs) = state%wind_u(:,jk,nlays)/(grid%z_u(:,jk,nlays) &
+      - 0.5_wp*(grid%z_w(:,jk-1,nlevs)+grid%z_w(:,jk,nlevs)))
     enddo
     !$omp end parallel do
     
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel workshare
-      diag%du_dz(:,1,nlays+1) = state%wind_u(:,1,nlays)/(grid%z_u(:,1,nlays) &
-      - 0.5_wp*(grid%z_w(:,nx,nlays+1)+grid%z_w(:,1,nlays+1)))
-      diag%du_dz(:,nx+1,nlays+1) = diag%du_dz(:,1,nlays+1)
+      diag%du_dz(:,1,nlevs) = state%wind_u(:,1,nlays)/(grid%z_u(:,1,nlays) &
+      - 0.5_wp*(grid%z_w(:,nx,nlevs)+grid%z_w(:,1,nlevs)))
+      diag%du_dz(:,nx+1,nlevs) = diag%du_dz(:,1,nlevs)
       !$omp end parallel workshare
     endif
     
     !$omp parallel do private(ji)
     do ji=2,ny
-      diag%dv_dz(ji,:,nlays+1) = state%wind_v(ji,:,nlays)/(grid%z_v(ji,:,nlays) &
-      - 0.5_wp*(grid%z_w(ji-1,:,nlays+1)+grid%z_w(ji,:,nlays+1)))
+      diag%dv_dz(ji,:,nlevs) = state%wind_v(ji,:,nlays)/(grid%z_v(ji,:,nlays) &
+      - 0.5_wp*(grid%z_w(ji-1,:,nlevs)+grid%z_w(ji,:,nlevs)))
     enddo
     !$omp end parallel do
     
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel workshare
-      diag%dv_dz(1,:,nlays+1) = state%wind_v(1,:,nlays)/(grid%z_v(1,:,nlays) &
-      - 0.5_wp*(grid%z_w(ny,:,nlays+1)+grid%z_w(1,:,nlays+1)))
-      diag%dv_dz(ny+1,:,nlays+1) = diag%dv_dz(1,:,nlays+1)
+      diag%dv_dz(1,:,nlevs) = state%wind_v(1,:,nlays)/(grid%z_v(1,:,nlays) &
+      - 0.5_wp*(grid%z_w(ny,:,nlevs)+grid%z_w(1,:,nlevs)))
+      diag%dv_dz(ny+1,:,nlevs) = diag%dv_dz(1,:,nlevs)
       !$omp end parallel workshare
     endif
     

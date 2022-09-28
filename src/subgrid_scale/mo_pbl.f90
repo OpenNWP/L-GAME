@@ -6,7 +6,7 @@ module mo_pbl
   ! This module computes everything related to the planetary boundary layer.
   
   use mo_definitions, only: wp,t_state,t_grid,t_diag
-  use mo_run_nml,     only: ny,nx,nlays,dtime
+  use mo_run_nml,     only: ny,nx,nlays,nlevs,dtime
   use mo_constants,   only: EPSILON_SECURITY,M_PI,gravity
   use mo_surface_nml, only: lprog_soil_temp
   use mo_diff_nml,    only: h_prandtl,karman
@@ -45,7 +45,7 @@ module mo_pbl
     !$omp w_pert,theta_v_pert,w_pert_theta_v_pert_avg)
     do ji=1,ny
       do jk=1,nx
-        agl = grid%z_scalar(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1)
+        agl = grid%z_scalar(ji,jk,nlays) - grid%z_w(ji,jk,nlevs)
 
         ! wind speed in the lowest layer
         u_lowest_layer = diag%v_squared(ji,jk,nlays)**0.5_wp
@@ -98,7 +98,7 @@ module mo_pbl
       do ji=1,ny
         do jk=1,nx
           diag%scalar_flux_resistance(ji,jk) = scalar_flux_resistance(diag%roughness_velocity(ji,jk), &
-          grid%z_scalar(ji,jk,nlays) - grid%z_w(ji,jk,nlays+1), &
+          grid%z_scalar(ji,jk,nlays) - grid%z_w(ji,jk,nlevs), &
           grid%roughness_length(ji,jk),diag%monin_obukhov_length(ji,jk))
         enddo
       enddo
@@ -127,9 +127,9 @@ module mo_pbl
 
           ! averaging some quantities to the vector point
           wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji,jk-1,nlays)**0.5_wp + diag%v_squared(ji,jk,nlays)**0.5_wp)
-          z_agl = grid%z_u(ji,jk,nlays) - 0.5_wp*(grid%z_w(ji,jk-1,nlays+1) + grid%z_w(ji,jk,nlays+1))
+          z_agl = grid%z_u(ji,jk,nlays) - 0.5_wp*(grid%z_w(ji,jk-1,nlevs) + grid%z_w(ji,jk,nlevs))
           layer_thickness = 0.5_wp*(grid%z_w(ji,jk-1,nlays) + grid%z_w(ji,jk,nlays)) &
-          - 0.5_wp*(grid%z_w(ji,jk-1,nlays+1) + grid%z_w(ji,jk,nlays+1))
+          - 0.5_wp*(grid%z_w(ji,jk-1,nlevs) + grid%z_w(ji,jk,nlevs))
           roughness_length = 0.5_wp*(grid%roughness_length(ji,jk-1) + grid%roughness_length(ji,jk))
           monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji,jk-1) &
           + diag%monin_obukhov_length(ji,jk))
@@ -154,9 +154,9 @@ module mo_pbl
         
           ! averaging some quantities to the vector point
           wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji,nx,nlays)**0.5_wp + diag%v_squared(ji,1,nlays)**0.5_wp)
-          z_agl = grid%z_u(ji,1,nlays) - 0.5_wp*(grid%z_w(ji,nx,nlays+1) + grid%z_w(ji,1,nlays+1))
+          z_agl = grid%z_u(ji,1,nlays) - 0.5_wp*(grid%z_w(ji,nx,nlevs) + grid%z_w(ji,1,nlevs))
           layer_thickness = 0.5_wp*(grid%z_w(ji,nx,nlays) + grid%z_w(ji,1,nlays)) &
-          - 0.5_wp*(grid%z_w(ji,nx,nlays+1) + grid%z_w(ji,1,nlays+1))
+          - 0.5_wp*(grid%z_w(ji,nx,nlevs) + grid%z_w(ji,1,nlevs))
           roughness_length = 0.5_wp*(grid%roughness_length(ji,nx) + grid%roughness_length(ji,1))
           monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji,nx) &
           + diag%monin_obukhov_length(ji,1))
@@ -188,9 +188,9 @@ module mo_pbl
 
           ! averaging some quantities to the vector point
           wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji-1,jk,nlays)**0.5_wp + diag%v_squared(ji,jk,nlays)**0.5_wp)
-          z_agl = grid%z_v(ji,jk,nlays) - 0.5_wp*(grid%z_w(ji-1,jk,nlays+1) + grid%z_w(ji,jk,nlays+1))
+          z_agl = grid%z_v(ji,jk,nlays) - 0.5_wp*(grid%z_w(ji-1,jk,nlevs) + grid%z_w(ji,jk,nlevs))
           layer_thickness = 0.5_wp*(grid%z_w(ji-1,jk,nlays) + grid%z_w(ji,jk,nlays)) &
-          - 0.5_wp*(grid%z_w(ji-1,jk,nlays+1) + grid%z_w(ji,jk,nlays+1))
+          - 0.5_wp*(grid%z_w(ji-1,jk,nlevs) + grid%z_w(ji,jk,nlevs))
           roughness_length = 0.5_wp*(grid%roughness_length(ji-1,jk) + grid%roughness_length(ji,jk))
           monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji-1,jk) &
           + diag%monin_obukhov_length(ji,jk))
@@ -214,9 +214,9 @@ module mo_pbl
         if (lperiodic) then
           ! averaging some quantities to the vector point
           wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ny,jk,nlays)**0.5_wp + diag%v_squared(1,jk,nlays)**0.5_wp)
-          z_agl = grid%z_v(1,jk,nlays) - 0.5_wp*(grid%z_w(ny,jk,nlays+1) + grid%z_w(1,jk,nlays+1))
+          z_agl = grid%z_v(1,jk,nlays) - 0.5_wp*(grid%z_w(ny,jk,nlevs) + grid%z_w(1,jk,nlevs))
           layer_thickness = 0.5_wp*(grid%z_w(ny,jk,nlays) + grid%z_w(1,jk,nlays)) &
-          - 0.5_wp*(grid%z_w(ny,jk,nlays+1) + grid%z_w(1,jk,nlays+1))
+          - 0.5_wp*(grid%z_w(ny,jk,nlevs) + grid%z_w(1,jk,nlevs))
           roughness_length = 0.5_wp*(grid%roughness_length(ny,jk) + grid%roughness_length(1,jk))
           monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ny,jk) &
           + diag%monin_obukhov_length(1,jk))

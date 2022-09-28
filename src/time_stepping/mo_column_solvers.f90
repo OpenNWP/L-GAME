@@ -5,7 +5,7 @@ module mo_column_solvers
 
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
-  use mo_run_nml,          only: ny,nx,nlays,dtime,toa,impl_weight,partial_impl_weight
+  use mo_run_nml,          only: ny,nx,nlays,nlevs,dtime,toa,impl_weight,partial_impl_weight
   use mo_constituents_nml, only: n_condensed_constituents,n_constituents, &
                                  snow_velocity,rain_velocity,cloud_droplets_velocity
   use mo_definitions,      only: t_grid,t_state,t_tend,t_diag,wp
@@ -84,7 +84,7 @@ module mo_column_solvers
 
           ! contribution of sensible heat to rhotheta_v
           tend%rhotheta_v(ji,jk,nlays) = tend%rhotheta_v(ji,jk,nlays) &
-          -grid%area_z(ji,jk,nlays+1)*diag%power_flux_density_sensible(ji,jk) &
+          -grid%area_z(ji,jk,nlevs)*diag%power_flux_density_sensible(ji,jk) &
           /((grid%exner_bg(ji,jk,nlays)+state_new%exner_pert(ji,jk,nlays))*c_d_p)/grid%volume(ji,jk,nlays)
           
         enddo

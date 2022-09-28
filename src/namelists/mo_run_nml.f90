@@ -13,6 +13,7 @@ module mo_run_nml
   integer           :: ny                  ! number of gridpoints in y-direction
   integer           :: nx                  ! number of gridpoints in x-direction
   integer           :: nlays               ! number of layers
+  integer           :: nlevs               ! number of levels
   integer           :: nlays_oro           ! number of layers following the orography
   integer           :: nlays_flat          ! number of flat layers
   real(wp)          :: dy                  ! mesh size in y direction at sea level
@@ -55,7 +56,6 @@ module mo_run_nml
     nx = 35
     nlays = 50
     nlays_oro = 40
-    nlays_flat = nlays-nlays_oro
     dy = 25e3_wp
     dx = 25e3_wp
     run_span_min = 1440
@@ -84,6 +84,10 @@ module mo_run_nml
     read(nml=run,unit=fileunit)
         
     close(fileunit)
+    
+    ! derived quantities
+    nlevs = nlays+1
+    nlays_flat = nlays-nlays_oro
     
     ! this calculates the time step using the CFL criterion
     eff_hor_res = sqrt(dx*dy)

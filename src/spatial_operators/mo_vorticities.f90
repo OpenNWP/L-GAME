@@ -6,7 +6,7 @@ module mo_vorticities
   ! This module contains the calculation of the vorticities.
 
   use mo_definitions,      only: t_state,t_diag,t_grid,wp
-  use mo_run_nml,          only: ny,nx,nlays,nlays_oro,toa,lcorio,llinear,nlays_flat
+  use mo_run_nml,          only: ny,nx,nlays,nlevs,nlays_oro,toa,lcorio,llinear,nlays_flat
   use mo_constants,        only: r_e
   use mo_constituents_nml, only: n_condensed_constituents
   use mo_averaging,        only: horizontal_covariant_x,horizontal_covariant_y
@@ -54,7 +54,7 @@ module mo_vorticities
         
         do ji=1,ny+1
           ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
-          diag%zeta_x(ji,jk,nlays+1) = -grid%dy(ji,jk,nlays)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,nlays)
+          diag%zeta_x(ji,jk,nlevs) = -grid%dy(ji,jk,nlays)*horizontal_covariant_y(state%wind_v,state%wind_w,grid,ji,jk,nlays)
         enddo
       enddo
     enddo
@@ -95,7 +95,7 @@ module mo_vorticities
         
         do jk=1,nx+1
           ! At the surface, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
-          diag%zeta_y(ji,jk,nlays+1) = grid%dx(ji,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,nlays)
+          diag%zeta_y(ji,jk,nlevs) = grid%dx(ji,jk,nlays)*horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,nlays)
         enddo
         
       enddo
@@ -148,7 +148,7 @@ module mo_vorticities
     ! adding the Coriolis vector to the relative vorticity to obtain the absolute vorticity
     if (lcorio) then
       !$omp parallel do private(jl)
-      do jl=1,nlays+1
+      do jl=1,nlevs
         diag%eta_x(:,:,jl) = diag%zeta_x(:,:,jl) + grid%fvec_x(:,:)
         diag%eta_y(:,:,jl) = diag%zeta_y(:,:,jl) + grid%fvec_y(:,:)
       enddo
@@ -160,7 +160,7 @@ module mo_vorticities
       !$omp end parallel do
     else
       !$omp parallel do private(jl)
-      do jl=1,nlays+1
+      do jl=1,nlevs
         diag%eta_x(:,:,jl) = diag%zeta_x(:,:,jl)
         diag%eta_y(:,:,jl) = diag%zeta_y(:,:,jl)
       enddo
@@ -176,7 +176,7 @@ module mo_vorticities
     ! horizontal vorticity in x-direction
     !$omp parallel do private(ji,jk,jl)
     do jk=1,nx
-      do jl=1,nlays+1
+      do jl=1,nlevs
         do ji=2,ny
           if (jl==1) then
             diag%eta_x(ji,jk,jl) = diag%eta_x(ji,jk,jl)/(0.5_wp*(state%rho(ji-1,jk,jl,n_condensed_constituents+1) &
@@ -189,7 +189,7 @@ module mo_vorticities
             +(toa-grid%z_scalar(ji,jk,jl))*(state%rho(ji,jk,jl,n_condensed_constituents+1) &
             -state%rho(ji,jk,jl+1,n_condensed_constituents+1))/ &
             (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))))
-          elseif (jl==nlays+1) then
+          elseif (jl==nlevs) then
             diag%eta_x(ji,jk,jl) = diag%eta_x(ji,jk,jl)/(0.5_wp*(state%rho(ji-1,jk,jl-1,n_condensed_constituents+1) &
             ! linear extrapolation to the surface
             +(grid%z_w(ji-1,jk,jl)-grid%z_scalar(ji-1,jk,jl-1))*(state%rho(ji-1,jk,jl-2,n_condensed_constituents+1) &
@@ -220,7 +220,7 @@ module mo_vorticities
             +(toa-grid%z_scalar(1,jk,jl))*(state%rho(1,jk,jl,n_condensed_constituents+1) &
             -state%rho(1,jk,jl+1,n_condensed_constituents+1))/ &
             (grid%z_scalar(1,jk,jl)-grid%z_scalar(1,jk,jl+1))))
-          elseif (jl==nlays+1) then
+          elseif (jl==nlevs) then
             diag%eta_x(1,jk,jl) = diag%eta_x(1,jk,jl)/(0.5_wp*(state%rho(ny,jk,jl-1,n_condensed_constituents+1) &
             ! linear extrapolation to the surface
             +(grid%z_w(ny,jk,jl)-grid%z_scalar(ny,jk,jl-1))*(state%rho(ny,jk,jl-2,n_condensed_constituents+1) &
@@ -247,7 +247,7 @@ module mo_vorticities
     ! horizontal vorticity in y-direction
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
-      do jl=1,nlays+1
+      do jl=1,nlevs
         do jk=2,nx
           if (jl==1) then
             diag%eta_y(ji,jk,jl) = diag%eta_y(ji,jk,jl)/(0.5_wp*(state%rho(ji,jk-1,jl,n_condensed_constituents+1) &
@@ -260,7 +260,7 @@ module mo_vorticities
             +(toa-grid%z_scalar(ji,jk,jl))*(state%rho(ji,jk,jl,n_condensed_constituents+1) &
             -state%rho(ji,jk,jl+1,n_condensed_constituents+1))/ &
             (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))))
-          elseif (jl==nlays+1) then
+          elseif (jl==nlevs) then
             diag%eta_y(ji,jk,jl) = diag%eta_y(ji,jk,jl)/(0.5_wp*(state%rho(ji,jk-1,jl-1,n_condensed_constituents+1) &
             ! linear extrapolation to the surface
             +(grid%z_w(ji,jk-1,jl)-grid%z_scalar(ji,jk-1,jl-1))*(state%rho(ji,jk-1,jl-2,n_condensed_constituents+1) &
@@ -291,7 +291,7 @@ module mo_vorticities
             +(toa-grid%z_scalar(ji,1,jl))*(state%rho(ji,1,jl,n_condensed_constituents+1) &
             -state%rho(ji,1,jl+1,n_condensed_constituents+1))/ &
             (grid%z_scalar(ji,1,jl)-grid%z_scalar(ji,1,jl+1))))
-          elseif (jl==nlays+1) then
+          elseif (jl==nlevs) then
             diag%eta_y(ji,1,jl) = diag%eta_y(ji,1,jl)/(0.5_wp*(state%rho(ji,nx,jl-1,n_condensed_constituents+1) &
             ! linear extrapolation to the surface
             +(grid%z_w(ji,nx,jl)-grid%z_scalar(ji,nx,jl-1))*(state%rho(ji,nx,jl-2,n_condensed_constituents+1) &
