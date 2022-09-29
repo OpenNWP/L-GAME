@@ -5,16 +5,17 @@ module mo_scalar_tend_expl
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
-  use mo_constants,            only: c_d_p
+  use mo_run_nml,              only: dtime,ny,nx,n_layers
+  use mo_constants,            only: c_d_p,c_d_v
   use mo_definitions,          only: wp,t_grid,t_state,t_diag,t_tend
   use mo_multiplications,      only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
   use mo_divergence_operators, only: div_h,div_h_tracers,add_vertical_div
-  use mo_run_nml,              only: dtime
   use mo_phase_trans,          only: calc_h2otracers_source_rates
   use mo_constituents_nml,     only: n_condensed_constituents,n_constituents
   use mo_diff_nml,             only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
   use mo_eff_diff_coeffs,      only: temp_diffusion_coeffs,mass_diffusion_coeffs
   use mo_gradient_operators,   only: grad_hor,grad_vert
+  use mo_derived,              only: c_v_mass_weighted_air
 
   implicit none
   
@@ -32,7 +33,8 @@ module mo_scalar_tend_expl
     integer,       intent(in)    :: rk_step      ! RK substep index
     
     ! local variables
-    integer  :: jc                         ! loop variable
+    integer  :: ji,jk,jl                   ! spatial indices
+    integer  :: jc                         ! constituent index
     real(wp) :: old_weight(n_constituents) ! time stepping weight
     real(wp) :: new_weight(n_constituents) ! time stepping weight
     
@@ -129,24 +131,32 @@ module mo_scalar_tend_expl
         ! calculating the divergence of the virtual potential temperature flux density
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
         
-        !$omp parallel workshare
-        tend%rhotheta_v = -diag%flux_density_div &
-        ! diabatic heating rates
-        ! dissipative heating
-        + (diag%heating_diss &
-        ! tendency due to radiation
-        + diag%radiation_tendency &
-        ! tendency due to phase transitions
-        + diag%phase_trans_heating_rate &
-        ! tendency due to falling condensates
-        + diag%condensates_sediment_heat &
-        ! tendency due to temperature diffusion
-        + diag%temp_diff_heating) &
-        /(c_d_p*(grid%exner_bg+state_scalar%exner_pert)) &
-        ! tendency of due to phase transitions and mass diffusion
-        + (diag%phase_trans_rates(:,:,:,jc) + diag%mass_diff_tendency(:,:,:,jc)) &
-        *diag%scalar_placeholder
-        !$omp end parallel workshare
+        !$omp parallel do private(ji,jk,jl)
+        do ji=1,ny
+          do jk=1,nx
+            do jl=1,n_layers
+              tend%rhotheta_v(ji,jk,jl) = -diag%flux_density_div(ji,jk,jl) &
+              ! diabatic heating rates
+              ! weighting factor accounting for condensates
+              + c_d_v*state_scalar%rho(ji,jk,jl,jc)/c_v_mass_weighted_air(state_scalar%rho,diag%temperature,ji,jk,jl)*( &
+              ! dissipative heating
+              + diag%heating_diss(ji,jk,jl) &
+              ! tendency due to radiation
+              + diag%radiation_tendency(ji,jk,jl) &
+              ! tendency due to phase transitions
+              + diag%phase_trans_heating_rate(ji,jk,jl) &
+              ! tendency due to falling condensates
+              + diag%condensates_sediment_heat(ji,jk,jl) &
+              ! tendency due to temperature diffusion
+              + diag%temp_diff_heating(ji,jk,jl)) &
+              /(c_d_p*(grid%exner_bg(ji,jk,jl)+state_scalar%exner_pert(ji,jk,jl))) &
+              ! tendency of due to phase transitions and mass diffusion
+              + (diag%phase_trans_rates(ji,jk,jl,jc) + diag%mass_diff_tendency(ji,jk,jl,jc)) &
+              *diag%scalar_placeholder(ji,jk,jl)
+            enddo
+          enddo
+        enddo
+        !$omp end parallel do
         
       endif
       
