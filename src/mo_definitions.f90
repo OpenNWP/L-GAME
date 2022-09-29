@@ -45,6 +45,8 @@ module mo_definitions
     real(wp), allocatable :: z_u(:,:,:)                       ! geomtric height of the u-vectors
     real(wp), allocatable :: z_v(:,:,:)                       ! geomtric height of the v-vectors
     real(wp), allocatable :: z_w(:,:,:)                       ! geomtric height of the w-vectors
+    real(wp), allocatable :: gravity_potential(:,:,:)         ! geopotential
+    real(wp), allocatable :: gravity_m_v(:,:,:)               ! vertical acceleration due to gravity
     real(wp), allocatable :: volume(:,:,:)                    ! volumes of the gridboxes
     real(wp), allocatable :: area_x(:,:,:)                    ! areas of the grid in x-direction
     real(wp), allocatable :: area_y(:,:,:)                    ! areas of the grid in y-direction
@@ -132,6 +134,7 @@ module mo_definitions
     real(wp), allocatable :: p_grad_acc_neg_nl_u(:,:,:)            ! x-component of nonlinear pressure gradient acceleration
     real(wp), allocatable :: p_grad_acc_neg_nl_v(:,:,:)            ! y-component of nonlinear pressure gradient acceleration
     real(wp), allocatable :: p_grad_acc_neg_nl_w(:,:,:)            ! z-component of nonlinear pressure gradient acceleration
+    real(wp), allocatable :: pressure_grad_condensates_w(:,:,:)    ! vertical pressure gradient acceleration due to the gravity of condensates
     real(wp), allocatable :: p_grad_acc_old_u(:,:,:)               ! x-component of pressure gradient at old time step
     real(wp), allocatable :: p_grad_acc_old_v(:,:,:)               ! y-component of pressure gradient at old time step
     real(wp), allocatable :: p_grad_acc_old_w(:,:,:)               ! z-component of pressure gradient at old time step

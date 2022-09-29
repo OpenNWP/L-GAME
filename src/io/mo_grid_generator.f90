@@ -867,6 +867,8 @@ module mo_grid_generator
       do jk=1,nx
         ! integrating from bottom to top
         do jl=n_layers,1,-1
+          ! setting the geopotential
+          grid%gravity_potential(ji,jk,jl) = geopot(grid%z_scalar(ji,jk,jl))
           ! lowest layer
           if (jl==n_layers) then
             pressure = bg_pres(grid%z_scalar(ji,jk,jl))
@@ -876,7 +878,7 @@ module mo_grid_generator
             ! solving a quadratic equation for the Exner pressure
             b = -0.5_wp*grid%exner_bg(ji,jk,jl+1)/bg_temp(grid%z_scalar(ji,jk,jl+1)) &
             *(bg_temp(grid%z_scalar(ji,jk,jl)) - bg_temp(grid%z_scalar(ji,jk,jl+1)) + 2.0_wp/ &
-            c_d_p*(geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1))))
+            c_d_p*(grid%gravity_potential(ji,jk,jl) - grid%gravity_potential(ji,jk,jl+1)))
             c = grid%exner_bg(ji,jk,jl+1)**2*bg_temp(grid%z_scalar(ji,jk,jl))/bg_temp(grid%z_scalar(ji,jk,jl+1))
             grid%exner_bg(ji,jk,jl) = b+sqrt(b**2+c)
           endif
@@ -889,6 +891,9 @@ module mo_grid_generator
     ! calculating the gradient of the background Exner pressure (only needs to be done once)
     call grad_vert(grid%exner_bg,grid%exner_bg_grad_w,grid)
     call grad_hor(grid%exner_bg,grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
+  
+    ! calculating the vertical acceleration due to gravity
+    call grad_vert(grid%gravity_potential,grid%gravity_m_v,grid)
   
   end subroutine bg_setup
   
