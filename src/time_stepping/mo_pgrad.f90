@@ -9,6 +9,7 @@ module mo_pgrad
   use mo_gradient_operators, only: grad_vert,grad_hor
   use mo_definitions,        only: t_state,t_diag,t_grid,wp
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v
+  use mo_constituents_nml,   only: n_condensed_constituents
 
   implicit none
   
@@ -42,7 +43,7 @@ module mo_pgrad
     !$omp end parallel workshare
     ! multiplying the perturbed Exner pressure gradient by the full virtual potential temperature
     call scalar_times_vector_h(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
-    diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
+                               diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
     call scalar_times_vector_v(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_w)
     
     ! the linear pressure gradient term
@@ -51,10 +52,21 @@ module mo_pgrad
     !$omp end parallel workshare
     ! multiplying the background Exner pressure gradient by the perturbed virtual potential temperature
     call scalar_times_vector_h(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
-    diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
+                               diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
     call scalar_times_vector_v(diag%scalar_placeholder,grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_w)
     
-    ! At the first step, the "old" pressure gradient acceleration is saved for the first time.
+    !$omp parallel workshare
+    diag%pressure_gradient_decel_factor = state%rho(:,:,:,n_condensed_constituents+1)/ &
+                                          sum(state%rho(:,:,:,1:n_condensed_constituents+1),4)
+    !$omp end parallel workshare
+    call scalar_times_vector_h(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
+                               diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
+    call scalar_times_vector_v(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_w)
+    call scalar_times_vector_h(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v, &
+                               diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_nl_v)
+    call scalar_times_vector_v(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_w,diag%p_grad_acc_neg_l_w)
+    
+    ! At the very first step of the model integration, the "old" pressure gradient acceleration is saved for the first time.
     if (lfirst) then
       !$omp parallel workshare
       diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - diag%p_grad_acc_neg_l_u
@@ -64,6 +76,22 @@ module mo_pgrad
     endif
     
   end subroutine manage_pressure_gradient
+  
+  subroutine calc_pressure_grad_condensates_v(state,diag,grid)
+    
+    ! This subroutine computes the correction to the vertical pressure gradient acceleration due to condensates.
+    
+    type(t_state), intent(in)    :: state ! state variables
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_grid),  intent(inout) :: grid  ! grid quantities
+    
+    !$omp parallel workshare
+    diag%pressure_gradient_decel_factor = state%rho(:,:,:,n_condensed_constituents+1) &
+                                          /sum(state%rho(:,:,:,1:n_condensed_constituents+1),4) - 1._wp
+    !$omp end parallel workshare
+    call scalar_times_vector_v(diag%pressure_gradient_decel_factor,grid%gravity_m_v,diag%pressure_grad_condensates_v)
+  
+  end subroutine calc_pressure_grad_condensates_v
 
 end module mo_pgrad
 
