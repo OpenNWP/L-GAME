@@ -5,8 +5,9 @@ module mo_dictionary
 
   ! This module contains look-up functions for properties of the atmosphere.
 
-  use mo_definitions, only: wp
-  use mo_constants,   only: t_0,n_a,r_v,m_v
+  use mo_definitions,      only: wp
+  use mo_constants,        only: t_0,n_a,r_v,m_v
+  use mo_constituents_nml, only: n_condensed_constituents
   
   implicit none
   
@@ -189,7 +190,11 @@ module mo_dictionary
     real(wp)             :: c_p_cond
   
     if (mod(const_id-1,2)==0) then
-      c_p_cond = c_p_ice(temperature)
+      if (const_id==n_condensed_constituents) then
+        c_p_cond = 0.5_wp*(c_p_ice(temperature) + c_p_water(temperature))
+      else
+        c_p_cond = c_p_ice(temperature)
+      endif
     else
       c_p_cond = c_p_water(temperature)
     endif
