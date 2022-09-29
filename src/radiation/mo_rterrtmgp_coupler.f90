@@ -168,11 +168,11 @@ module mo_rrtmgp_coupler
     liquid_precip_radius = cloud_optics_sw%get_max_radius_liq()
     ice_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
     liquid_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
-    if (n_condensed_constituents==4) then
+    if (n_condensed_constituents==5) then
       do jk=1,nx
         do jl=1,n_layers
           ! the solid condensates' effective radius
-          ice_precip_weight = rho(jk,jl,1)+EPSILON_SECURITY
+          ice_precip_weight = rho(jk,jl,1)+rho(jk,jl,5)+EPSILON_SECURITY
           ice_cloud_weight = rho(jk,jl,3)+EPSILON_SECURITY
           ice_eff_radius_value = (ice_precip_weight*ice_precip_radius+ice_cloud_weight*ice_cloud_radius) &
           /(ice_precip_weight+ice_cloud_weight)
@@ -184,7 +184,7 @@ module mo_rrtmgp_coupler
           ! thickness of the gridbox
           thickness = z_vector(jk,jl)-z_vector(jk,jl+1)
           ! solid water "content"
-          ice_water_path(jk,jl) = thickness*1000._wp*(rho(jk,jl,1) + rho(jk,jl,3))
+          ice_water_path(jk,jl) = thickness*1000._wp*(rho(jk,jl,1) + rho(jk,jl,3) + rho(jk,jl,5))
           ! liquid water "content"
           liquid_water_path(jk,jl) = thickness*1000._wp*(rho(jk,jl,2) + rho(jk,jl,4))
           ! if there is no solid water in the grid box, the solid effective radius is set to zero
@@ -195,10 +195,10 @@ module mo_rrtmgp_coupler
       enddo
     ! the dry case
     else
-      liquid_water_path(:,:) = 0._wp
-      ice_water_path(:,:) = 0._wp
-      liquid_eff_radius(:,:) = 0._wp
-      ice_eff_radius(:,:) = 0._wp
+      liquid_water_path = 0._wp
+      ice_water_path = 0._wp
+      liquid_eff_radius = 0._wp
+      ice_eff_radius = 0._wp
     endif
     
     ! moving the temperature into the allowed area
@@ -600,9 +600,9 @@ module mo_rrtmgp_coupler
         case("n2o")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(11)
         case("h2o")
-          ! n_condensed_constituents==4 is equivalent to the presence of water in the model atmosphere
+          ! n_condensed_constituents==5 is equivalent to the presence of water in the model atmosphere
           ! in the short wave case,only the day points matter
-          if (sw_bool .and. n_condensed_constituents==4) then
+          if (sw_bool .and. n_condensed_constituents==5) then
             do jk=1,n_day_points
               do jl=1,n_layers
                 vol_mix_ratio(jk,jl) = (rho(day_indices(jk),jl,n_condensed_constituents+2)*r_v)/ &
@@ -610,7 +610,7 @@ module mo_rrtmgp_coupler
               enddo
             enddo
           ! in the long wave case,all points matter
-          elseif (n_condensed_constituents==4) then
+          elseif (n_condensed_constituents==5) then
             do jk=1,nx
               do jl=1,n_layers
                 vol_mix_ratio(jk,jl) = (rho(jk,jl,n_condensed_constituents+2)*r_v)/(rho(jk,jl,n_condensed_constituents+1)*r_d)
