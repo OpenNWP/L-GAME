@@ -426,9 +426,9 @@ module mo_eff_diff_coeffs
   
   end subroutine vert_vert_mom_viscosity
   
-  subroutine temp_diffusion_coeffs(state,diag,grid)
+  subroutine scalar_diffusion_coeffs(state,diag,grid)
   
-    ! This function computes the viscous temperature diffusion coefficient (including eddies).
+    ! This subroutine computes the scalar diffusion coefficients (including eddies).
   
     ! input arguments and output
     type(t_state), intent(in)    :: state ! state
@@ -436,8 +436,47 @@ module mo_eff_diff_coeffs
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer :: ji,jk,jl  ! loop variables
+    integer  :: ji,jk,jl ! loop variables
     real(wp) :: c_g_v    ! specific heat capacity
+    
+    ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
+    if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
+    
+      call hor_viscosity(state,diag)
+      call tke_update(state,diag,grid)
+      
+      ! molecular viscosity
+      !$omp parallel do private(ji,jk,jl)
+      do ji=1,ny
+        do jk=1,nx
+          do jl=1,n_layers
+            diag%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
+            state%rho(ji,jk,jl,n_condensed_constituents+1))
+          enddo
+        enddo
+      enddo
+      !$omp end parallel do
+    
+    endif
+    
+    !$omp parallel do private(ji,jk,jl)
+    do ji=1,ny
+      do jk=1,nx
+        do jl=1,n_layers
+          ! horizontal diffusion coefficient
+          diag%mass_diffusion_coeff_numerical_h(ji,jk,jl) &
+          = 0.5_wp*(diag%viscosity_coeff_div(ji,jk,jl) + diag%viscosity_coeff_curl(ji,jk,jl)) &
+          /state%rho(ji,jk,jl,n_condensed_constituents+1)
+          ! vertical diffusion coefficient
+          diag%mass_diffusion_coeff_numerical_v(ji,jk,jl) &
+          ! molecular component
+          = diag%viscosity_molecular(ji,jk,jl) &
+          ! turbulent component
+          + tke2vert_diff_coeff(diag%tke(ji,jk,jl),diag%n_squared(ji,jk,jl),grid%layer_thickness(ji,jk,jl))
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
     
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h) then
@@ -465,10 +504,10 @@ module mo_eff_diff_coeffs
         do jl=1,n_layers
           c_g_v = spec_heat_cap_diagnostics_v(state,ji,jk,jl)
           ! horizontal diffusion coefficient
-          diag%scalar_diff_coeff_h(ji,jk,jl) = c_g_v &
+          diag%temp_diffusion_coeff_numerical_h(ji,jk,jl) = c_g_v &
           *0.5_wp*(diag%viscosity_coeff_div(ji,jk,jl) + diag%viscosity_coeff_curl(ji,jk,jl))
           ! vertical diffusion coefficient
-          diag%scalar_diff_coeff_v(ji,jk,jl) &
+          diag%temp_diffusion_coeff_numerical_v(ji,jk,jl) &
           ! molecular component
           = state%rho(ji,jk,jl,n_condensed_constituents+1) &
           *c_g_v*(diag%viscosity_molecular(ji,jk,jl) &
@@ -478,61 +517,8 @@ module mo_eff_diff_coeffs
       enddo
     enddo
     !$omp end parallel do
-  
-  end subroutine temp_diffusion_coeffs
-  
-  subroutine mass_diffusion_coeffs(state,diag,grid)
-  
-    ! This subroutine computes the viscous tracer diffusion coefficient (including eddies).
-  
-    ! input arguments and output
-    type(t_state), intent(in)    :: state ! state
-    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
-    type(t_grid),  intent(in)    :: grid  ! grid quantities
     
-    ! local variables
-    integer :: ji,jk,jl ! loop variables
-    
-    ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
-    if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
-    
-      call hor_viscosity(state,diag)
-      call tke_update(state,diag,grid)
-      
-      ! molecular viscosity
-      !$omp parallel do private(ji,jk,jl)
-      do ji=1,ny
-        do jk=1,nx
-          do jl=1,n_layers
-            diag%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
-            state%rho(ji,jk,jl,n_condensed_constituents+1))
-          enddo
-        enddo
-      enddo
-      !$omp end parallel do
-    
-    endif
-    
-    !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jk=1,nx
-        do jl=1,n_layers
-          ! horizontal diffusion coefficient
-          diag%scalar_diff_coeff_h(ji,jk,jl) &
-          = 0.5_wp*(diag%viscosity_coeff_div(ji,jk,jl) + diag%viscosity_coeff_curl(ji,jk,jl)) &
-          /state%rho(ji,jk,jl,n_condensed_constituents+1)
-          ! vertical diffusion coefficient
-          diag%scalar_diff_coeff_v(ji,jk,jl) &
-          ! molecular component
-          = diag%viscosity_molecular(ji,jk,jl) &
-          ! turbulent component
-          + tke2vert_diff_coeff(diag%tke(ji,jk,jl),diag%n_squared(ji,jk,jl),grid%layer_thickness(ji,jk,jl))
-        enddo
-      enddo
-    enddo
-    !$omp end parallel do
-    
-  end subroutine mass_diffusion_coeffs
+  end subroutine scalar_diffusion_coeffs
   
   subroutine update_n_squared(state,diag,grid)
     

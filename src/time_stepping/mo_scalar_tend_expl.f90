@@ -13,7 +13,7 @@ module mo_scalar_tend_expl
   use mo_phase_trans,          only: calc_h2otracers_source_rates
   use mo_constituents_nml,     only: n_condensed_constituents,n_constituents
   use mo_diff_nml,             only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
-  use mo_eff_diff_coeffs,      only: temp_diffusion_coeffs,mass_diffusion_coeffs
+  use mo_eff_diff_coeffs,      only: scalar_diffusion_coeffs
   use mo_gradient_operators,   only: grad_hor,grad_vert
   use mo_derived,              only: c_v_mass_weighted_air
 
@@ -47,21 +47,24 @@ module mo_scalar_tend_expl
       old_weight(jc) = 1._wp - new_weight(jc)
     enddo
     
+    ! updating the scalar diffusion coefficient if required
+    if (rk_step==1 .and. (lmass_diff_h .or. ltemp_diff_h)) then
+      call scalar_diffusion_coeffs(state_scalar,diag,grid)
+    endif
+    
     ! Temperature diffusion gets updated here,but only at the first RK step and if heat conduction is switched on.
     if (ltemp_diff_h) then
-      ! Now we need to calculate the temperature diffusion coefficients.
-      call temp_diffusion_coeffs(state_scalar,diag,grid)
       ! The diffusion of the temperature depends on its gradient.
       call grad_vert(diag%temperature,diag%w_placeholder,grid)
       call grad_hor(diag%temperature,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
       ! Now the diffusive temperature flux density can be obtained.
-      call scalar_times_vector_h(diag%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
-      diag%flux_density_u,diag%flux_density_v)
+      call scalar_times_vector_h(diag%temp_diffusion_coeff_numerical_h,diag%u_placeholder,diag%v_placeholder, &
+                                 diag%flux_density_u,diag%flux_density_v)
       ! The divergence of the diffusive temperature flux density is the diffusive temperature heating.
       call div_h(diag%flux_density_u,diag%flux_density_v,diag%temp_diff_heating,grid)
       ! vertical temperature diffusion
       if (ltemp_diff_v) then
-        call scalar_times_vector_v(diag%scalar_diff_coeff_v,diag%w_placeholder,diag%flux_density_w)
+        call scalar_times_vector_v(diag%temp_diffusion_coeff_numerical_v,diag%w_placeholder,diag%flux_density_w)
         call add_vertical_div(diag%flux_density_w,diag%temp_diff_heating,grid)
       endif
     endif
@@ -70,21 +73,17 @@ module mo_scalar_tend_expl
     if (lmass_diff_h .and. rk_step==1) then
       ! loop over all constituents
       do jc=1,n_constituents
-        ! firstly, we need to calculate the mass diffusion coeffcients
-        if (jc==1) then
-          call mass_diffusion_coeffs(state_scalar,diag,grid)
-        endif
         ! The diffusion of the mass density depends on its gradient.
         call grad_vert(state_scalar%rho(:,:,:,jc),diag%w_placeholder,grid)
         call grad_hor(state_scalar%rho(:,:,:,jc),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
         ! Now the diffusive mass flux density can be obtained.
-        call scalar_times_vector_h(diag%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
-        diag%u_placeholder,diag%v_placeholder)
+        call scalar_times_vector_h(diag%mass_diffusion_coeff_numerical_h,diag%u_placeholder,diag%v_placeholder, &
+                                   diag%u_placeholder,diag%v_placeholder)
         ! The divergence of the diffusive mass flux density is the diffusive mass source rate.
         call div_h(diag%u_placeholder,diag%v_placeholder,diag%mass_diff_tendency(:,:,:,jc),grid)
         ! vertical mass diffusion
         if (lmass_diff_v) then
-          call scalar_times_vector_v(diag%scalar_diff_coeff_v,diag%w_placeholder,diag%w_placeholder)
+          call scalar_times_vector_v(diag%mass_diffusion_coeff_numerical_v,diag%w_placeholder,diag%w_placeholder)
           call add_vertical_div(diag%w_placeholder,diag%mass_diff_tendency(:,:,:,jc),grid)
         endif
       enddo
