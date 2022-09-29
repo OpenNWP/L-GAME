@@ -62,71 +62,71 @@ module mo_rrtmgp_coupler
     ! the thermodynamic state as well as meta data (time stamp, coordinates) and gets
     ! back radiative flux convergences in W/m^3.
     
-    real(wp), intent(in)    :: time_coord                   ! the time coordinate (UTC time stamp)
-    real(wp), intent(in)    :: latitude_scalar(nx)          ! the latitude coordinates of the scalar data points
-    real(wp), intent(in)    :: longitude_scalar(nx)         ! the longitude coordinates of the scalar data points
+    real(wp), intent(in)    :: time_coord                      ! the time coordinate (UTC time stamp)
+    real(wp), intent(in)    :: latitude_scalar(nx)             ! the latitude coordinates of the scalar data points
+    real(wp), intent(in)    :: longitude_scalar(nx)            ! the longitude coordinates of the scalar data points
     real(wp), intent(in)    :: z_scalar(nx,n_layers)           ! the vertical positions of the scalar data points
     real(wp), intent(in)    :: z_vector(nx,n_levels)           ! the vertical positions of the vector data points
     real(wp), intent(in)    :: rho(nx,n_layers,n_constituents) ! the mass densities of the model atmosphere
     real(wp), intent(in)    :: temperature(nx,n_layers)        ! the temperature of the model atmosphere
     real(wp), intent(inout) :: radiation_tendency(nx,n_layers) ! the result (in W/m**3)
-    real(wp), intent(in)    :: temp_sfc(nx)                 ! surface temperature
-    real(wp), intent(inout) :: sfc_sw_in(nx)                ! surface shortwave in
-    real(wp), intent(inout) :: sfc_lw_out(nx)               ! surface longwave out
-    real(wp), intent(in)    :: sfc_albedo(nx)               ! surface albedo for all bands
+    real(wp), intent(in)    :: temp_sfc(nx)                    ! surface temperature
+    real(wp), intent(inout) :: sfc_sw_in(nx)                   ! surface shortwave in
+    real(wp), intent(inout) :: sfc_lw_out(nx)                  ! surface longwave out
+    real(wp), intent(in)    :: sfc_albedo(nx)                  ! surface albedo for all bands
     
     ! local variables
-    type(ty_gas_concs)                  :: gas_concentrations_sw                  ! the gas concentrations (object holding all information on the composition
-                                                                                  ! of the gas phase for the SW calculation)
-    type(ty_gas_concs)                  :: gas_concentrations_lw                  ! the gas concentrations (object holding all information on the composition
-                                                                                  ! of the gas phase for the LW calculation)
-    type(ty_gas_optics_rrtmgp)          :: k_dist_sw                              ! the spectral properties of the gas phase for the SW calculation
-    type(ty_gas_optics_rrtmgp)          :: k_dist_lw                              ! the spectral properties of the gas phase for the LW calculation
-    type(ty_cloud_optics)               :: cloud_optics_sw                        ! the spectral properties of the clouds for the SW calculation
-    type(ty_cloud_optics)               :: cloud_optics_lw                        ! the spectral properties of the clouds for the LW calculation
-    real(wp)                            :: mu_0(nx)                               ! solar zenith angle
-    integer                             :: n_day_points                           ! number of points where it is day
-    integer                             :: jk,jl,j_day                            ! spatial indices
-    integer                             :: day_indices(nx)                        ! the indices of columns where it is day
-    type(ty_fluxes_broadband)           :: fluxes,fluxes_day                      ! the resulting fluxes
-    type(ty_optical_props_2str)         :: atmos_props_sw,cloud_props_sw          ! short wave optical properties
-    type(ty_optical_props_1scl)         :: atmos_props_lw,cloud_props_lw          ! long wave optical properties
-    real(wp),dimension(:,:),allocatable :: toa_flux                               ! top of atmosphere short wave flux(n_day_points,n_sw_g_points)
-    type(ty_source_func_lw)             :: sources_lw                             ! long wave source function
-    real(wp)                            :: surface_emissivity(n_lw_bands,nx)      ! the surface emissivity
-    real(wp)                            :: albedo_dir(n_sw_bands,nx)              ! surface albedo for direct radiation
-    real(wp)                            :: albedo_dif(n_sw_bands,nx)              ! surface albedo for diffusive radiation
-    real(wp)                            :: albedo_dir_day(n_sw_bands,nx)          ! surface albedo for direct radiation (day points only)
-    real(wp)                            :: albedo_dif_day(n_sw_bands,nx)          ! surface albedo for diffusive radiation (day points only)
-    real(wp)                            :: mu_0_day(nx)                           ! solar zenith angle (day points only)
-    real(wp)                            :: temp_sfc_day(nx)                       ! temperature at the surface (day points only)
-    real(wp)                            :: temperature_rad(nx,n_layers)              ! reformatted temperature field
-    real(wp)                            :: pressure_rad(nx,n_layers)                 ! reformatted pressure field
+    type(ty_gas_concs)                  :: gas_concentrations_sw                   ! the gas concentrations (object holding all information on the composition
+                                                                                   ! of the gas phase for the SW calculation)
+    type(ty_gas_concs)                  :: gas_concentrations_lw                   ! the gas concentrations (object holding all information on the composition
+                                                                                   ! of the gas phase for the LW calculation)
+    type(ty_gas_optics_rrtmgp)          :: k_dist_sw                               ! the spectral properties of the gas phase for the SW calculation
+    type(ty_gas_optics_rrtmgp)          :: k_dist_lw                               ! the spectral properties of the gas phase for the LW calculation
+    type(ty_cloud_optics)               :: cloud_optics_sw                         ! the spectral properties of the clouds for the SW calculation
+    type(ty_cloud_optics)               :: cloud_optics_lw                         ! the spectral properties of the clouds for the LW calculation
+    real(wp)                            :: mu_0(nx)                                ! solar zenith angle
+    integer                             :: n_day_points                            ! number of points where it is day
+    integer                             :: jk,jl,j_day                             ! spatial indices
+    integer                             :: day_indices(nx)                         ! the indices of columns where it is day
+    type(ty_fluxes_broadband)           :: fluxes,fluxes_day                       ! the resulting fluxes
+    type(ty_optical_props_2str)         :: atmos_props_sw,cloud_props_sw           ! short wave optical properties
+    type(ty_optical_props_1scl)         :: atmos_props_lw,cloud_props_lw           ! long wave optical properties
+    real(wp),dimension(:,:),allocatable :: toa_flux                                ! top of atmosphere short wave flux(n_day_points,n_sw_g_points)
+    type(ty_source_func_lw)             :: sources_lw                              ! long wave source function
+    real(wp)                            :: surface_emissivity(n_lw_bands,nx)       ! the surface emissivity
+    real(wp)                            :: albedo_dir(n_sw_bands,nx)               ! surface albedo for direct radiation
+    real(wp)                            :: albedo_dif(n_sw_bands,nx)               ! surface albedo for diffusive radiation
+    real(wp)                            :: albedo_dir_day(n_sw_bands,nx)           ! surface albedo for direct radiation (day points only)
+    real(wp)                            :: albedo_dif_day(n_sw_bands,nx)           ! surface albedo for diffusive radiation (day points only)
+    real(wp)                            :: mu_0_day(nx)                            ! solar zenith angle (day points only)
+    real(wp)                            :: temp_sfc_day(nx)                        ! temperature at the surface (day points only)
+    real(wp)                            :: temperature_rad(nx,n_layers)            ! reformatted temperature field
+    real(wp)                            :: pressure_rad(nx,n_layers)               ! reformatted pressure field
     real(wp)                            :: pressure_interface_rad(nx,n_levels)     ! pressure at cell interfaces
     real(wp)                            :: temperature_interface_rad (nx,n_levels) ! temperature at cell interfaces
-    real(wp)                            :: temperature_rad_day(nx,n_layers)          ! temperature at cells restricted to day points
-    real(wp)                            :: pressure_rad_day(nx,n_layers)             ! pressure at cells restricted to day points
+    real(wp)                            :: temperature_rad_day(nx,n_layers)        ! temperature at cells restricted to day points
+    real(wp)                            :: pressure_rad_day(nx,n_layers)           ! pressure at cells restricted to day points
     real(wp)                            :: pressure_interface_rad_day(nx,n_levels) ! pressure at cell interfaces restricted to day points
-    real(wp)                            :: liquid_water_path(nx,n_layers)            ! liquid water path in g/m**2
-    real(wp)                            :: ice_water_path(nx,n_layers)               ! ice water path g/m**2
-    real(wp)                            :: liquid_eff_radius(nx,n_layers)            ! liquid particles effective radius in micro meters 
-    real(wp)                            :: ice_eff_radius(nx,n_layers)               ! ice particles effective radius in micro meters 
-    real(wp)                            :: liquid_water_path_day(nx,n_layers)        ! liquid water path in g/m^2 restricted to the day points
-    real(wp)                            :: ice_water_path_day(nx,n_layers)           ! ice water path in g/m^2 restricted to the day points
-    real(wp)                            :: liquid_eff_radius_day(nx,n_layers)        ! liquid particles effective radius in micro meters restricted to the day points
-    real(wp)                            :: ice_eff_radius_day(nx,n_layers)           ! ice particles effective radius in micro meters restricted to the day points
-    real(wp)                            :: scale_height = 8.e3_wp                 ! scale height of the atmosphere
-    real(wp)                            :: liquid_eff_radius_value                ! representative value of liquid particle radius
-    real(wp)                            :: ice_eff_radius_value                   ! representative value of ice particle radius
-    real(wp)                            :: thickness                              ! layer thickness
-    real(wp)                            :: ice_precip_radius                      ! ice precipitation particles radius
-    real(wp)                            :: liquid_precip_radius                   ! liquid precipitation particles radius
-    real(wp)                            :: ice_cloud_radius                       ! ice cloud particles radius
-    real(wp)                            :: liquid_cloud_radius                    ! liquid cloud particles radius
-    real(wp)                            :: ice_precip_weight                      ! ice precipitation particles weight
-    real(wp)                            :: liquid_precip_weight                   ! liquid precipitation particles weight
-    real(wp)                            :: ice_cloud_weight                       ! ice cloud particles weight
-    real(wp)                            :: liquid_cloud_weight                    ! liquid cloud particles weight
+    real(wp)                            :: liquid_water_path(nx,n_layers)          ! liquid water path in g/m**2
+    real(wp)                            :: ice_water_path(nx,n_layers)             ! ice water path g/m**2
+    real(wp)                            :: liquid_eff_radius(nx,n_layers)          ! liquid particles effective radius in micro meters 
+    real(wp)                            :: ice_eff_radius(nx,n_layers)             ! ice particles effective radius in micro meters 
+    real(wp)                            :: liquid_water_path_day(nx,n_layers)      ! liquid water path in g/m^2 restricted to the day points
+    real(wp)                            :: ice_water_path_day(nx,n_layers)         ! ice water path in g/m^2 restricted to the day points
+    real(wp)                            :: liquid_eff_radius_day(nx,n_layers)      ! liquid particles effective radius in micro meters restricted to the day points
+    real(wp)                            :: ice_eff_radius_day(nx,n_layers)         ! ice particles effective radius in micro meters restricted to the day points
+    real(wp)                            :: scale_height = 8.e3_wp                  ! scale height of the atmosphere
+    real(wp)                            :: liquid_eff_radius_value                 ! representative value of liquid particle radius
+    real(wp)                            :: ice_eff_radius_value                    ! representative value of ice particle radius
+    real(wp)                            :: thickness                               ! layer thickness
+    real(wp)                            :: ice_precip_radius                       ! ice precipitation particles radius
+    real(wp)                            :: liquid_precip_radius                    ! liquid precipitation particles radius
+    real(wp)                            :: ice_cloud_radius                        ! ice cloud particles radius
+    real(wp)                            :: liquid_cloud_radius                     ! liquid cloud particles radius
+    real(wp)                            :: ice_precip_weight                       ! ice precipitation particles weight
+    real(wp)                            :: liquid_precip_weight                    ! liquid precipitation particles weight
+    real(wp)                            :: ice_cloud_weight                        ! ice cloud particles weight
+    real(wp)                            :: liquid_cloud_weight                     ! liquid cloud particles weight
     
     ! here, the names of the gases are written to the gas_concentrations object
     call handle_error(gas_concentrations_sw%init(gases_lowercase))
@@ -570,7 +570,7 @@ module mo_rrtmgp_coupler
     ! setting the volume mixing ratios of the gases
     do jc=1,size(active_gases)
       ! the default
-      vol_mix_ratio(:,:) = 0.0_wp
+      vol_mix_ratio = 0.0_wp
       select case (gases_lowercase(jc))
         ! reading the VMRs from the atmostracers library
         case("n2")
@@ -578,7 +578,7 @@ module mo_rrtmgp_coupler
         case("o2")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(3)
         case("ch4")
-          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(wp)
+          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(8)
         case("o3")
           if (sw_bool) then
             do jk=1,n_day_points
@@ -605,15 +605,18 @@ module mo_rrtmgp_coupler
           if (sw_bool .and. n_condensed_constituents==5) then
             do jk=1,n_day_points
               do jl=1,n_layers
-                vol_mix_ratio(jk,jl) = (rho(day_indices(jk),jl,n_condensed_constituents+2)*r_v)/ &
-                                       (rho(day_indices(jk),jl,n_condensed_constituents+1)*r_d)
+                vol_mix_ratio(jk,jl) &
+                = (rho(day_indices(jk),jl,n_condensed_constituents+2)*r_v) &
+                /((rho(day_indices(jk),jl,n_condensed_constituents+1)-rho(day_indices(jk),jl,n_condensed_constituents+2))*r_d)
               enddo
             enddo
           ! in the long wave case,all points matter
           elseif (n_condensed_constituents==5) then
             do jk=1,nx
               do jl=1,n_layers
-                vol_mix_ratio(jk,jl) = (rho(jk,jl,n_condensed_constituents+2)*r_v)/(rho(jk,jl,n_condensed_constituents+1)*r_d)
+                vol_mix_ratio(jk,jl) &
+                = (rho(jk,jl,n_condensed_constituents+2)*r_v) &
+                /((rho(jk,jl,n_condensed_constituents+1)-rho(jk,jl,n_condensed_constituents+2))*r_d)
               enddo
             enddo
           endif
