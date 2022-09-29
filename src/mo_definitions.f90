@@ -189,6 +189,7 @@ module mo_definitions
     real(wp), allocatable :: phase_trans_heating_rate(:,:,:)  ! heat source rates due to phase transitions and cloud physics
     real(wp), allocatable :: temp_diff_heating(:,:,:)         ! heating due to temperature diffusion
     real(wp), allocatable :: condensates_sediment_heat(:,:,:) ! heating rate due to falling condensates
+    real(wp), allocatable :: mass_diff_tendency(:,:,:,:)      ! mass source rate due to mass diffusion
   
   end type t_diag
   

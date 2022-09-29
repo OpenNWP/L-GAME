@@ -35,7 +35,6 @@ module mo_scalar_tend_expl
     integer  :: jc                         ! loop variable
     real(wp) :: old_weight(n_constituents) ! time stepping weight
     real(wp) :: new_weight(n_constituents) ! time stepping weight
-    integer  :: diff_switch                ! diffusion switch
     
     ! setting the time stepping weights
     do jc=1,n_constituents
@@ -64,6 +63,30 @@ module mo_scalar_tend_expl
         call add_vertical_div(diag%flux_density_w,diag%temp_diff_heating,grid)
       endif
     endif
+
+    ! Mass diffusion gets updated at the first RK step if required.
+    if (lmass_diff_h .and. rk_step==1) then
+      ! loop over all constituents
+      do jc=1,n_constituents
+        ! firstly, we need to calculate the mass diffusion coeffcients
+        if (jc==1) then
+          call mass_diffusion_coeffs(state_scalar,diag,grid)
+        endif
+        ! The diffusion of the mass density depends on its gradient.
+        call grad_vert(state_scalar%rho(:,:,:,jc),diag%w_placeholder,grid)
+        call grad_hor(state_scalar%rho(:,:,:,jc),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
+        ! Now the diffusive mass flux density can be obtained.
+        call scalar_times_vector_h(diag%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
+        diag%u_placeholder,diag%v_placeholder)
+        ! The divergence of the diffusive mass flux density is the diffusive mass source rate.
+        call div_h(diag%u_placeholder,diag%v_placeholder,diag%mass_diff_tendency(:,:,:,jc),grid)
+        ! vertical mass diffusion
+        if (lmass_diff_v) then
+          call scalar_times_vector_v(diag%scalar_diff_coeff_v,diag%w_placeholder,diag%w_placeholder)
+          call add_vertical_div(diag%w_placeholder,diag%mass_diff_tendency(:,:,:,jc),grid)
+        endif
+      endif
+    endif
     
     ! loop over all constituents
     do jc=1,n_constituents
@@ -83,33 +106,10 @@ module mo_scalar_tend_expl
         call div_h_tracers(diag%flux_density_u,diag%flux_density_v,state_scalar%rho(:,:,:,jc), &
         state_vector%wind_u,state_vector%wind_v,diag%flux_density_div,grid)
       endif
-
-      ! mass diffusion
-      diff_switch = 0
-      if (lmass_diff_h) then
-        diff_switch = 1
-        ! firstly, we need to calculate the mass diffusion coeffcients
-        if (jc==1) then
-          call mass_diffusion_coeffs(state_scalar,diag,grid)
-        endif
-        ! The diffusion of the mass density depends on its gradient.
-        call grad_vert(state_scalar%rho(:,:,:,jc),diag%w_placeholder,grid)
-        call grad_hor(state_scalar%rho(:,:,:,jc),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
-        ! Now the diffusive mass flux density can be obtained.
-        call scalar_times_vector_h(diag%scalar_diff_coeff_h,diag%u_placeholder,diag%v_placeholder, &
-        diag%u_placeholder,diag%v_placeholder)
-        ! The divergence of the diffusive mass flux density is the diffusive mass source rate.
-        call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
-        ! vertical mass diffusion
-        if (lmass_diff_v) then
-          call scalar_times_vector_v(diag%scalar_diff_coeff_v,diag%w_placeholder,diag%w_placeholder)
-          call add_vertical_div(diag%w_placeholder,diag%scalar_placeholder,grid)
-        endif
-      endif
       
       !$omp parallel workshare
       tend%rho(:,:,:,jc) = old_weight(jc)*tend%rho(:,:,:,jc) &
-      + new_weight(jc)*(-diag%flux_density_div)+diff_switch*diag%scalar_placeholder
+      + new_weight(jc)*(-diag%flux_density_div)+diag%mass_diff_tendency(:,:,:,jc)
       !$omp end parallel workshare
     
       ! explicit virtual potential temperature density integration
@@ -137,7 +137,10 @@ module mo_scalar_tend_expl
         + diag%condensates_sediment_heat &
         ! tendency due to temperature diffusion
         + diag%temp_diff_heating) &
-        /(c_d_p*(grid%exner_bg+state_scalar%exner_pert))
+        /(c_d_p*(grid%exner_bg+state_scalar%exner_pert)) &
+        ! tendency of due to phase transitions and mass diffusion
+        + (diag%phase_trans_rates(:,:,:,jc) + diag%mass_diff_tendency(:,:,:,jc)) &
+        *diag%scalar_placeholder
         !$omp end parallel workshare
         
       endif
