@@ -6,7 +6,6 @@ module mo_eff_diff_coeffs
   ! This module computes the effective diffusion coefficients.
   
   use mo_run_nml,              only: ny,nx,n_layers,n_levels,dtime,eff_hor_res
-  use mo_constants,            only: gravity
   use mo_definitions,          only: wp,t_state,t_diag,t_grid
   use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h
   use mo_derived,              only: calc_diffusion_coeff
@@ -559,16 +558,7 @@ module mo_eff_diff_coeffs
     call scalar_times_vector_v(diag%scalar_placeholder,diag%w_placeholder,diag%w_placeholder)
     
     ! multiplying by the gravity acceleration
-    !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jk=1,nx
-        do jl=2,n_layers
-          diag%w_placeholder(ji,jk,jl) &
-          = gravity*diag%w_placeholder(ji,jk,jl)
-        enddo
-      enddo
-    enddo
-    !$omp end parallel do
+    call scalar_times_vector_v(diag%w_placeholder,grid%gravity_m_v,diag%w_placeholder)
     
     ! averaging vertically to the scalar points
     !$omp parallel do private(ji,jk,jl)
