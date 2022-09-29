@@ -104,12 +104,17 @@ module mo_scalar_tend_expl
         call scalar_times_vector_h_upstream( &
         state_scalar%rho(:,:,:,jc),state_vector%wind_u,state_vector%wind_v,diag%flux_density_u,diag%flux_density_v)
         call div_h_tracers(diag%flux_density_u,diag%flux_density_v,state_scalar%rho(:,:,:,jc), &
-        state_vector%wind_u,state_vector%wind_v,diag%flux_density_div,grid)
+                           state_vector%wind_u,state_vector%wind_v,diag%flux_density_div,grid)
       endif
       
       !$omp parallel workshare
       tend%rho(:,:,:,jc) = old_weight(jc)*tend%rho(:,:,:,jc) &
-      + new_weight(jc)*(-diag%flux_density_div)+diag%mass_diff_tendency(:,:,:,jc)
+      ! advection
+      + new_weight(jc)*(-diag%flux_density_div &
+      ! diffusion
+      + diag%mass_diff_tendency(:,:,:,jc) &
+      ! phase transitions
+      + diag%phase_trans_rates(:,:,:,min(jc,n_condensed_constituents+1)))
       !$omp end parallel workshare
     
       ! explicit virtual potential temperature density integration
