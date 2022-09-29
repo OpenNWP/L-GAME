@@ -190,11 +190,7 @@ module mo_dictionary
     real(wp)             :: c_p_cond
   
     if (mod(const_id-1,2)==0) then
-      if (const_id==n_condensed_constituents) then
-        c_p_cond = 0.5_wp*(c_p_ice(temperature) + c_p_water(temperature))
-      else
-        c_p_cond = c_p_ice(temperature)
-      endif
+      c_p_cond = c_p_ice(temperature)
     else
       c_p_cond = c_p_water(temperature)
     endif
