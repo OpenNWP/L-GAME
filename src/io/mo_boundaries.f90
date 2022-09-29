@@ -6,7 +6,7 @@ module mo_boundaries
   ! This module handles everything dealing with boundary conditions.
 
   use mo_definitions,       only: t_state,t_bc,t_grid,wp
-  use mo_run_nml,           only: ny,nx,nlays,nlevs,t_init
+  use mo_run_nml,           only: ny,nx,n_layers,n_levels,t_init
   use mo_bc_nml,            only: n_swamp,bc_root_filename,bc_root_filename,dtime_bc,t_latest_bc
   use mo_constants,         only: M_PI,p_0,r_d,c_d_v
   use mo_constituents_nml,  only: n_condensed_constituents
@@ -50,7 +50,7 @@ module mo_boundaries
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           state%rho(ji,jk,jl,:) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rho(ji,jk,jl,:,bc%index_old) &
           + new_weight*bc%rho(ji,jk,jl,:,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%rho(ji,jk,jl,:)
           state%rhotheta_v(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%rhotheta_v(ji,jk,jl,bc%index_old) &
@@ -58,8 +58,8 @@ module mo_boundaries
           state%wind_w(ji,jk,jl) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%wind_w(ji,jk,jl,bc%index_old) &
           + new_weight*bc%wind_w(ji,jk,jl,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%wind_w(ji,jk,jl)
         enddo
-        state%wind_w(ji,jk,nlevs) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%wind_w(ji,jk,nlevs,bc%index_old) &
-        + new_weight*bc%wind_w(ji,jk,nlevs,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%wind_w(ji,jk,nlevs)
+        state%wind_w(ji,jk,n_levels) = bc%scalar_bc_factor(ji,jk)*(old_weight*bc%wind_w(ji,jk,n_levels,bc%index_old) &
+        + new_weight*bc%wind_w(ji,jk,n_levels,bc%index_new)) + (1._wp - bc%scalar_bc_factor(ji,jk))*state%wind_w(ji,jk,n_levels)
       enddo
     enddo
     !$omp end parallel do
@@ -67,7 +67,7 @@ module mo_boundaries
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx+1
-        do jl=1,nlays
+        do jl=1,n_layers
           state%wind_u(ji,jk,jl) = bc%u_bc_factor(ji,jk)*(old_weight*bc%wind_u(ji,jk,jl,bc%index_old) &
           + new_weight*bc%wind_u(ji,jk,jl,bc%index_new)) + (1._wp - bc%u_bc_factor(ji,jk))*state%wind_u(ji,jk,jl)
         enddo
@@ -78,7 +78,7 @@ module mo_boundaries
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny+1
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           state%wind_v(ji,jk,jl) = bc%v_bc_factor(ji,jk)*(old_weight*bc%wind_v(ji,jk,jl,bc%index_old) &
           + new_weight*bc%wind_v(ji,jk,jl,bc%index_new)) + (1._wp - bc%v_bc_factor(ji,jk))*state%wind_v(ji,jk,jl)
         enddo

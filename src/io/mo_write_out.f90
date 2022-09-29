@@ -7,7 +7,7 @@ module mo_write_out
 
   use mo_definitions,       only: t_state,wp,t_diag,t_grid
   use netcdf
-  use mo_run_nml,           only: ny,nx,nlays,scenario,run_id
+  use mo_run_nml,           only: ny,nx,n_layers,scenario,run_id
   use mo_constituents_nml,  only: n_condensed_constituents,n_gaseous_constituents,n_constituents
   use mo_derived,           only: rel_humidity
   use mo_set_initial_state, only: bg_temp,bg_pres,geopot,nc_check
@@ -78,7 +78,7 @@ module mo_write_out
     call nc_check(nf90_def_dim(ncid,"single_double",1,single_double_dimid))
     call nc_check(nf90_def_dim(ncid,"lon_model",nx,x_dimid))
     call nc_check(nf90_def_dim(ncid,"lat_model",ny,y_dimid))
-    call nc_check(nf90_def_dim(ncid,"z",nlays,z_dimid))
+    call nc_check(nf90_def_dim(ncid,"z",n_layers,z_dimid))
     call nc_check(nf90_def_dim(ncid,"jc",n_constituents,constituents_dimid))
 
     ! setting the dimension ID arrays
@@ -176,7 +176,7 @@ module mo_write_out
       !$omp parallel do private(ji,jk,jl)
       do ji=1,ny
         do jk=1,nx
-          do jl=1,nlays
+          do jl=1,n_layers
             diag%scalar_placeholder(ji,jk,jl) = rel_humidity(state%rho(ji,jk,jl,n_condensed_constituents+2), &
             diag%scalar_placeholder(ji,jk,jl))
           enddo
@@ -204,7 +204,7 @@ module mo_write_out
     
     ! 3D w wind
     !$omp parallel do private(jl,upper_weight)
-    do jl=1,nlays
+    do jl=1,n_layers
       upper_weight = (grid%z_scalar(:,:,jl) -&
       grid%z_w(:,:,jl+1))/(grid%z_w(:,:,jl) - grid%z_w(:,:,jl+1))
       diag%scalar_placeholder(:,:,jl) = &

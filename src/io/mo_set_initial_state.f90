@@ -7,7 +7,7 @@ module mo_set_initial_state
 
   use mo_definitions,      only: t_state,wp,t_diag,t_grid
   use netcdf
-  use mo_run_nml,          only: ny,nx,nlays,scenario,run_id,lplane,dx
+  use mo_run_nml,          only: ny,nx,n_layers,scenario,run_id,lplane,dx
   use mo_constituents_nml, only: n_condensed_constituents,n_constituents
   use mo_constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
                                  gravity,p_0_standard,r_e,t_grad_inv,M_PI,r_d,c_d_p,c_d_v
@@ -49,10 +49,10 @@ module mo_set_initial_state
         !$omp parallel do private(ji,jk,jl)
         do ji=1,ny
           do jk=1,nx
-            do jl=1,nlays
+            do jl=1,n_layers
               diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))
             enddo
-            pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,nlays))
+            pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,n_layers))
           enddo
         enddo
         !$omp end parallel do
@@ -82,7 +82,7 @@ module mo_set_initial_state
         !$omp parallel do private(ji,jk,jl)
         do ji=1,ny
           do jk=1,nx+1
-            do jl=1,nlays
+            do jl=1,n_layers
               if (grid%z_u(ji,jk,jl)>=z_2) then
                 state%wind_u(ji,jk,jl) = u_0
               elseif (z_1<=grid%z_u(ji,jk,jl) .and. grid%z_u(ji,jk,jl)<=z_2) then
@@ -103,10 +103,10 @@ module mo_set_initial_state
         !$omp parallel do private(ji,jk,jl)
         do ji=1,ny
           do jk=1,nx
-            do jl=1,nlays
+            do jl=1,n_layers
               diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))
             enddo
-            pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,nlays))
+            pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,n_layers))
           enddo
         enddo
         !$omp end parallel do
@@ -115,7 +115,7 @@ module mo_set_initial_state
         !$omp parallel do private(ji,jk,jl,r,x_coord)
         do ji=1,ny
           do jk=1,nx
-            do jl=1,nlays
+            do jl=1,n_layers
               x_coord = dx*jk - (nx/2 + 1)*dx
               r = (((x_coord-x_0)/A_x)**2 + ((grid%z_scalar(ji,jk,jl)-z_0)/A_z)**2)**0.5_wp
               if (r<=1._wp) then
@@ -151,20 +151,20 @@ module mo_set_initial_state
         do ji=1,ny
           do jk=1,nx
             ! calculating delta_z
-            delta_z = grid%z_scalar(ji,jk,nlays)
+            delta_z = grid%z_scalar(ji,jk,n_layers)
             ! calculating the gravity
-            gravity_local = geopot(grid%z_scalar(ji,jk,nlays))/delta_z
+            gravity_local = geopot(grid%z_scalar(ji,jk,n_layers))/delta_z
             
             ! virtual potential temperature in the lowest layer
-            state%theta_v_pert(ji,jk,nlays) = T_0 &
+            state%theta_v_pert(ji,jk,n_layers) = T_0 &
             *(1._wp + n_squared*delta_z/(2._wp*gravity_local)) &
             /(1._wp - n_squared*delta_z/(2._wp*gravity_local))
             ! Exner pressure in the lowest layer
-            state%exner_pert(ji,jk,nlays) = 1._wp &
-            - 2._wp*geopot(grid%z_scalar(ji,jk,nlays))/(c_d_p*(state%theta_v_pert(ji,jk,nlays) + T_0))
+            state%exner_pert(ji,jk,n_layers) = 1._wp &
+            - 2._wp*geopot(grid%z_scalar(ji,jk,n_layers))/(c_d_p*(state%theta_v_pert(ji,jk,n_layers) + T_0))
             
             ! stacking the virtual potential temperature
-            do jl=nlays-1,1,-1
+            do jl=n_layers-1,1,-1
               ! calculating delta_z
               delta_z = grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1)
               ! calculating the gravity
@@ -177,7 +177,7 @@ module mo_set_initial_state
             enddo
             
             ! stacking the Exner pressure
-            do jl=nlays-1,1,-1
+            do jl=n_layers-1,1,-1
               ! result
               state%exner_pert(ji,jk,jl) = state%exner_pert(ji,jk,jl+1) &
               + 2._wp*(geopot(grid%z_scalar(ji,jk,jl+1)) - geopot(grid%z_scalar(ji,jk,jl))) &
@@ -186,11 +186,11 @@ module mo_set_initial_state
             
             ! filling up what's needed for the unessential_ideal_init routine
             ! temperature
-            do jl=1,nlays
+            do jl=1,n_layers
               diag%scalar_placeholder(ji,jk,jl)=state%exner_pert(ji,jk,jl)*state%theta_v_pert(ji,jk,jl)
             enddo
             ! pressure in the lowest layer
-            pres_lowest_layer(ji,jk)=p_0*state%exner_pert(ji,jk,nlays)**(c_d_p/r_d)
+            pres_lowest_layer(ji,jk)=p_0*state%exner_pert(ji,jk,n_layers)**(c_d_p/r_d)
           enddo
         enddo
         !$omp end parallel do
@@ -300,9 +300,9 @@ module mo_set_initial_state
     do ji=1,ny
       do jk=1,nx  
         ! integrating from bottom to top
-        do jl=nlays,1,-1
+        do jl=n_layers,1,-1
           ! lowest layer
-          if (jl==nlays) then
+          if (jl==n_layers) then
             pressure = pres_lowest_layer(ji,jk)
             state%exner_pert(ji,jk,jl) = (pressure/p_0)**(r_d/c_d_p)
           ! other layers

@@ -7,8 +7,8 @@ module mo_grid_generator
 
   use netcdf
   use mo_definitions,        only: wp,t_grid
-  use mo_run_nml,            only: ny,nx,nlays,nlevs,dy,dx,toa,nlays_oro,sigma,scenario,lat_center, &
-                                   lon_center,lplane,nlays_flat
+  use mo_run_nml,            only: ny,nx,n_layers,n_levels,dy,dx,toa,n_oro_layers,sigma,scenario,lat_center, &
+                                   lon_center,lplane,n_flat_layers
   use mo_constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                    lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv, &
                                    r_d,c_d_p
@@ -37,7 +37,7 @@ module mo_grid_generator
     real(wp) :: B                            ! variable for calculating the vertical grid
     real(wp) :: sigma_z                      ! variable for calculating the vertical grid
     real(wp) :: z_rel                        ! variable for calculating the vertical grid
-    real(wp) :: vertical_vector_pre(nlevs)   ! variable for calculating the vertical grid
+    real(wp) :: vertical_vector_pre(n_levels)   ! variable for calculating the vertical grid
     real(wp) :: base_area                    ! variable for calculating the vertical grid
     real(wp) :: lower_z,upper_z,lower_length ! variables needed for area calculations
     real(wp) :: height_mountain              ! height of Gaussian mountain (needed for test case)
@@ -279,7 +279,7 @@ module mo_grid_generator
       ! no orography
       case(0)
         !$omp parallel workshare
-        grid%z_w(:,:,nlevs) = 0._wp
+        grid%z_w(:,:,n_levels) = 0._wp
         !$omp end parallel workshare
       
       ! real orography
@@ -288,7 +288,7 @@ module mo_grid_generator
           call read_oro(grid)
         elseif (lset_oro) then
           call set_orography(grid)
-          call smooth_hor_scalar(grid%z_w(:,:,nlevs))
+          call smooth_hor_scalar(grid%z_w(:,:,n_levels))
         endif
       
       ! Schaer wave test orography
@@ -297,7 +297,7 @@ module mo_grid_generator
         !$omp parallel do private(jk,x_coord)
         do jk=1,nx
           x_coord = dx*jk - (nx/2 + 1)*dx
-          grid%z_w(:,jk,nlevs) = height_mountain*exp(-x_coord**2/5000._wp**2)*cos(M_PI*x_coord/4000._wp)**2
+          grid%z_w(:,jk,n_levels) = height_mountain*exp(-x_coord**2/5000._wp**2)*cos(M_PI*x_coord/4000._wp)**2
         enddo
         !$omp end parallel do
       
@@ -308,9 +308,9 @@ module mo_grid_generator
         do jk=1,nx
           x_coord = dx*jk - (nx/2 + 1)*dx
           if (abs(x_coord)<=25e3_wp) then
-            grid%z_w(:,jk,nlevs) = height_mountain*cos(0.5_wp*M_PI*x_coord/25000._wp)**2*cos(M_PI*x_coord/8000._wp)**2
+            grid%z_w(:,jk,n_levels) = height_mountain*cos(0.5_wp*M_PI*x_coord/25000._wp)**2*cos(M_PI*x_coord/8000._wp)**2
           else
-            grid%z_w(:,jk,nlevs) = 0._wp
+            grid%z_w(:,jk,n_levels) = 0._wp
           endif
         enddo
         !$omp end parallel do
@@ -363,7 +363,7 @@ module mo_grid_generator
           endif
           
           ! calculating a roughness length depending on the vegetation height
-          grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_geo_scalar(ji,jk),grid%z_w(ji,jk,nlevs))/8._wp
+          grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_geo_scalar(ji,jk),grid%z_w(ji,jk,n_levels))/8._wp
           
         endif
 		
@@ -383,23 +383,23 @@ module mo_grid_generator
     do ji=1,ny
       do jk=1,nx
         ! filling up vertical_vector_pre
-        do jl=1,nlevs
-          z_rel = 1._wp-(jl-1._wp)/nlays ! z/toa
+        do jl=1,n_levels
+          z_rel = 1._wp-(jl-1._wp)/n_layers ! z/toa
           sigma_z = z_rel**sigma
           A = sigma_z*toa ! the height without orography
           ! B corrects for orography
-          if (jl>=nlays_flat+1._wp) then
-            B = (jl-(nlays_flat+1._wp))/nlays_oro
+          if (jl>=n_flat_layers+1._wp) then
+            B = (jl-(n_flat_layers+1._wp))/n_oro_layers
           else
             B = 0._wp
           endif
-          vertical_vector_pre(jl)=A+B*grid%z_w(ji,jk,nlevs)
+          vertical_vector_pre(jl)=A+B*grid%z_w(ji,jk,n_levels)
         enddo
         
         ! doing a check
         if (ji==1 .and. jk==1) then
-          max_oro = maxval(grid%z_w(:,:,nlevs))
-          if (max_oro >= vertical_vector_pre(nlays_flat+1)) then
+          max_oro = maxval(grid%z_w(:,:,n_levels))
+          if (max_oro >= vertical_vector_pre(n_flat_layers+1)) then
             write(*,*) "Maximum of orography larger or equal to the height of the lowest flat level."
             write(*,*) "Aborting."
             call exit(1)
@@ -407,7 +407,7 @@ module mo_grid_generator
         endif
         
         ! placing the scalar points in the middle between the preliminary values of the adjacent levels
-        do jl=1,nlays
+        do jl=1,n_layers
           grid%z_scalar(ji,jk,jl) = 0.5_wp*(vertical_vector_pre(jl) + vertical_vector_pre(jl+1))
         enddo
       enddo
@@ -513,7 +513,7 @@ module mo_grid_generator
     
     ! setting the z coordinates of the vertical vector points
     !$omp parallel do private(jl)
-    do jl=1,nlays
+    do jl=1,n_layers
       if (jl==1) then
         grid%z_w(:,:,jl) = toa
       else
@@ -524,17 +524,17 @@ module mo_grid_generator
     
     ! setting the layer thicknesses
     !$omp parallel do private(jl)
-    do jl=1,nlays
+    do jl=1,n_layers
       grid%layer_thickness(:,:,jl) = grid%z_w(:,:,jl) - grid%z_w(:,:,jl+1)
     enddo
     !$omp end parallel do
     
     ! setting the vertical distances between the scalar data points
     !$omp parallel do private(jl)
-    do jl=1,nlevs
+    do jl=1,n_levels
       if (jl==1) then
         grid%dz(:,:,jl) = 2._wp*(toa - grid%z_scalar(:,:,jl))
-      elseif (jl==nlevs) then
+      elseif (jl==n_levels) then
         grid%dz(:,:,jl) = 2._wp*(grid%z_scalar(:,:,jl-1) - grid%z_w(:,:,jl))
       else
         grid%dz(:,:,jl) = grid%z_scalar(:,:,jl-1) - grid%z_scalar(:,:,jl)
@@ -546,16 +546,16 @@ module mo_grid_generator
     !$omp parallel do private(ji,jk)
     do ji=1,ny
       do jk=1,nx
-        grid%area_z(ji,jk,nlevs) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(r_e + grid%z_w(ji,jk,nlevs))**2/r_e**2
+        grid%area_z(ji,jk,n_levels) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(r_e + grid%z_w(ji,jk,n_levels))**2/r_e**2
       enddo
     enddo
     !$omp end parallel do
 
     ! setting the horizontal areas at the higher points (above the surface)
     !$omp parallel do private(jl)
-    do jl=1,nlays
-      grid%area_z(:,:,jl) = grid%area_z(:,:,nlevs)*(r_e + grid%z_w(:,:,jl))**2 &
-      /(r_e + grid%z_w(:,:,nlevs))**2
+    do jl=1,n_layers
+      grid%area_z(:,:,jl) = grid%area_z(:,:,n_levels)*(r_e + grid%z_w(:,:,jl))**2 &
+      /(r_e + grid%z_w(:,:,n_levels))**2
     enddo
     !$omp end parallel do
     
@@ -567,13 +567,13 @@ module mo_grid_generator
     endif
     
     ! the mean velocity area can be set now
-    grid%mean_velocity_area = 2._wp*sum(grid%area_z(:,:,nlevs))/size(grid%area_z(:,:,nlevs))
+    grid%mean_velocity_area = 2._wp*sum(grid%area_z(:,:,n_levels))/size(grid%area_z(:,:,n_levels))
     
     ! setting the vertical areas in x-direction
     !$omp parallel do private(ji,jk,jl,lower_z,upper_z,lower_length)
     do ji=1,ny
       do jk=1,nx+1
-        do jl=1,nlays
+        do jl=1,n_layers
           ! left boundary
           if (jk==1) then
             lower_z = grid%z_w(ji,1,jl+1)+0.5_wp*(grid%z_w(ji,1,jl+1)-grid%z_w(ji,2,jl+1))
@@ -602,7 +602,7 @@ module mo_grid_generator
     !$omp parallel do private(ji,jk,jl,lower_z,upper_z,lower_length)
     do ji=1,ny+1
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           ! upper boundary
           if (ji==1) then
             lower_z = grid%z_w(1,jk,jl+1)+0.5_wp*(grid%z_w(1,jk,jl+1)-grid%z_w(2,jk,jl+1))
@@ -635,7 +635,7 @@ module mo_grid_generator
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny+1
       do jk=1,nx+1
-        do jl=1,nlays
+        do jl=1,n_layers
         
           ! setting the vertical position of the areas
           if (jk==1) then
@@ -668,8 +668,8 @@ module mo_grid_generator
     !$omp parallel do private(ji,jk,jl,lower_z,lower_length,upper_z)
     do ji=1,ny+1
       do jk=1,nx
-        do jl=1,nlevs
-          if (jl==nlevs) then
+        do jl=1,n_levels
+          if (jl==n_levels) then
             if (ji==1) then
               lower_z = grid%z_w(1,jk,jl) + 0.5_wp*(grid%z_w(1,jk,jl)-grid%z_w(2,jk,jl))
             elseif (ji==ny+1) then
@@ -677,7 +677,7 @@ module mo_grid_generator
             else
               lower_z = 0.5_wp*(grid%z_w(ji-1,jk,jl) + grid%z_w(ji,jk,jl))
             endif
-            lower_length = grid%dy(ji,jk,nlays)*(r_e + lower_z)/(r_e + grid%z_v(ji,jk,nlays))
+            lower_length = grid%dy(ji,jk,n_layers)*(r_e + lower_z)/(r_e + grid%z_v(ji,jk,n_layers))
           else
             lower_z = grid%z_v(ji,jk,jl)
             lower_length = grid%dy(ji,jk,jl)
@@ -707,8 +707,8 @@ module mo_grid_generator
     !$omp parallel do private(ji,jk,jl,lower_z,lower_length,upper_z)
     do ji=1,ny
       do jk=1,nx+1
-        do jl=1,nlevs
-          if (jl==nlevs) then
+        do jl=1,n_levels
+          if (jl==n_levels) then
             if (jk==1) then
               lower_z = grid%z_w(ji,1,jl) + 0.5_wp*(grid%z_w(ji,1,jl)-grid%z_w(ji,2,jl))
             elseif (jk==nx+1) then
@@ -716,7 +716,7 @@ module mo_grid_generator
             else
               lower_z = 0.5_wp*(grid%z_w(ji,jk-1,jl) + grid%z_w(ji,jk,jl))
             endif
-            lower_length = grid%dx(ji,jk,nlays)*(r_e + lower_z)/(r_e + grid%z_u(ji,jk,nlays))
+            lower_length = grid%dx(ji,jk,n_layers)*(r_e + lower_z)/(r_e + grid%z_u(ji,jk,n_layers))
           else
             lower_z = grid%z_u(ji,jk,jl)
             lower_length = grid%dx(ji,jk,jl)
@@ -744,7 +744,7 @@ module mo_grid_generator
 
     ! setting the volume of the grid boxes
     !$omp parallel do private(jl)
-    do jl=1,nlays
+    do jl=1,n_layers
       grid%volume(:,:,jl) = 1._wp/3._wp*((r_e + grid%z_w(:,:,jl))**3 - (r_e + grid%z_w(:,:,jl+1))**3) &
       /(r_e + grid%z_w(:,:,jl+1))**2*grid%area_z(:,:,jl+1)
       ! plane geometry
@@ -761,7 +761,7 @@ module mo_grid_generator
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           grid%inner_product_weights(ji,jk,jl,1) = grid%area_x(ji,jk+1,jl)*grid%dx(ji,jk+1,jl)/(2._wp*grid%volume(ji,jk,jl))
           grid%inner_product_weights(ji,jk,jl,2) = grid%area_y(ji,jk,jl)*grid%dy(ji,jk,jl)/(2._wp*grid%volume(ji,jk,jl))
           grid%inner_product_weights(ji,jk,jl,3) = grid%area_x(ji,jk,jl)*grid%dx(ji,jk,jl)/(2._wp*grid%volume(ji,jk,jl))
@@ -866,9 +866,9 @@ module mo_grid_generator
     do ji=1,ny
       do jk=1,nx
         ! integrating from bottom to top
-        do jl=nlays,1,-1
+        do jl=n_layers,1,-1
           ! lowest layer
-          if (jl==nlays) then
+          if (jl==n_layers) then
             pressure = bg_pres(grid%z_scalar(ji,jk,jl))
             grid%exner_bg(ji,jk,jl) = (pressure/p_0)**(r_d/c_d_p)
           ! other layers
@@ -949,7 +949,7 @@ module mo_grid_generator
     do ji=1,ny
       do jk=1,nx
         ! default
-        grid%z_w(ji,jk,nlevs) = 0._wp
+        grid%z_w(ji,jk,n_levels) = 0._wp
     
         do jl=1,n_lat_points
           lat_distance_vector(jl) = abs(2._wp*M_PI*latitude_input(jl)/360._wp - grid%lat_geo_scalar(ji,jk))
@@ -962,10 +962,10 @@ module mo_grid_generator
         lat_index = find_min_index(lat_distance_vector)
         lon_index = find_min_index(lon_distance_vector)
           
-        grid%z_w(ji,jk,nlevs) = real(z_input(lon_index,lat_index),wp)
+        grid%z_w(ji,jk,n_levels) = real(z_input(lon_index,lat_index),wp)
 
         ! check
-        if (grid%z_w(ji,jk,nlevs)<-382._wp .or. grid%z_w(ji,jk,nlevs)>8850._wp) then
+        if (grid%z_w(ji,jk,n_levels)<-382._wp .or. grid%z_w(ji,jk,n_levels)>8850._wp) then
           write(*,*) "Warning: orography value out of usual range."
         endif
       

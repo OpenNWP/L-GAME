@@ -22,7 +22,7 @@ module mo_rrtmgp_coupler
   use mo_rad_nml,                 only: rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
                                         cloud_coefficients_file_sw,cloud_coefficients_file_lw
   use mo_constituents_nml,        only: n_condensed_constituents,n_constituents
-  use mo_run_nml,                 only: nx,nlays,nlevs
+  use mo_run_nml,                 only: nx,n_layers,n_levels
   
   implicit none
   
@@ -65,11 +65,11 @@ module mo_rrtmgp_coupler
     real(wp), intent(in)    :: time_coord                   ! the time coordinate (UTC time stamp)
     real(wp), intent(in)    :: latitude_scalar(nx)          ! the latitude coordinates of the scalar data points
     real(wp), intent(in)    :: longitude_scalar(nx)         ! the longitude coordinates of the scalar data points
-    real(wp), intent(in)    :: z_scalar(nx,nlays)           ! the vertical positions of the scalar data points
-    real(wp), intent(in)    :: z_vector(nx,nlevs)           ! the vertical positions of the vector data points
-    real(wp), intent(in)    :: rho(nx,nlays,n_constituents) ! the mass densities of the model atmosphere
-    real(wp), intent(in)    :: temperature(nx,nlays)        ! the temperature of the model atmosphere
-    real(wp), intent(inout) :: radiation_tendency(nx,nlays) ! the result (in W/m**3)
+    real(wp), intent(in)    :: z_scalar(nx,n_layers)           ! the vertical positions of the scalar data points
+    real(wp), intent(in)    :: z_vector(nx,n_levels)           ! the vertical positions of the vector data points
+    real(wp), intent(in)    :: rho(nx,n_layers,n_constituents) ! the mass densities of the model atmosphere
+    real(wp), intent(in)    :: temperature(nx,n_layers)        ! the temperature of the model atmosphere
+    real(wp), intent(inout) :: radiation_tendency(nx,n_layers) ! the result (in W/m**3)
     real(wp), intent(in)    :: temp_sfc(nx)                 ! surface temperature
     real(wp), intent(inout) :: sfc_sw_in(nx)                ! surface shortwave in
     real(wp), intent(inout) :: sfc_lw_out(nx)               ! surface longwave out
@@ -100,21 +100,21 @@ module mo_rrtmgp_coupler
     real(wp)                            :: albedo_dif_day(n_sw_bands,nx)          ! surface albedo for diffusive radiation (day points only)
     real(wp)                            :: mu_0_day(nx)                           ! solar zenith angle (day points only)
     real(wp)                            :: temp_sfc_day(nx)                       ! temperature at the surface (day points only)
-    real(wp)                            :: temperature_rad(nx,nlays)              ! reformatted temperature field
-    real(wp)                            :: pressure_rad(nx,nlays)                 ! reformatted pressure field
-    real(wp)                            :: pressure_interface_rad(nx,nlevs)     ! pressure at cell interfaces
-    real(wp)                            :: temperature_interface_rad (nx,nlevs) ! temperature at cell interfaces
-    real(wp)                            :: temperature_rad_day(nx,nlays)          ! temperature at cells restricted to day points
-    real(wp)                            :: pressure_rad_day(nx,nlays)             ! pressure at cells restricted to day points
-    real(wp)                            :: pressure_interface_rad_day(nx,nlevs) ! pressure at cell interfaces restricted to day points
-    real(wp)                            :: liquid_water_path(nx,nlays)            ! liquid water path in g/m**2
-    real(wp)                            :: ice_water_path(nx,nlays)               ! ice water path g/m**2
-    real(wp)                            :: liquid_eff_radius(nx,nlays)            ! liquid particles effective radius in micro meters 
-    real(wp)                            :: ice_eff_radius(nx,nlays)               ! ice particles effective radius in micro meters 
-    real(wp)                            :: liquid_water_path_day(nx,nlays)        ! liquid water path in g/m^2 restricted to the day points
-    real(wp)                            :: ice_water_path_day(nx,nlays)           ! ice water path in g/m^2 restricted to the day points
-    real(wp)                            :: liquid_eff_radius_day(nx,nlays)        ! liquid particles effective radius in micro meters restricted to the day points
-    real(wp)                            :: ice_eff_radius_day(nx,nlays)           ! ice particles effective radius in micro meters restricted to the day points
+    real(wp)                            :: temperature_rad(nx,n_layers)              ! reformatted temperature field
+    real(wp)                            :: pressure_rad(nx,n_layers)                 ! reformatted pressure field
+    real(wp)                            :: pressure_interface_rad(nx,n_levels)     ! pressure at cell interfaces
+    real(wp)                            :: temperature_interface_rad (nx,n_levels) ! temperature at cell interfaces
+    real(wp)                            :: temperature_rad_day(nx,n_layers)          ! temperature at cells restricted to day points
+    real(wp)                            :: pressure_rad_day(nx,n_layers)             ! pressure at cells restricted to day points
+    real(wp)                            :: pressure_interface_rad_day(nx,n_levels) ! pressure at cell interfaces restricted to day points
+    real(wp)                            :: liquid_water_path(nx,n_layers)            ! liquid water path in g/m**2
+    real(wp)                            :: ice_water_path(nx,n_layers)               ! ice water path g/m**2
+    real(wp)                            :: liquid_eff_radius(nx,n_layers)            ! liquid particles effective radius in micro meters 
+    real(wp)                            :: ice_eff_radius(nx,n_layers)               ! ice particles effective radius in micro meters 
+    real(wp)                            :: liquid_water_path_day(nx,n_layers)        ! liquid water path in g/m^2 restricted to the day points
+    real(wp)                            :: ice_water_path_day(nx,n_layers)           ! ice water path in g/m^2 restricted to the day points
+    real(wp)                            :: liquid_eff_radius_day(nx,n_layers)        ! liquid particles effective radius in micro meters restricted to the day points
+    real(wp)                            :: ice_eff_radius_day(nx,n_layers)           ! ice particles effective radius in micro meters restricted to the day points
     real(wp)                            :: scale_height = 8.e3_wp                 ! scale height of the atmosphere
     real(wp)                            :: liquid_eff_radius_value                ! representative value of liquid particle radius
     real(wp)                            :: ice_eff_radius_value                   ! representative value of ice particle radius
@@ -155,7 +155,7 @@ module mo_rrtmgp_coupler
     
     ! reformatting the thermodynamical state of the gas phase for RTE+RRTMGP
     do jk=1,nx
-      do jl=1,nlays
+      do jl=1,n_layers
         temperature_rad(jk,jl) = temperature(jk,jl)
         ! the pressure is diagnozed here, using the equation of state for ideal gases
         pressure_rad(jk,jl) = r_d*rho(jk,jl,n_condensed_constituents+1)*temperature_rad(jk,jl)
@@ -170,7 +170,7 @@ module mo_rrtmgp_coupler
     liquid_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
     if (n_condensed_constituents==4) then
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           ! the solid condensates' effective radius
           ice_precip_weight = rho(jk,jl,1)+EPSILON_SECURITY
           ice_cloud_weight = rho(jk,jl,3)+EPSILON_SECURITY
@@ -203,7 +203,7 @@ module mo_rrtmgp_coupler
     
     ! moving the temperature into the allowed area
     do jk=1,nx
-      do jl=1,nlays
+      do jl=1,n_layers
         if (temperature_rad(jk,jl)>k_dist_sw%get_temp_max()) then
           temperature_rad(jk,jl) = k_dist_sw%get_temp_max()
         endif
@@ -221,7 +221,7 @@ module mo_rrtmgp_coupler
     
     ! the properties at cell interfaces
     do jk=1,nx
-      do jl=1,nlevs
+      do jl=1,n_levels
         ! values at TOA
         if (jl==1) then
           ! temperature at TOA (linear extrapolation)
@@ -238,12 +238,13 @@ module mo_rrtmgp_coupler
           ! here, the barometric height formula is used
           pressure_interface_rad(jk,1) = pressure_rad(jk,1)*exp(-(z_vector(jk,1)-z_scalar(jk,2))/scale_height)
         ! values at the surface
-        elseif (jl==nlevs) then
+        elseif (jl==n_levels) then
           ! temperature at the surface
           ! the value in the lowest layer
-          temperature_interface_rad(jk,nlevs) = temp_sfc(jk)
+          temperature_interface_rad(jk,n_levels) = temp_sfc(jk)
           ! surface pressure
-          pressure_interface_rad(jk,nlevs) = pressure_rad(jk,nlays)*exp(-(z_vector(jk,nlevs)-z_scalar(jk,jl-1))/scale_height)
+          pressure_interface_rad(jk,n_levels) = pressure_rad(jk,n_layers) &
+                                                *exp(-(z_vector(jk,n_levels)-z_scalar(jk,jl-1))/scale_height)
         else
           ! just the arithmetic mean
           temperature_interface_rad(jk,jl) = 0.5_wp*(temperature_rad(jk,jl-1)+temperature_rad(jk,jl))
@@ -266,17 +267,17 @@ module mo_rrtmgp_coupler
       if (temperature_interface_rad(jk,1)<k_dist_lw%get_temp_min()) then
         temperature_interface_rad(jk,1) = k_dist_lw%get_temp_min()
       endif
-      if (temperature_interface_rad(jk,nlevs)>k_dist_sw%get_temp_max()) then
-         temperature_interface_rad(jk,nlevs) = k_dist_sw%get_temp_max()
+      if (temperature_interface_rad(jk,n_levels)>k_dist_sw%get_temp_max()) then
+         temperature_interface_rad(jk,n_levels) = k_dist_sw%get_temp_max()
       endif
-      if (temperature_interface_rad(jk,nlevs)<k_dist_sw%get_temp_min()) then
-        temperature_interface_rad(jk,nlevs) = k_dist_sw%get_temp_min()
+      if (temperature_interface_rad(jk,n_levels)<k_dist_sw%get_temp_min()) then
+        temperature_interface_rad(jk,n_levels) = k_dist_sw%get_temp_min()
       endif
-      if (temperature_interface_rad(jk,nlevs)>k_dist_lw%get_temp_max()) then
-        temperature_interface_rad(jk,nlevs) = k_dist_lw%get_temp_max()
+      if (temperature_interface_rad(jk,n_levels)>k_dist_lw%get_temp_max()) then
+        temperature_interface_rad(jk,n_levels) = k_dist_lw%get_temp_max()
       endif
-      if (temperature_interface_rad(jk,nlevs)<k_dist_lw%get_temp_min()) then
-        temperature_interface_rad(jk,nlevs) = k_dist_lw%get_temp_min()
+      if (temperature_interface_rad(jk,n_levels)<k_dist_lw%get_temp_min()) then
+        temperature_interface_rad(jk,n_levels) = k_dist_lw%get_temp_min()
       endif
     enddo
     
@@ -321,16 +322,16 @@ module mo_rrtmgp_coupler
     call set_vol_mix_ratios(rho,.true.,n_day_points,day_indices,z_scalar,gas_concentrations_sw)
     
     ! initializing the short wave fluxes
-    call init_fluxes(fluxes_day,n_day_points,nlevs)
+    call init_fluxes(fluxes_day,n_day_points,n_levels)
     
     ! setting the bands for the SW cloud properties
     call handle_error(cloud_props_sw%init(k_dist_sw%get_band_lims_wavenumber()))
     
     ! allocating the short wave optical properties
-    call handle_error(atmos_props_sw%alloc_2str(n_day_points,nlays,k_dist_sw))
+    call handle_error(atmos_props_sw%alloc_2str(n_day_points,n_layers,k_dist_sw))
     
     ! allocating the short wave optical properties of the clouds
-    call handle_error(cloud_props_sw%alloc_2str(n_day_points,nlays))
+    call handle_error(cloud_props_sw%alloc_2str(n_day_points,n_layers))
     
     ! allocating the TOA flux
     allocate(toa_flux(n_day_points,k_dist_sw%get_ngpt()))
@@ -361,7 +362,7 @@ module mo_rrtmgp_coupler
     
     ! saving the surface shortwave inward radiative flux density
     do jk=1,n_day_points
-      sfc_sw_in(day_indices(jk)) = fluxes_day%flux_dn(jk,nlevs) - fluxes_day%flux_up(jk,nlevs)
+      sfc_sw_in(day_indices(jk)) = fluxes_day%flux_dn(jk,n_levels) - fluxes_day%flux_up(jk,n_levels)
     enddo
     
     ! freeing the short wave fluxes
@@ -373,19 +374,19 @@ module mo_rrtmgp_coupler
     call set_vol_mix_ratios(rho,.false.,n_day_points,day_indices,z_scalar,gas_concentrations_lw)
     
     ! initializing the long wave fluxes
-    call init_fluxes(fluxes,nx,nlevs)
+    call init_fluxes(fluxes,nx,n_levels)
     
     ! setting the bands for the LW cloud properties
     call handle_error(cloud_props_lw%init(k_dist_lw%get_band_lims_wavenumber()))
     
     ! allocating the long wave optical properties of the gas phase
-    call handle_error(atmos_props_lw%alloc_1scl(nx,nlays,k_dist_lw))
+    call handle_error(atmos_props_lw%alloc_1scl(nx,n_layers,k_dist_lw))
     
     ! allocating the long wave optical properties of the clouds
-    call handle_error(cloud_props_lw%alloc_1scl(nx,nlays))
+    call handle_error(cloud_props_lw%alloc_1scl(nx,n_layers))
     
     ! allocating the long wave source function
-    call handle_error(sources_lw%alloc(nx,nlays,k_dist_lw))
+    call handle_error(sources_lw%alloc(nx,n_layers,k_dist_lw))
     
     ! setting the long wave optical properties of the gas phase
     call handle_error(k_dist_lw%gas_optics(pressure_rad,pressure_interface_rad,temperature_rad,temp_sfc,gas_concentrations_lw, &
@@ -406,8 +407,8 @@ module mo_rrtmgp_coupler
     
     ! saving the surface longwave outward radiative flux density
     do jk=1,nx
-      sfc_lw_out(jk) = fluxes%flux_up(jk,nlevs) &
-      - fluxes%flux_dn(jk,nlevs)
+      sfc_lw_out(jk) = fluxes%flux_up(jk,n_levels) &
+      - fluxes%flux_dn(jk,n_levels)
     enddo
     
     ! freeing the long wave fluxes
@@ -423,8 +424,8 @@ module mo_rrtmgp_coupler
     integer,intent(in)                   :: n_day_points                 ! as usual
     integer,intent(in)                   :: day_indices(nx)              ! the indices of the columns where it is day
     type(ty_fluxes_broadband),intent(in) :: fluxes                       ! fluxes object based on which to compute the power density
-    real(wp),intent(in)                  :: z_vector(nx,nlevs)           ! as usual
-    real(wp),intent(inout)               :: radiation_tendency(nx,nlays) ! the result (in W/m**3)
+    real(wp),intent(in)                  :: z_vector(nx,n_levels)           ! as usual
+    real(wp),intent(inout)               :: radiation_tendency(nx,n_layers) ! the result (in W/m**3)
   
     ! local variables
     integer :: n_relevant_columns ! the number of columns taken into account
@@ -441,7 +442,7 @@ module mo_rrtmgp_coupler
     ! loop over all columns
     do j_column=1,n_relevant_columns
       ! loop over all layers
-      do jl=1,nlays
+      do jl=1,n_layers
         ! finding the relevant horizontal index
         if (day_only) then
           jk = day_indices(j_column)
@@ -555,15 +556,15 @@ module mo_rrtmgp_coupler
     
     ! This subroutine computes volume mixing ratios based on the model variables.
     
-    real(wp),          intent(in)    :: rho(nx,nlays,n_constituents) ! mass densities of the constituents
+    real(wp),          intent(in)    :: rho(nx,n_layers,n_constituents) ! mass densities of the constituents
     logical,           intent(in)    :: sw_bool                      ! short wave switch
     integer,           intent(in)    :: n_day_points                 ! as usual
     integer,           intent(in)    :: day_indices(nx)              ! the indices of the points where it is day
-    real(wp),          intent(in)    :: z_scalar(nx,nlays)           ! z coordinates of scalar data points
+    real(wp),          intent(in)    :: z_scalar(nx,n_layers)           ! z coordinates of scalar data points
     type(ty_gas_concs),intent(inout) :: gas_concentrations           ! the gas concentrations object to to fill
     
     ! local variables
-    real(wp) :: vol_mix_ratio(nx,nlays) ! the volume mixing ratio of a gas
+    real(wp) :: vol_mix_ratio(nx,n_layers) ! the volume mixing ratio of a gas
     integer  :: jc,jk,jl                ! loop indices
     
     ! setting the volume mixing ratios of the gases
@@ -581,13 +582,13 @@ module mo_rrtmgp_coupler
         case("o3")
           if (sw_bool) then
             do jk=1,n_day_points
-              do jl=1,nlays
+              do jl=1,n_layers
                 vol_mix_ratio(jk,jl) = calc_o3_vmr(z_scalar(day_indices(jk),jl))
               enddo
             enddo
           else
             do jk=1,nx
-              do jl=1,nlays
+              do jl=1,n_layers
                 vol_mix_ratio(jk,jl) = calc_o3_vmr(z_scalar(jk,jl))
               enddo
             enddo
@@ -603,7 +604,7 @@ module mo_rrtmgp_coupler
           ! in the short wave case,only the day points matter
           if (sw_bool .and. n_condensed_constituents==4) then
             do jk=1,n_day_points
-              do jl=1,nlays
+              do jl=1,n_layers
                 vol_mix_ratio(jk,jl) = (rho(day_indices(jk),jl,n_condensed_constituents+2)*r_v)/ &
                                        (rho(day_indices(jk),jl,n_condensed_constituents+1)*r_d)
               enddo
@@ -611,7 +612,7 @@ module mo_rrtmgp_coupler
           ! in the long wave case,all points matter
           elseif (n_condensed_constituents==4) then
             do jk=1,nx
-              do jl=1,nlays
+              do jl=1,n_layers
                 vol_mix_ratio(jk,jl) = (rho(jk,jl,n_condensed_constituents+2)*r_v)/(rho(jk,jl,n_condensed_constituents+1)*r_d)
               enddo
             enddo

@@ -13,8 +13,8 @@ cat > namelist.nml << EOF
 run_id="$run_id"
 ny=3
 nx=401
-nlays=65
-nlays_oro=64
+n_layers=65
+n_oro_layers=64
 toa=19500.0
 dy=500
 dx=500

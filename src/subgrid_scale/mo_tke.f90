@@ -6,7 +6,7 @@ module mo_tke
   ! This module computes everything related to the turbulent kinetic energy (TKE).
   
   use mo_definitions,        only: wp,t_state,t_diag,t_grid
-  use mo_run_nml,            only: ny,nx,nlays,dtime
+  use mo_run_nml,            only: ny,nx,n_layers,dtime
   use mo_constituents_nml,   only: n_condensed_constituents,n_constituents
   use mo_constants,          only: M_PI
   use mo_gradient_operators, only: grad_hor,grad_vert
@@ -38,7 +38,7 @@ module mo_tke
     !$omp parallel do private(ji,jk,jl,decay_constant)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           ! calculating the decay constant
           decay_constant = 8._wp*M_PI**2/grid%mean_velocity_area*(diag%viscosity_coeff_div(ji,jk,jl) &
           + diag%viscosity_coeff_curl(ji,jk,jl))/state%rho(ji,jk,jl,n_condensed_constituents+1)

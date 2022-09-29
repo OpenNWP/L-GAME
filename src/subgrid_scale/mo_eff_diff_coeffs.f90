@@ -5,7 +5,7 @@ module mo_eff_diff_coeffs
   
   ! This module computes the effective diffusion coefficients.
   
-  use mo_run_nml,              only: ny,nx,nlays,nlevs,dtime,eff_hor_res
+  use mo_run_nml,              only: ny,nx,n_layers,n_levels,dtime,eff_hor_res
   use mo_constants,            only: gravity
   use mo_definitions,          only: wp,t_state,t_diag,t_grid
   use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h
@@ -37,7 +37,7 @@ module mo_eff_diff_coeffs
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           diag%viscosity_coeff_div(ji,jk,jl) = tke2hor_diff_coeff(diag%tke(ji,jk,jl),eff_hor_res)
         enddo
       enddo
@@ -48,7 +48,7 @@ module mo_eff_diff_coeffs
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           diag%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
           state%rho(ji,jk,jl,n_condensed_constituents+1))
         enddo
@@ -65,7 +65,7 @@ module mo_eff_diff_coeffs
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           diag%viscosity_coeff_div(ji,jk,jl) = state%rho(ji,jk,jl,n_condensed_constituents+1) &
                                                *diag%viscosity_coeff_div(ji,jk,jl)
         enddo
@@ -80,7 +80,7 @@ module mo_eff_diff_coeffs
     
     ! molecular component
     !$omp parallel do private(ji,jk,jl)
-    do jl=1,nlays
+    do jl=1,n_layers
       do ji=2,ny
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*sum(diag%viscosity_molecular(ji-1:ji,jk-1:jk,jl))
@@ -117,7 +117,7 @@ module mo_eff_diff_coeffs
         
     ! turbulent component
     !$omp parallel do private(ji,jk,jl)
-    do jl=1,nlays
+    do jl=1,n_layers
       do ji=2,ny
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*( &
@@ -159,7 +159,7 @@ module mo_eff_diff_coeffs
     
     ! multiplication by the density
     !$omp parallel do private(ji,jk,jl)
-    do jl=1,nlays
+    do jl=1,n_layers
       do ji=2,ny
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*( &
@@ -213,7 +213,7 @@ module mo_eff_diff_coeffs
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           diag%viscosity_coeff_curl(ji,jk,jl) = 0.25_wp*sum(diag%viscosity_coeff_curl_dual(ji:ji+1,jk:jk+1,jl))
         enddo
       enddo
@@ -241,7 +241,7 @@ module mo_eff_diff_coeffs
     
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
-      do jl=2,nlays
+      do jl=2,n_layers
         do jk=2,nx
           diag%vert_hor_viscosity_u(ji,jk,jl) = &
           ! molecular component
@@ -281,7 +281,7 @@ module mo_eff_diff_coeffs
     
     !$omp parallel do private(ji,jk,jl)
     do jk=1,nx
-      do jl=2,nlays
+      do jl=2,n_layers
         do ji=2,ny
           diag%vert_hor_viscosity_v(ji,jk,jl) = &
           ! molecular component
@@ -322,7 +322,7 @@ module mo_eff_diff_coeffs
     ! multiplication by the density
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
-      do jl=2,nlays
+      do jl=2,n_layers
         do jk=2,nx
           diag%vert_hor_viscosity_u(ji,jk,jl) = diag%vert_hor_viscosity_u(ji,jk,jl) &
           ! molecular component
@@ -351,7 +351,7 @@ module mo_eff_diff_coeffs
     
     !$omp parallel do private(ji,jk,jl)
     do jk=1,nx
-      do jl=2,nlays
+      do jl=2,n_layers
         do ji=2,ny
           diag%vert_hor_viscosity_v(ji,jk,jl) = diag%vert_hor_viscosity_v(ji,jk,jl) &
           ! molecular component
@@ -383,13 +383,13 @@ module mo_eff_diff_coeffs
     ! for now, we set the vertical diffusion coefficient at the TOA equal to the vertical diffusion coefficient in the layer below
     diag%vert_hor_viscosity_u(:,:,1) = diag%vert_hor_viscosity_u(:,:,2)
     ! for now, we set the vertical diffusion coefficient at the surface equal to the vertical diffusion coefficient in the layer above
-    diag%vert_hor_viscosity_u(:,:,nlevs) = diag%vert_hor_viscosity_u(:,:,nlays)
+    diag%vert_hor_viscosity_u(:,:,n_levels) = diag%vert_hor_viscosity_u(:,:,n_layers)
     !$omp end parallel workshare
     !$omp parallel workshare
     ! for now, we set the vertical diffusion coefficient at the TOA equal to the vertical diffusion coefficient in the layer below
     diag%vert_hor_viscosity_v(:,:,1) = diag%vert_hor_viscosity_v(:,:,2)
     ! for now, we set the vertical diffusion coefficient at the surface equal to the vertical diffusion coefficient in the layer above
-    diag%vert_hor_viscosity_v(:,:,nlevs) = diag%vert_hor_viscosity_v(:,:,nlays)
+    diag%vert_hor_viscosity_v(:,:,n_levels) = diag%vert_hor_viscosity_v(:,:,n_layers)
     !$omp end parallel workshare
   
   end subroutine vert_hor_mom_viscosity
@@ -410,7 +410,7 @@ module mo_eff_diff_coeffs
     !$omp parallel do private(ji,jk,jl,mom_diff_coeff)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
     
           mom_diff_coeff &
           ! molecular viscosity
@@ -450,7 +450,7 @@ module mo_eff_diff_coeffs
       !$omp parallel do private(ji,jk,jl)
       do ji=1,ny
         do jk=1,nx
-          do jl=1,nlays
+          do jl=1,n_layers
             diag%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
             state%rho(ji,jk,jl,n_condensed_constituents+1))
           enddo
@@ -463,7 +463,7 @@ module mo_eff_diff_coeffs
     !$omp parallel do private(ji,jk,jl,c_g_v)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           c_g_v = spec_heat_cap_diagnostics_v(state,ji,jk,jl)
           ! horizontal diffusion coefficient
           diag%scalar_diff_coeff_h(ji,jk,jl) = c_g_v &
@@ -504,7 +504,7 @@ module mo_eff_diff_coeffs
       !$omp parallel do private(ji,jk,jl)
       do ji=1,ny
         do jk=1,nx
-          do jl=1,nlays
+          do jl=1,n_layers
             diag%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
             state%rho(ji,jk,jl,n_condensed_constituents+1))
           enddo
@@ -517,7 +517,7 @@ module mo_eff_diff_coeffs
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           ! horizontal diffusion coefficient
           diag%scalar_diff_coeff_h(ji,jk,jl) &
           = 0.5_wp*(diag%viscosity_coeff_div(ji,jk,jl) + diag%viscosity_coeff_curl(ji,jk,jl)) &
@@ -562,7 +562,7 @@ module mo_eff_diff_coeffs
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=2,nlays
+        do jl=2,n_layers
           diag%w_placeholder(ji,jk,jl) &
           = gravity*diag%w_placeholder(ji,jk,jl)
         enddo
@@ -574,10 +574,10 @@ module mo_eff_diff_coeffs
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           if (jl==1) then
             diag%n_squared(ji,jk,jl) = diag%w_placeholder(ji,jk,jl)
-          elseif (jl==nlays) then
+          elseif (jl==n_layers) then
             diag%n_squared(ji,jk,jl) = diag%w_placeholder(ji,jk,jl+1)
           else
             diag%n_squared(ji,jk,jl) &

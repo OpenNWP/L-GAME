@@ -8,7 +8,7 @@ module mo_momentum_diff_diss
   use mo_definitions,          only: t_grid,t_diag,t_state
   use mo_divergence_operators, only: div_h,add_vertical_div
   use mo_gradient_operators,   only: grad_hor,grad_vert
-  use mo_run_nml,              only: ny,nx,nlays,nlevs,wp
+  use mo_run_nml,              only: ny,nx,n_layers,n_levels,wp
   use mo_diff_nml,             only: h_prandtl
   use mo_constituents_nml,     only: n_constituents,n_condensed_constituents
   use mo_inner_product,        only: inner_product
@@ -59,14 +59,14 @@ module mo_momentum_diff_diss
     !$omp parallel do private(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
     do ji=1,ny
       do jk=1,nx+1
-        do jl=1,nlays
+        do jl=1,n_layers
           diag%u_placeholder(ji,jk,jl) = (diag%viscosity_coeff_curl_dual(ji+1,jk,jl)*diag%zeta_z(ji+1,jk,jl) - &
           diag%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
           
           ! terrain-following correction
           slope = (grid%z_area_dual_z(ji+1,jk,jl) - grid%z_area_dual_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
           upper_index = max(1,jl-1)
-          lower_index = min(nlays,jl+1)
+          lower_index = min(n_layers,jl+1)
           ! computing the vertical gradient of the vertical vorticity (times the respective diffusion coefficient)
           ! and averaging it to the vector point
           vertical_gradient = 0.5_wp*(diag%viscosity_coeff_curl_dual(ji+1,jk,upper_index)*diag%zeta_z(ji+1,jk,upper_index) &
@@ -85,14 +85,14 @@ module mo_momentum_diff_diss
     !$omp parallel do private(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
     do ji=1,ny+1
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           diag%v_placeholder(ji,jk,jl) = (diag%viscosity_coeff_curl_dual(ji,jk+1,jl)*diag%zeta_z(ji,jk+1,jl) - &
           diag%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
           
           ! terrain-following correction
           slope = (grid%z_area_dual_z(ji,jk+1,jl) - grid%z_area_dual_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
           upper_index = max(1,jl-1)
-          lower_index = min(nlays,jl+1)
+          lower_index = min(n_layers,jl+1)
           ! computing the vertical gradient of the vertical vorticity (times the respective diffusion coefficient)
           ! and averaging it to the vector point
           vertical_gradient = 0.5_wp*(diag%viscosity_coeff_curl_dual(ji,jk+1,upper_index)*diag%zeta_z(ji,jk+1,upper_index) &
@@ -111,7 +111,7 @@ module mo_momentum_diff_diss
     ! adding up the two components and dividing by the averaged density
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
-      do jl=1,nlays
+      do jl=1,n_layers
         do jk=2,nx
           diag%mom_diff_tend_x(ji,jk,jl) = (diag%mom_diff_tend_x(ji,jk,jl) + diag%u_placeholder(ji,jk,jl)) &
           /(0.5_wp*(sum(state%rho(ji,jk-1,jl,1:n_condensed_constituents+1)) &
@@ -132,7 +132,7 @@ module mo_momentum_diff_diss
     
     !$omp parallel do private(ji,jk,jl)
     do jk=1,nx
-      do jl=1,nlays
+      do jl=1,n_layers
         do ji=2,ny
           diag%mom_diff_tend_y(ji,jk,jl) = (diag%mom_diff_tend_y(ji,jk,jl) + diag%v_placeholder(ji,jk,jl)) &
           /(0.5_wp*(sum(state%rho(ji-1,jk,jl,1:n_condensed_constituents+1)) &
@@ -168,7 +168,7 @@ module mo_momentum_diff_diss
     ! ---------------------------------------------
     ! calculating the vertical gradients of the velocity components
     !$omp parallel do private(jl)
-    do jl=2,nlays
+    do jl=2,n_layers
       diag%du_dz(:,:,jl) = (state%wind_u(:,:,jl-1) - state%wind_u(:,:,jl))/(grid%z_u(:,:,jl-1) - grid%z_u(:,:,jl))
       diag%dv_dz(:,:,jl) = (state%wind_v(:,:,jl-1) - state%wind_v(:,:,jl))/(grid%z_v(:,:,jl-1) - grid%z_v(:,:,jl))
     enddo
@@ -181,40 +181,40 @@ module mo_momentum_diff_diss
     ! calculation at the surface
     !$omp parallel do private(jk)
     do jk=2,nx
-      diag%du_dz(:,jk,nlevs) = state%wind_u(:,jk,nlays)/(grid%z_u(:,jk,nlays) &
-      - 0.5_wp*(grid%z_w(:,jk-1,nlevs)+grid%z_w(:,jk,nlevs)))
+      diag%du_dz(:,jk,n_levels) = state%wind_u(:,jk,n_layers)/(grid%z_u(:,jk,n_layers) &
+      - 0.5_wp*(grid%z_w(:,jk-1,n_levels)+grid%z_w(:,jk,n_levels)))
     enddo
     !$omp end parallel do
     
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel workshare
-      diag%du_dz(:,1,nlevs) = state%wind_u(:,1,nlays)/(grid%z_u(:,1,nlays) &
-      - 0.5_wp*(grid%z_w(:,nx,nlevs)+grid%z_w(:,1,nlevs)))
-      diag%du_dz(:,nx+1,nlevs) = diag%du_dz(:,1,nlevs)
+      diag%du_dz(:,1,n_levels) = state%wind_u(:,1,n_layers)/(grid%z_u(:,1,n_layers) &
+      - 0.5_wp*(grid%z_w(:,nx,n_levels)+grid%z_w(:,1,n_levels)))
+      diag%du_dz(:,nx+1,n_levels) = diag%du_dz(:,1,n_levels)
       !$omp end parallel workshare
     endif
     
     !$omp parallel do private(ji)
     do ji=2,ny
-      diag%dv_dz(ji,:,nlevs) = state%wind_v(ji,:,nlays)/(grid%z_v(ji,:,nlays) &
-      - 0.5_wp*(grid%z_w(ji-1,:,nlevs)+grid%z_w(ji,:,nlevs)))
+      diag%dv_dz(ji,:,n_levels) = state%wind_v(ji,:,n_layers)/(grid%z_v(ji,:,n_layers) &
+      - 0.5_wp*(grid%z_w(ji-1,:,n_levels)+grid%z_w(ji,:,n_levels)))
     enddo
     !$omp end parallel do
     
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel workshare
-      diag%dv_dz(1,:,nlevs) = state%wind_v(1,:,nlays)/(grid%z_v(1,:,nlays) &
-      - 0.5_wp*(grid%z_w(ny,:,nlevs)+grid%z_w(1,:,nlevs)))
-      diag%dv_dz(ny+1,:,nlevs) = diag%dv_dz(1,:,nlevs)
+      diag%dv_dz(1,:,n_levels) = state%wind_v(1,:,n_layers)/(grid%z_v(1,:,n_layers) &
+      - 0.5_wp*(grid%z_w(ny,:,n_levels)+grid%z_w(1,:,n_levels)))
+      diag%dv_dz(ny+1,:,n_levels) = diag%dv_dz(1,:,n_levels)
       !$omp end parallel workshare
     endif
     
     ! calculating the acceleration
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
-      do jl=1,nlays
+      do jl=1,n_layers
         do jk=2,nx
           diag%mom_diff_tend_x(ji,jk,jl) = diag%mom_diff_tend_x(ji,jk,jl) &
           + (diag%vert_hor_viscosity_u(ji,jk,jl)*diag%du_dz(ji,jk,jl) &
@@ -241,7 +241,7 @@ module mo_momentum_diff_diss
     
     !$omp parallel do private(ji,jk,jl)
     do jk=1,nx
-      do jl=1,nlays
+      do jl=1,n_layers
         do ji=2,ny
           diag%mom_diff_tend_y(ji,jk,jl) = diag%mom_diff_tend_y(ji,jk,jl) &
           + (diag%vert_hor_viscosity_v(ji,jk,jl)*diag%dv_dz(ji,jk,jl) &
@@ -284,7 +284,7 @@ module mo_momentum_diff_diss
     ! the diffusion coefficient is the same as the one for vertical diffusion of horizontal velocity
     ! averaging the vertical velocity vertically to cell centers, using the inner product weights
     !$omp parallel do private(jl)
-    do jl=1,nlays
+    do jl=1,n_layers
       diag%scalar_placeholder(:,:,jl) = &
       grid%inner_product_weights(:,:,jl,5)*state%wind_w(:,:,jl) &
       + grid%inner_product_weights(:,:,jl,6)*state%wind_w(:,:,jl+1)
@@ -294,7 +294,7 @@ module mo_momentum_diff_diss
     call grad_hor(diag%scalar_placeholder,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
     ! multiplying by the already computed diffusion coefficient
     !$omp parallel do private(jl)
-    do jl=1,nlays
+    do jl=1,n_layers
       diag%u_placeholder(:,:,jl) = 0.5_wp*(diag%vert_hor_viscosity_u(:,:,jl) + diag%vert_hor_viscosity_u(:,:,jl+1)) &
       *diag%u_placeholder(:,:,jl)
       diag%v_placeholder(:,:,jl) = 0.5_wp*(diag%vert_hor_viscosity_v(:,:,jl) + diag%vert_hor_viscosity_v(:,:,jl+1)) &
@@ -308,7 +308,7 @@ module mo_momentum_diff_diss
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=2,nlays
+        do jl=2,n_layers
           diag%mom_diff_tend_z(ji,jk,jl) = diag%mom_diff_tend_z(ji,jk,jl) + &
           0.5_wp*(diag%scalar_placeholder(ji,jk,jl-1) + diag%scalar_placeholder(ji,jk,jl))
           ! dividing by the density
@@ -341,7 +341,7 @@ module mo_momentum_diff_diss
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           diag%heating_diss(ji,jk,jl) = -sum(state%rho(ji,jk,jl,1:n_condensed_constituents+1)) &
                                          *diag%heating_diss(ji,jk,jl)
         enddo

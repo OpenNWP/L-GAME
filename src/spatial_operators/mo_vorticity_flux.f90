@@ -6,7 +6,7 @@ module mo_vorticity_flux
   ! This module computes the vorticity flux term.
   
   use mo_definitions, only: t_grid,t_diag,wp
-  use mo_run_nml,     only: ny,nx,nlays
+  use mo_run_nml,     only: ny,nx,n_layers
   use mo_bc_nml,      only: lperiodic
   
   implicit none
@@ -100,7 +100,7 @@ module mo_vorticity_flux
     ! u
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
-      do jl=1,nlays
+      do jl=1,n_layers
         do jk=2,nx
           diag%pot_vort_tend_x(ji,jk,jl) = diag%pot_vort_tend_x(ji,jk,jl) &
           - 0.5_wp*grid%inner_product_weights(ji,jk-1,jl,5)*diag%w_placeholder(ji,jk-1,jl)*diag%eta_y(ji,jk,jl) &
@@ -125,7 +125,7 @@ module mo_vorticity_flux
     ! v
     !$omp parallel do private(ji,jk,jl)
     do jk=1,nx
-      do jl=1,nlays
+      do jl=1,n_layers
         do ji=2,ny
           diag%pot_vort_tend_y(ji,jk,jl) = diag%pot_vort_tend_y(ji,jk,jl) &
           + 0.5_wp*grid%inner_product_weights(ji-1,jk,jl,5)*diag%w_placeholder(ji-1,jk,jl)*diag%eta_x(ji,jk,jl) &
@@ -152,7 +152,7 @@ module mo_vorticity_flux
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=2,nlays
+        do jl=2,n_layers
           diag%pot_vort_tend_z(ji,jk,jl) = 0.5_wp*( &
           grid%inner_product_weights(ji,jk,jl-1,1)*diag%u_placeholder(ji,jk+1,jl-1)*diag%eta_y(ji,jk+1,jl) &
           - grid%inner_product_weights(ji,jk,jl-1,2)*diag%v_placeholder(ji,jk,jl-1)*diag%eta_x(ji,jk,jl) &

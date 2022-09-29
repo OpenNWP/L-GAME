@@ -6,7 +6,7 @@ module mo_averaging
   ! This module contains averaging operators.
 
   use mo_definitions, only: t_grid,wp
-  use mo_run_nml,     only: nlays,nlays_oro,ny,nx,nlays_flat
+  use mo_run_nml,     only: n_layers,n_oro_layers,ny,nx,n_flat_layers
   use mo_bc_nml,      only: lperiodic
   
   implicit none
@@ -26,9 +26,9 @@ module mo_averaging
     real(wp) :: vertical_contravariant_corr
     vertical_contravariant_corr = 0._wp
     
-    if (jl>=nlays_flat+1) then
+    if (jl>=n_flat_layers+1) then
       ! highest level following orography
-      if (jl==nlays_flat+1) then
+      if (jl==n_flat_layers+1) then
         vertical_contravariant_corr = vertical_contravariant_corr &
         - 0.5_wp*vector_field_x(ji,jk+1,jl)*grid%slope_x(ji,jk+1,jl)*grid%inner_product_weights(ji,jk,jl,1) &
         - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,2) &
@@ -70,7 +70,7 @@ module mo_averaging
         remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,nx,jl,5)*vertical_cov(ji,nx,jl)
         remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,1,jl,5)*vertical_cov(ji,1,jl)
         ! layer below
-        if (jl<nlays) then
+        if (jl<n_layers) then
           remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,nx,jl,6)*vertical_cov(ji,nx,jl+1)
           remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,1,jl,6)*vertical_cov(ji,1,jl+1)
         endif
@@ -81,7 +81,7 @@ module mo_averaging
       remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk-1,jl,5)*vertical_cov(ji,jk-1,jl)
       remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
       ! layer below
-      if (jl<nlays) then
+      if (jl<n_layers) then
         remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk-1,jl,6)*vertical_cov(ji,jk-1,jl+1)
         remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
       endif
@@ -111,7 +111,7 @@ module mo_averaging
         remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ny,jk,jl,5)*vertical_cov(ny,jk,jl)
         remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(1,jk,jl,5)*vertical_cov(1,jk,jl)
         ! layer below
-        if (jl<nlays) then
+        if (jl<n_layers) then
           remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ny,jk,jl,6)*vertical_cov(ny,jk,jl+1)
           remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(1,jk,jl,6)*vertical_cov(1,jk,jl+1)
         endif
@@ -122,7 +122,7 @@ module mo_averaging
       remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji-1,jk,jl,5)*vertical_cov(ji-1,jk,jl)
       remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
       ! layer below
-      if (jl<nlays) then
+      if (jl<n_layers) then
         remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji-1,jk,jl,6)*vertical_cov(ji-1,jk,jl+1)
         remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
       endif
@@ -147,7 +147,7 @@ module mo_averaging
     
     horizontal_covariant_x = hor_comp_x(ji,jk,jl)
     
-    if (jl>nlays_flat) then
+    if (jl>n_flat_layers) then
       horizontal_covariant_x = horizontal_covariant_x + grid%slope_x(ji,jk,jl)*remap_ver2hor_x(vert_comp,grid,ji,jk,jl)
     endif
     
@@ -167,7 +167,7 @@ module mo_averaging
   
     horizontal_covariant_y = hor_comp_y(ji,jk,jl)
     
-    if (jl>nlays_flat) then
+    if (jl>n_flat_layers) then
       horizontal_covariant_y = horizontal_covariant_y + grid%slope_y(ji,jk,jl)*remap_ver2hor_y(vert_comp,grid,ji,jk,jl)
     endif
   

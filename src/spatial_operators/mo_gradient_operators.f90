@@ -6,7 +6,7 @@ module mo_gradient_operators
   ! This module is a collection of gradient operators.
 
   use mo_definitions, only: t_grid,wp
-  use mo_run_nml,     only: ny,nx,nlays,toa,nlays_flat
+  use mo_run_nml,     only: ny,nx,n_layers,toa,n_flat_layers
   use mo_averaging,   only: remap_ver2hor_x,remap_ver2hor_y
   use mo_bc_nml,      only: lperiodic
     
@@ -76,7 +76,7 @@ module mo_gradient_operators
 
     ! calculating the vertical gradient in the inner levels
     !$omp parallel do private(jl)
-    do jl=2,nlays
+    do jl=2,n_layers
       result_field(:,:,jl) = (scalar_field(:,:,jl-1) - scalar_field(:,:,jl))/grid%dz(:,:,jl)
     enddo
     !$omp end parallel do
@@ -106,7 +106,7 @@ module mo_gradient_operators
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx+1
-        do jl=nlays_flat+1,nlays
+        do jl=n_flat_layers+1,n_layers
           result_field_x(ji,jk,jl) = result_field_x(ji,jk,jl) &
           - grid%slope_x(ji,jk,jl)*remap_ver2hor_x(result_field_z,grid,ji,jk,jl)
         enddo
@@ -118,7 +118,7 @@ module mo_gradient_operators
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny+1
       do jk=1,nx
-        do jl=nlays_flat+1,nlays
+        do jl=n_flat_layers+1,n_layers
           result_field_y(ji,jk,jl) = result_field_y(ji,jk,jl) &
           - grid%slope_y(ji,jk,jl)*remap_ver2hor_y(result_field_z,grid,ji,jk,jl)
         enddo

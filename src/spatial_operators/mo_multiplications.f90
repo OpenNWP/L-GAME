@@ -6,7 +6,7 @@ module mo_multiplications
   ! This module is a collection of various multiplications of vector and/or scalar fields.
   
   use mo_definitions, only: wp
-  use mo_run_nml,     only: ny,nx,nlays
+  use mo_run_nml,     only: ny,nx,n_layers
   use mo_bc_nml,      only: lperiodic
   
   implicit none
@@ -82,7 +82,7 @@ module mo_multiplications
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=2,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           if (in_vector_x(ji,jk,jl)>=0._wp) then
             result_field_x(ji,jk,jl) = scalar_field(ji,jk-1,jl)*in_vector_x(ji,jk,jl)
           else
@@ -97,7 +97,7 @@ module mo_multiplications
     !$omp parallel do private(ji,jk,jl)
     do ji=2,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           if (in_vector_y(ji,jk,jl)>=0._wp) then
             result_field_y(ji,jk,jl) = scalar_field(ji,jk,jl)*in_vector_y(ji,jk,jl)
           else
@@ -112,7 +112,7 @@ module mo_multiplications
     if (lperiodic) then
       !$omp parallel do private(ji,jl)
       do ji=1,ny
-        do jl=1,nlays
+        do jl=1,n_layers
           if (in_vector_x(ji,1,jl)>=0._wp) then
             result_field_x(ji,1,jl) = scalar_field(ji,nx,jl)*in_vector_x(ji,1,jl)
           else
@@ -128,7 +128,7 @@ module mo_multiplications
       
       !$omp parallel do private(jk,jl)
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           if (in_vector_y(1,jk,jl)>=0._wp) then
             result_field_y(1,jk,jl) = scalar_field(1,jk,jl)*in_vector_y(1,jk,jl)
           else
@@ -157,7 +157,7 @@ module mo_multiplications
     integer :: jl ! loop index
     
     !$omp parallel do private(jl)
-    do jl=2,nlays
+    do jl=2,n_layers
       result_field_z(:,:,jl) = 0.5_wp*(scalar_field(:,:,jl-1) + scalar_field(:,:,jl))*in_vector_z(:,:,jl)
     enddo
     !$omp end parallel do

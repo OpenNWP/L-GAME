@@ -12,10 +12,10 @@ module mo_run_nml
 
   integer           :: ny                  ! number of gridpoints in y-direction
   integer           :: nx                  ! number of gridpoints in x-direction
-  integer           :: nlays               ! number of layers
-  integer           :: nlevs               ! number of levels
-  integer           :: nlays_oro           ! number of layers following the orography
-  integer           :: nlays_flat          ! number of flat layers
+  integer           :: n_layers            ! number of layers
+  integer           :: n_levels            ! number of levels
+  integer           :: n_oro_layers        ! number of layers following the orography
+  integer           :: n_flat_layers       ! number of flat layers
   real(wp)          :: dy                  ! mesh size in y direction at sea level
   real(wp)          :: dx                  ! mesh size in x direction at sea level at the equator
   real(wp)          :: eff_hor_res         ! effective horizontal resolution
@@ -41,8 +41,8 @@ module mo_run_nml
   real(wp)          :: lat_center          ! latitude of the center of the model domain
   real(wp)          :: lon_center          ! longitude of the center of the model domain
   
-  namelist /run/ny,nx,nlays,dy,dx,run_span_min,sigma, &
-  toa,scenario,llinear,run_id,lcorio,nlays_oro,lat_center,lon_center, &
+  namelist /run/ny,nx,n_layers,dy,dx,run_span_min,sigma, &
+  toa,scenario,llinear,run_id,lcorio,n_oro_layers,lat_center,lon_center, &
   start_year,start_month,start_day,start_hour,start_minute,lplane
 
   contains
@@ -54,8 +54,8 @@ module mo_run_nml
     
     ny = 35
     nx = 35
-    nlays = 50
-    nlays_oro = 40
+    n_layers = 50
+    n_oro_layers = 40
     dy = 25e3_wp
     dx = 25e3_wp
     run_span_min = 1440
@@ -86,8 +86,8 @@ module mo_run_nml
     close(fileunit)
     
     ! derived quantities
-    nlevs = nlays+1
-    nlays_flat = nlays-nlays_oro
+    n_levels = n_layers+1
+    n_flat_layers = n_layers-n_oro_layers
     
     ! this calculates the time step using the CFL criterion
     eff_hor_res = sqrt(dx*dy)
@@ -130,8 +130,8 @@ module mo_run_nml
       call exit(1)
     endif
     
-    if (nlays_oro>=nlays) then
-      write(*,*) "Error: it must be nlays_oro<nlays."
+    if (n_oro_layers>=n_layers) then
+      write(*,*) "Error: it must be n_oro_layers<n_layers."
       call exit(1)
     endif
     

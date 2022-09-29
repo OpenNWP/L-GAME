@@ -6,7 +6,7 @@ module mo_derived
   ! In this module more complex thermodynamic quantities are being calculated.
   
   use mo_definitions,      only: wp,t_grid,t_state,t_diag
-  use mo_run_nml,          only: ny,nx,nlays
+  use mo_run_nml,          only: ny,nx,n_layers
   use mo_constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0
   use mo_constituents_nml, only: n_condensed_constituents,n_gaseous_constituents,n_constituents,lmoist
   use mo_dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water,c_p_cond
@@ -30,7 +30,7 @@ module mo_derived
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           diag%temperature(ji,jk,jl) = (grid%theta_v_bg(ji,jk,jl) + state%theta_v_pert(ji,jk,jl)) &
           *(grid%exner_bg(ji,jk,jl) + state%exner_pert(ji,jk,jl))
         enddo
@@ -162,7 +162,7 @@ module mo_derived
   
     ! This function calculates the mass-weighted c_v of the air.
     
-    real(wp), intent(in) :: rho(ny,nx,nlays,n_constituents),temperature(ny,nx,nlays)
+    real(wp), intent(in) :: rho(ny,nx,n_layers,n_constituents),temperature(ny,nx,n_layers)
     integer,  intent(in) :: ji,jk,jl
     real(wp)             :: c_v_mass_weighted_air
     

@@ -5,7 +5,7 @@ module mo_inner_product
 
   ! The calculation of the inner product is executed in this module.
 
-  use mo_run_nml,     only: ny,nx,nlays
+  use mo_run_nml,     only: ny,nx,n_layers
   use mo_definitions, only: t_grid,wp
   
   implicit none
@@ -32,7 +32,7 @@ module mo_inner_product
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           output_scalar(ji,jk,jl) = &
           grid%inner_product_weights(ji,jk,jl,1)*u_vector_1(ji,jk+1,jl)*u_vector_2(ji,jk+1,jl) &
           + grid%inner_product_weights(ji,jk,jl,2)*v_vector_1(ji,jk,jl)*v_vector_2(ji,jk,jl) &

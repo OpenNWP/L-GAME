@@ -9,7 +9,7 @@ module mo_read_write_grid
   use mo_definitions,       only: t_grid,wp
   use mo_set_initial_state, only: nc_check
   use mo_io_nml,            only: grid_filename,land_sea_filename
-  use mo_run_nml,           only: ny,nx,nlays,nlevs
+  use mo_run_nml,           only: ny,nx,n_layers,n_levels
   
   implicit none
   
@@ -115,7 +115,7 @@ module mo_read_write_grid
     call nc_check(nf90_put_var(ncid,varid_lon_u,grid%lon_geo_u))
     call nc_check(nf90_put_var(ncid,varid_lat_v,grid%lat_geo_v))
     call nc_check(nf90_put_var(ncid,varid_lon_v,grid%lon_geo_v))
-    call nc_check(nf90_put_var(ncid,varid_z_w,grid%z_w(:,:,nlevs)))
+    call nc_check(nf90_put_var(ncid,varid_z_w,grid%z_w(:,:,n_levels)))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u,grid%dir_geo_u))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_v,grid%dir_geo_v))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u_scalar,grid%dir_geo_u_scalar))
@@ -147,10 +147,10 @@ module mo_read_write_grid
     call nc_check(nf90_inq_varid(ncid,"oro",varid_z_w))
     
     ! reading the arrays
-    call nc_check(nf90_get_var(ncid,varid_z_w,grid%z_w(:,:,nlevs)))
+    call nc_check(nf90_get_var(ncid,varid_z_w,grid%z_w(:,:,n_levels)))
     
     !$omp parallel workshare
-    grid%z_w(:,:,nlevs) = merge(grid%z_w(:,:,nlevs),0._wp,grid%z_w(:,:,nlevs)>=0._wp)
+    grid%z_w(:,:,n_levels) = merge(grid%z_w(:,:,n_levels),0._wp,grid%z_w(:,:,n_levels)>=0._wp)
     !$omp end parallel workshare
     
     ! closing the NetCDF file

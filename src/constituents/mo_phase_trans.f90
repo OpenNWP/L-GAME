@@ -6,7 +6,7 @@ module mo_phase_trans
   ! This file contains functions calculating everything related to phase transition rates.
 
   use mo_definitions,      only: wp,t_grid,t_state,t_diag
-  use mo_run_nml,          only: ny,nx,nlays,dtime
+  use mo_run_nml,          only: ny,nx,n_layers,dtime
   use mo_constants,        only: r_v,t_0,r_d
   use mo_constituents_nml, only: n_condensed_constituents,n_constituents
   use mo_dictionary,       only: saturation_pressure_over_water,saturation_pressure_over_ice, &
@@ -44,7 +44,7 @@ module mo_phase_trans
     !$omp a,b,c,p,q,enhancement_factor)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           ! Preparation
           ! -----------
           
@@ -249,7 +249,7 @@ module mo_phase_trans
             
           ! Surface effects
           ! ---------------
-          if (jl==nlays .and. lsfc_phase_trans) then
+          if (jl==n_layers .and. lsfc_phase_trans) then
             
             ! evaporation and latent heat rates
             if (grid%is_land(ji,jk)==0) then

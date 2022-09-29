@@ -13,8 +13,8 @@ cat > namelist.nml << EOF
 run_id="$run_id"
 ny=${BASH_ARGV[8]}
 nx=${BASH_ARGV[7]}
-nlays=${BASH_ARGV[6]}
-nlays_oro=${BASH_ARGV[5]}
+n_layers=${BASH_ARGV[6]}
+n_oro_layers=${BASH_ARGV[5]}
 dy=${BASH_ARGV[4]}
 dx=${BASH_ARGV[3]}
 run_span_min=${BASH_ARGV[2]}

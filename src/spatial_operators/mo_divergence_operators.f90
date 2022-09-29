@@ -6,7 +6,7 @@ module mo_divergence_operators
   ! The calculation of the horizontal divergence operator is executed in this module.
 
   use mo_definitions, only: wp,t_grid
-  use mo_run_nml,     only: ny,nx,nlays,nlays_oro,dtime,nlays_flat
+  use mo_run_nml,     only: ny,nx,n_layers,n_oro_layers,dtime,n_flat_layers
   use mo_averaging,   only: vertical_contravariant_corr
   
   implicit none
@@ -35,7 +35,7 @@ module mo_divergence_operators
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           ! the horizontal component
           comp_h = &
           vector_field_x(ji,jk+1,jl)*grid%area_x(ji,jk+1,jl) &
@@ -45,13 +45,13 @@ module mo_divergence_operators
           
           ! the vertical component
           comp_v = 0._wp
-          if (jl==nlays_flat) then
+          if (jl==n_flat_layers) then
             contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
             comp_v = -contra_lower*grid%area_z(ji,jk,jl+1)
-          elseif (jl==nlays) then
+          elseif (jl==n_layers) then
             contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
             comp_v = contra_upper*grid%area_z(ji,jk,jl)
-          elseif (jl>nlays_flat) then
+          elseif (jl>n_flat_layers) then
             contra_upper = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
             contra_lower = vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl+1,grid)
             comp_v &
@@ -95,7 +95,7 @@ module mo_divergence_operators
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v,density_upper,density_lower)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           ! the horizontal component
           comp_h = &
           vector_field_x(ji,jk+1,jl)*grid%area_x(ji,jk+1,jl) &
@@ -105,7 +105,7 @@ module mo_divergence_operators
           
           ! the vertical component
           comp_v = 0._wp
-          if (jl==nlays_flat) then
+          if (jl==n_flat_layers) then
             contra_lower = vertical_contravariant_corr(wind_field_x,wind_field_y,ji,jk,jl+1,grid)
             if (contra_lower<=0._wp) then
               density_lower = density_field(ji,jk,jl)
@@ -113,7 +113,7 @@ module mo_divergence_operators
               density_lower = density_field(ji,jk,jl+1)
             endif
             comp_v = -density_lower*contra_lower*grid%area_z(ji,jk,jl+1)
-          elseif (jl==nlays) then
+          elseif (jl==n_layers) then
             contra_upper = vertical_contravariant_corr(wind_field_x,wind_field_y,ji,jk,jl,grid)
             if (contra_upper<=0._wp) then
               density_upper = density_field(ji,jk,jl-1)
@@ -121,7 +121,7 @@ module mo_divergence_operators
               density_upper = density_field(ji,jk,jl)
             endif
             comp_v = density_upper*contra_upper*grid%area_z(ji,jk,jl)
-          elseif (jl>nlays_flat) then
+          elseif (jl>n_flat_layers) then
             contra_upper = vertical_contravariant_corr(wind_field_x,wind_field_y,ji,jk,jl,grid)
             if (contra_upper<=0._wp) then
               density_upper = density_field(ji,jk,jl-1)
@@ -163,11 +163,11 @@ module mo_divergence_operators
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_v)
     do ji=1,ny
       do jk=1,nx
-        do jl=1,nlays
+        do jl=1,n_layers
           if (jl==0) then
             contra_upper = 0._wp
             contra_lower = in_field(ji,jk,jl+1)
-          elseif (jl==nlays) then
+          elseif (jl==n_layers) then
             contra_upper = in_field(ji,jk,jl)
             contra_lower = 0._wp
           else
