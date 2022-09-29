@@ -221,13 +221,13 @@ module mo_phase_trans
           ! snow
           if (diag%temperature(ji,jk,jl)<t_0) then
             diag%phase_trans_rates(ji,jk,jl,1) = max(state%rho(ji,jk,jl,3) &
-                                             - maximum_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/1000._wp
+                                  - maximum_cloud_water_content*state%rho(ji,jk,jl,n_condensed_constituents+1),0._wp)/1000._wp
             ! the snow creation comes at the cost of cloud ice particles
             diag%phase_trans_rates(ji,jk,jl,3) = diag%phase_trans_rates(ji,jk,jl,3) - diag%phase_trans_rates(ji,jk,jl,1)
           ! rain
           elseif (diag%temperature(ji,jk,jl)>=t_0) then
             diag%phase_trans_rates(ji,jk,jl,2) = max(state%rho(ji,jk,jl,4) &
-                                              - maximum_cloud_water_content*state%rho(ji,jk,jl,5),0._wp)/1000._wp
+                                  - maximum_cloud_water_content*state%rho(ji,jk,jl,n_condensed_constituents+1),0._wp)/1000._wp
             ! the rain creation comes at the cost of cloud water particles
             diag%phase_trans_rates(ji,jk,jl,4) = diag%phase_trans_rates(ji,jk,jl,4) - diag%phase_trans_rates(ji,jk,jl,2)
           endif
