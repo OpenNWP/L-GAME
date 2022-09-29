@@ -100,7 +100,7 @@ module mo_phase_trans
               phase_trans_density = min(state%rho(ji,jk,jl,4),diff_density)
                     
               ! the tendency for the water vapour
-              diag%phase_trans_rates(ji,jk,jl,5) = phase_trans_density/dtime
+              diag%phase_trans_rates(ji,jk,jl,n_condensed_constituents+1) = phase_trans_density/dtime
                     
               ! The source rate for the liquid water consists of two terms:
               ! 1.) the melting
@@ -134,7 +134,7 @@ module mo_phase_trans
               phase_trans_density = min(state%rho(ji,jk,jl,3), diff_density)
                     
               ! the tendency for the water vapour
-              diag%phase_trans_rates(ji,jk,jl,5) = phase_trans_density/dtime
+              diag%phase_trans_rates(ji,jk,jl,n_condensed_constituents+1) = phase_trans_density/dtime
               
               ! the tendency for the ice contains two terms:
               ! 1.) the freezing
@@ -167,7 +167,7 @@ module mo_phase_trans
               diff_density = -0.5_wp*p - (0.25_wp*p**2 - q)**0.5_wp
                     
               ! the tendency for the water vapour
-              diag%phase_trans_rates(ji,jk,jl,5) = diff_density/dtime
+              diag%phase_trans_rates(ji,jk,jl,n_condensed_constituents+1) = diff_density/dtime
                     
               ! The source rate for the liquid water consists of two terms:
               ! 1.) the melting
@@ -197,7 +197,7 @@ module mo_phase_trans
               diff_density = -0.5_wp*p - (0.25_wp*p**2 - q)**0.5_wp
                    
               ! the tendency for the water vapour
-              diag%phase_trans_rates(ji,jk,jl,5) = diff_density/dtime
+              diag%phase_trans_rates(ji,jk,jl,n_condensed_constituents+1) = diff_density/dtime
                 
               ! The source rate for the cloud ice consists of two terms:
               ! 1.) the freezing
