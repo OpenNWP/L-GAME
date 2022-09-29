@@ -12,6 +12,7 @@ module mo_column_solvers
   use mo_diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
   use mo_surface_nml,      only: nsoillays,lprog_soil_temp,lsfc_sensible_heat_flux
   use mo_constants,        only: M_PI,r_d,c_d_v,c_d_p
+  use mo_dictionary,       only: c_p_cond
 
   implicit none
   
@@ -322,7 +323,7 @@ module mo_column_solvers
 
   end subroutine three_band_solver_ver
   
-  subroutine three_band_solver_gen_densities(state_old,state_new,tend,grid)
+  subroutine three_band_solver_gen_densities(state_old,state_new,tend,diag,grid,rk_step)
   
     ! Vertical advection of generalized densities (of tracers) with 3-band matrices.
     ! mass densities, density x temperatures
@@ -331,28 +332,30 @@ module mo_column_solvers
     type(t_state), intent(in)    :: state_old ! state at the old timestep
     type(t_state), intent(inout) :: state_new ! state at the new timestep
     type(t_tend),  intent(in)    :: tend      ! explicit tendencies
+    type(t_diag),  intent(inout) :: diag      ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid      ! model grid
+    integer,       intent(in)    :: rk_step   ! predictor-corrector substep index
     
     ! local variables
-    integer  :: n_relevant_constituents             ! number of relevant constituents for a certain quantity
-    real(wp) :: impl_weight,expl_weight             ! time stepping weights
-    real(wp) :: c_vector(n_layers-1)                   ! vector for solving the system of linear equations
-    real(wp) :: d_vector(n_layers)                     ! vector for solving the system of linear equations
-    real(wp) :: e_vector(n_layers-1)                   ! vector for solving the system of linear equations
-    real(wp) :: r_vector(n_layers)                     ! vector for solving the system of linear equations
-    real(wp) :: vertical_flux_vector_impl(n_layers-1)  ! vertical flux at the new timestep
-    real(wp) :: vertical_flux_vector_rhs(n_layers-1)   ! vertical flux at the old timestep
-    real(wp) :: solution_vector(n_layers)              ! solution of the system of linear equations
-    real(wp) :: density_old_at_interface,added_mass ! abbreviations
-    integer  :: jc,ji,jk,jl                         ! loop indices
+    integer  :: n_relevant_constituents                   ! number of relevant constituents for a certain quantity
+    real(wp) :: impl_weight,expl_weight                   ! time stepping weights
+    real(wp) :: c_vector(n_layers-1)                      ! vector for solving the system of linear equations
+    real(wp) :: d_vector(n_layers)                        ! vector for solving the system of linear equations
+    real(wp) :: e_vector(n_layers-1)                      ! vector for solving the system of linear equations
+    real(wp) :: r_vector(n_layers)                        ! vector for solving the system of linear equations
+    real(wp) :: vertical_flux_vector_impl(n_layers-1)     ! vertical flux at the new timestep
+    real(wp) :: vertical_flux_vector_rhs(n_layers-1)      ! vertical flux at the old timestep
+    real(wp) :: vertical_enthalpy_flux_vector(n_layers-1) ! vertical enthalpy flux density vector
+    real(wp) :: solution_vector(n_layers)                 ! solution of the system of linear equations
+    real(wp) :: density_old_at_interface,added_mass       ! abbreviations
+    real(wp) :: temperature_old_at_interface              ! temperature in a level at the old PC substep
+    integer  :: jc,ji,jk,jl                               ! loop indices
     
     ! setting the time stepping weights
     impl_weight = 0.5_wp
     expl_weight = 1._wp - impl_weight
     
     ! firstly the number of relevant constituents needs to be determined
-    n_relevant_constituents = 0
-    ! mass densities
     n_relevant_constituents = n_constituents ! the main gaseous constituent is excluded later
 
     ! loop over all relevant constituents
@@ -362,12 +365,16 @@ module mo_column_solvers
         
         ! loop over all columns
         !$omp parallel do private(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
-        !$omp d_vector,e_vector,r_vector,solution_vector,added_mass)
+        !$omp d_vector,e_vector,r_vector,solution_vector,added_mass,vertical_enthalpy_flux_vector)
         do ji=1,ny
           do jk=1,nx
 
             ! diagnozing the vertical fluxes
             do jl=1,n_layers-1
+              ! resetting the vertical enthalpy flux density divergence
+              if (rk_step==1 .and. jc==1) then
+                diag%condensates_sediment_heat(ji,jk,jl) = 0._wp
+              endif
               vertical_flux_vector_impl(jl) = state_old%wind_w(ji,jk,jl+1)
               vertical_flux_vector_rhs(jl) = state_new%wind_w(ji,jk,jl+1)
               
@@ -392,11 +399,18 @@ module mo_column_solvers
               ! old density at the interface
               if (vertical_flux_vector_rhs(jl)>=0._wp) then
                 density_old_at_interface = state_old%rho(ji,jk,jl+1,jc)
+                temperature_old_at_interface = diag%temperature(ji,jk,jl+1)
               else
                 density_old_at_interface = state_old%rho(ji,jk,jl,jc)
+                temperature_old_at_interface = diag%temperature(ji,jk,jl+1)
               endif
               vertical_flux_vector_rhs(jl) = density_old_at_interface*vertical_flux_vector_rhs(jl)
+              vertical_enthalpy_flux_vector(jl) = c_p_cond(jc,temperature_old_at_interface) &
+                                                  *temperature_old_at_interface*vertical_flux_vector_rhs(jl)
             enddo
+            if (rk_step==1 .and. jc==1) then
+              diag%condensates_sediment_heat(ji,jk,n_layers) = 0._wp
+            endif
 
             ! Now we proceed to solving the vertical tridiagonal problems.
 
@@ -451,8 +465,16 @@ module mo_column_solvers
               ! adding the explicit part of the vertical flux divergence
               if (jl==1) then
                 r_vector(jl) = r_vector(jl) + expl_weight*dtime*vertical_flux_vector_rhs(jl)/grid%volume(ji,jk,jl)
+                if (rk_step==1 .and. jc<=n_condensed_constituents) then
+                  diag%condensates_sediment_heat(ji,jk,jl) = diag%condensates_sediment_heat(ji,jk,jl) &
+                  + vertical_enthalpy_flux_vector(jl)/grid%volume(ji,jk,jl)
+                endif
               elseif (jl==n_layers) then
                 r_vector(jl) = r_vector(jl) - expl_weight*dtime*vertical_flux_vector_rhs(jl-1)/grid%volume(ji,jk,jl)
+                if (rk_step==1 .and. jc<=n_condensed_constituents) then
+                  diag%condensates_sediment_heat(ji,jk,jl) = diag%condensates_sediment_heat(ji,jk,jl) &
+                  - vertical_enthalpy_flux_vector(jl-1)/grid%volume(ji,jk,jl)
+                endif
                 ! precipitation
                 ! snow
                 if (jc<=n_condensed_constituents/4) then
@@ -462,14 +484,30 @@ module mo_column_solvers
                 elseif (jc<=n_condensed_constituents/2) then
                   r_vector(jl) = r_vector(jl) - expl_weight*rain_velocity*dtime*state_old%rho(ji,jk,jl,jc) &
                   *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
+                  if (rk_step==1) then
+                    diag%condensates_sediment_heat(ji,jk,jl) = diag%condensates_sediment_heat(ji,jk,jl) &
+                    - snow_velocity &
+                    *diag%temperature(ji,jk,n_layers)*c_p_cond(jc,diag%temperature(ji,jk,n_layers)) &
+                    *state_old%rho(ji,jk,n_layers,jc)*grid%area_z(ji,jk,n_levels)/grid%volume(ji,jk,jl)
+                  endif
                 ! clouds
                 elseif (jc<=n_condensed_constituents) then
                   r_vector(jl) = r_vector(jl) - expl_weight*cloud_droplets_velocity*dtime*state_old%rho(ji,jk,jl,jc) &
                   *grid%area_z(ji,jk,jl+1)/grid%volume(ji,jk,jl)
+                  if (rk_step==1) then
+                    diag%condensates_sediment_heat(ji,jk,jl) = diag%condensates_sediment_heat(ji,jk,jl) &
+                    -cloud_droplets_velocity &
+                    *diag%temperature(ji,jk,n_layers)*c_p_cond(jc,diag%temperature(ji,jk,n_layers)) &
+                    *state_old%rho(ji,jk,n_layers,jc)*grid%area_z(ji,jk,n_levels)/grid%volume(ji,jk,jl)
+                  endif
                 endif
               else
                 r_vector(jl) = r_vector(jl) + expl_weight*dtime*(-vertical_flux_vector_rhs(jl-1)+vertical_flux_vector_rhs(jl)) &
-                /grid%volume(ji,jk,jl)
+                               /grid%volume(ji,jk,jl)
+                if (rk_step==1 .and. jc<=n_condensed_constituents) then
+                  diag%condensates_sediment_heat(ji,jk,jl) = diag%condensates_sediment_heat(ji,jk,jl) &
+                  + (-vertical_enthalpy_flux_vector(jl-1) + vertical_enthalpy_flux_vector(jl))/grid%volume(ji,jk,jl)
+                endif
               endif
             enddo
 
