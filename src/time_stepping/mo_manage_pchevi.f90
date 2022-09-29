@@ -8,7 +8,7 @@ module mo_manage_pchevi
   use mo_definitions,               only: t_grid,t_state,t_diag,t_tend,t_bc,wp
   use mo_linear_combine_two_states, only: lin_combination
   use mo_run_nml,                   only: dtime,ny,nx
-  use mo_pgrad,                     only: manage_pressure_gradient
+  use mo_pgrad,                     only: manage_pressure_gradient,calc_pressure_grad_condensates_v
   use mo_scalar_tend_expl,          only: scalar_tend_expl
   use mo_vector_tend_expl,          only: vector_tend_expl
   use mo_column_solvers,            only: three_band_solver_ver,three_band_solver_gen_densities
@@ -75,9 +75,11 @@ module mo_manage_pchevi
       
       ! Only the horizontal momentum is a forward tendency.
       if (rk_step==1) then
+        call calc_pressure_grad_condensates_v(state_old,diag,grid)
         call vector_tend_expl(state_old,tend,diag,grid,rk_step,total_step_counter)
       endif
       if (rk_step==2) then
+        call calc_pressure_grad_condensates_v(state_old,diag,grid)
         call vector_tend_expl(state_new,tend,diag,grid,rk_step,total_step_counter)
       endif
       
