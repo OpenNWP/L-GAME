@@ -85,7 +85,7 @@ module mo_scalar_tend_expl
           call scalar_times_vector_v(diag%scalar_diff_coeff_v,diag%w_placeholder,diag%w_placeholder)
           call add_vertical_div(diag%w_placeholder,diag%mass_diff_tendency(:,:,:,jc),grid)
         endif
-      endif
+      enddo
     endif
     
     ! loop over all constituents
