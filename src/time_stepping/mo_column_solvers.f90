@@ -365,7 +365,7 @@ module mo_column_solvers
         
         ! loop over all columns
         !$omp parallel do private(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
-        !$omp d_vector,e_vector,r_vector,solution_vector,added_mass,vertical_enthalpy_flux_vector)
+        !$omp d_vector,e_vector,r_vector,solution_vector,added_mass,vertical_enthalpy_flux_vector,temperature_old_at_interface)
         do ji=1,ny
           do jk=1,nx
 
