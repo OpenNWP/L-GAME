@@ -7,7 +7,7 @@ module mo_derived
   
   use mo_definitions,      only: wp,t_grid,t_state,t_diag
   use mo_run_nml,          only: ny,nx,n_layers
-  use mo_constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0
+  use mo_constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0,m_v
   use mo_constituents_nml, only: n_condensed_constituents,n_gaseous_constituents,n_constituents,lmoist
   use mo_dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water,c_p_cond
   
@@ -19,24 +19,21 @@ module mo_derived
     
     ! This function diagnoses the temperature of the gas phase.
     
-    ! input arguments
-    type(t_state), intent(in)    :: state
-    type(t_diag),  intent(inout) :: diag
-    type(t_grid),  intent(in)    :: grid
+    type(t_state), intent(in)    :: state ! state variables
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities (needed for the background state)
     
-    ! local variables
-    integer :: ji,jk,jl ! loop indices
-    
-    !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jk=1,nx
-        do jl=1,n_layers
-          diag%temperature(ji,jk,jl) = (grid%theta_v_bg(ji,jk,jl) + state%theta_v_pert(ji,jk,jl)) &
-          *(grid%exner_bg(ji,jk,jl) + state%exner_pert(ji,jk,jl))
-        enddo
-      enddo
-    enddo
-    !$omp end parallel do
+    if (.not. lmoist) then
+      !$omp parallel workshare
+      diag%temperature = (grid%theta_v_bg + state%theta_v_pert)*(grid%exner_bg + state%exner_pert)
+      !$omp end parallel workshare
+    else
+      !$omp parallel workshare
+      diag%temperature = (grid%theta_v_bg + state%theta_v_pert)*(grid%exner_bg + state%exner_pert) &
+      /(1._wp+state%rho(:,:,:,n_condensed_constituents+2) &
+      /state%rho(:,:,:,n_condensed_constituents+1)*(m_d/m_v-1._wp))
+      !$omp end parallel workshare
+    endif
     
   end subroutine temperature_diagnostics
 
