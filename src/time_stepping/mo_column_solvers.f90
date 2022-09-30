@@ -7,7 +7,7 @@ module mo_column_solvers
 
   use mo_run_nml,          only: ny,nx,n_layers,n_levels,dtime,toa,impl_weight,partial_impl_weight
   use mo_constituents_nml, only: n_condensed_constituents,n_constituents, &
-                                 snow_velocity,rain_velocity,cloud_droplets_velocity
+                                 snow_velocity,rain_velocity,cloud_droplets_velocity,graupel_velocity
   use mo_definitions,      only: t_grid,t_state,t_tend,t_diag,wp
   use mo_diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
   use mo_surface_nml,      only: nsoillays,lprog_soil_temp,lsfc_sensible_heat_flux
@@ -389,9 +389,13 @@ module mo_column_solvers
                 vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - rain_velocity
                 vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - rain_velocity
               ! clouds
-              elseif (jc<=n_condensed_constituents) then
+              elseif (jc<=n_condensed_constituents-1) then
                 vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - cloud_droplets_velocity
                 vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - cloud_droplets_velocity
+              ! graupel
+              elseif (jc==n_condensed_constituents) then
+                vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - graupel_velocity
+                vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - graupel_velocity
               endif
               ! multiplying the vertical velocity by the area
               vertical_flux_vector_impl(jl) = grid%area_z(ji,jk,jl+1)*vertical_flux_vector_impl(jl)

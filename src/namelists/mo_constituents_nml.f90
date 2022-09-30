@@ -16,6 +16,7 @@ module mo_constituents_nml
   real(wp) :: snow_velocity            ! sedimentation velocity of snow
   real(wp) :: rain_velocity            ! sedimentation velocity of rain
   real(wp) :: cloud_droplets_velocity  ! sedimentation velocity of cloud droplets
+  real(wp) :: graupel_velocity         ! sedimentation velocity of graupel
 
   namelist /constituents/lmoist
 
@@ -33,6 +34,7 @@ module mo_constituents_nml
     snow_velocity = 5._wp
     rain_velocity = 10._wp
     cloud_droplets_velocity = .01_wp
+    graupel_velocity = 5._wp
     
     ! open and read namelist file
     open(action="read",file="namelist.nml",newunit=fileunit)
