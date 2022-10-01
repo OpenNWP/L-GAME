@@ -308,7 +308,7 @@ program control
   
   ! the loop over the time steps
   t_write = t_0 + dt_write
-  run_span = 3600._wp*run_span_min
+  run_span = 60._wp*run_span_min
   timestep_counter = 0
   do while (t_0<t_init+run_span+300._wp .and. run_span/=0)
 
