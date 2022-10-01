@@ -53,6 +53,7 @@ orography_id=2
 lprog_soil_temp=.false.
 lsfc_sensible_heat_flux=.false.
 lsfc_phase_trans=.false.
+lpbl=.false.
 /
 
 &bc
