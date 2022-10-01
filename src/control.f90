@@ -311,9 +311,9 @@ program control
   run_span = 3600._wp*run_span_min
   timestep_counter = 0
   do while (t_0<t_init+run_span+300._wp .and. run_span/=0)
-    
-    ! writing the new state into the old state
-    call lin_combination(state_2,state_2,state_1,0._wp,1._wp,grid)
+
+    ! Checking if the radiative fluxes need to be updated:
+    ! ----------------------------------------------------
 
     if (lrad .and. t_0<=t_rad_update .and. t_0+dtime>=t_rad_update) then
       lrad_update = .true.

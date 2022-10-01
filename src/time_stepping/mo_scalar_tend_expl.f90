@@ -90,7 +90,6 @@ module mo_scalar_tend_expl
     
     ! loop over all constituents
     do jc=1,n_constituents
-    
       ! explicit mass densities integration
       ! -----------------------------------
       ! calculating the divergence of the mass flux density
