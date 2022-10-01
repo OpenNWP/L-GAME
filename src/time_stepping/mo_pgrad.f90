@@ -63,7 +63,7 @@ module mo_pgrad
                                diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
     call scalar_times_vector_v(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_w)
     call scalar_times_vector_h(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v, &
-                               diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_nl_v)
+                               diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
     call scalar_times_vector_v(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_w,diag%p_grad_acc_neg_l_w)
     
     ! At the very first step of the model integration, the "old" pressure gradient acceleration is saved for the first time.

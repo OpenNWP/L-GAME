@@ -47,7 +47,7 @@ module mo_vector_tend_expl
     if ((rk_step==2 .or. total_step_counter==0) .and. ((.not. llinear) .or. lcorio)) then
       ! calculating the mass flux density
       call scalar_times_vector_h(state%rho(:,:,:,n_condensed_constituents+1),state%wind_u,state%wind_v, &
-      diag%u_placeholder,diag%v_placeholder)
+                                 diag%u_placeholder,diag%v_placeholder)
       call scalar_times_vector_v(state%rho(:,:,:,n_condensed_constituents+1),state%wind_w,diag%w_placeholder)
       ! calculating the potential vorticity
       call calc_pot_vort(state,diag,grid)

@@ -335,8 +335,8 @@ module mo_momentum_diff_diss
     integer :: ji,jk,jl ! loop indices
     
     ! calculating the inner product of the momentum diffusion acceleration and the wind
-    call inner_product(state%wind_u,state%wind_v,state%wind_w, &
-    diag%mom_diff_tend_x,diag%mom_diff_tend_y,diag%mom_diff_tend_z,diag%heating_diss,grid)
+    call inner_product(state%wind_u,state%wind_v,state%wind_w,diag%mom_diff_tend_x,diag%mom_diff_tend_y, &
+                       diag%mom_diff_tend_z,diag%heating_diss,grid)
     
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny

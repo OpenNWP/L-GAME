@@ -10,7 +10,6 @@ module mo_scalar_tend_expl
   use mo_definitions,          only: wp,t_grid,t_state,t_diag,t_tend
   use mo_multiplications,      only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
   use mo_divergence_operators, only: div_h,div_h_tracers,add_vertical_div
-  use mo_phase_trans,          only: calc_h2otracers_source_rates
   use mo_constituents_nml,     only: n_condensed_constituents,n_constituents
   use mo_diff_nml,             only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
   use mo_eff_diff_coeffs,      only: scalar_diffusion_coeffs
@@ -102,8 +101,8 @@ module mo_scalar_tend_expl
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
       ! all other constituents
       else
-        call scalar_times_vector_h_upstream( &
-        state_scalar%rho(:,:,:,jc),state_vector%wind_u,state_vector%wind_v,diag%flux_density_u,diag%flux_density_v)
+        call scalar_times_vector_h_upstream(state_scalar%rho(:,:,:,jc),state_vector%wind_u,state_vector%wind_v, &
+                                            diag%flux_density_u,diag%flux_density_v)
         call div_h_tracers(diag%flux_density_u,diag%flux_density_v,state_scalar%rho(:,:,:,jc), &
                            state_vector%wind_u,state_vector%wind_v,diag%flux_density_div,grid)
       endif
@@ -126,7 +125,7 @@ module mo_scalar_tend_expl
         diag%scalar_placeholder = grid%theta_v_bg + state_scalar%theta_v_pert
         !$omp end parallel workshare
         call scalar_times_vector_h(diag%scalar_placeholder,diag%flux_density_u,diag%flux_density_v,&
-        diag%flux_density_u,diag%flux_density_v)
+                                   diag%flux_density_u,diag%flux_density_v)
         ! calculating the divergence of the virtual potential temperature flux density
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
         
