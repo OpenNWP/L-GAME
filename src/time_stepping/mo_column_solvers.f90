@@ -32,7 +32,7 @@ module mo_column_solvers
     integer,       intent(in)    :: rk_step      ! Runge Kutta substep
 
     ! local variables
-    integer  :: soil_switch                        ! soil switch: 0 if soil does not have to be calculated off, 1 if soil has to be calculated
+    integer  :: soil_switch                           ! soil switch: 0 if soil does not have to be calculated off, 1 if soil has to be calculated
     real(wp) :: c_vector(n_layers-2+nsoillays)        ! needed for the vertical solver
     real(wp) :: d_vector(n_layers-1+nsoillays)        ! needed for the vertical solver
     real(wp) :: e_vector(n_layers-2+nsoillays)        ! needed for the vertical solver
@@ -44,7 +44,7 @@ module mo_column_solvers
     real(wp) :: rho_int_old(n_layers-1)               ! old interface mass density
     real(wp) :: rho_int_expl(n_layers-1)              ! explicit interface mass density
     real(wp) :: theta_v_int_new(n_layers-1)           ! preliminary new virtual potential temperature interface values
-    real(wp) :: rho_int_new                        ! new density interface value
+    real(wp) :: rho_int_new                           ! new density interface value
     real(wp) :: alpha_old(n_layers)                   ! alpha at the old time step
     real(wp) :: beta_old(n_layers)                    ! beta at the old time step
     real(wp) :: gamma_old(n_layers)                   ! gamma at the old time step
@@ -54,14 +54,14 @@ module mo_column_solvers
     real(wp) :: alpha(n_layers)                       ! alpha
     real(wp) :: beta(n_layers)                        ! beta
     real(wp) :: gammaa(n_layers)                      ! gamma
-    real(wp) :: damping_start_height               ! lower boundary height of the Klemp layer
-    real(wp) :: damping_coeff                      ! damping coefficient of the Klemp layer
-    real(wp) :: above_damping                      ! height above the lower boundary of the damping height
-    real(wp) :: t_gas_lowest_layer_old             ! temperature of the gas in the lowest layer of the model atmosphere, old timestep
-    real(wp) :: t_gas_lowest_layer_new             ! temperature of the gas in the lowest layer of the model atmosphere, new timestep
-    real(wp) :: heat_flux_density_expl(nsoillays)  ! explicit heat_flux_density in the soil
+    real(wp) :: damping_start_height                  ! lower boundary height of the Klemp layer
+    real(wp) :: damping_coeff                         ! damping coefficient of the Klemp layer
+    real(wp) :: above_damping                         ! height above the lower boundary of the damping height
+    real(wp) :: t_gas_lowest_layer_old                ! temperature of the gas in the lowest layer of the model atmosphere, old timestep
+    real(wp) :: t_gas_lowest_layer_new                ! temperature of the gas in the lowest layer of the model atmosphere, new timestep
+    real(wp) :: heat_flux_density_expl(nsoillays)     ! explicit heat_flux_density in the soil
     real(wp) :: solution_vector(n_layers-1+nsoillays) ! vector containing the solution of the linear problem to solve here
-    integer  :: ji,jk,jl                           ! loop variables
+    integer  :: ji,jk,jl                              ! loop variables
     
     damping_start_height = klemp_begin_rel*toa
     
