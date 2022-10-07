@@ -28,7 +28,7 @@ program control
   implicit none
 
   ! local variables
-  integer           :: timestep_counter                ! counter of the timestep
+  integer           :: time_step_counter                ! counter of the time step
   real(wp)          :: t_0,run_span,t_write            ! time information
   type(t_grid)      :: grid                            ! grid properties
   type(t_state)     :: state_1,state_2,state_write ! states at different time steps
@@ -467,7 +467,7 @@ program control
   ! the loop over the time steps
   t_write = t_0 + dt_write
   run_span = 60._wp*run_span_min
-  timestep_counter = 0
+  time_step_counter = 0
   do while (t_0<t_init+run_span+300._wp .and. run_span/=0)
 
     ! Checking if the radiative fluxes need to be updated:
@@ -481,10 +481,10 @@ program control
     endif
 
     ! this is the RKHEVI routine performing the time stepping
-    if (mod(timestep_counter,2)==0) then
-      call pchevi(state_1,state_2,tend,bc,grid,diag,timestep_counter,lrad_update,t_0)
+    if (mod(time_step_counter,2)==0) then
+      call pchevi(state_1,state_2,tend,bc,grid,diag,time_step_counter,lrad_update,t_0)
     else
-      call pchevi(state_2,state_1,tend,bc,grid,diag,timestep_counter,lrad_update,t_0)
+      call pchevi(state_2,state_1,tend,bc,grid,diag,time_step_counter,lrad_update,t_0)
     endif
     
     ! managing the calls to the output routine
@@ -497,8 +497,8 @@ program control
     endif
     
     t_0 = t_0+dtime
-    timestep_counter = timestep_counter+1
-    write(*,*) "Step", timestep_counter, " completed."
+    time_step_counter = time_step_counter+1
+    write(*,*) "Step", time_step_counter, " completed."
     
   enddo
   

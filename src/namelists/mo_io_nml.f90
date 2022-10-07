@@ -46,7 +46,7 @@ module mo_io_nml
     
     close(fileunit)
     
-    ! calculating the output timestep in seconds
+    ! calculating the output time step in seconds
     dt_write = 60._wp*dt_write_min
     
     ! sanity check

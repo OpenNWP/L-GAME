@@ -37,9 +37,9 @@ module mo_vector_tend_expl
     integer,       intent(in)    :: total_step_counter ! time step counter of the model integration
     
     ! local variables
-    real(wp) :: old_hor_pgrad_weight     ! old timestep pressure gradient weight
-    real(wp) :: current_hor_pgrad_weight ! current timestep horizontal pressure gradient weight
-    real(wp) :: current_ver_pgrad_weight ! current timestep vertical pressure gradient weight
+    real(wp) :: old_hor_pgrad_weight     ! old time step pressure gradient weight
+    real(wp) :: current_hor_pgrad_weight ! current time step horizontal pressure gradient weight
+    real(wp) :: current_ver_pgrad_weight ! current time step vertical pressure gradient weight
     real(wp) :: old_weight,new_weight    ! Runge-Kutta weights
      
     ! momentum advection

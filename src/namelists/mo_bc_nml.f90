@@ -12,7 +12,7 @@ module mo_bc_nml
   
   integer           :: n_swamp          ! thickness of the swamp layer
   logical           :: lperiodic        ! periodic boundary conditions switch
-  integer           :: dtime_bc         ! timestep for the boundary conditions update
+  integer           :: dtime_bc         ! time step for the boundary conditions update
   character(len=64) :: bc_root_filename ! root filename of the boundary conditions
   real(wp)          :: t_latest_bc      ! latest boundary conditions update time
   

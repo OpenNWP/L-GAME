@@ -23,8 +23,8 @@ module mo_column_solvers
     ! This subroutine is the main implicit vertical solver.
 
     ! input arguments and output
-    type(t_state), intent(in)    :: state_old    ! state at the old timestep
-    type(t_state), intent(inout) :: state_new    ! state at the new timestep
+    type(t_state), intent(in)    :: state_old    ! state at the old time step
+    type(t_state), intent(inout) :: state_new    ! state at the new time step
     type(t_state), intent(inout) :: state_target ! state into which to write the results
     type(t_diag),  intent(inout) :: diag         ! diagnostic quantities
     type(t_tend),  intent(inout) :: tend         ! explicit tendencies
@@ -57,11 +57,11 @@ module mo_column_solvers
     real(wp) :: damping_start_height                  ! lower boundary height of the Klemp layer
     real(wp) :: damping_coeff                         ! damping coefficient of the Klemp layer
     real(wp) :: above_damping                         ! height above the lower boundary of the damping height
-    real(wp) :: t_gas_lowest_layer_old                ! temperature of the gas in the lowest layer of the model atmosphere, old timestep
-    real(wp) :: t_gas_lowest_layer_new                ! temperature of the gas in the lowest layer of the model atmosphere, new timestep
+    real(wp) :: t_gas_lowest_layer_old                ! temperature of the gas in the lowest layer of the model atmosphere, old time step
+    real(wp) :: t_gas_lowest_layer_new                ! temperature of the gas in the lowest layer of the model atmosphere, new time step
     real(wp) :: heat_flux_density_expl(nsoillays)     ! explicit heat_flux_density in the soil
     real(wp) :: solution_vector(n_layers-1+nsoillays) ! vector containing the solution of the linear problem to solve here
-    real(wp) :: partial_deriv_new_time_step_weight    ! partial derivatives weight of the new timestep
+    real(wp) :: partial_deriv_new_time_step_weight    ! partial derivatives weight of the new time step
     integer  :: ji,jk,jl                              ! loop variables
     
     damping_start_height = klemp_begin_rel*toa
@@ -344,8 +344,8 @@ module mo_column_solvers
     ! mass densities, density x temperatures
     
     ! input arguments and output
-    type(t_state), intent(in)    :: state_old ! state at the old timestep
-    type(t_state), intent(inout) :: state_new ! state at the new timestep
+    type(t_state), intent(in)    :: state_old ! state at the old time step
+    type(t_state), intent(inout) :: state_new ! state at the new time step
     type(t_tend),  intent(in)    :: tend      ! explicit tendencies
     type(t_diag),  intent(inout) :: diag      ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid      ! model grid
@@ -358,8 +358,8 @@ module mo_column_solvers
     real(wp) :: d_vector(n_layers)                        ! vector for solving the system of linear equations
     real(wp) :: e_vector(n_layers-1)                      ! vector for solving the system of linear equations
     real(wp) :: r_vector(n_layers)                        ! vector for solving the system of linear equations
-    real(wp) :: vertical_flux_vector_impl(n_layers-1)     ! vertical flux at the new timestep
-    real(wp) :: vertical_flux_vector_rhs(n_layers-1)      ! vertical flux at the old timestep
+    real(wp) :: vertical_flux_vector_impl(n_layers-1)     ! vertical flux at the new time step
+    real(wp) :: vertical_flux_vector_rhs(n_layers-1)      ! vertical flux at the old time step
     real(wp) :: vertical_enthalpy_flux_vector(n_layers-1) ! vertical enthalpy flux density vector
     real(wp) :: solution_vector(n_layers)                 ! solution of the system of linear equations
     real(wp) :: density_old_at_interface,added_mass       ! abbreviations

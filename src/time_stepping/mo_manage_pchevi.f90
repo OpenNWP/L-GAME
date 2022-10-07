@@ -27,8 +27,8 @@ module mo_manage_pchevi
   
     ! This subroutine manages the predictor-corrector HEVI time stepping.
     
-    type(t_state), intent(inout) :: state_old          ! the state at the old timestep
-    type(t_state), intent(inout) :: state_new          ! the state at the new timestep
+    type(t_state), intent(inout) :: state_old          ! the state at the old time step
+    type(t_state), intent(inout) :: state_new          ! the state at the new time step
     type(t_tend),  intent(inout) :: tend               ! the tendency
     type(t_bc),    intent(inout) :: bc                 ! boundary conditions
     type(t_grid),  intent(inout) :: grid               ! the grid of the model
