@@ -367,7 +367,7 @@ module mo_column_solvers
     integer  :: jc,ji,jk,jl                               ! loop indices
     
     ! setting the time stepping weights
-    impl_thermo_weight = 0.5_wp
+    impl_thermo_weight = 0.75_wp
     expl_weight = 1._wp - impl_thermo_weight
     
     ! firstly the number of relevant constituents needs to be determined
