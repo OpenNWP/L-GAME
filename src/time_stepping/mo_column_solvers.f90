@@ -6,12 +6,12 @@ module mo_column_solvers
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
 
   use mo_run_nml,          only: ny,nx,n_layers,n_levels,dtime,toa,impl_weight,partial_impl_weight
-  use mo_constituents_nml, only: n_condensed_constituents,n_constituents, &
+  use mo_constituents_nml, only: n_condensed_constituents,n_constituents,lmoist, &
                                  snow_velocity,rain_velocity,cloud_droplets_velocity,graupel_velocity
   use mo_definitions,      only: t_grid,t_state,t_tend,t_diag,wp
   use mo_diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
   use mo_surface_nml,      only: nsoillays,lprog_soil_temp,lsfc_sensible_heat_flux
-  use mo_constants,        only: M_PI,r_d,c_d_v,c_d_p
+  use mo_constants,        only: M_PI,r_d,c_d_v,c_d_p,m_d,m_v
   use mo_dictionary,       only: c_p_cond
 
   implicit none
@@ -76,6 +76,14 @@ module mo_column_solvers
           *(grid%theta_v_bg(ji,jk,n_layers)+state_old%theta_v_pert(ji,jk,n_layers))
           t_gas_lowest_layer_new = (grid%exner_bg(ji,jk,n_layers)+state_new%exner_pert(ji,jk,n_layers)) &
           *(grid%theta_v_bg(ji,jk,n_layers)+state_new%theta_v_pert(ji,jk,n_layers))
+        
+          ! converting the virtual temperature to the real temperature
+          if (lmoist) then
+            t_gas_lowest_layer_old = t_gas_lowest_layer_old/(1._wp+state_old%rho(ji,jk,n_layers,n_condensed_constituents+2) &
+                                     /state_old%rho(ji,jk,n_layers,n_condensed_constituents+1)*(m_d/m_v-1._wp))
+            t_gas_lowest_layer_new = t_gas_lowest_layer_new/(1._wp+state_new%rho(ji,jk,n_layers,n_condensed_constituents+2) &
+                                     /state_new%rho(ji,jk,n_layers,n_condensed_constituents+1)*(m_d/m_v-1._wp))
+          endif
 
           ! the sensible power flux density
           diag%power_flux_density_sensible(ji,jk) = 0.5_wp*c_d_v*(state_new%rho(ji,jk,n_layers,n_condensed_constituents+1) &
