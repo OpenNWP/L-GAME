@@ -137,7 +137,6 @@ module mo_definitions
     real(wp), allocatable :: pressure_grad_condensates_w(:,:,:)      ! vertical pressure gradient acceleration due to the gravity of condensates
     real(wp), allocatable :: p_grad_acc_old_u(:,:,:)                 ! x-component of pressure gradient at old time step
     real(wp), allocatable :: p_grad_acc_old_v(:,:,:)                 ! y-component of pressure gradient at old time step
-    real(wp), allocatable :: p_grad_acc_old_w(:,:,:)                 ! z-component of pressure gradient at old time step
     real(wp), allocatable :: v_squared_grad_x(:,:,:)                 ! x-gradient of specific kinetic energy
     real(wp), allocatable :: v_squared_grad_y(:,:,:)                 ! y-gradient of specific kinetic energy
     real(wp), allocatable :: v_squared_grad_z(:,:,:)                 ! z-gradient of specific kinetic energy
