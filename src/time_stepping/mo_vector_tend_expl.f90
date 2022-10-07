@@ -37,12 +37,10 @@ module mo_vector_tend_expl
     integer,       intent(in)    :: total_step_counter ! time step counter of the model integration
     
     ! local variables
-    real(wp) :: old_hor_pgrad_weight  ! old time step pressure gradient weight
-    real(wp) :: new_hor_pgrad_weight  ! new time step pressure gradient weight
-    real(wp) :: old_weight,new_weight ! Runge-Kutta weights
-    
-    new_hor_pgrad_weight = 0.5_wp + impl_thermo_weight
-    old_hor_pgrad_weight = 1._wp - new_hor_pgrad_weight
+    real(wp) :: old_hor_pgrad_weight     ! old timestep pressure gradient weight
+    real(wp) :: current_hor_pgrad_weight ! current timestep horizontal pressure gradient weight
+    real(wp) :: current_ver_pgrad_weight ! current timestep vertical pressure gradient weight
+    real(wp) :: old_weight,new_weight    ! Runge-Kutta weights
      
     ! momentum advection
     if ((rk_step==2 .or. total_step_counter==0) .and. ((.not. llinear) .or. lcorio)) then
@@ -89,13 +87,16 @@ module mo_vector_tend_expl
       endif
     endif
     
+    ! Now the explicit forces are added up.
     new_weight = 1._wp
     if (rk_step==2) then
       new_weight = 0.5_wp
     endif
-    old_weight = 1._wp - new_weight
-    
-    ! Now the explicit forces are added up.
+    old_weight = 1._wp-new_weight
+    ! the weights for the pressure gradient
+    current_hor_pgrad_weight = 0.5_wp + impl_thermo_weight
+    old_hor_pgrad_weight = 1._wp - current_hor_pgrad_weight
+    current_ver_pgrad_weight = 1._wp - impl_thermo_weight
     
     ! x-direction
     !$omp parallel workshare
@@ -104,7 +105,7 @@ module mo_vector_tend_expl
     ! old time step pressure gradient component
     old_hor_pgrad_weight*diag%p_grad_acc_old_u &
     ! new time step pressure gradient component
-    - new_hor_pgrad_weight*(diag%p_grad_acc_neg_nl_u + diag%p_grad_acc_neg_l_u) &
+    - current_hor_pgrad_weight*(diag%p_grad_acc_neg_nl_u + diag%p_grad_acc_neg_l_u) &
     ! momentum advection
     - 0.5_wp*diag%v_squared_grad_x + diag%pot_vort_tend_x & 
     ! momentum diffusion
@@ -118,7 +119,7 @@ module mo_vector_tend_expl
     ! old time step pressure gradient component
     old_hor_pgrad_weight*diag%p_grad_acc_old_v &
     ! new time step pressure gradient component
-    - new_hor_pgrad_weight*(diag%p_grad_acc_neg_nl_v + diag%p_grad_acc_neg_l_v) &
+    - current_hor_pgrad_weight*(diag%p_grad_acc_neg_nl_v + diag%p_grad_acc_neg_l_v) &
     ! momentum advection
     - 0.5_wp*diag%v_squared_grad_y + diag%pot_vort_tend_y &
     ! momentum diffusion
@@ -130,8 +131,7 @@ module mo_vector_tend_expl
     tend%wind_w = old_weight*tend%wind_w &
     + new_weight*( &
     ! old time step component of the pressure gradient acceleration
-    -(1._wp - impl_thermo_weight) &
-    *(diag%p_grad_acc_neg_nl_w + diag%p_grad_acc_neg_l_w) &
+    -current_ver_pgrad_weight*(diag%p_grad_acc_neg_nl_w + diag%p_grad_acc_neg_l_w) &
     ! momentum advection
     - 0.5_wp*diag%v_squared_grad_z + diag%pot_vort_tend_z &
     ! effect of condensates on the pressure gradient acceleration
