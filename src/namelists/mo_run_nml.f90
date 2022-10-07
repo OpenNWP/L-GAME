@@ -36,8 +36,6 @@ module mo_run_nml
   character(len=64) :: scenario            ! scenario for ideal runs
   character(len=64) :: run_id              ! ID of the model run
   logical           :: llinear             ! switch to turn momentum advection on or off
-  real(wp)          :: impl_weight         ! implicit weight of the pressure gradient
-  real(wp)          :: partial_impl_weight ! partial derivatives new time step weight
   real(wp)          :: lat_center          ! latitude of the center of the model domain
   real(wp)          :: lon_center          ! longitude of the center of the model domain
   
@@ -74,8 +72,6 @@ module mo_run_nml
     run_id = "ideal"
     llinear = .false.
     lcorio = .true.
-    impl_weight = 0.75_wp
-    partial_impl_weight = 0.5_wp
     lat_center = 0._wp
     lon_center = 0._wp
     

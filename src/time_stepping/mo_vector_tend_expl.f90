@@ -6,9 +6,10 @@ module mo_vector_tend_expl
   ! This module manages the calculation of the explicit part of the wind tendencies.
 
   use mo_definitions,        only: t_grid,t_state,t_diag,t_tend,wp
+  use mo_constants,          only: impl_thermo_weight
   use mo_inner_product,      only: inner_product
   use mo_gradient_operators, only: grad_hor,grad_vert
-  use mo_run_nml,            only: ny,nx,n_layers,impl_weight,llinear,lcorio
+  use mo_run_nml,            only: ny,nx,n_layers,llinear,lcorio
   use mo_constituents_nml,   only: n_condensed_constituents
   use mo_vorticities,        only: calc_pot_vort
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v
@@ -40,7 +41,7 @@ module mo_vector_tend_expl
     real(wp) :: new_hor_pgrad_weight  ! new time step pressure gradient weight
     real(wp) :: old_weight,new_weight ! Runge-Kutta weights
     
-    new_hor_pgrad_weight = 0.5_wp + impl_weight
+    new_hor_pgrad_weight = 0.5_wp + impl_thermo_weight
     old_hor_pgrad_weight = 1._wp - new_hor_pgrad_weight
      
     ! momentum advection
@@ -129,7 +130,7 @@ module mo_vector_tend_expl
     tend%wind_w = old_weight*tend%wind_w &
     + new_weight*( &
     ! old time step component of the pressure gradient acceleration
-    -(1._wp - impl_weight) &
+    -(1._wp - impl_thermo_weight) &
     *(diag%p_grad_acc_neg_nl_w + diag%p_grad_acc_neg_l_w) &
     ! momentum advection
     - 0.5_wp*diag%v_squared_grad_z + diag%pot_vort_tend_z &
