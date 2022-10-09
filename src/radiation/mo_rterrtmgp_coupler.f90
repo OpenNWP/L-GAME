@@ -420,12 +420,12 @@ module mo_rrtmgp_coupler
   
     ! This subroutine is essentially the negative vertical divergence operator.
     
-    logical,intent(in)                   :: day_only                     ! true for short wave calculations (for efficiency)
-    integer,intent(in)                   :: n_day_points                 ! as usual
-    integer,intent(in)                   :: day_indices(nx)              ! the indices of the columns where it is day
-    type(ty_fluxes_broadband),intent(in) :: fluxes                       ! fluxes object based on which to compute the power density
-    real(wp),intent(in)                  :: z_vector(nx,n_levels)           ! as usual
-    real(wp),intent(inout)               :: radiation_tendency(nx,n_layers) ! the result (in W/m**3)
+    logical,                   intent(in)    :: day_only                        ! true for short wave calculations (for efficiency)
+    integer,                   intent(in)    :: n_day_points                    ! as usual
+    integer,                   intent(in)    :: day_indices(nx)                 ! the indices of the columns where it is day
+    type(ty_fluxes_broadband), intent(in)    :: fluxes                          ! fluxes object based on which to compute the power density
+    real(wp),                  intent(in)    :: z_vector(nx,n_levels)           ! as usual
+    real(wp),                  intent(inout) :: radiation_tendency(nx,n_layers) ! the result (in W/m**3)
   
     ! local variables
     integer :: n_relevant_columns ! the number of columns taken into account
@@ -556,12 +556,12 @@ module mo_rrtmgp_coupler
     
     ! This subroutine computes volume mixing ratios based on the model variables.
     
-    real(wp),          intent(in)    :: rho(nx,n_layers,n_constituents) ! mass densities of the constituents
-    logical,           intent(in)    :: sw_bool                      ! short wave switch
-    integer,           intent(in)    :: n_day_points                 ! as usual
-    integer,           intent(in)    :: day_indices(nx)              ! the indices of the points where it is day
-    real(wp),          intent(in)    :: z_scalar(nx,n_layers)           ! z coordinates of scalar data points
-    type(ty_gas_concs),intent(inout) :: gas_concentrations           ! the gas concentrations object to to fill
+    real(wp),           intent(in)    :: rho(nx,n_layers,n_constituents) ! mass densities of the constituents
+    logical,            intent(in)    :: sw_bool                         ! short wave switch
+    integer,            intent(in)    :: n_day_points                    ! as usual
+    integer,            intent(in)    :: day_indices(nx)                 ! the indices of the points where it is day
+    real(wp),           intent(in)    :: z_scalar(nx,n_layers)           ! z coordinates of scalar data points
+    type(ty_gas_concs), intent(inout) :: gas_concentrations              ! the gas concentrations object to to fill
     
     ! local variables
     real(wp) :: vol_mix_ratio(nx,n_layers) ! the volume mixing ratio of a gas
@@ -635,9 +635,9 @@ module mo_rrtmgp_coupler
   
     ! This subroutine initializes a flux object.
     
-    type(ty_fluxes_broadband),intent(inout) :: fluxes ! the fluxes to initialize
-    integer,                  intent(in)    :: n_hor  ! the number of columns
-    integer,                  intent(in)    :: n_vert ! the number of levels
+    type(ty_fluxes_broadband), intent(inout) :: fluxes ! the fluxes to initialize
+    integer,                   intent(in)    :: n_hor  ! the number of columns
+    integer,                   intent(in)    :: n_vert ! the number of levels
  	
  	! broad band fluxes
     allocate(fluxes%flux_up(n_hor,n_vert))
@@ -652,7 +652,7 @@ module mo_rrtmgp_coupler
 
     ! resets all fluxes to zero
 
-    type(ty_fluxes_broadband),intent(inout) :: fluxes
+    type(ty_fluxes_broadband), intent(inout) :: fluxes
 
     ! reset broadband fluxes
     fluxes%flux_up = 0._wp
@@ -666,7 +666,7 @@ module mo_rrtmgp_coupler
   
     ! This subroutine frees a flux object.
     
-    type(ty_fluxes_broadband),intent(inout) :: fluxes ! the fluxes to free
+    type(ty_fluxes_broadband), intent(inout) :: fluxes ! the fluxes to free
     
     if (associated(fluxes%flux_up)) deallocate(fluxes%flux_up)
     if (associated(fluxes%flux_dn)) deallocate(fluxes%flux_dn)
@@ -677,7 +677,7 @@ module mo_rrtmgp_coupler
   
   subroutine handle_error(error_message)
   
-    character(len = *),intent(in) :: error_message
+    character(len = *), intent(in) :: error_message
     
     ! write the error message if its real length is larger than zero
     if (len(trim(error_message))>0) then
