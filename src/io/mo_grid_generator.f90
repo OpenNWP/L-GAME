@@ -901,7 +901,7 @@ module mo_grid_generator
   
     ! This subroutine interpolates the real orography from ETOPO1.
     
-    type(t_grid), intent(inout) :: grid
+    type(t_grid), intent(inout) :: grid ! grid quantities
     
     ! local variables
     integer               :: ncid                   ! ID of the NetCDF file
@@ -909,8 +909,8 @@ module mo_grid_generator
     integer               :: lat_in_id              ! variable ID of the latitude vector
     integer               :: lon_in_id              ! variable ID of the longitude vector
     integer               :: z_in_id                ! variable ID of the orography
-    integer               :: n_lat_points       ! number of latitude points of the input dataset
-    integer               :: n_lon_points       ! number of longitude points of the input dataset
+    integer               :: n_lat_points           ! number of latitude points of the input dataset
+    integer               :: n_lon_points           ! number of longitude points of the input dataset
     real(wp), allocatable :: latitude_input(:)      ! latitudes of the input dataset
     real(wp), allocatable :: longitude_input(:)     ! longitudes of the input dataset
     real(wp), allocatable :: lat_distance_vector(:) ! latitudes distance vector
