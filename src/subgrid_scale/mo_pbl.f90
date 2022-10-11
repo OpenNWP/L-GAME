@@ -248,7 +248,7 @@ module mo_pbl
     ! This function returns the roughness length as a function of the mean wind speed at 10 m above a fully developed sea.
 
     ! input variable
-    real(wp), intent(in) :: u10
+    real(wp), intent(in) :: u10 ! wind velocity 10 m above the surface
     ! output variable
     real(wp)             :: roughness_length_from_u10_sea
 
@@ -281,7 +281,7 @@ module mo_pbl
     ! input variables
     real(wp), intent(in) :: roughness_velocity_value,z_agl,roughness_length_value,monin_obukhov_length_value
     ! output variable
-    real(wp)             :: scalar_flux_resistance
+    real(wp)             :: scalar_flux_resistance ! result
 
     ! local variables
     real(wp) :: used_vertical_height
@@ -309,9 +309,12 @@ module mo_pbl
     ! This function returns the surface flux resistance for momentum.
 
     ! input variables
-    real(wp), intent(in) :: wind_h_lowest_layer,z_agl,roughness_length_value,monin_obukhov_length_value
+    real(wp), intent(in) :: wind_h_lowest_layer        ! wind speed in the lowest model layer
+    real(wp), intent(in) :: z_agl                      ! height of the target grid point above the surface (m)
+    real(wp), intent(in) :: roughness_length_value     ! roughness length  of the surface (m)
+    real(wp), intent(in) :: monin_obukhov_length_value ! Monin-Obukhiv-length (m)
     ! output variable
-    real(wp)             :: momentum_flux_resistance
+    real(wp)             :: momentum_flux_resistance ! result
 
     ! local variables
     real(wp) :: used_vertical_height
