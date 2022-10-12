@@ -3,7 +3,7 @@
 
 module mo_momentum_diff_diss
 
-  ! This module handles momentum diffusion and dissipation.
+  ! This module computes momentum diffusion and dissipation.
   
   use mo_definitions,          only: t_grid,t_diag,t_state
   use mo_divergence_operators, only: div_h,add_vertical_div
@@ -31,7 +31,7 @@ module mo_momentum_diff_diss
     ! local variables
     integer  :: upper_index,lower_index ! vertical interpolation indices
     real(wp) :: slope,vertical_gradient ! vertical interpolation helper variables
-    integer  :: ji,jk,jl                ! loop indices
+    integer  :: ji,jk,jl                ! spatial indices
     
     ! Preparation of kinematic properties of the wind field
     ! -----------------------------------------------------
@@ -162,7 +162,7 @@ module mo_momentum_diff_diss
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer  :: ji,jk,jl ! loop indices
+    integer  :: ji,jk,jl ! spatial indices
     
     ! 1.) vertical diffusion of horizontal velocity
     ! ---------------------------------------------
@@ -332,7 +332,7 @@ module mo_momentum_diff_diss
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer :: ji,jk,jl ! loop indices
+    integer :: ji,jk,jl ! spatial indices
     
     ! calculating the inner product of the momentum diffusion acceleration and the wind
     call inner_product(state%wind_u,state%wind_v,state%wind_w,diag%mom_diff_tend_x,diag%mom_diff_tend_y, &

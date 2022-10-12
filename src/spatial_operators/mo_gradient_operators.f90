@@ -18,14 +18,13 @@ module mo_gradient_operators
 
     ! This subroutine computes the horizontal covariant gradient of a scalar field.
     
-    ! input arguments and output
     real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
     real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
     real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
-    integer :: ji,jk ! loop variables
+    integer :: ji,jk ! spatial indices
 
     ! inner domain
     ! calculating the x-component of the gradient
@@ -66,13 +65,12 @@ module mo_gradient_operators
 
     ! This subroutine computes the vertical covariant gradient of a scalar field.
     
-    ! input arguments and output
     real(wp),     intent(in)    :: scalar_field(:,:,:) ! scalar field of which to calculate the gradient
     real(wp),     intent(inout) :: result_field(:,:,:) ! z-component of resulting vector field
     type(t_grid), intent(in)    :: grid                ! the grid properties
     
     ! local variables
-    integer :: jl ! loop variables
+    integer :: jl ! spatial indices
 
     ! calculating the vertical gradient in the inner levels
     !$omp parallel do private(jl)
@@ -88,7 +86,6 @@ module mo_gradient_operators
     ! This subroutine computes the covariant gradient of a scalar field.
     ! result_field_z must be computed already
     
-    ! input arguments and output
     real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
     real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
     real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
@@ -96,8 +93,9 @@ module mo_gradient_operators
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
-    integer :: ji,jk,jl ! loop indices
+    integer :: ji,jk,jl ! spatial indices
     
+    ! computing the horizontal covariant gradient
     call grad_hor_cov(scalar_field,result_field_x,result_field_y,grid)
 
     ! correction for terrain

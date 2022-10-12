@@ -21,8 +21,7 @@ module mo_column_solvers
   subroutine three_band_solver_ver(state_old,state_new,state_target,diag,tend,grid,rk_step)
   
     ! This subroutine is the main implicit vertical solver.
-
-    ! input arguments and output
+    
     type(t_state), intent(in)    :: state_old    ! state at the old time step
     type(t_state), intent(inout) :: state_new    ! state at the new time step
     type(t_state), intent(inout) :: state_target ! state into which to write the results
@@ -343,7 +342,6 @@ module mo_column_solvers
     ! Vertical advection of generalized densities (of tracers) with 3-band matrices.
     ! mass densities, density x temperatures
     
-    ! input arguments and output
     type(t_state), intent(in)    :: state_old ! state at the old time step
     type(t_state), intent(inout) :: state_new ! state at the new time step
     type(t_tend),  intent(in)    :: tend      ! explicit tendencies
@@ -353,7 +351,7 @@ module mo_column_solvers
     
     ! local variables
     integer  :: n_relevant_constituents                   ! number of relevant constituents for a certain quantity
-    real(wp) :: impl_thermo_weight,expl_weight                   ! time stepping weights
+    real(wp) :: impl_thermo_weight,expl_weight            ! time stepping weights
     real(wp) :: c_vector(n_layers-1)                      ! vector for solving the system of linear equations
     real(wp) :: d_vector(n_layers)                        ! vector for solving the system of linear equations
     real(wp) :: e_vector(n_layers-1)                      ! vector for solving the system of linear equations
@@ -364,7 +362,8 @@ module mo_column_solvers
     real(wp) :: solution_vector(n_layers)                 ! solution of the system of linear equations
     real(wp) :: density_old_at_interface,added_mass       ! abbreviations
     real(wp) :: temperature_old_at_interface              ! temperature in a level at the old PC substep
-    integer  :: jc,ji,jk,jl                               ! loop indices
+    integer  :: jc                                        ! constituent index
+    integer  :: ji,jk,jl                                  ! spatial indices
     
     ! setting the time stepping weights
     impl_thermo_weight = 0.5_wp

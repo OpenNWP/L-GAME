@@ -27,7 +27,7 @@ module mo_inner_product
     type(t_grid), intent(in)    :: grid                 ! grid properties
     
     ! local variables
-    integer :: ji,jk,jl ! loop indices
+    integer :: ji,jk,jl ! spatial indices
     
     !$omp parallel do private(ji,jk,jl)
     do ji=1,ny

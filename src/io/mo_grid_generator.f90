@@ -26,41 +26,44 @@ module mo_grid_generator
   
   subroutine grid_setup(grid)
   
+    ! This module computes the grid quantities.
+  
     type(t_grid), intent(inout) :: grid ! the model grid
+    
     ! local variables
-    real(wp) :: lat_left_upper               ! latitude coordinate of upper left corner
-    real(wp) :: lon_left_upper               ! longitude coordinate of upper left corner
-    real(wp) :: dlat                         ! mesh size in y direction as angle
-    real(wp) :: dlon                         ! mesh size in x direction as angle
-    real(wp) :: max_oro                      ! variable for orography check
-    real(wp) :: A                            ! variable for calculating the vertical grid
-    real(wp) :: B                            ! variable for calculating the vertical grid
-    real(wp) :: sigma_z                      ! variable for calculating the vertical grid
-    real(wp) :: z_rel                        ! variable for calculating the vertical grid
-    real(wp) :: vertical_vector_pre(n_levels)   ! variable for calculating the vertical grid
-    real(wp) :: base_area                    ! variable for calculating the vertical grid
-    real(wp) :: lower_z,upper_z,lower_length ! variables needed for area calculations
-    real(wp) :: height_mountain              ! height of Gaussian mountain (needed for test case)
-    real(wp) :: x_coord                      ! help variable needed for the Schär test
-    real(wp) :: rescale_factor               ! soil grid rescaling factor
-    real(wp) :: sigma_soil                   ! sigma of the soil grid
-    real(wp) :: density_soil                 ! typical density of soil
-    real(wp) :: c_p_soil                     ! typical c_p of soil
-    real(wp) :: c_p_water                    ! typical c_p of water
-    real(wp) :: lat_lower_center             ! variable for calculating the TRSK weights
-    real(wp) :: lat_upper_center             ! variable for calculating the TRSK weights
-    real(wp) :: rot_y(3,3)                   ! rotation matrix around the global y-axis
-    real(wp) :: rot_z(3,3)                   ! rotation matrix around the global z-axis
-    real(wp) :: rot(3,3)                     ! complete rotation matrix
-    real(wp) :: r_old(3)                     ! positional vector before rotation
-    real(wp) :: r_new(3)                     ! positional vector after rotation
-    real(wp) :: basis_old(3)                 ! old local basis vector
-    real(wp) :: basis_new(3)                 ! new local basis vector
-    real(wp) :: local_i(3)                   ! local i-vector
-    real(wp) :: local_j(3)                   ! local j-vector
-    real(wp) :: x_basis_local,y_basis_local  ! local Cartesian components of the local basis vector
-    real(wp) :: lat_local,lon_local          ! helper variables
-    integer  :: ji,jk,jl                     ! loop indices
+    real(wp) :: lat_left_upper                ! latitude coordinate of upper left corner
+    real(wp) :: lon_left_upper                ! longitude coordinate of upper left corner
+    real(wp) :: dlat                          ! mesh size in y direction as angle
+    real(wp) :: dlon                          ! mesh size in x direction as angle
+    real(wp) :: max_oro                       ! variable for orography check
+    real(wp) :: A                             ! variable for calculating the vertical grid
+    real(wp) :: B                             ! variable for calculating the vertical grid
+    real(wp) :: sigma_z                       ! variable for calculating the vertical grid
+    real(wp) :: z_rel                         ! variable for calculating the vertical grid
+    real(wp) :: vertical_vector_pre(n_levels) ! variable for calculating the vertical grid
+    real(wp) :: base_area                     ! variable for calculating the vertical grid
+    real(wp) :: lower_z,upper_z,lower_length  ! variables needed for area calculations
+    real(wp) :: height_mountain               ! height of Gaussian mountain (needed for test case)
+    real(wp) :: x_coord                       ! help variable needed for the Schär test
+    real(wp) :: rescale_factor                ! soil grid rescaling factor
+    real(wp) :: sigma_soil                    ! sigma of the soil grid
+    real(wp) :: density_soil                  ! typical density of soil
+    real(wp) :: c_p_soil                      ! typical c_p of soil
+    real(wp) :: c_p_water                     ! typical c_p of water
+    real(wp) :: lat_lower_center              ! variable for calculating the TRSK weights
+    real(wp) :: lat_upper_center              ! variable for calculating the TRSK weights
+    real(wp) :: rot_y(3,3)                    ! rotation matrix around the global y-axis
+    real(wp) :: rot_z(3,3)                    ! rotation matrix around the global z-axis
+    real(wp) :: rot(3,3)                      ! complete rotation matrix
+    real(wp) :: r_old(3)                      ! positional vector before rotation
+    real(wp) :: r_new(3)                      ! positional vector after rotation
+    real(wp) :: basis_old(3)                  ! old local basis vector
+    real(wp) :: basis_new(3)                  ! new local basis vector
+    real(wp) :: local_i(3)                    ! local i-vector
+    real(wp) :: local_j(3)                    ! local j-vector
+    real(wp) :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
+    real(wp) :: lat_local,lon_local           ! helper variables
+    integer  :: ji,jk,jl                      ! loop indices
     
     ! Horizontal grid properties
     ! --------------------------
@@ -899,7 +902,7 @@ module mo_grid_generator
   
   subroutine set_orography(grid)
   
-    ! This subroutine interpolates the real orography from ETOPO1.
+    ! This subroutine interpolates the real orography from ETOPO1 to the model grid.
     
     type(t_grid), intent(inout) :: grid ! grid quantities
     
@@ -994,7 +997,7 @@ module mo_grid_generator
     
     ! local variables
     real(wp) :: original_array(ny,nx) ! the unsmoothed input array
-    integer  :: ji,jk                       ! loop indices
+    integer  :: ji,jk                 ! spatial indices
     
     ! copying the original array
     original_array = array
@@ -1065,11 +1068,9 @@ module mo_grid_generator
   
     ! This function calculates the area of a quadrilateral grid cell.
   
-    ! input
     real(wp) :: center_lat  ! latitude at the center of the patch
     real(wp) :: dx_as_angle ! delta x as angle
     real(wp) :: dy_as_angle ! delta y as angle
-    ! output
     real(wp) :: patch_area  ! the result
   
     ! computing the result
@@ -1087,10 +1088,9 @@ module mo_grid_generator
     ! This function calculates the area of a vertical face.
     
     ! input
-    real(wp) :: lower_z      ! geometric height of the lower boundary of the face
-    real(wp) :: upper_z      ! geometric height of the upper boundary of the face
-    real(wp) :: lower_length ! length of the lower boundary of the face
-    ! output
+    real(wp) :: lower_z            ! geometric height of the lower boundary of the face
+    real(wp) :: upper_z            ! geometric height of the upper boundary of the face
+    real(wp) :: lower_length       ! length of the lower boundary of the face
     real(wp) :: vertical_face_area ! the result
     
     vertical_face_area = 0.5_wp*lower_length*(r_e + upper_z + r_e + lower_z) &
@@ -1107,11 +1107,9 @@ module mo_grid_generator
   
     ! This function calculates a latitude- and height-dependant idealized vegetation height.
 
-    ! input arguments
-    real(wp) :: latitude ! latitude of this point
-    real(wp) :: oro      ! height of the terrain at this point
-    ! output
-    real(wp) :: vegetation_height_ideal ! the result
+    real(wp) :: latitude                ! latitude of this point
+    real(wp) :: oro                     ! height of the terrain at this point
+    real(wp) :: vegetation_height_ideal ! result
     
     ! local variables
     real(wp) :: vegetation_height_equator ! the vegetation height at the equator
@@ -1124,10 +1122,9 @@ module mo_grid_generator
   end function vegetation_height_ideal
   
   subroutine find_global_normal(lat,lon,r)
-
+    
     ! This subroutine calculates the Cartesian normal vector of a point given its geographical coordinates.
     
-    ! input arguments and output
     real(wp), intent(in)  :: lat  ! input latitude
     real(wp), intent(in)  :: lon  ! input longitude
     real(wp), intent(out) :: r(3) ! positional vector (result)
@@ -1139,10 +1136,9 @@ module mo_grid_generator
   end subroutine find_global_normal
   
   subroutine find_geos(r,lat_out,lon_out)
-
+    
     ! This subroutine calculates the geographical coordinates of a point given its Cartesian coordinates.
-
-    ! input arguments and output
+    
     real(wp), intent(in)  :: r(3)    ! positional vector
     real(wp), intent(out) :: lat_out ! output latitude
     real(wp), intent(out) :: lon_out ! output longitude
@@ -1154,11 +1150,10 @@ module mo_grid_generator
 
   subroutine calc_local_i(lon,result_vec)
 
-    ! This function calculates the local eastward basis vector.
+    ! This subroutine calculates the local eastward basis vector.
     
-    ! input arguments and output
-    real(wp), intent(in)  :: lon ! geographical longitude
-    real(wp), intent(out) :: result_vec(3)
+    real(wp), intent(in)  :: lon           ! geographical longitude
+    real(wp), intent(out) :: result_vec(3) ! result
     
     result_vec(1) = -sin(lon)
     result_vec(2) = cos(lon)
@@ -1170,10 +1165,9 @@ module mo_grid_generator
 
     ! This subroutine calculates the local northward basis vector.
     
-    ! input arguments and output
-    real(wp), intent(in)  :: lat ! geographical latitude
-    real(wp), intent(in)  :: lon ! geographical longitude
-    real(wp), intent(out) :: result_vec(3)
+    real(wp), intent(in)  :: lat           ! geographical latitude
+    real(wp), intent(in)  :: lon           ! geographical longitude
+    real(wp), intent(out) :: result_vec(3) ! result
     
     result_vec(1) = -sin(lat)*cos(lon)
     result_vec(2) = -sin(lat)*sin(lon)

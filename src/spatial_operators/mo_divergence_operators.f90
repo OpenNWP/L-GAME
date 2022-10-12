@@ -24,7 +24,7 @@ module mo_divergence_operators
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
-    integer  :: ji,jk,jl     ! loop variables
+    integer  :: ji,jk,jl     ! spatial indices
     real(wp) :: comp_h       ! horizontal component of divergence
     real(wp) :: comp_v       ! vertical component of divergence
     real(wp) :: contra_upper ! contravariant mass flux density resulting 
@@ -82,7 +82,7 @@ module mo_divergence_operators
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
-    integer  :: ji,jk,jl      ! loop variables
+    integer  :: ji,jk,jl      ! spatial indices
     real(wp) :: comp_h        ! horizontal component of divergence
     real(wp) :: comp_v        ! vertical component of divergence
     real(wp) :: contra_upper  ! contravariant mass flux density resulting 
@@ -157,7 +157,7 @@ module mo_divergence_operators
     type(t_grid), intent(in)    :: grid             ! grid properties
 
     !local variables
-    integer  :: ji,jk,jl                         ! loop indices
+    integer  :: ji,jk,jl                         ! spatial indices
     real(wp) :: contra_upper,contra_lower,comp_v ! kinematic quantities for computing the vertical divergence
     
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_v)

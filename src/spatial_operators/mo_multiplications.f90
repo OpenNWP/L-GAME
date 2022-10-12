@@ -25,7 +25,7 @@ module mo_multiplications
     real(wp), intent(inout) :: result_field_y(:,:,:) ! output vector field, y-component
   
     ! local variables
-    integer :: ji,jk ! loop indices
+    integer :: ji,jk ! horizontal indices
     
     ! inner domain
     ! x
@@ -75,7 +75,7 @@ module mo_multiplications
     real(wp), intent(inout) :: result_field_y(:,:,:) ! output vector field, y-component
   
     ! local variables
-    integer :: ji,jk,jl ! loop indices
+    integer :: ji,jk,jl ! spatial indices
     
     ! inner domain
     ! x
@@ -154,7 +154,7 @@ module mo_multiplications
     real(wp), intent(inout) :: result_field_z(:,:,:) ! output vector field, z-component
   
     ! local variables
-    integer :: jl ! loop index
+    integer :: jl ! layer index
     
     !$omp parallel do private(jl)
     do jl=2,n_layers

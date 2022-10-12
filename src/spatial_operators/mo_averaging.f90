@@ -15,15 +15,15 @@ module mo_averaging
   
   function vertical_contravariant_corr(vector_field_x,vector_field_y,ji,jk,jl,grid)
   
-    ! calculates (the vertical contravariant component - the vertical covariant component)
-    ! of a vector field out of the horizontal contravariant components
+    ! This function calculates (the vertical contravariant component - the vertical covariant component)
+    ! of a vector field out of the horizontal contravariant components.
     
     real(wp),     intent(in) :: vector_field_x(:,:,:) ! x-component of vector field to work with
     real(wp),     intent(in) :: vector_field_y(:,:,:) ! y-component of vector field to work with
     type(t_grid), intent(in) :: grid                  ! model grid
     integer,      intent(in) :: ji,jk,jl              ! spatial indices
-    
-    real(wp) :: vertical_contravariant_corr
+    real(wp) :: vertical_contravariant_corr           ! result
+        
     vertical_contravariant_corr = 0._wp
     
     if (jl>=n_flat_layers+1) then
@@ -53,14 +53,12 @@ module mo_averaging
   
   function remap_ver2hor_x(vertical_cov,grid,ji,jk,jl)
   
-    ! This function remaps a vertical covariant component of
-    ! a vector field to a position of a vector component in x-direction.
+    ! This function remaps a vertical covariant component of a vector field to a position of a vector component in x-direction.
   
     real(wp),     intent(in) :: vertical_cov(:,:,:) ! z-component of vector field to work with
     type(t_grid), intent(in) :: grid                ! the grid properties
     integer,      intent(in) :: ji,jk,jl            ! positional indices
-  
-    real(wp) :: remap_ver2hor_x ! the result
+    real(wp)                 :: remap_ver2hor_x     ! result
     
     ! initialization with zero
     remap_ver2hor_x = 0._wp
@@ -94,14 +92,12 @@ module mo_averaging
   
   function remap_ver2hor_y(vertical_cov,grid,ji,jk,jl)
   
-    ! This function remaps a vertical covariant component of
-    ! a vector field to a position of a vector component in y-direction.
+    ! This function remaps a vertical covariant component of a vector field to a position of a vector component in y-direction.
   
     real(wp),     intent(in) :: vertical_cov(:,:,:) ! z-component of vector field to work with
     type(t_grid), intent(in) :: grid                ! the grid properties
     integer,      intent(in) :: ji,jk,jl            ! positional indices
-  
-    real(wp) :: remap_ver2hor_y ! the result
+    real(wp)                 :: remap_ver2hor_y     ! result
     
     ! initialization with zero
     remap_ver2hor_y = 0._wp
@@ -137,13 +133,11 @@ module mo_averaging
   
     ! This function calculates the horizontal covariant component of a vector field in x-direction.
   
-    real(wp),     intent(in) :: hor_comp_x(:,:,:) ! horizontal component in x-direction of vector field to work with
-    real(wp),     intent(in) :: vert_comp(:,:,:)  ! vertical component of vector field to work with
-    type(t_grid), intent(in) :: grid              ! model grid
-    integer,      intent(in) :: ji,jk,jl          ! positional indices
-    
-    ! output
-    real(wp) :: horizontal_covariant_x
+    real(wp),     intent(in) :: hor_comp_x(:,:,:)      ! horizontal component in x-direction of vector field to work with
+    real(wp),     intent(in) :: vert_comp(:,:,:)       ! vertical component of vector field to work with
+    type(t_grid), intent(in) :: grid                   ! model grid
+    integer,      intent(in) :: ji,jk,jl               ! positional indices
+    real(wp)                 :: horizontal_covariant_x ! result
     
     horizontal_covariant_x = hor_comp_x(ji,jk,jl)
     
@@ -157,13 +151,11 @@ module mo_averaging
   
     ! This function calculates the horizontal covariant component of a vector field in y-direction.
   
-    real(wp),     intent(in) :: hor_comp_y(:,:,:) ! horizontal component in x-direction of vector field to work with
-    real(wp),     intent(in) :: vert_comp(:,:,:)  ! vertical component of vector field to work with
-    type(t_grid), intent(in) :: grid              ! model grid
-    integer,      intent(in) :: ji,jk,jl          ! positional indices
-    
-    ! output
-    real(wp) :: horizontal_covariant_y
+    real(wp),     intent(in) :: hor_comp_y(:,:,:)      ! horizontal component in x-direction of vector field to work with
+    real(wp),     intent(in) :: vert_comp(:,:,:)       ! vertical component of vector field to work with
+    type(t_grid), intent(in) :: grid                   ! model grid
+    integer,      intent(in) :: ji,jk,jl               ! positional indices
+    real(wp)                 :: horizontal_covariant_y ! result
   
     horizontal_covariant_y = hor_comp_y(ji,jk,jl)
     

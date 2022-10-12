@@ -25,7 +25,7 @@ module mo_vorticities
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    integer :: ji,jk,jl ! loop indices
+    integer :: ji,jk,jl ! spatial indices
     
     ! calculating the relative vorticity in x-direction
     !$omp parallel do private(ji,jk,jl)
@@ -134,7 +134,7 @@ module mo_vorticities
     type(t_grid),  intent(in)    :: grid  ! model grid
   
     ! local variables
-    integer :: ji,jk,jl ! loop indices
+    integer :: ji,jk,jl ! spatial indices
   
     ! calculating the relative vorticity
     if (.not. llinear) then
@@ -365,14 +365,12 @@ module mo_vorticities
   
   function rel_vort_z_local(state,grid,ji,jk,jl)
   
-    ! This function returns the vertical relative vorticity at a grindpoint.
+    ! This function returns the vertical relative vorticity at a grid point.
     
-    ! input arguments
-    type(t_state) :: state    ! state with which to calculate the relative vorticity
-    type(t_grid)  :: grid     ! grid properties
-    integer       :: ji,jk,jl ! indices of the gridpoint
-    ! result
-    real(wp)      :: rel_vort_z_local
+    type(t_state) :: state            ! state with which to calculate the relative vorticity
+    type(t_grid)  :: grid             ! grid properties
+    integer       :: ji,jk,jl         ! indices of the gridpoint
+    real(wp)      :: rel_vort_z_local ! result
     
     ! local variables
     real(wp) :: delta_z,l_rescale,vertical_gradient       ! needed for terrain handling

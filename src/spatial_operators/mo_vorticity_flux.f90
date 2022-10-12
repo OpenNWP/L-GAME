@@ -16,13 +16,12 @@ module mo_vorticity_flux
   subroutine calc_vorticity_flux_term(diag,grid)
   
     ! This module computes the vorticity flux.
-
-    ! input arguments and output
-    type(t_diag), intent(inout) :: diag ! diagnostic quantities
+    
+    type(t_diag), intent(inout) :: diag ! diagnostic quantities (the vorticity flux term is included here)
     type(t_grid), intent(in)    :: grid ! model grid
     
     ! local variables
-    integer :: ji,jk,jl ! loop indices
+    integer :: ji,jk,jl ! spatial indices
     
     ! horizontal velocity tendency due to vertical vorticity and horizontal wind (TRSK)
     ! u
