@@ -73,7 +73,17 @@ src/namelists/mo_surface_nml.f90
 ../rte-rrtmgp/examples/all-sky/mo_load_cloud_coefficients.F90
 )
 find_package(OpenMP)
-SET(CMAKE_Fortran_FLAGS "${OpenMP_Fortran_FLAGS} -O2 -ftree-vectorize -funroll-loops -Wall -Wpedantic -Wno-c-binding-type -I/usr/include -L/usr/lib/x86_64-linux-gnu")
+# aggressive optimization
+if (FAST)
+  SET(CMAKE_Fortran_FLAGS "${OpenMP_Fortran_FLAGS} -Ofast -ftree-vectorize -funroll-loops -Wall -Wpedantic -Wno-c-binding-type -I/usr/include -L/usr/lib/x86_64-linux-gnu")
+# default optimization
+else()
+  SET(CMAKE_Fortran_FLAGS "${OpenMP_Fortran_FLAGS} -O2 -ftree-vectorize -funroll-loops -Wall -Wpedantic -Wno-c-binding-type -I/usr/include -L/usr/lib/x86_64-linux-gnu")
+endif()
+# switching on boundary checking of arrays
+if(BOUNDS_CHECKS)
+  SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fbounds-check")
+endif()
 target_link_libraries(lgame netcdff)
 
 
