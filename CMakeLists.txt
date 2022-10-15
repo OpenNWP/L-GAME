@@ -42,9 +42,9 @@ src/radiation/mo_manage_radiation_calls.f90
 src/radiation/mo_rterrtmgp_coupler.f90
 src/namelists/mo_bc_nml.f90
 src/namelists/mo_diff_nml.f90
-src/namelists/mo_constituents_nml.f90
+src/namelists/mo_constituents_nml.F90
 src/namelists/mo_rad_nml.f90
-src/namelists/mo_run_nml.f90
+src/namelists/mo_run_nml.F90
 src/namelists/mo_io_nml.f90
 src/namelists/mo_surface_nml.f90
 ../rte-rrtmgp/rrtmgp/mo_gas_optics.F90

@@ -24,10 +24,11 @@ program control
   use mo_boundaries,                only: setup_bc_factor,read_boundaries
   use mo_rrtmgp_coupler,            only: radiation_init
   use mo_derived,                   only: temperature_diagnostics
+  use omp_lib,                      only: omp_get_num_threads
   
   implicit none
 
-  ! local variables
+  integer           :: omp_num_threads             ! number of OMP threads
   integer           :: time_step_counter           ! counter of the time step
   real(wp)          :: t_0,run_span,t_write        ! time information
   type(t_grid)      :: grid                        ! grid properties
@@ -414,6 +415,10 @@ program control
   diag%mass_diff_tendency = 0._wp
   !$omp end parallel workshare
   write(*,*) "... finished."
+  
+  !$omp parallel
+  omp_num_threads = omp_get_num_threads()
+  !$omp end parallel
   
   ! firstly, the grid generator needs to be called to calculate the grid properties
   write(*,*) "Setting up the grid ..."
