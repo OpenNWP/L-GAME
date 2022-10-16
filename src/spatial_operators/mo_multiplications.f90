@@ -17,11 +17,11 @@ module mo_multiplications
   
     ! This subroutine multiplies of a scalar with a vector field at horizontal points.
     
-    real(wp), intent(in)  :: scalar_field(:,:,:)   ! input scalar field
-    real(wp), intent(in)  :: in_vector_x(:,:,:)    ! input vector field, x-component
-    real(wp), intent(in)  :: in_vector_y(:,:,:)    ! input vector field, y-component
-    real(wp), intent(out) :: result_field_x(:,:,:) ! output vector field, x-component
-    real(wp), intent(out) :: result_field_y(:,:,:) ! output vector field, y-component
+    real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
+    real(wp), intent(in)    :: in_vector_x(:,:,:)    ! input vector field, x-component
+    real(wp), intent(in)    :: in_vector_y(:,:,:)    ! input vector field, y-component
+    real(wp), intent(inout) :: result_field_x(:,:,:) ! output vector field, x-component
+    real(wp), intent(inout) :: result_field_y(:,:,:) ! output vector field, y-component
   
     ! local variables
     integer :: ji,jk ! horizontal indices
