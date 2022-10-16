@@ -286,8 +286,8 @@ module mo_momentum_diff_diss
     !$omp parallel do private(jl)
     do jl=1,n_layers
       diag%scalar_placeholder(:,:,jl) = &
-      grid%inner_product_weights(:,:,jl,5)*state%wind_w(:,:,jl) &
-      + grid%inner_product_weights(:,:,jl,6)*state%wind_w(:,:,jl+1)
+      grid%inner_product_weights(5,:,:,jl)*state%wind_w(:,:,jl) &
+      + grid%inner_product_weights(6,:,:,jl)*state%wind_w(:,:,jl+1)
     enddo
     !$omp end parallel do
     ! computing the horizontal gradient of the vertical velocity field

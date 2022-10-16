@@ -30,22 +30,22 @@ module mo_averaging
       ! highest level following orography
       if (jl==n_flat_layers+1) then
         vertical_contravariant_corr = vertical_contravariant_corr &
-        - 0.5_wp*vector_field_x(ji,jk+1,jl)*grid%slope_x(ji,jk+1,jl)*grid%inner_product_weights(ji,jk,jl,1) &
-        - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,2) &
-        - 0.5_wp*vector_field_x(ji,jk,jl)*grid%slope_x(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,3) &
-        - 0.5_wp*vector_field_y(ji+1,jk,jl)*grid%slope_y(ji+1,jk,jl)*grid%inner_product_weights(ji,jk,jl,4)
+        - 0.5_wp*vector_field_x(ji,jk+1,jl)*grid%slope_x(ji,jk+1,jl)*grid%inner_product_weights(1,ji,jk,jl) &
+        - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(2,ji,jk,jl) &
+        - 0.5_wp*vector_field_x(ji,jk,jl)*grid%slope_x(ji,jk,jl)*grid%inner_product_weights(3,ji,jk,jl) &
+        - 0.5_wp*vector_field_y(ji+1,jk,jl)*grid%slope_y(ji+1,jk,jl)*grid%inner_product_weights(4,ji,jk,jl)
       ! levels below
       else
         vertical_contravariant_corr = vertical_contravariant_corr &
-        - 0.5_wp*vector_field_x(ji,jk+1,jl-1)*grid%slope_x(ji,jk+1,jl-1)*grid%inner_product_weights(ji,jk,jl-1,1) &
-        - 0.5_wp*vector_field_y(ji,jk,jl-1)*grid%slope_y(ji,jk,jl-1)*grid%inner_product_weights(ji,jk,jl-1,2) &
-        - 0.5_wp*vector_field_x(ji,jk,jl-1)*grid%slope_x(ji,jk,jl-1)*grid%inner_product_weights(ji,jk,jl-1,3) &
-        - 0.5_wp*vector_field_y(ji+1,jk,jl-1)*grid%slope_y(ji+1,jk,jl-1)*grid%inner_product_weights(ji,jk,jl-1,4)
+        - 0.5_wp*vector_field_x(ji,jk+1,jl-1)*grid%slope_x(ji,jk+1,jl-1)*grid%inner_product_weights(1,ji,jk,jl-1) &
+        - 0.5_wp*vector_field_y(ji,jk,jl-1)*grid%slope_y(ji,jk,jl-1)*grid%inner_product_weights(2,ji,jk,jl-1) &
+        - 0.5_wp*vector_field_x(ji,jk,jl-1)*grid%slope_x(ji,jk,jl-1)*grid%inner_product_weights(3,ji,jk,jl-1) &
+        - 0.5_wp*vector_field_y(ji+1,jk,jl-1)*grid%slope_y(ji+1,jk,jl-1)*grid%inner_product_weights(4,ji,jk,jl-1)
         vertical_contravariant_corr = vertical_contravariant_corr &
-        - 0.5_wp*vector_field_x(ji,jk+1,jl)*grid%slope_x(ji,jk+1,jl)*grid%inner_product_weights(ji,jk,jl,1) &
-        - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,2) &
-        - 0.5_wp*vector_field_x(ji,jk,jl)*grid%slope_x(ji,jk,jl)*grid%inner_product_weights(ji,jk,jl,3) &
-        - 0.5_wp*vector_field_y(ji+1,jk,jl)*grid%slope_y(ji+1,jk,jl)*grid%inner_product_weights(ji,jk,jl,4)
+        - 0.5_wp*vector_field_x(ji,jk+1,jl)*grid%slope_x(ji,jk+1,jl)*grid%inner_product_weights(1,ji,jk,jl) &
+        - 0.5_wp*vector_field_y(ji,jk,jl)*grid%slope_y(ji,jk,jl)*grid%inner_product_weights(2,ji,jk,jl) &
+        - 0.5_wp*vector_field_x(ji,jk,jl)*grid%slope_x(ji,jk,jl)*grid%inner_product_weights(3,ji,jk,jl) &
+        - 0.5_wp*vector_field_y(ji+1,jk,jl)*grid%slope_y(ji+1,jk,jl)*grid%inner_product_weights(4,ji,jk,jl)
       endif
     endif
   
@@ -65,23 +65,23 @@ module mo_averaging
     
     if (jk==1 .or. jk==nx+1) then
       if (lperiodic) then
-        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,nx,jl,5)*vertical_cov(ji,nx,jl)
-        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,1,jl,5)*vertical_cov(ji,1,jl)
+        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(5,ji,nx,jl)*vertical_cov(ji,nx,jl)
+        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(5,ji,1,jl)*vertical_cov(ji,1,jl)
         ! layer below
         if (jl<n_layers) then
-          remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,nx,jl,6)*vertical_cov(ji,nx,jl+1)
-          remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,1,jl,6)*vertical_cov(ji,1,jl+1)
+          remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(6,ji,nx,jl)*vertical_cov(ji,nx,jl+1)
+          remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(6,ji,1,jl)*vertical_cov(ji,1,jl+1)
         endif
       else
         return
       endif
     else
-      remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk-1,jl,5)*vertical_cov(ji,jk-1,jl)
-      remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
+      remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(5,ji,jk-1,jl)*vertical_cov(ji,jk-1,jl)
+      remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(5,ji,jk,jl)*vertical_cov(ji,jk,jl)
       ! layer below
       if (jl<n_layers) then
-        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk-1,jl,6)*vertical_cov(ji,jk-1,jl+1)
-        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
+        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(6,ji,jk-1,jl)*vertical_cov(ji,jk-1,jl+1)
+        remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(6,ji,jk,jl)*vertical_cov(ji,jk,jl+1)
       endif
     endif
     
@@ -104,23 +104,23 @@ module mo_averaging
     
     if (ji==1 .or. ji==ny+1) then
       if (lperiodic) then
-        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ny,jk,jl,5)*vertical_cov(ny,jk,jl)
-        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(1,jk,jl,5)*vertical_cov(1,jk,jl)
+        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(5,ny,jk,jl)*vertical_cov(ny,jk,jl)
+        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(5,1,jk,jl)*vertical_cov(1,jk,jl)
         ! layer below
         if (jl<n_layers) then
-          remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ny,jk,jl,6)*vertical_cov(ny,jk,jl+1)
-          remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(1,jk,jl,6)*vertical_cov(1,jk,jl+1)
+          remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(6,ny,jk,jl)*vertical_cov(ny,jk,jl+1)
+          remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(6,1,jk,jl)*vertical_cov(1,jk,jl+1)
         endif
       else
         return
       endif
     else
-      remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji-1,jk,jl,5)*vertical_cov(ji-1,jk,jl)
-      remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,5)*vertical_cov(ji,jk,jl)
+      remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(5,ji-1,jk,jl)*vertical_cov(ji-1,jk,jl)
+      remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(5,ji,jk,jl)*vertical_cov(ji,jk,jl)
       ! layer below
       if (jl<n_layers) then
-        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji-1,jk,jl,6)*vertical_cov(ji-1,jk,jl+1)
-        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(ji,jk,jl,6)*vertical_cov(ji,jk,jl+1)
+        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(6,ji-1,jk,jl)*vertical_cov(ji-1,jk,jl+1)
+        remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(6,ji,jk,jl)*vertical_cov(ji,jk,jl+1)
       endif
     endif
     

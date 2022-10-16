@@ -557,8 +557,8 @@ module mo_eff_diff_coeffs
             diag%n_squared(ji,jk,jl) = diag%w_placeholder(ji,jk,jl+1)
           else
             diag%n_squared(ji,jk,jl) &
-            = grid%inner_product_weights(ji,jk,jl,5)*diag%w_placeholder(ji,jk,jl) &
-            + grid%inner_product_weights(ji,jk,jl,6)*diag%w_placeholder(ji,jk,jl+1)
+            = grid%inner_product_weights(5,ji,jk,jl)*diag%w_placeholder(ji,jk,jl) &
+            + grid%inner_product_weights(6,ji,jk,jl)*diag%w_placeholder(ji,jk,jl+1)
           endif
         enddo
       enddo

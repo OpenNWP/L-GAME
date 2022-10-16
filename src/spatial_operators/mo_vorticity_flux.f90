@@ -102,19 +102,19 @@ module mo_vorticity_flux
       do jl=1,n_layers
         do jk=2,nx
           diag%pot_vort_tend_x(ji,jk,jl) = diag%pot_vort_tend_x(ji,jk,jl) &
-          - 0.5_wp*grid%inner_product_weights(ji,jk-1,jl,5)*diag%w_placeholder(ji,jk-1,jl)*diag%eta_y(ji,jk,jl) &
-          - 0.5_wp*grid%inner_product_weights(ji,jk-1,jl,6)*diag%w_placeholder(ji,jk-1,jl+1)*diag%eta_y(ji,jk,jl+1) &
-          - 0.5_wp*grid%inner_product_weights(ji,jk,jl,5)*diag%w_placeholder(ji,jk,jl)*diag%eta_y(ji,jk,jl) &
-          - 0.5_wp*grid%inner_product_weights(ji,jk,jl,6)*diag%w_placeholder(ji,jk,jl+1)*diag%eta_y(ji,jk,jl+1)
+          - 0.5_wp*grid%inner_product_weights(5,ji,jk-1,jl)*diag%w_placeholder(ji,jk-1,jl)*diag%eta_y(ji,jk,jl) &
+          - 0.5_wp*grid%inner_product_weights(6,ji,jk-1,jl)*diag%w_placeholder(ji,jk-1,jl+1)*diag%eta_y(ji,jk,jl+1) &
+          - 0.5_wp*grid%inner_product_weights(5,ji,jk,jl)*diag%w_placeholder(ji,jk,jl)*diag%eta_y(ji,jk,jl) &
+          - 0.5_wp*grid%inner_product_weights(6,ji,jk,jl)*diag%w_placeholder(ji,jk,jl+1)*diag%eta_y(ji,jk,jl+1)
         enddo
         
         ! boundary conditions
         if (lperiodic) then
           diag%pot_vort_tend_x(ji,1,jl) = diag%pot_vort_tend_x(ji,1,jl) &
-          - 0.5_wp*grid%inner_product_weights(ji,nx,jl,5)*diag%w_placeholder(ji,nx,jl)*diag%eta_y(ji,1,jl) &
-          - 0.5_wp*grid%inner_product_weights(ji,nx,jl,6)*diag%w_placeholder(ji,nx,jl+1)*diag%eta_y(ji,1,jl+1) &
-          - 0.5_wp*grid%inner_product_weights(ji,1,jl,5)*diag%w_placeholder(ji,1,jl)*diag%eta_y(ji,1,jl) &
-          - 0.5_wp*grid%inner_product_weights(ji,1,jl,6)*diag%w_placeholder(ji,1,jl+1)*diag%eta_y(ji,1,jl+1)
+          - 0.5_wp*grid%inner_product_weights(5,ji,nx,jl)*diag%w_placeholder(ji,nx,jl)*diag%eta_y(ji,1,jl) &
+          - 0.5_wp*grid%inner_product_weights(6,ji,nx,jl)*diag%w_placeholder(ji,nx,jl+1)*diag%eta_y(ji,1,jl+1) &
+          - 0.5_wp*grid%inner_product_weights(5,ji,1,jl)*diag%w_placeholder(ji,1,jl)*diag%eta_y(ji,1,jl) &
+          - 0.5_wp*grid%inner_product_weights(6,ji,1,jl)*diag%w_placeholder(ji,1,jl+1)*diag%eta_y(ji,1,jl+1)
           diag%pot_vort_tend_x(ji,nx+1,jl) = diag%pot_vort_tend_x(ji,1,jl)
         endif
         
@@ -127,19 +127,19 @@ module mo_vorticity_flux
       do jl=1,n_layers
         do ji=2,ny
           diag%pot_vort_tend_y(ji,jk,jl) = diag%pot_vort_tend_y(ji,jk,jl) &
-          + 0.5_wp*grid%inner_product_weights(ji-1,jk,jl,5)*diag%w_placeholder(ji-1,jk,jl)*diag%eta_x(ji,jk,jl) &
-          + 0.5_wp*grid%inner_product_weights(ji-1,jk,jl,6)*diag%w_placeholder(ji-1,jk,jl+1)*diag%eta_x(ji,jk,jl+1) &
-          + 0.5_wp*grid%inner_product_weights(ji,jk,jl,5)*diag%w_placeholder(ji,jk,jl)*diag%eta_x(ji,jk,jl) &
-          + 0.5_wp*grid%inner_product_weights(ji,jk,jl,6)*diag%w_placeholder(ji,jk,jl+1)*diag%eta_x(ji,jk,jl+1)
+          + 0.5_wp*grid%inner_product_weights(5,ji-1,jk,jl)*diag%w_placeholder(ji-1,jk,jl)*diag%eta_x(ji,jk,jl) &
+          + 0.5_wp*grid%inner_product_weights(6,ji-1,jk,jl)*diag%w_placeholder(ji-1,jk,jl+1)*diag%eta_x(ji,jk,jl+1) &
+          + 0.5_wp*grid%inner_product_weights(5,ji,jk,jl)*diag%w_placeholder(ji,jk,jl)*diag%eta_x(ji,jk,jl) &
+          + 0.5_wp*grid%inner_product_weights(6,ji,jk,jl)*diag%w_placeholder(ji,jk,jl+1)*diag%eta_x(ji,jk,jl+1)
         enddo
         
         ! boundary conditions
         if (lperiodic) then
           diag%pot_vort_tend_y(1,jk,jl) = diag%pot_vort_tend_y(1,jk,jl) &
-          + 0.5_wp*grid%inner_product_weights(ny,jk,jl,5)*diag%w_placeholder(ny,jk,jl)*diag%eta_x(1,jk,jl) &
-          + 0.5_wp*grid%inner_product_weights(ny,jk,jl,6)*diag%w_placeholder(ny,jk,jl+1)*diag%eta_x(1,jk,jl+1) &
-          + 0.5_wp*grid%inner_product_weights(1,jk,jl,5)*diag%w_placeholder(1,jk,jl)*diag%eta_x(1,jk,jl) &
-          + 0.5_wp*grid%inner_product_weights(1,jk,jl,6)*diag%w_placeholder(1,jk,jl+1)*diag%eta_x(1,jk,jl+1)
+          + 0.5_wp*grid%inner_product_weights(5,ny,jk,jl)*diag%w_placeholder(ny,jk,jl)*diag%eta_x(1,jk,jl) &
+          + 0.5_wp*grid%inner_product_weights(6,ny,jk,jl)*diag%w_placeholder(ny,jk,jl+1)*diag%eta_x(1,jk,jl+1) &
+          + 0.5_wp*grid%inner_product_weights(5,1,jk,jl)*diag%w_placeholder(1,jk,jl)*diag%eta_x(1,jk,jl) &
+          + 0.5_wp*grid%inner_product_weights(6,1,jk,jl)*diag%w_placeholder(1,jk,jl+1)*diag%eta_x(1,jk,jl+1)
           diag%pot_vort_tend_y(ny+1,jk,jl) = diag%pot_vort_tend_y(1,jk,jl)
         endif
         
@@ -153,14 +153,14 @@ module mo_vorticity_flux
       do jk=1,nx
         do jl=2,n_layers
           diag%pot_vort_tend_z(ji,jk,jl) = 0.5_wp*( &
-          grid%inner_product_weights(ji,jk,jl-1,1)*diag%u_placeholder(ji,jk+1,jl-1)*diag%eta_y(ji,jk+1,jl) &
-          - grid%inner_product_weights(ji,jk,jl-1,2)*diag%v_placeholder(ji,jk,jl-1)*diag%eta_x(ji,jk,jl) &
-          + grid%inner_product_weights(ji,jk,jl-1,3)*diag%u_placeholder(ji,jk,jl-1)*diag%eta_y(ji,jk,jl) &
-          - grid%inner_product_weights(ji,jk,jl-1,4)*diag%v_placeholder(ji+1,jk,jl-1)*diag%eta_x(ji+1,jk,jl) &
-          + grid%inner_product_weights(ji,jk,jl,1)*diag%u_placeholder(ji,jk+1,jl)*diag%eta_y(ji,jk+1,jl) &
-          - grid%inner_product_weights(ji,jk,jl,2)*diag%v_placeholder(ji,jk,jl)*diag%eta_x(ji,jk,jl) &
-          + grid%inner_product_weights(ji,jk,jl,3)*diag%u_placeholder(ji,jk,jl)*diag%eta_y(ji,jk,jl) &
-          - grid%inner_product_weights(ji,jk,jl,4)*diag%v_placeholder(ji+1,jk,jl)*diag%eta_x(ji+1,jk,jl))
+          grid%inner_product_weights(1,ji,jk,jl-1)*diag%u_placeholder(ji,jk+1,jl-1)*diag%eta_y(ji,jk+1,jl) &
+          - grid%inner_product_weights(2,ji,jk,jl-1)*diag%v_placeholder(ji,jk,jl-1)*diag%eta_x(ji,jk,jl) &
+          + grid%inner_product_weights(3,ji,jk,jl-1)*diag%u_placeholder(ji,jk,jl-1)*diag%eta_y(ji,jk,jl) &
+          - grid%inner_product_weights(4,ji,jk,jl-1)*diag%v_placeholder(ji+1,jk,jl-1)*diag%eta_x(ji+1,jk,jl) &
+          + grid%inner_product_weights(1,ji,jk,jl)*diag%u_placeholder(ji,jk+1,jl)*diag%eta_y(ji,jk+1,jl) &
+          - grid%inner_product_weights(2,ji,jk,jl)*diag%v_placeholder(ji,jk,jl)*diag%eta_x(ji,jk,jl) &
+          + grid%inner_product_weights(3,ji,jk,jl)*diag%u_placeholder(ji,jk,jl)*diag%eta_y(ji,jk,jl) &
+          - grid%inner_product_weights(4,ji,jk,jl)*diag%v_placeholder(ji+1,jk,jl)*diag%eta_x(ji+1,jk,jl))
         enddo
       enddo
     enddo

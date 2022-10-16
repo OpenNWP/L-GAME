@@ -122,7 +122,7 @@ program control
   allocate(grid%area_dual_y(ny,nx+1,n_levels))
   allocate(grid%area_dual_z(ny+1,nx+1,n_layers))
   allocate(grid%z_area_dual_z(ny+1,nx+1,n_layers))
-  allocate(grid%inner_product_weights(ny,nx,n_layers,6))
+  allocate(grid%inner_product_weights(6,ny,nx,n_layers))
   allocate(grid%fvec_x(ny+1,nx))
   allocate(grid%fvec_y(ny,nx+1))
   allocate(grid%fvec_z(ny+1,nx+1))
