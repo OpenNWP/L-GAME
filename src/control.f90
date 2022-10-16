@@ -5,26 +5,26 @@ program control
 
   ! This controls the model run from the beginning to the end.
 
-  use mo_run_nml,                   only: run_nml_setup,run_span_min,dtime,t_init,ny,nx,n_layers,lrestart, &
-                                          lideal,n_levels
-  use mo_io_nml,                    only: io_nml_setup,dt_write
-  use mo_constituents_nml,          only: constituents_nml_setup,n_condensed_constituents,n_constituents, &
-                                          snow_velocity,rain_velocity
-  use mo_diff_nml,                  only: diff_nml_setup
-  use mo_surface_nml,               only: surface_nml_setup,nsoillays
-  use mo_definitions,               only: t_grid,t_state,wp,t_diag,t_tend,t_bc
-  use mo_grid_generator,            only: grid_setup,bg_setup
-  use mo_set_initial_state,         only: restart,ideal_init
-  use mo_write_out,                 only: write_output
-  use mo_manage_pchevi,             only: pchevi
-  use mo_linear_combine_two_states, only: lin_combination
-  use mo_bc_nml,                    only: bc_nml_setup,lperiodic,t_latest_bc,dtime_bc
-  use mo_rad_nml,                   only: rad_nml_setup,lrad,dtime_rad
-  use mo_manage_radiation_calls,    only: update_rad_fluxes
-  use mo_boundaries,                only: setup_bc_factor,read_boundaries
-  use mo_rrtmgp_coupler,            only: radiation_init
-  use mo_derived,                   only: temperature_diagnostics
-  use omp_lib,                      only: omp_get_num_threads
+  use mo_run_nml,                only: run_nml_setup,run_span_min,dtime,t_init,ny,nx,n_layers,lrestart, &
+                                       lideal,n_levels
+  use mo_io_nml,                 only: io_nml_setup,dt_write
+  use mo_constituents_nml,       only: constituents_nml_setup,n_condensed_constituents,n_constituents, &
+                                       snow_velocity,rain_velocity
+  use mo_diff_nml,               only: diff_nml_setup
+  use mo_surface_nml,            only: surface_nml_setup,nsoillays
+  use mo_definitions,            only: t_grid,t_state,wp,t_diag,t_tend,t_bc
+  use mo_grid_generator,         only: grid_setup,bg_setup
+  use mo_set_initial_state,      only: restart,ideal_init
+  use mo_write_out,              only: write_output
+  use mo_manage_pchevi,          only: pchevi
+  use mo_linear_combination,     only: linear_combine_two_states
+  use mo_bc_nml,                 only: bc_nml_setup,lperiodic,t_latest_bc,dtime_bc
+  use mo_rad_nml,                only: rad_nml_setup,lrad,dtime_rad
+  use mo_manage_radiation_calls, only: update_rad_fluxes
+  use mo_boundaries,             only: setup_bc_factor,read_boundaries
+  use mo_rrtmgp_coupler,         only: radiation_init
+  use mo_derived,                only: temperature_diagnostics
+  use omp_lib,                   only: omp_get_num_threads
   
   implicit none
 
@@ -494,7 +494,7 @@ program control
     
     ! managing the calls to the output routine
     if (t_0+dtime>=t_write) then
-      call lin_combination(state_1,state_2,state_write,1._wp-(t_write-t_0)/dtime,(t_write-t_0)/dtime,grid)
+      call linear_combine_two_states(state_1,state_2,state_write,1._wp-(t_write-t_0)/dtime,(t_write-t_0)/dtime,grid)
       call write_output(state_write,diag,int((t_write-t_init)/60._wp),grid)
     
       t_write = t_write+dt_write

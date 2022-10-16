@@ -31,7 +31,7 @@ src/subgrid_scale/mo_pbl.f90
 src/subgrid_scale/mo_tke.f90
 src/spatial_operators/mo_vorticity_flux.f90
 src/spatial_operators/mo_multiplications.f90
-src/spatial_operators/mo_linear_combine_two_states.f90
+src/spatial_operators/mo_linear_combination.f90
 src/spatial_operators/mo_gradient_operators.f90
 src/spatial_operators/mo_averaging.f90
 src/spatial_operators/mo_vorticities.f90
