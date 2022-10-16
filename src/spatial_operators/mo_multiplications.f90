@@ -13,16 +13,15 @@ module mo_multiplications
   
   contains
 
-  subroutine scalar_times_vector_h(scalar_field,in_vector_x,in_vector_y, &
-                   result_field_x,result_field_y)
+  subroutine scalar_times_vector_h(scalar_field,in_vector_x,in_vector_y,result_field_x,result_field_y)
   
     ! This subroutine multiplies of a scalar with a vector field at horizontal points.
     
-    real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
-    real(wp), intent(in)    :: in_vector_x(:,:,:)    ! input vector field, x-component
-    real(wp), intent(in)    :: in_vector_y(:,:,:)    ! input vector field, y-component
-    real(wp), intent(inout) :: result_field_x(:,:,:) ! output vector field, x-component
-    real(wp), intent(inout) :: result_field_y(:,:,:) ! output vector field, y-component
+    real(wp), intent(in)  :: scalar_field(:,:,:)   ! input scalar field
+    real(wp), intent(in)  :: in_vector_x(:,:,:)    ! input vector field, x-component
+    real(wp), intent(in)  :: in_vector_y(:,:,:)    ! input vector field, y-component
+    real(wp), intent(out) :: result_field_x(:,:,:) ! output vector field, x-component
+    real(wp), intent(out) :: result_field_y(:,:,:) ! output vector field, y-component
   
     ! local variables
     integer :: ji,jk ! horizontal indices
@@ -63,16 +62,15 @@ module mo_multiplications
   
   end subroutine scalar_times_vector_h
   
-  subroutine scalar_times_vector_h_upstream(scalar_field,in_vector_x,in_vector_y, &
-                   result_field_x,result_field_y)
+  subroutine scalar_times_vector_h_upstream(scalar_field,in_vector_x,in_vector_y,result_field_x,result_field_y)
   
     ! This subroutine multiplies of a scalar with a vector field at horizontal points.
     
-    real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
-    real(wp), intent(in)    :: in_vector_x(:,:,:)    ! input vector field, x-component
-    real(wp), intent(in)    :: in_vector_y(:,:,:)    ! input vector field, y-component
-    real(wp), intent(inout) :: result_field_x(:,:,:) ! output vector field, x-component
-    real(wp), intent(inout) :: result_field_y(:,:,:) ! output vector field, y-component
+    real(wp), intent(in)  :: scalar_field(:,:,:)   ! input scalar field
+    real(wp), intent(in)  :: in_vector_x(:,:,:)    ! input vector field, x-component
+    real(wp), intent(in)  :: in_vector_y(:,:,:)    ! input vector field, y-component
+    real(wp), intent(out) :: result_field_x(:,:,:) ! output vector field, x-component
+    real(wp), intent(out) :: result_field_y(:,:,:) ! output vector field, y-component
   
     ! local variables
     integer :: ji,jk,jl ! spatial indices
