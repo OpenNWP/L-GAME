@@ -36,9 +36,9 @@ module mo_tke
     diag%w_placeholder,diag%scalar_placeholder,grid)
     
     !$omp parallel do private(ji,jk,jl,decay_constant)
-    do ji=1,ny
+    do jl=1,n_layers
       do jk=1,nx
-        do jl=1,n_layers
+        do ji=1,ny
           ! calculating the decay constant
           decay_constant = 8._wp*M_PI**2/grid%mean_velocity_area*(diag%viscosity_coeff_div(ji,jk,jl) &
           + diag%viscosity_coeff_curl(ji,jk,jl))/state%rho(ji,jk,jl,n_condensed_constituents+1)

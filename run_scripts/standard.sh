@@ -10,12 +10,16 @@ export OMP_NUM_THREADS=4
 cat > namelist.nml << EOF
 
 &run
+ny=37
+nx=35
 run_id="$run_id"
 lat_center=0.8929595951304794
 lon_center=0.1199133716060684
 /
 
 &io
+lread_oro=.true.
+lread_land_sea=.true.
 /
 
 &constituents
@@ -26,7 +30,7 @@ lmoist=.true.
 /
 
 &rad
-lrad=.true.
+lrad=.false.
 /
 
 &surface

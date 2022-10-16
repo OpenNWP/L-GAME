@@ -57,9 +57,9 @@ module mo_momentum_diff_diss
     ! Computing the curl of vorticity component
     ! -----------------------------------------
     !$omp parallel do private(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
-    do ji=1,ny
+    do jl=1,n_layers
       do jk=1,nx+1
-        do jl=1,n_layers
+        do ji=1,ny
           diag%u_placeholder(ji,jk,jl) = (diag%viscosity_coeff_curl_dual(ji+1,jk,jl)*diag%zeta_z(ji+1,jk,jl) - &
           diag%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
           
@@ -83,9 +83,9 @@ module mo_momentum_diff_diss
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl,upper_index,lower_index,slope,vertical_gradient)
-    do ji=1,ny+1
+    do jl=1,n_layers
       do jk=1,nx
-        do jl=1,n_layers
+        do ji=1,ny+1
           diag%v_placeholder(ji,jk,jl) = (diag%viscosity_coeff_curl_dual(ji,jk+1,jl)*diag%zeta_z(ji,jk+1,jl) - &
           diag%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
           

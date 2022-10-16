@@ -33,9 +33,9 @@ module mo_divergence_operators
                              ! from the horizontal vector components through the lower area
 
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v)
-    do ji=1,ny
+    do jl=1,n_layers
       do jk=1,nx
-        do jl=1,n_layers
+        do ji=1,ny
           ! the horizontal component
           comp_h = &
           vector_field_x(ji,jk+1,jl)*grid%area_x(ji,jk+1,jl) &
@@ -93,9 +93,9 @@ module mo_divergence_operators
     real(wp) :: density_lower ! density at the lower interface
 
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v,density_upper,density_lower)
-    do ji=1,ny
+    do jl=1,n_layers
       do jk=1,nx
-        do jl=1,n_layers
+        do ji=1,ny
           ! the horizontal component
           comp_h = &
           vector_field_x(ji,jk+1,jl)*grid%area_x(ji,jk+1,jl) &
@@ -161,9 +161,9 @@ module mo_divergence_operators
     real(wp) :: contra_upper,contra_lower,comp_v ! kinematic quantities for computing the vertical divergence
     
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_v)
-    do ji=1,ny
+    do jl=1,n_layers
       do jk=1,nx
-        do jl=1,n_layers
+        do ji=1,ny
           if (jl==0) then
             contra_upper = 0._wp
             contra_lower = in_field(ji,jk,jl+1)

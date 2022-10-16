@@ -129,9 +129,9 @@ module mo_scalar_tend_expl
         call div_h(diag%u_placeholder,diag%v_placeholder,diag%flux_density_div,grid)
         
         !$omp parallel do private(ji,jk,jl)
-        do ji=1,ny
+        do jl=1,n_layers
           do jk=1,nx
-            do jl=1,n_layers
+            do ji=1,ny
               tend%rhotheta_v(ji,jk,jl) = -diag%flux_density_div(ji,jk,jl) &
               ! diabatic heating rates
               ! weighting factor accounting for condensates

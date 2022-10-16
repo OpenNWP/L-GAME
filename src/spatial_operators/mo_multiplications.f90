@@ -78,9 +78,9 @@ module mo_multiplications
     ! inner domain
     ! x
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
+    do jl=1,n_layers
       do jk=2,nx
-        do jl=1,n_layers
+        do ji=1,ny
           if (in_vector_x(ji,jk,jl)>=0._wp) then
             result_field_x(ji,jk,jl) = scalar_field(ji,jk-1,jl)*in_vector_x(ji,jk,jl)
           else
@@ -93,9 +93,9 @@ module mo_multiplications
     
     ! y
     !$omp parallel do private(ji,jk,jl)
-    do ji=2,ny
+    do jl=1,n_layers
       do jk=1,nx
-        do jl=1,n_layers
+        do ji=2,ny
           if (in_vector_y(ji,jk,jl)>=0._wp) then
             result_field_y(ji,jk,jl) = scalar_field(ji,jk,jl)*in_vector_y(ji,jk,jl)
           else
