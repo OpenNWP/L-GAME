@@ -26,7 +26,7 @@ while getopts "df" opt; do
   esac
 done
 
-cmake -DBOUNDS_CHECKS=$d_value -DFAST=$f_value ..
+cmake -DDEBUGGING=$d_value -DFAST=$f_value ..
 make
 
 cd ..

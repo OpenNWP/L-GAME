@@ -26,6 +26,7 @@ lmoist=.true.
 /
 
 &rad
+lrad=.true.
 /
 
 &surface
