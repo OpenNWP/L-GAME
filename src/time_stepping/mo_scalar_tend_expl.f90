@@ -124,9 +124,9 @@ module mo_scalar_tend_expl
         diag%scalar_placeholder = grid%theta_v_bg + state_scalar%theta_v_pert
         !$omp end parallel workshare
         call scalar_times_vector_h(diag%scalar_placeholder,diag%flux_density_u,diag%flux_density_v,&
-                                   diag%flux_density_u,diag%flux_density_v)
+                                   diag%u_placeholder,diag%v_placeholder)
         ! calculating the divergence of the virtual potential temperature flux density
-        call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
+        call div_h(diag%u_placeholder,diag%v_placeholder,diag%flux_density_div,grid)
         
         !$omp parallel do private(ji,jk,jl)
         do ji=1,ny
