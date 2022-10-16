@@ -14,10 +14,10 @@ d_value=False
 f_value=False
 while getopts "df" opt; do
   case $opt in
-    d)
+    d) # debugging flag
       d_value=True
       ;;
-    f)
+    f) # aggressive optimization flag
       f_value=True
       ;;
     \?)
