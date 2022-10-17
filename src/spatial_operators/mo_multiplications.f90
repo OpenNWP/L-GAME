@@ -15,7 +15,7 @@ module mo_multiplications
 
   subroutine scalar_times_vector_h(scalar_field,in_vector_x,in_vector_y,result_field_x,result_field_y)
   
-    ! This subroutine multiplies of a scalar with a vector field at horizontal points.
+    ! This subroutine multiplies a scalar with a vector field at horizontal points.
     
     real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
     real(wp), intent(in)    :: in_vector_x(:,:,:)    ! input vector field, x-component
@@ -64,7 +64,7 @@ module mo_multiplications
   
   subroutine scalar_times_vector_h_upstream(scalar_field,in_vector_x,in_vector_y,result_field_x,result_field_y)
   
-    ! This subroutine multiplies of a scalar with a vector field at horizontal points.
+    ! This subroutine multiplies a scalar with a vector field at horizontal points.
     
     real(wp), intent(in)  :: scalar_field(:,:,:)   ! input scalar field
     real(wp), intent(in)  :: in_vector_x(:,:,:)    ! input vector field, x-component
