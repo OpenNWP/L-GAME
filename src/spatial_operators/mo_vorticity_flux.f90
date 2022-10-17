@@ -98,8 +98,8 @@ module mo_vorticity_flux
     ! horizontal velocity tendency due to horizontal vorticity and vertical wind
     ! u
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jl=1,n_layers
+    do jl=1,n_layers
+      do ji=1,ny
         do jk=2,nx
           diag%pot_vort_tend_x(ji,jk,jl) = diag%pot_vort_tend_x(ji,jk,jl) &
           - 0.5_wp*grid%inner_product_weights(5,ji,jk-1,jl)*diag%w_placeholder(ji,jk-1,jl)*diag%eta_y(ji,jk,jl) &
@@ -123,8 +123,8 @@ module mo_vorticity_flux
     !$omp end parallel do
     ! v
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,nx
-      do jl=1,n_layers
+    do jl=1,n_layers
+      do jk=1,nx
         do ji=2,ny
           diag%pot_vort_tend_y(ji,jk,jl) = diag%pot_vort_tend_y(ji,jk,jl) &
           + 0.5_wp*grid%inner_product_weights(5,ji-1,jk,jl)*diag%w_placeholder(ji-1,jk,jl)*diag%eta_x(ji,jk,jl) &

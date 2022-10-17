@@ -110,8 +110,8 @@ module mo_momentum_diff_diss
     
     ! adding up the two components and dividing by the averaged density
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jl=1,n_layers
+    do jl=1,n_layers
+      do ji=1,ny
         do jk=2,nx
           diag%mom_diff_tend_x(ji,jk,jl) = (diag%mom_diff_tend_x(ji,jk,jl) + diag%u_placeholder(ji,jk,jl)) &
           /(0.5_wp*(sum(state%rho(ji,jk-1,jl,1:n_condensed_constituents+1)) &
@@ -131,8 +131,8 @@ module mo_momentum_diff_diss
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,nx
-      do jl=1,n_layers
+    do jl=1,n_layers
+      do jk=1,nx
         do ji=2,ny
           diag%mom_diff_tend_y(ji,jk,jl) = (diag%mom_diff_tend_y(ji,jk,jl) + diag%v_placeholder(ji,jk,jl)) &
           /(0.5_wp*(sum(state%rho(ji-1,jk,jl,1:n_condensed_constituents+1)) &
@@ -240,8 +240,8 @@ module mo_momentum_diff_diss
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,nx
-      do jl=1,n_layers
+    do jl=1,n_layers
+      do jk=1,nx
         do ji=2,ny
           diag%mom_diff_tend_y(ji,jk,jl) = diag%mom_diff_tend_y(ji,jk,jl) &
           + (diag%vert_hor_viscosity_v(ji,jk,jl)*diag%dv_dz(ji,jk,jl) &
@@ -306,9 +306,9 @@ module mo_momentum_diff_diss
     call div_h(diag%u_placeholder,diag%v_placeholder,diag%scalar_placeholder,grid)
     ! vertically averaging the divergence to half levels and dividing by the density
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
+    do jl=2,n_layers
       do jk=1,nx
-        do jl=2,n_layers
+        do ji=1,ny
           diag%mom_diff_tend_z(ji,jk,jl) = diag%mom_diff_tend_z(ji,jk,jl) + &
           0.5_wp*(diag%scalar_placeholder(ji,jk,jl-1) + diag%scalar_placeholder(ji,jk,jl))
           ! dividing by the density
@@ -331,23 +331,13 @@ module mo_momentum_diff_diss
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
-    ! local variables
-    integer :: ji,jk,jl ! spatial indices
-    
     ! calculating the inner product of the momentum diffusion acceleration and the wind
     call inner_product(state%wind_u,state%wind_v,state%wind_w,diag%mom_diff_tend_x,diag%mom_diff_tend_y, &
                        diag%mom_diff_tend_z,diag%heating_diss,grid)
     
-    !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jk=1,nx
-        do jl=1,n_layers
-          diag%heating_diss(ji,jk,jl) = -sum(state%rho(ji,jk,jl,1:n_condensed_constituents+1)) &
-                                         *diag%heating_diss(ji,jk,jl)
-        enddo
-      enddo
-    enddo
-    !$omp end parallel do
+    !$omp parallel workshare
+    diag%heating_diss = -sum(state%rho(:,:,:,1:n_condensed_constituents+1))*diag%heating_diss
+    !$omp end parallel workshare
   
   end subroutine simple_dissipation_rate
 

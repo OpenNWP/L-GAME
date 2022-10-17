@@ -10,7 +10,7 @@ export OMP_NUM_THREADS=4
 cat > namelist.nml << EOF
 
 &run
-ny=37
+ny=35
 nx=35
 run_id="$run_id"
 lat_center=0.8929595951304794

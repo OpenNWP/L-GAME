@@ -954,8 +954,8 @@ module mo_grid_generator
     allocate(lon_distance_vector(n_lon_points))
 
     ! setting the unfiltered orography
-    do ji=1,ny
-      do jk=1,nx
+    do jk=1,nx
+      do ji=1,ny
         ! default
         grid%z_w(ji,jk,n_levels) = 0._wp
     
@@ -1004,8 +1004,8 @@ module mo_grid_generator
     
     ! inner domin
     !$omp parallel do private(ji,jk)
-    do ji=2,ny-1
-      do jk=2,nx-1
+    do jk=2,nx-1
+      do ji=2,ny-1
         array(ji,jk) = sum(original_array(ji-1:ji+1,jk-1:jk+1))/9._wp
       enddo
     enddo

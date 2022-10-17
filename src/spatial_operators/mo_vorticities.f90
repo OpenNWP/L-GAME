@@ -29,8 +29,8 @@ module mo_vorticities
     
     ! calculating the relative vorticity in x-direction
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,nx
-      do jl=2,n_layers
+    do jl=2,n_layers
+      do jk=1,nx
         do ji=2,ny
           diag%zeta_x(ji,jk,jl) = &
           grid%dz(ji-1,jk,jl)*state%wind_w(ji-1,jk,jl) &
@@ -71,8 +71,8 @@ module mo_vorticities
     
     ! calculating the relative vorticity in y-direction
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jl=2,n_layers
+    do jl=2,n_layers
+      do ji=1,ny
         do jk=2,nx
           diag%zeta_y(ji,jk,jl) = &
           -grid%dz(ji,jk,jl)*state%wind_w(ji,jk,jl) &
@@ -114,9 +114,9 @@ module mo_vorticities
       
     ! calculating the relative vorticity in z-direction
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny+1
+    do jl=1,n_layers
       do jk=1,nx+1
-        do jl=1,n_layers
+        do ji=1,ny+1
           diag%zeta_z(ji,jk,jl) = rel_vort_z_local(state,grid,ji,jk,jl)/grid%area_dual_z(ji,jk,jl)
         enddo
       enddo
@@ -177,8 +177,8 @@ module mo_vorticities
     ! dividing by the averaged density to obtain the "potential vorticity"
     ! horizontal vorticity in x-direction
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,nx
-      do jl=1,n_levels
+    do jl=1,n_levels
+      do jk=1,nx
         do ji=2,ny
           if (jl==1) then
             diag%eta_x(ji,jk,jl) = diag%eta_x(ji,jk,jl)/(0.5_wp*(state%rho(ji-1,jk,jl,n_condensed_constituents+1) &
@@ -248,8 +248,8 @@ module mo_vorticities
   
     ! horizontal vorticity in y-direction
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jl=1,n_levels
+    do jl=1,n_levels
+      do ji=1,ny
         do jk=2,nx
           if (jl==1) then
             diag%eta_y(ji,jk,jl) = diag%eta_y(ji,jk,jl)/(0.5_wp*(state%rho(ji,jk-1,jl,n_condensed_constituents+1) &
