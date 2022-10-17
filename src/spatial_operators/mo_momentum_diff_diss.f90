@@ -336,7 +336,7 @@ module mo_momentum_diff_diss
                        diag%mom_diff_tend_z,diag%heating_diss,grid)
     
     !$omp parallel workshare
-    diag%heating_diss = -sum(state%rho(:,:,:,1:n_condensed_constituents+1))*diag%heating_diss
+    diag%heating_diss = -sum(state%rho(:,:,:,1:n_condensed_constituents+1),4)*diag%heating_diss
     !$omp end parallel workshare
   
   end subroutine simple_dissipation_rate
