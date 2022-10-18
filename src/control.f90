@@ -476,7 +476,7 @@ program control
   do while (t_0<t_init+run_span+300._wp .and. run_span/=0)
 
     ! Checking if the radiative fluxes need to be updated:
-    ! ----------------------------------------------------
+    ! ---------------------------------------------------
 
     if (lrad .and. t_0<=t_rad_update .and. t_0+dtime>=t_rad_update) then
       lrad_update = .true.
