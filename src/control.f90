@@ -36,10 +36,17 @@ program control
   type(t_diag)      :: diag                        ! diagnostic quantities
   type(t_tend)      :: tend                        ! state containing the tendency
   type(t_bc)        :: bc                          ! boundary conditions
-  real(wp)          :: normal_dist_min_vert        ! minimum vertical gridpoint distance
   logical           :: lrad_update                 ! radiation update switch
+  real(wp)          :: normal_dist_min_vert        ! minimum vertical gridpoint distance
   real(wp)          :: t_rad_update                ! radiation update time
+  real(wp)          :: init_timestamp              ! used for measuring model runtime
+  real(wp)          :: begin_timestamp             ! used for measuring model runtime
+  real(wp)          :: end_timestamp               ! used for measuring model runtime
   character(len=82) :: stars                       ! character containing stars
+
+  ! taking the timestamp to measure the performance
+  call cpu_time(init_timestamp)
+  begin_timestamp = init_timestamp
 
   stars = "**********************************************************************************"
   write(*,*) stars
@@ -498,6 +505,12 @@ program control
       call write_output(state_write,diag,int((t_write-t_init)/60._wp),grid)
     
       t_write = t_write+dt_write
+      
+      ! calculating the speed of the model
+      call cpu_time(end_timestamp)
+      write(*,fmt="(A,F9.3)") " Current speed:",dt_write/((end_timestamp-begin_timestamp)/omp_num_threads)
+      call cpu_time(begin_timestamp)
+      write(*,fmt="(A,F10.3,A2)") " Run progress:",(t_0+dtime-t_init)/3600._wp,"h"
     
     endif
     
@@ -673,6 +686,8 @@ program control
   deallocate(diag%condensates_sediment_heat)
   deallocate(diag%mass_diff_tendency)
   write(*,*) "... finished."
+  call cpu_time(end_timestamp)
+  write(*,fmt="(A,F9.3)") "Average speed:",(60._wp*run_span_min+300._wp)/((end_timestamp-init_timestamp)/omp_num_threads)
   write(*,*) "L-GAME over."
   
 end program control
