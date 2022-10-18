@@ -102,9 +102,9 @@ module mo_gradient_operators
     
     ! correction to the x-component
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
+    do jl=n_flat_layers+1,n_layers
       do jk=1,nx+1
-        do jl=n_flat_layers+1,n_layers
+        do ji=1,ny
           result_field_x(ji,jk,jl) = result_field_x(ji,jk,jl) &
           - grid%slope_x(ji,jk,jl)*remap_ver2hor_x(result_field_z,grid,ji,jk,jl)
         enddo
@@ -114,9 +114,9 @@ module mo_gradient_operators
     
     ! correction to the y-component
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny+1
+    do jl=n_flat_layers+1,n_layers
       do jk=1,nx
-        do jl=n_flat_layers+1,n_layers
+        do ji=1,ny+1
           result_field_y(ji,jk,jl) = result_field_y(ji,jk,jl) &
           - grid%slope_y(ji,jk,jl)*remap_ver2hor_y(result_field_z,grid,ji,jk,jl)
         enddo

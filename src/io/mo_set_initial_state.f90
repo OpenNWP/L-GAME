@@ -47,9 +47,9 @@ module mo_set_initial_state
         !$omp end parallel workshare
         
         !$omp parallel do private(ji,jk,jl)
-        do ji=1,ny
+        do jl=1,n_layers
           do jk=1,nx
-            do jl=1,n_layers
+            do ji=1,ny
               diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))
             enddo
             pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,n_layers))
@@ -80,9 +80,9 @@ module mo_set_initial_state
         
         ! horizontal wind
         !$omp parallel do private(ji,jk,jl)
-        do ji=1,ny
+        do jl=1,n_layers
           do jk=1,nx+1
-            do jl=1,n_layers
+            do ji=1,ny
               if (grid%z_u(ji,jk,jl)>=z_2) then
                 state%wind_u(ji,jk,jl) = u_0
               elseif (z_1<=grid%z_u(ji,jk,jl) .and. grid%z_u(ji,jk,jl)<=z_2) then
@@ -101,9 +101,9 @@ module mo_set_initial_state
         
         ! temperature in the whole atmosphere and pressure in the lowest layer
         !$omp parallel do private(ji,jk,jl)
-        do ji=1,ny
+        do jl=1,n_layers
           do jk=1,nx
-            do jl=1,n_layers
+            do ji=1,ny
               diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))
             enddo
             pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,n_layers))
@@ -113,9 +113,9 @@ module mo_set_initial_state
         
         ! density anomaly
         !$omp parallel do private(ji,jk,jl,r,x_coord)
-        do ji=1,ny
+        do jl=1,n_layers
           do jk=1,nx
-            do jl=1,n_layers
+            do ji=1,ny
               x_coord = dx*jk - (nx/2 + 1)*dx
               r = (((x_coord-x_0)/A_x)**2 + ((grid%z_scalar(ji,jk,jl)-z_0)/A_z)**2)**0.5_wp
               if (r<=1._wp) then
@@ -148,8 +148,8 @@ module mo_set_initial_state
         ! background state not yet substracted here
        
         !$omp parallel do private(ji,jk,jl,delta_z,gravity_local)
-        do ji=1,ny
-          do jk=1,nx
+        do jk=1,nx
+          do ji=1,ny
             ! calculating delta_z
             delta_z = grid%z_scalar(ji,jk,n_layers)
             ! calculating the gravity
@@ -205,8 +205,8 @@ module mo_set_initial_state
     endselect
     
     !$omp parallel do private(ji,jk)
-    do ji=1,ny
-      do jk=1,nx
+    do jk=1,nx
+      do ji=1,ny
         state%temperature_soil(ji,jk,:) = 280._wp
       enddo
     enddo
@@ -297,8 +297,8 @@ module mo_set_initial_state
     
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
     !$omp parallel do private(ji,jk,jl,b,c,pressure)
-    do ji=1,ny
-      do jk=1,nx  
+    do jk=1,nx
+      do ji=1,ny
         ! integrating from bottom to top
         do jl=n_layers,1,-1
           ! lowest layer
