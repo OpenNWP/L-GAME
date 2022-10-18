@@ -173,9 +173,9 @@ module mo_write_out
     if (n_gaseous_constituents>1) then
       ! relative humidity
       !$omp parallel do private(ji,jk,jl)
-      do ji=1,ny
+      do jl=1,n_layers
         do jk=1,nx
-          do jl=1,n_layers
+          do ji=1,ny
             diag%scalar_placeholder(ji,jk,jl) = rel_humidity(state%rho(ji,jk,jl,n_condensed_constituents+2), &
             diag%scalar_placeholder(ji,jk,jl))
           enddo
