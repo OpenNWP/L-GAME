@@ -30,9 +30,9 @@ module mo_inner_product
     integer :: ji,jk,jl ! spatial indices
     
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
+    do jl=1,n_layers
       do jk=1,nx
-        do jl=1,n_layers
+        do ji=1,ny
           output_scalar(ji,jk,jl) = &
           grid%inner_product_weights(1,ji,jk,jl)*u_vector_1(ji,jk+1,jl)*u_vector_2(ji,jk+1,jl) &
           + grid%inner_product_weights(2,ji,jk,jl)*v_vector_1(ji,jk,jl)*v_vector_2(ji,jk,jl) &

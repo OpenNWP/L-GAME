@@ -96,8 +96,8 @@ module mo_grid_generator
     
     ! this will be modified later
     !$omp parallel do private(ji,jk)
-    do ji=1,ny
-      do jk=1,nx+1
+    do jk=1,nx+1
+      do ji=1,ny
         grid%lat_geo_u(ji,jk) = grid%lat_scalar(ji)
         if (jk==nx+1) then
           grid%lon_geo_u(ji,jk) = grid%lon_scalar(jk-1) + 0.5_wp*dlon
@@ -110,8 +110,8 @@ module mo_grid_generator
     
     ! this will be modified later
     !$omp parallel do private(ji,jk)
-    do ji=1,ny+1
-      do jk=1,nx
+    do jk=1,nx
+      do ji=1,ny+1
         if (ji==ny+1) then
           grid%lat_geo_v(ji,jk) = grid%lat_scalar(ji-1) - 0.5_wp*dlat
         else
@@ -162,8 +162,8 @@ module mo_grid_generator
 	! calculating the geographic coordinates of the gridpoints
 	! scalar points
     !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
-    do ji=1,ny
-      do jk=1,nx
+    do jk=1,nx
+      do ji=1,ny
         ! calculating the local i-vector before the rotation
         call calc_local_i(grid%lon_geo_scalar(ji,jk),basis_old)
         call find_global_normal(grid%lat_geo_scalar(ji,jk),grid%lon_geo_scalar(ji,jk),r_old)
@@ -185,8 +185,8 @@ module mo_grid_generator
     
     ! u-vector points, including directions
     !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
-    do ji=1,ny
-      do jk=1,nx+1
+    do jk=1,nx+1
+      do ji=1,ny
         ! calculating the local i-vector before the rotation
         call calc_local_i(grid%lon_geo_u(ji,jk),basis_old)
         ! rotating the gridpoint itself
@@ -209,8 +209,8 @@ module mo_grid_generator
 	
     ! v-vector points, including directions
     !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
-    do ji=1,ny+1
-      do jk=1,nx
+    do jk=1,nx
+      do ji=1,ny+1
         ! calculating the local j-vector before the rotation
         call calc_local_j(grid%lat_geo_v(ji,jk),grid%lon_geo_v(ji,jk),basis_old)
         ! rotating the gridpoint itself
@@ -233,24 +233,24 @@ module mo_grid_generator
     
     ! setting the Coriolis vector
     !$omp parallel do private(ji,jk,y_basis_local)
-    do ji=1,ny+1
-      do jk=1,nx
+    do jk=1,nx
+      do ji=1,ny+1
         y_basis_local = sin(grid%dir_geo_v(ji,jk) - 0.5_wp*M_PI)
         grid%fvec_x(ji,jk) = 2._wp*omega*cos(grid%lat_geo_v(ji,jk))*y_basis_local
       enddo
     enddo
     !$omp end parallel do
     !$omp parallel do private(ji,jk,y_basis_local)
-    do ji=1,ny
-      do jk=1,nx+1
+    do jk=1,nx+1
+      do ji=1,ny
         y_basis_local = sin(grid%dir_geo_u(ji,jk) + 0.5_wp*M_PI)
         grid%fvec_y(ji,jk) = 2._wp*omega*cos(grid%lat_geo_u(ji,jk))*y_basis_local
       enddo
     enddo
     !$omp end parallel do
     !$omp parallel do private(ji,jk,lat_local,lon_local,r_old,r_new)
-    do ji=1,ny+1
-      do jk=1,nx+1
+    do jk=1,nx+1
+      do ji=1,ny+1
         if (ji==ny+1) then
           lat_local = grid%lat_scalar(ji-1) - 0.5*dlat
         else
@@ -326,8 +326,8 @@ module mo_grid_generator
     c_p_water = 4184._wp
     
     !$omp parallel do private(ji,jk,x_coord)
-    do ji=1,ny
-      do jk=1,nx
+    do jk=1,nx
+      do ji=1,ny
 		
 		! seabreeze land-sea mask
         if (trim(scenario)=="seabreeze") then
@@ -547,8 +547,8 @@ module mo_grid_generator
     
     ! setting the horizontal areas at the surface
     !$omp parallel do private(ji,jk)
-    do ji=1,ny
-      do jk=1,nx
+    do jk=1,nx
+      do ji=1,ny
         grid%area_z(ji,jk,n_levels) = patch_area(grid%lat_scalar(ji),dlon,dlat)*(r_e + grid%z_w(ji,jk,n_levels))**2/r_e**2
       enddo
     enddo
@@ -574,9 +574,9 @@ module mo_grid_generator
     
     ! setting the vertical areas in x-direction
     !$omp parallel do private(ji,jk,jl,lower_z,upper_z,lower_length)
-    do ji=1,ny
+    do jl=1,n_layers
       do jk=1,nx+1
-        do jl=1,n_layers
+        do ji=1,ny
           ! left boundary
           if (jk==1) then
             lower_z = grid%z_w(ji,1,jl+1)+0.5_wp*(grid%z_w(ji,1,jl+1)-grid%z_w(ji,2,jl+1))
@@ -603,9 +603,9 @@ module mo_grid_generator
     
     ! setting the vertical areas in y-direction
     !$omp parallel do private(ji,jk,jl,lower_z,upper_z,lower_length)
-    do ji=1,ny+1
+    do jl=1,n_layers
       do jk=1,nx
-        do jl=1,n_layers
+        do ji=1,ny+1
           ! upper boundary
           if (ji==1) then
             lower_z = grid%z_w(1,jk,jl+1)+0.5_wp*(grid%z_w(1,jk,jl+1)-grid%z_w(2,jk,jl+1))
@@ -636,9 +636,9 @@ module mo_grid_generator
     
     ! setting the horizontal dual areas
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny+1
+    do jl=1,n_layers
       do jk=1,nx+1
-        do jl=1,n_layers
+        do ji=1,ny+1
         
           ! setting the vertical position of the areas
           if (jk==1) then
@@ -669,9 +669,9 @@ module mo_grid_generator
     
     ! setting the vertical dual areas in x-direction
     !$omp parallel do private(ji,jk,jl,lower_z,lower_length,upper_z)
-    do ji=1,ny+1
+    do jl=1,n_levels
       do jk=1,nx
-        do jl=1,n_levels
+        do ji=1,ny+1
           if (jl==n_levels) then
             if (ji==1) then
               lower_z = grid%z_w(1,jk,jl) + 0.5_wp*(grid%z_w(1,jk,jl)-grid%z_w(2,jk,jl))
@@ -708,9 +708,9 @@ module mo_grid_generator
     
     ! setting the vertical dual areas in y-direction
     !$omp parallel do private(ji,jk,jl,lower_z,lower_length,upper_z)
-    do ji=1,ny
+    do jl=1,n_levels
       do jk=1,nx+1
-        do jl=1,n_levels
+        do ji=1,ny
           if (jl==n_levels) then
             if (jk==1) then
               lower_z = grid%z_w(ji,1,jl) + 0.5_wp*(grid%z_w(ji,1,jl)-grid%z_w(ji,2,jl))
@@ -762,9 +762,9 @@ module mo_grid_generator
     
     ! setting the inner product weights
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
+    do jl=1,n_layers
       do jk=1,nx
-        do jl=1,n_layers
+        do ji=1,ny
           grid%inner_product_weights(1,ji,jk,jl) = grid%area_x(ji,jk+1,jl)*grid%dx(ji,jk+1,jl)/(2._wp*grid%volume(ji,jk,jl))
           grid%inner_product_weights(2,ji,jk,jl) = grid%area_y(ji,jk,jl)*grid%dy(ji,jk,jl)/(2._wp*grid%volume(ji,jk,jl))
           grid%inner_product_weights(3,ji,jk,jl) = grid%area_x(ji,jk,jl)*grid%dx(ji,jk,jl)/(2._wp*grid%volume(ji,jk,jl))
@@ -866,8 +866,8 @@ module mo_grid_generator
     
     ! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
     !$omp parallel do private(ji,jk,jl,b,c,pressure)
-    do ji=1,ny
-      do jk=1,nx
+    do jk=1,nx
+      do ji=1,ny
         ! integrating from bottom to top
         do jl=n_layers,1,-1
           ! setting the geopotential
