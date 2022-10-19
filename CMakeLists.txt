@@ -110,7 +110,7 @@ if(DEBUGGING)
   SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fbounds-check -ffpe-trap=invalid,zero,overflow,underflow,denormal -fbacktrace -fdump-core")
 endif()
 # single precision for more performance
-if(COMPILE_TIME_CONFIG)
+if(SINGLE_PRECISION)
   SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DSINGLE_PRECISION")
 endif()
 target_link_libraries(lgame netcdff)
