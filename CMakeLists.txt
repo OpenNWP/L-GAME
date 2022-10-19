@@ -10,7 +10,7 @@ project(lgame VERSION ${version})
 enable_language(Fortran)
 add_executable(
 lgame
-src/mo_definitions.f90
+src/mo_definitions.F90
 src/control.f90
 src/mo_constants.f90
 src/io/mo_boundaries.f90
@@ -108,6 +108,10 @@ endif()
 # switching on debugging options
 if(DEBUGGING)
   SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fbounds-check -ffpe-trap=invalid,zero,overflow,underflow,denormal -fbacktrace -fdump-core")
+endif()
+# single precision for more performance
+if(COMPILE_TIME_CONFIG)
+  SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DSINGLE_PRECISION")
 endif()
 target_link_libraries(lgame netcdff)
 
