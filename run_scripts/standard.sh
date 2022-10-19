@@ -30,7 +30,7 @@ lmoist=.true.
 /
 
 &rad
-lrad=.false.
+lrad=.true.
 /
 
 &surface
