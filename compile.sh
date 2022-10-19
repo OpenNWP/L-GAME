@@ -5,6 +5,7 @@
 
 d_value=False
 f_value=False
+s_value=False
 while getopts "df" opt; do
   case $opt in
     d) # debugging flag
@@ -12,6 +13,9 @@ while getopts "df" opt; do
       ;;
     f) # aggressive optimization flag
       f_value=True
+      ;;
+    s) # single precision flag
+      s_value=True
       ;;
     \?)
       echo "Invalid option: -$OPTARG. Compiling anyway."
@@ -26,7 +30,7 @@ fi
 
 cd build
 
-cmake -DDEBUGGING=$d_value -DFAST=$f_value ..
+cmake -DDEBUGGING=$d_value -DFAST=$f_value -DSINGLE_PRECISION=$s_value ..
 make
 
 cd ..

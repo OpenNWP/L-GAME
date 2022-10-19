@@ -16,10 +16,15 @@ module mo_definitions
   integer, parameter :: pd = 12
   integer, parameter :: rd = 37
   
-  integer, parameter :: sp = selected_real_kind(ps,rs)        ! single precission
-  integer, parameter :: dp = selected_real_kind(pd,rd)        ! double precission
-  
-  integer, parameter :: wp = dp                               ! working precission
+  integer, parameter :: sp = selected_real_kind(ps,rs) ! single precission
+  integer, parameter :: dp = selected_real_kind(pd,rd) ! double precission
+
+#ifdef SINGLE_PRECISION
+  integer, parameter :: wp = sp                        ! working precision
+#endif
+#ifndef SINGLE_PRECISION
+  integer, parameter :: wp = dp
+#endif
   
   type t_grid
   
