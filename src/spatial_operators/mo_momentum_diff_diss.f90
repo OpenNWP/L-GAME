@@ -213,8 +213,8 @@ module mo_momentum_diff_diss
     
     ! calculating the acceleration
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jl=1,n_layers
+    do jl=1,n_layers
+      do ji=1,ny
         do jk=2,nx
           diag%mom_diff_tend_x(ji,jk,jl) = diag%mom_diff_tend_x(ji,jk,jl) &
           + (diag%vert_hor_viscosity_u(ji,jk,jl)*diag%du_dz(ji,jk,jl) &
