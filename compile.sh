@@ -3,13 +3,6 @@
 # This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 # Github repository: https://github.com/OpenNWP/L-GAME
 
-if [ ! -d build ]
-then
-  mkdir build
-fi
-
-cd build
-
 d_value=False
 f_value=False
 while getopts "df" opt; do
@@ -25,6 +18,13 @@ while getopts "df" opt; do
       ;;
   esac
 done
+
+if [ ! -d build ]
+then
+  mkdir build
+fi
+
+cd build
 
 cmake -DDEBUGGING=$d_value -DFAST=$f_value ..
 make
