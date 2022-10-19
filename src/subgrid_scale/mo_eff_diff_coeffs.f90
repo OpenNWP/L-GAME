@@ -239,8 +239,8 @@ module mo_eff_diff_coeffs
     call tke_update(state,diag,grid)
     
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jl=2,n_layers
+    do jl=2,n_layers
+      do ji=1,ny
         do jk=2,nx
           diag%vert_hor_viscosity_u(ji,jk,jl) = &
           ! molecular component
@@ -279,8 +279,8 @@ module mo_eff_diff_coeffs
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,nx
-      do jl=2,n_layers
+    do jl=2,n_layers
+      do jk=1,nx
         do ji=2,ny
           diag%vert_hor_viscosity_v(ji,jk,jl) = &
           ! molecular component
@@ -320,8 +320,8 @@ module mo_eff_diff_coeffs
     
     ! multiplication by the density
     !$omp parallel do private(ji,jk,jl)
-    do ji=1,ny
-      do jl=2,n_layers
+    do jl=2,n_layers
+      do ji=1,ny
         do jk=2,nx
           diag%vert_hor_viscosity_u(ji,jk,jl) = diag%vert_hor_viscosity_u(ji,jk,jl) &
           ! molecular component
@@ -349,8 +349,8 @@ module mo_eff_diff_coeffs
     !$omp end parallel do
     
     !$omp parallel do private(ji,jk,jl)
-    do jk=1,nx
-      do jl=2,n_layers
+    do jl=2,n_layers
+      do jk=1,nx
         do ji=2,ny
           diag%vert_hor_viscosity_v(ji,jk,jl) = diag%vert_hor_viscosity_v(ji,jk,jl) &
           ! molecular component
