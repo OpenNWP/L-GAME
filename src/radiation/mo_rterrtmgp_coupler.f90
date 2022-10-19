@@ -154,8 +154,8 @@ module mo_rrtmgp_coupler
     enddo
     
     ! reformatting the thermodynamical state of the gas phase for RTE+RRTMGP
-    do jk=1,nx
-      do jl=1,n_layers
+    do jl=1,n_layers
+      do jk=1,nx
         temperature_rad(jk,jl) = temperature(jk,jl)
         ! the pressure is diagnozed here, using the equation of state for ideal gases
         pressure_rad(jk,jl) = r_d*rho(jk,jl,n_condensed_constituents+1)*temperature_rad(jk,jl)
@@ -169,8 +169,8 @@ module mo_rrtmgp_coupler
     ice_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
     liquid_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
     if (n_condensed_constituents==5) then
-      do jk=1,nx
-        do jl=1,n_layers
+      do jl=1,n_layers
+        do jk=1,nx
           ! the solid condensates' effective radius
           ice_precip_weight = rho(jk,jl,1)+rho(jk,jl,5)+EPSILON_SECURITY
           ice_cloud_weight = rho(jk,jl,3)+EPSILON_SECURITY
@@ -202,8 +202,8 @@ module mo_rrtmgp_coupler
     endif
     
     ! moving the temperature into the allowed area
-    do jk=1,nx
-      do jl=1,n_layers
+    do jl=1,n_layers
+      do jk=1,nx
         if (temperature_rad(jk,jl)>k_dist_sw%get_temp_max()) then
           temperature_rad(jk,jl) = k_dist_sw%get_temp_max()
         endif
@@ -220,8 +220,8 @@ module mo_rrtmgp_coupler
     enddo
     
     ! the properties at cell interfaces
-    do jk=1,nx
-      do jl=1,n_levels
+    do jl=1,n_levels
+      do jk=1,nx
         ! values at TOA
         if (jl==1) then
           ! temperature at TOA (linear extrapolation)
@@ -439,10 +439,10 @@ module mo_rrtmgp_coupler
       n_relevant_columns = nx
     endif
   
-    ! loop over all columns
-    do j_column=1,n_relevant_columns
-      ! loop over all layers
-      do jl=1,n_layers
+    ! loop over all layers
+    do jl=1,n_layers
+      ! loop over all columns
+      do j_column=1,n_relevant_columns
         ! finding the relevant horizontal index
         if (day_only) then
           jk = day_indices(j_column)
@@ -581,14 +581,14 @@ module mo_rrtmgp_coupler
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(8)
         case("o3")
           if (sw_bool) then
-            do jk=1,n_day_points
-              do jl=1,n_layers
+            do jl=1,n_layers
+              do jk=1,n_day_points
                 vol_mix_ratio(jk,jl) = calc_o3_vmr(z_scalar(day_indices(jk),jl))
               enddo
             enddo
           else
-            do jk=1,nx
-              do jl=1,n_layers
+            do jl=1,n_layers
+              do jk=1,nx
                 vol_mix_ratio(jk,jl) = calc_o3_vmr(z_scalar(jk,jl))
               enddo
             enddo
@@ -603,8 +603,8 @@ module mo_rrtmgp_coupler
           ! n_condensed_constituents==5 is equivalent to the presence of water in the model atmosphere
           ! in the short wave case,only the day points matter
           if (sw_bool .and. n_condensed_constituents==5) then
-            do jk=1,n_day_points
-              do jl=1,n_layers
+            do jl=1,n_layers
+              do jk=1,n_day_points
                 vol_mix_ratio(jk,jl) &
                 = (rho(day_indices(jk),jl,n_condensed_constituents+2)*r_v) &
                 /((rho(day_indices(jk),jl,n_condensed_constituents+1)-rho(day_indices(jk),jl,n_condensed_constituents+2))*r_d)
@@ -612,8 +612,8 @@ module mo_rrtmgp_coupler
             enddo
           ! in the long wave case,all points matter
           elseif (n_condensed_constituents==5) then
-            do jk=1,nx
-              do jl=1,n_layers
+            do jl=1,n_layers
+              do jk=1,nx
                 vol_mix_ratio(jk,jl) &
                 = (rho(jk,jl,n_condensed_constituents+2)*r_v) &
                 /((rho(jk,jl,n_condensed_constituents+1)-rho(jk,jl,n_condensed_constituents+2))*r_d)
