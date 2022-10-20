@@ -31,7 +31,7 @@ module mo_rrtmgp_coupler
   ! the number of bands in the long wave region
   integer,parameter :: n_lw_bands = 16
 
-  character(len = 3),dimension(wp) :: active_gases = (/ &
+  character(len = 3),dimension(8) :: active_gases = (/ &
    "N2 ","O2 ","CH4","O3 ","CO2","H2O","N2O","CO " &
    /)
   
