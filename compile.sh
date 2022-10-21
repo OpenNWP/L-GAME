@@ -14,7 +14,7 @@ while getopts "dfs" opt; do
     f) # aggressive optimization flag
       f_value=True
       ;;
-    s) # single precision flag
+    s) # single-precision flag
       s_value=True
       ;;
     \?)
