@@ -90,7 +90,7 @@ module mo_scalar_tend_expl
     
     ! loop over all constituents
     do jc=1,n_constituents
-      ! explicit mass densities integration
+      ! Explicit mass densities integration
       ! -----------------------------------
       ! calculating the divergence of the mass flux density
       ! main gaseous constituent
@@ -116,8 +116,8 @@ module mo_scalar_tend_expl
       + diag%phase_trans_rates(:,:,:,min(jc,n_condensed_constituents+1)))
       !$omp end parallel workshare
     
-      ! explicit virtual potential temperature density integration
-      ! --------------------------------------------------
+      ! Explicit virtual potential temperature density integration
+      ! ----------------------------------------------------------
       ! calculating the virtual potential temperature density flux
       if (jc==n_condensed_constituents+1) then
         !$omp parallel workshare
