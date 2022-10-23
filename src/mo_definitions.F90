@@ -26,112 +26,112 @@ module mo_definitions
   integer, parameter :: wp = dp
 #endif
   
+  ! type containing information on the model grid
   type t_grid
   
-    ! type containing information on the model grid
-    real(wp), allocatable :: lat_scalar(:)                    ! latitudes of the scalar gridpoints
-    real(wp), allocatable :: lon_scalar(:)                    ! longitudes of the scalar gridpoints
-    real(wp), allocatable :: lat_geo_scalar(:,:)              ! geographic latitudes of the scalar gridpoints
-    real(wp), allocatable :: lon_geo_scalar(:,:)              ! geographic longitudes of the scalar gridpoints
-    real(wp), allocatable :: lat_geo_u(:,:)                   ! geographic latitudes of the u-vector gridpoints
-    real(wp), allocatable :: lon_geo_u(:,:)                   ! geographic longitudes of the u-vector gridpoints
-    real(wp), allocatable :: dir_geo_u(:,:)                   ! geographic directions of the u-vectors
-    real(wp), allocatable :: lat_geo_v(:,:)                   ! geographic latitudes of the v-vector gridpoints
-    real(wp), allocatable :: lon_geo_v(:,:)                   ! geographic longitudes of the v-vector gridpoints
-    real(wp), allocatable :: dir_geo_v(:,:)                   ! geographic directions of the v-vectors
-    real(wp), allocatable :: dir_geo_u_scalar(:,:)            ! geographic directions of the u-vectors at the scalar points
-    real(wp), allocatable :: z_scalar(:,:,:)                  ! geometric heights of the scalar gridpoints
-    real(wp), allocatable :: dx(:,:,:)                        ! grid point distance in x-direction
-    real(wp), allocatable :: dy(:,:,:)                        ! grid point distance in y-direction
-    real(wp), allocatable :: dz(:,:,:)                        ! grid point distance in z-direction
-    real(wp), allocatable :: layer_thickness(:,:,:)           ! layer thicknesses
-    real(wp), allocatable :: dx_dual(:,:,:)                   ! grid point distance in x-direction of the dual grid
-    real(wp), allocatable :: dy_dual(:,:,:)                   ! grid point distance in y-direction of the dual grid
-    real(wp), allocatable :: z_u(:,:,:)                       ! geomtric height of the u-vectors
-    real(wp), allocatable :: z_v(:,:,:)                       ! geomtric height of the v-vectors
-    real(wp), allocatable :: z_w(:,:,:)                       ! geomtric height of the w-vectors
-    real(wp), allocatable :: gravity_potential(:,:,:)         ! geopotential
-    real(wp), allocatable :: gravity_m_v(:,:,:)               ! vertical acceleration due to gravity
-    real(wp), allocatable :: volume(:,:,:)                    ! volumes of the gridboxes
-    real(wp), allocatable :: area_x(:,:,:)                    ! areas of the grid in x-direction
-    real(wp), allocatable :: area_y(:,:,:)                    ! areas of the grid in y-direction
-    real(wp), allocatable :: area_z(:,:,:)                    ! areas of the grid in z-direction
-    real(wp), allocatable :: slope_x(:,:,:)                   ! coordinate slopes in x-direction
-    real(wp), allocatable :: slope_y(:,:,:)                   ! coordinate slopes in y-direction
-    real(wp), allocatable :: inner_product_weights(:,:,:,:)   ! weights for calculating the inner product
-    real(wp), allocatable :: area_dual_x(:,:,:)               ! areas of the dual grid in x-direction
-    real(wp), allocatable :: area_dual_y(:,:,:)               ! areas of the dual grid in y-direction
-    real(wp), allocatable :: area_dual_z(:,:,:)               ! areas of the dual grid in z-direction
-    real(wp), allocatable :: z_area_dual_z(:,:,:)             ! geometric heights of the areas of the dual grid in z-direction
-    real(wp), allocatable :: fvec_x(:,:)                      ! x-component of Coriolis vector
-    real(wp), allocatable :: fvec_y(:,:)                      ! y-component of Coriolis vector
-    real(wp), allocatable :: fvec_z(:,:)                      ! z-component of Coriolis vector
-    real(wp), allocatable :: trsk_weights_u(:,:)              ! weights for computing the Coriolis acceleration in x-direction
-    real(wp), allocatable :: trsk_weights_v(:,:)              ! weights for computing the Coriolis acceleration in y-direction
-    real(wp), allocatable :: exner_bg_grad_u(:,:,:)           ! gradient of background exner pressure in x-direction
-    real(wp), allocatable :: exner_bg_grad_v(:,:,:)           ! gradient of background exner pressure in y-direction
-    real(wp), allocatable :: exner_bg_grad_w(:,:,:)           ! gradient of background exner pressure in z-direction
-    real(wp), allocatable :: theta_v_bg(:,:,:)                ! background virtual potential temperature
-    real(wp), allocatable :: exner_bg(:,:,:)                  ! background Exner pressure
-    real(wp), allocatable :: sfc_albedo(:,:)                  ! albedo of the surface
-    real(wp), allocatable :: sfc_rho_c(:,:)                   ! volumetric heat capacity of the surface
-    real(wp), allocatable :: t_conduc_soil(:,:)               ! temperature conductivity of the soil
-    real(wp), allocatable :: roughness_length(:,:)            ! roughness length of the surface
-    integer,  allocatable :: is_land(:,:)                     ! land-sea-mask
-    real(wp), allocatable :: z_soil_interface(:)              ! heights of the interfaces of the soil layers
-    real(wp), allocatable :: z_soil_center(:)                 ! heights of the centers of the soil layers
-    real(wp), allocatable :: t_const_soil(:,:)                ! temperature of the soil below the depth where it is constant
-    real(wp)              :: z_t_const                        ! depth where the soil temperature is constant
-    real(wp)              :: lat_center                       ! latitude of the center of the model domain
-    real(wp)              :: lon_center                       ! longitude of the center of the model domain
-    real(wp)              :: mean_velocity_area               ! area needed for the turbulence parameterizations
+    real(wp), allocatable :: lat_scalar(:)                  ! latitudes of the scalar gridpoints
+    real(wp), allocatable :: lon_scalar(:)                  ! longitudes of the scalar gridpoints
+    real(wp), allocatable :: lat_geo_scalar(:,:)            ! geographic latitudes of the scalar gridpoints
+    real(wp), allocatable :: lon_geo_scalar(:,:)            ! geographic longitudes of the scalar gridpoints
+    real(wp), allocatable :: lat_geo_u(:,:)                 ! geographic latitudes of the u-vector gridpoints
+    real(wp), allocatable :: lon_geo_u(:,:)                 ! geographic longitudes of the u-vector gridpoints
+    real(wp), allocatable :: dir_geo_u(:,:)                 ! geographic directions of the u-vectors
+    real(wp), allocatable :: lat_geo_v(:,:)                 ! geographic latitudes of the v-vector gridpoints
+    real(wp), allocatable :: lon_geo_v(:,:)                 ! geographic longitudes of the v-vector gridpoints
+    real(wp), allocatable :: dir_geo_v(:,:)                 ! geographic directions of the v-vectors
+    real(wp), allocatable :: dir_geo_u_scalar(:,:)          ! geographic directions of the u-vectors at the scalar points
+    real(wp), allocatable :: z_scalar(:,:,:)                ! geometric heights of the scalar gridpoints
+    real(wp), allocatable :: dx(:,:,:)                      ! grid point distance in x-direction
+    real(wp), allocatable :: dy(:,:,:)                      ! grid point distance in y-direction
+    real(wp), allocatable :: dz(:,:,:)                      ! grid point distance in z-direction
+    real(wp), allocatable :: layer_thickness(:,:,:)         ! layer thicknesses
+    real(wp), allocatable :: dx_dual(:,:,:)                 ! grid point distance in x-direction of the dual grid
+    real(wp), allocatable :: dy_dual(:,:,:)                 ! grid point distance in y-direction of the dual grid
+    real(wp), allocatable :: z_u(:,:,:)                     ! geomtric height of the u-vectors
+    real(wp), allocatable :: z_v(:,:,:)                     ! geomtric height of the v-vectors
+    real(wp), allocatable :: z_w(:,:,:)                     ! geomtric height of the w-vectors
+    real(wp), allocatable :: gravity_potential(:,:,:)       ! geopotential
+    real(wp), allocatable :: gravity_m_v(:,:,:)             ! vertical acceleration due to gravity
+    real(wp), allocatable :: volume(:,:,:)                  ! volumes of the gridboxes
+    real(wp), allocatable :: area_x(:,:,:)                  ! areas of the grid in x-direction
+    real(wp), allocatable :: area_y(:,:,:)                  ! areas of the grid in y-direction
+    real(wp), allocatable :: area_z(:,:,:)                  ! areas of the grid in z-direction
+    real(wp), allocatable :: slope_x(:,:,:)                 ! coordinate slopes in x-direction
+    real(wp), allocatable :: slope_y(:,:,:)                 ! coordinate slopes in y-direction
+    real(wp), allocatable :: inner_product_weights(:,:,:,:) ! weights for calculating the inner product
+    real(wp), allocatable :: area_dual_x(:,:,:)             ! areas of the dual grid in x-direction
+    real(wp), allocatable :: area_dual_y(:,:,:)             ! areas of the dual grid in y-direction
+    real(wp), allocatable :: area_dual_z(:,:,:)             ! areas of the dual grid in z-direction
+    real(wp), allocatable :: z_area_dual_z(:,:,:)           ! geometric heights of the areas of the dual grid in z-direction
+    real(wp), allocatable :: fvec_x(:,:)                    ! x-component of Coriolis vector
+    real(wp), allocatable :: fvec_y(:,:)                    ! y-component of Coriolis vector
+    real(wp), allocatable :: fvec_z(:,:)                    ! z-component of Coriolis vector
+    real(wp), allocatable :: trsk_weights_u(:,:)            ! weights for computing the Coriolis acceleration in x-direction
+    real(wp), allocatable :: trsk_weights_v(:,:)            ! weights for computing the Coriolis acceleration in y-direction
+    real(wp), allocatable :: exner_bg_grad_u(:,:,:)         ! gradient of background exner pressure in x-direction
+    real(wp), allocatable :: exner_bg_grad_v(:,:,:)         ! gradient of background exner pressure in y-direction
+    real(wp), allocatable :: exner_bg_grad_w(:,:,:)         ! gradient of background exner pressure in z-direction
+    real(wp), allocatable :: theta_v_bg(:,:,:)              ! background virtual potential temperature
+    real(wp), allocatable :: exner_bg(:,:,:)                ! background Exner pressure
+    real(wp), allocatable :: sfc_albedo(:,:)                ! albedo of the surface
+    real(wp), allocatable :: sfc_rho_c(:,:)                 ! volumetric heat capacity of the surface
+    real(wp), allocatable :: t_conduc_soil(:,:)             ! temperature conductivity of the soil
+    real(wp), allocatable :: roughness_length(:,:)          ! roughness length of the surface
+    integer,  allocatable :: is_land(:,:)                   ! land-sea-mask
+    real(wp), allocatable :: z_soil_interface(:)            ! heights of the interfaces of the soil layers
+    real(wp), allocatable :: z_soil_center(:)               ! heights of the centers of the soil layers
+    real(wp), allocatable :: t_const_soil(:,:)              ! temperature of the soil below the depth where it is constant
+    real(wp)              :: z_t_const                      ! depth where the soil temperature is constant
+    real(wp)              :: lat_center                     ! latitude of the center of the model domain
+    real(wp)              :: lon_center                     ! longitude of the center of the model domain
+    real(wp)              :: mean_velocity_area             ! area needed for the turbulence parameterizations
     
   end type t_grid
   
+  ! type containing the state variables
   type t_state
   
-    ! type containing the state variables
-    real(wp), allocatable :: rho(:,:,:,:)                     ! mass densities
-    real(wp), allocatable :: rhotheta_v(:,:,:)                ! virtual potential temperature density
-    real(wp), allocatable :: theta_v_pert(:,:,:)              ! virtual potential temperature perturbation
-    real(wp), allocatable :: exner_pert(:,:,:)                ! Exner pressure perturbation
-    real(wp), allocatable :: wind_u(:,:,:)                    ! x-component of the wind
-    real(wp), allocatable :: wind_v(:,:,:)                    ! y-component of the wind
-    real(wp), allocatable :: wind_w(:,:,:)                    ! vertical wind
-    real(wp), allocatable :: temperature_soil(:,:,:)          ! temperature of the soil
+    real(wp), allocatable :: rho(:,:,:,:)            ! mass densities
+    real(wp), allocatable :: rhotheta_v(:,:,:)       ! virtual potential temperature density
+    real(wp), allocatable :: theta_v_pert(:,:,:)     ! virtual potential temperature perturbation
+    real(wp), allocatable :: exner_pert(:,:,:)       ! Exner pressure perturbation
+    real(wp), allocatable :: wind_u(:,:,:)           ! x-component of the wind
+    real(wp), allocatable :: wind_v(:,:,:)           ! y-component of the wind
+    real(wp), allocatable :: wind_w(:,:,:)           ! vertical wind
+    real(wp), allocatable :: temperature_soil(:,:,:) ! temperature of the soil
   
   end type t_state
   
+  ! type containing tendencies
   type t_tend
   
-    ! type containing tendencies
-    real(wp), allocatable :: rho(:,:,:,:)                     ! mass densities
-    real(wp), allocatable :: rhotheta_v(:,:,:)                ! virtual potential temperature densities
-    real(wp), allocatable :: wind_u(:,:,:)                    ! x-component of the wind
-    real(wp), allocatable :: wind_v(:,:,:)                    ! y-component of the wind
-    real(wp), allocatable :: wind_w(:,:,:)                    ! vertical wind
+    real(wp), allocatable :: rho(:,:,:,:)      ! mass densities
+    real(wp), allocatable :: rhotheta_v(:,:,:) ! virtual potential temperature densities
+    real(wp), allocatable :: wind_u(:,:,:)     ! x-component of the wind
+    real(wp), allocatable :: wind_v(:,:,:)     ! y-component of the wind
+    real(wp), allocatable :: wind_w(:,:,:)     ! vertical wind
   
   end type t_tend
   
+  ! type containing information on boundary conditions
   type t_bc
   
-    ! type containing information on boundary conditions
-    real(wp), allocatable :: rho(:,:,:,:,:)                   ! mass densities
-    real(wp), allocatable :: rhotheta_v(:,:,:,:)              ! virtual potential temperature densities
-    real(wp), allocatable :: wind_u(:,:,:,:)                  ! x-component of the wind
-    real(wp), allocatable :: wind_v(:,:,:,:)                  ! y-component of the wind
-    real(wp), allocatable :: wind_w(:,:,:,:)                  ! vertical wind
-    real(wp), allocatable :: scalar_bc_factor(:,:)            ! boundary conditions factor for scalar fields
-    real(wp), allocatable :: u_bc_factor(:,:)                 ! boundary conditions factor for u-vector fields
-    real(wp), allocatable :: v_bc_factor(:,:)                 ! boundary conditions factor for v-vector fields
-    integer               :: index_old                        ! index of the old BC time
-    integer               :: index_new                        ! index of the new BC time
+    real(wp), allocatable :: rho(:,:,:,:,:)        ! mass densities
+    real(wp), allocatable :: rhotheta_v(:,:,:,:)   ! virtual potential temperature densities
+    real(wp), allocatable :: wind_u(:,:,:,:)       ! x-component of the wind
+    real(wp), allocatable :: wind_v(:,:,:,:)       ! y-component of the wind
+    real(wp), allocatable :: wind_w(:,:,:,:)       ! vertical wind
+    real(wp), allocatable :: scalar_bc_factor(:,:) ! boundary conditions factor for scalar fields
+    real(wp), allocatable :: u_bc_factor(:,:)      ! boundary conditions factor for u-vector fields
+    real(wp), allocatable :: v_bc_factor(:,:)      ! boundary conditions factor for v-vector fields
+    integer               :: index_old             ! index of the old BC time
+    integer               :: index_new             ! index of the new BC time
     
   end type t_bc
   
+  ! type containing diagnostic quantities
   type t_diag
   
-    ! type containing diagnostic quantities
     real(wp), allocatable :: v_squared(:,:,:)                        ! specific kinetic energy
     real(wp), allocatable :: p_grad_acc_neg_l_u(:,:,:)               ! x-component of linear pressure gradient acceleration
     real(wp), allocatable :: p_grad_acc_neg_l_v(:,:,:)               ! y-component of linear pressure gradient acceleration
