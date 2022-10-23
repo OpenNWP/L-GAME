@@ -42,9 +42,9 @@ module mo_phase_trans
     !$omp parallel do private(ji,jk,jl,diff_density,phase_trans_density,saturation_pressure,water_vapour_pressure, &
     !$omp diff_density_sfc,saturation_pressure_sfc,dry_pressure,air_pressure, &
     !$omp a,b,c,p,q,enhancement_factor)
-    do ji=1,ny
+    do jl=1,n_layers
       do jk=1,nx
-        do jl=1,n_layers
+        do ji=1,ny
           ! Preparation
           ! -----------
           
