@@ -145,7 +145,6 @@ program control
   allocate(grid%t_conduc_soil(ny,nx))
   allocate(grid%roughness_length(ny,nx))
   allocate(grid%is_land(ny,nx))
-  grid%is_land = 0
   allocate(grid%z_soil_interface(nsoillays+1))
   allocate(grid%z_soil_center(nsoillays))
   allocate(grid%t_const_soil(ny,nx))
@@ -182,8 +181,6 @@ program control
   allocate(bc%scalar_bc_factor(ny,nx))
   allocate(bc%u_bc_factor(ny,nx+1))
   allocate(bc%v_bc_factor(ny+1,nx))
-  bc%index_old = 1
-  bc%index_new = 2
   ! state to be written out
   allocate(state_write%rho(ny,nx,n_layers,n_constituents))
   allocate(state_write%rhotheta_v(ny,nx,n_layers))
@@ -262,6 +259,7 @@ program control
   allocate(diag%temp_diff_heating(ny,nx,n_layers))
   allocate(diag%condensates_sediment_heat(ny,nx,n_layers))
   allocate(diag%mass_diff_tendency(ny,nx,n_layers,n_constituents))
+  
   ! initializing arrays to zero
   !$omp parallel workshare
   grid%lat_scalar = 0._wp
@@ -312,6 +310,7 @@ program control
   grid%sfc_rho_c = 0._wp
   grid%t_conduc_soil = 0._wp
   grid%roughness_length = 0._wp
+  grid%is_land = 0
   grid%z_soil_interface = 0._wp
   grid%z_soil_center = 0._wp
   grid%t_const_soil = 0._wp
@@ -342,6 +341,8 @@ program control
   bc%wind_v = 0._wp
   bc%wind_w = 0._wp
   bc%scalar_bc_factor = 0._wp
+  bc%index_old = 1
+  bc%index_new = 2
   bc%u_bc_factor = 0._wp
   bc%v_bc_factor = 0._wp
   state_write%rho = 0._wp
