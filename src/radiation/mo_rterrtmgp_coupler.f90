@@ -21,7 +21,7 @@ module mo_rrtmgp_coupler
   use mo_dictionary,              only: molar_fraction_in_dry_air,calc_o3_vmr
   use mo_rad_nml,                 only: rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
                                         cloud_coefficients_file_sw,cloud_coefficients_file_lw
-  use mo_constituents_nml,        only: n_condensed_constituents,n_constituents
+  use mo_constituents_nml,        only: lmoist,n_condensed_constituents,n_constituents
   use mo_run_nml,                 only: nx,n_layers,n_levels
   
   implicit none
@@ -168,7 +168,7 @@ module mo_rrtmgp_coupler
     liquid_precip_radius = cloud_optics_sw%get_max_radius_liq()
     ice_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
     liquid_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
-    if (n_condensed_constituents==5) then
+    if (lmoist) then
       do jl=1,n_layers
         do jk=1,nx
           ! the solid condensates' effective radius
@@ -600,9 +600,9 @@ module mo_rrtmgp_coupler
         case("n2o")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(11)
         case("h2o")
-          ! n_condensed_constituents==5 is equivalent to the presence of water in the model atmosphere
+          ! lmoist is equivalent to the presence of water in the model atmosphere
           ! in the short wave case,only the day points matter
-          if (sw_bool .and. n_condensed_constituents==5) then
+          if (sw_bool .and. lmoist) then
             do jl=1,n_layers
               do jk=1,n_day_points
                 vol_mix_ratio(jk,jl) &
@@ -611,7 +611,7 @@ module mo_rrtmgp_coupler
               enddo
             enddo
           ! in the long wave case,all points matter
-          elseif (n_condensed_constituents==5) then
+          elseif (lmoist) then
             do jl=1,n_layers
               do jk=1,nx
                 vol_mix_ratio(jk,jl) &
