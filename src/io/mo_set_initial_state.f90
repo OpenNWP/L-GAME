@@ -177,7 +177,7 @@ module mo_set_initial_state
               ! calculating delta_z
               delta_z = grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1)
               ! calculating the gravity
-              gravity_local = (geopot(grid%z_scalar(ji,jk,jl))-geopot(grid%z_scalar(ji,jk,jl+1)))/delta_z
+              gravity_local = (geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1)))/delta_z
               
               ! result
               state%theta_v_pert(ji,jk,jl) = state%theta_v_pert(ji,jk,jl+1) &
@@ -196,10 +196,10 @@ module mo_set_initial_state
             ! filling up what's needed for the unessential_ideal_init routine
             ! temperature
             do jl=1,n_layers
-              diag%scalar_placeholder(ji,jk,jl)=state%exner_pert(ji,jk,jl)*state%theta_v_pert(ji,jk,jl)
+              diag%scalar_placeholder(ji,jk,jl) = state%exner_pert(ji,jk,jl)*state%theta_v_pert(ji,jk,jl)
             enddo
             ! pressure in the lowest layer
-            pres_lowest_layer(ji,jk)=p_0*state%exner_pert(ji,jk,n_layers)**(c_d_p/r_d)
+            pres_lowest_layer(ji,jk) = p_0*state%exner_pert(ji,jk,n_layers)**(c_d_p/r_d)
           enddo
         enddo
         !$omp end parallel do
