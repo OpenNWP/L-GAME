@@ -5,15 +5,15 @@
 
 if [ ! -d output ]
 then
-mkdir output
+  mkdir output
 fi
 
 if [ ! -d real_weather ]
 then
-mkdir real_weather
+  mkdir real_weather
 fi
 
 if [ ! -d figs ]
 then
-mkdir figs
+  mkdir figs
 fi
