@@ -2,9 +2,9 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_divergence_operators
-
+  
   ! The calculation of the horizontal divergence operator is executed in this module.
-
+  
   use mo_definitions, only: wp,t_grid
   use mo_run_nml,     only: ny,nx,n_layers,n_oro_layers,dtime,n_flat_layers
   use mo_averaging,   only: vertical_contravariant_corr
@@ -14,7 +14,7 @@ module mo_divergence_operators
   contains
 
   subroutine div_h(vector_field_x,vector_field_y,result_field,grid)
-
+    
     ! This subroutine computes the divergence of a vector field.
     
     ! input arguments and output
@@ -27,7 +27,7 @@ module mo_divergence_operators
     integer  :: ji,jk,jl     ! spatial indices
     real(wp) :: comp_h       ! horizontal component of divergence
     real(wp) :: comp_v       ! vertical component of divergence
-    real(wp) :: contra_upper ! contravariant mass flux density resulting 
+    real(wp) :: contra_upper ! contravariant mass flux density resulting
                              ! from the horizontal vector components through the upper area
     real(wp) :: contra_lower ! contravariant mass flux density resulting
                              ! from the horizontal vector components through the lower area
@@ -85,7 +85,7 @@ module mo_divergence_operators
     integer  :: ji,jk,jl      ! spatial indices
     real(wp) :: comp_h        ! horizontal component of divergence
     real(wp) :: comp_v        ! vertical component of divergence
-    real(wp) :: contra_upper  ! contravariant mass flux density resulting 
+    real(wp) :: contra_upper  ! contravariant mass flux density resulting
                               ! from the horizontal vector components through the upper area
     real(wp) :: contra_lower  ! contravariant mass flux density resulting
                               ! from the horizontal vector components through the lower area

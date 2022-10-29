@@ -16,9 +16,9 @@ module mo_read_write_grid
   contains
   
   subroutine write_grid(grid)
-  
+    
     ! This subroutine writes important grid properties to a file so they can be reused elsewhere.
-  
+    
     ! input arguments
     type(t_grid), intent(in) :: grid ! grid properties
     
@@ -122,14 +122,13 @@ module mo_read_write_grid
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
-  
+    
   end subroutine write_grid
   
   subroutine read_oro(grid)
-  
+    
     ! This subroutine reads the orography from a file.
-  
-    ! input arguments
+    
     type(t_grid), intent(inout) :: grid ! grid properties
     
     ! local variables
@@ -155,14 +154,13 @@ module mo_read_write_grid
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
-  
+    
   end subroutine read_oro
   
   subroutine read_land_sea(grid)
-  
+    
     ! This subroutine reads the land-sea mask from a file.
-  
-    ! input arguments
+    
     type(t_grid), intent(inout) :: grid ! grid properties
     
     ! local variables
@@ -184,7 +182,7 @@ module mo_read_write_grid
     
     ! closing the NetCDF file
     call nc_check(nf90_close(ncid))
-  
+    
   end subroutine read_land_sea
 
 end module mo_read_write_grid

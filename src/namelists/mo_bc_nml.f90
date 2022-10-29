@@ -2,7 +2,7 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_bc_nml
-
+  
   ! In this namelist, the boundary conditions are configured.
   
   use mo_definitions, only: wp
@@ -21,7 +21,7 @@ module mo_bc_nml
   contains
   
   subroutine bc_nml_setup
-
+    
     ! local variables
     integer :: fileunit
     
@@ -37,7 +37,7 @@ module mo_bc_nml
     read(nml=bc,unit=fileunit)
     
     close(fileunit)
-  
+    
   end subroutine bc_nml_setup
 
 end module mo_bc_nml

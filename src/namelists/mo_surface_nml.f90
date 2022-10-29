@@ -2,9 +2,9 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_surface_nml
-
+  
   ! This namelist defines the surface properties.
-
+  
   use mo_definitions, only: wp
   use mo_diff_nml,    only: lmom_diff_h
   
@@ -22,7 +22,7 @@ module mo_surface_nml
   contains
   
   subroutine surface_nml_setup
-
+    
     ! local variables
     integer :: fileunit
     
@@ -37,17 +37,17 @@ module mo_surface_nml
     ! Open and read namelist file.
     open(action="read",file="namelist.nml",newunit=fileunit)
     read(nml=surface,unit=fileunit)
-        
+    
     close(fileunit)
-  
+    
     ! sanity checks
     if (lpbl .and. .not. lmom_diff_h) then
       write(*,*) "Error: lmom_diff_h must be true is lpbl is true."
       call exit(1)
     endif
-  
+    
   end subroutine surface_nml_setup
-
+  
 end module mo_surface_nml
 
 

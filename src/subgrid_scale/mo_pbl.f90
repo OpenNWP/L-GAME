@@ -2,7 +2,7 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_pbl
-
+  
   ! This module computes everything related to the planetary boundary layer.
   
   use mo_definitions, only: wp,t_state,t_grid,t_diag
@@ -20,7 +20,6 @@ module mo_pbl
 
     ! This subroutine updates surface-related turbulence quantities.
     
-    ! input arguments and output
     type(t_state), intent(in)    :: state ! state with which to calculate the turbulence quantities
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(inout) :: grid  ! grid properties
@@ -87,9 +86,9 @@ module mo_pbl
         ! computing the Monin-Obukhov length
         diag%monin_obukhov_length(ji,jk) = -theta_v_lowest_layer*diag%roughness_velocity(ji,jk)**3 &
         /(karman*gravity*w_pert_theta_v_pert_avg)
-      
+        
       enddo
-    enddo 
+    enddo
     !$omp end parallel do
 
     ! updating the surface flux resistance acting on scalar quantities (moisture and sensible heat)
@@ -108,7 +107,7 @@ module mo_pbl
   end subroutine update_sfc_turb_quantities
   
   subroutine pbl_wind_tendency(state,diag,grid)
-  
+    
     ! This subroutine computes the interaction of the horizontal wind with the surface.
     
     type(t_state), intent(in)    :: state ! state with which to calculate the horizontal diffusion
@@ -124,7 +123,7 @@ module mo_pbl
     !$omp flux_resistance,wind_rescale_factor)
     do ji=1,ny
       do jk=2,nx
-      
+        
         ! averaging some quantities to the vector point
         wind_speed_lowest_layer = 0.5_wp*(diag%v_squared(ji,jk-1,n_layers)**0.5_wp + diag%v_squared(ji,jk,n_layers)**0.5_wp)
         z_agl = grid%z_u(ji,jk,n_layers) - 0.5_wp*(grid%z_w(ji,jk-1,n_levels) + grid%z_w(ji,jk,n_levels))
@@ -239,16 +238,14 @@ module mo_pbl
         
     enddo
     !$omp end parallel do
-  
+    
   end subroutine pbl_wind_tendency
   
   function roughness_length_from_u10_sea(u10)
-  
+    
     ! This function returns the roughness length as a function of the mean wind speed at 10 m above a fully developed sea.
-
-    ! input variable
+    
     real(wp), intent(in) :: u10 ! wind velocity 10 m above the surface
-    ! output variable
     real(wp)             :: roughness_length_from_u10_sea
 
     ! local variables
@@ -270,24 +267,22 @@ module mo_pbl
 
     ! avoid too small values for stability
     roughness_length_from_u10_sea = max(0.0001_wp,roughness_length_from_u10_sea)
-  
+    
   end function roughness_length_from_u10_sea
 
   function scalar_flux_resistance(roughness_velocity_value,z_agl,roughness_length_value,monin_obukhov_length_value)
-
+    
     ! This function returns the surface flux resistance for scalar quantities.
-
-    ! input variables
+    
     real(wp), intent(in) :: roughness_velocity_value,z_agl,roughness_length_value,monin_obukhov_length_value
-    ! output variable
     real(wp)             :: scalar_flux_resistance ! result
-
+    
     ! local variables
     real(wp) :: used_vertical_height
-
+    
     ! height of the prandtl layer
     used_vertical_height = min(z_agl,h_prandtl)
-
+    
     scalar_flux_resistance = 1._wp/(karman*roughness_velocity_value) &
     ! neutral conditions
     *(log(used_vertical_height/roughness_length_value) &
@@ -295,16 +290,16 @@ module mo_pbl
     - psi_h(used_vertical_height,monin_obukhov_length_value) &
     ! interfacial sublayer
     + log(7._wp))
-
+    
     ! limitting the result for security
     if (scalar_flux_resistance<dtime/z_agl) then
       scalar_flux_resistance = dtime/z_agl
-    endif 
+    endif
     
   end function scalar_flux_resistance
-
+  
   function momentum_flux_resistance(wind_h_lowest_layer,z_agl,roughness_length_value,monin_obukhov_length_value)
-
+    
     ! This function returns the surface flux resistance for momentum.
 
     ! input variables
@@ -331,18 +326,16 @@ module mo_pbl
     if (momentum_flux_resistance<dtime/z_agl) then
       momentum_flux_resistance = dtime/z_agl
     endif
-
+    
   end function momentum_flux_resistance
 
   function roughness_velocity(wind_speed,z_agl,roughness_length_value)
-
+    
     ! This function returns the roughness velocity.
-
-    ! input variables
+    
     real(wp), intent(in) :: wind_speed             ! wind speed at a certain height
     real(wp), intent(in) :: z_agl                  ! height at which the wind speed is valid
     real(wp), intent(in) :: roughness_length_value ! roughness length at this point
-    ! output variable
     real(wp)             :: roughness_velocity     ! the result
 
     ! local variables
@@ -384,7 +377,7 @@ module mo_pbl
     ! unstable conditions
     if (l_local<0._wp) then
       x = (1._wp - 15._wp*eff/l_local)**0.25_wp
-      psi_h = 2._wp*log((1._wp + x**2)/2._wp)     
+      psi_h = 2._wp*log((1._wp + x**2)/2._wp)
     ! neutral and stable conditions
     else
       psi_h = -4._wp*eff/l_local
@@ -395,11 +388,9 @@ module mo_pbl
   function psi_m(eff,l)
 
     ! This is a helper function for the correction to the surface momentum flux resistance for non-neutral conditions.
-
-    ! input variables
+    
     real(wp), intent(in) :: eff   ! effective height above the surface
     real(wp), intent(in) :: l     ! Monin-Obukhov length
-    ! output variable
     real(wp)             :: psi_m ! the value of the helper function
 
     ! local variables

@@ -27,7 +27,7 @@ program control
   use omp_lib,                   only: omp_get_num_threads
   
   implicit none
-
+  
   integer           :: omp_num_threads             ! number of OMP threads
   integer           :: time_step_counter           ! counter of the time step
   real(wp)          :: t_0,run_span,t_write        ! time information
@@ -43,11 +43,11 @@ program control
   real(wp)          :: begin_timestamp             ! used for measuring model runtime
   real(wp)          :: end_timestamp               ! used for measuring model runtime
   character(len=82) :: stars                       ! character containing stars
-
+  
   ! taking the timestamp to measure the performance
   call cpu_time(init_timestamp)
   begin_timestamp = init_timestamp
-
+  
   stars = "**********************************************************************************"
   write(*,*) stars
   write(*,*) "*                                                                                *"
@@ -58,7 +58,7 @@ program control
   write(*,*) "*         Visit https://github.com/OpenNWP/L-GAME for more information.          *"
   write(*,*) "*                                                                                *"
   write(*,*) stars
-
+  
   ! reading in all namelists so that we know what we have to do
   write(*,*) "Reading in run namelist ..."
   call run_nml_setup()
@@ -504,7 +504,7 @@ program control
     if (t_0+dtime>=t_write) then
       call linear_combine_two_states(state_1,state_2,state_write,1._wp-(t_write-t_0)/dtime,(t_write-t_0)/dtime,grid)
       call write_output(state_write,diag,int((t_write-t_init)/60._wp),grid)
-    
+      
       t_write = t_write+dt_write
       
       ! calculating the speed of the model
@@ -512,7 +512,7 @@ program control
       write(*,fmt="(A,F9.3)") " Current speed:",dt_write/((end_timestamp-begin_timestamp)/omp_num_threads)
       call cpu_time(begin_timestamp)
       write(*,fmt="(A,F10.3,A2)") " Run progress:",(t_0+dtime-t_init)/3600._wp,"h"
-    
+      
     endif
     
     t_0 = t_0+dtime

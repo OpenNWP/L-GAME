@@ -2,7 +2,7 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_multiplications
-
+  
   ! This module is a collection of various multiplications of vector and/or scalar fields.
   
   use mo_definitions, only: wp
@@ -14,7 +14,7 @@ module mo_multiplications
   contains
 
   subroutine scalar_times_vector_h(scalar_field,in_vector_x,in_vector_y,result_field_x,result_field_y)
-  
+    
     ! This subroutine multiplies a scalar with a vector field at horizontal points.
     
     real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
@@ -59,11 +59,11 @@ module mo_multiplications
       result_field_y(ny+1,:,:) = result_field_y(1,:,:)
       !$omp end parallel workshare
     endif
-  
+    
   end subroutine scalar_times_vector_h
   
   subroutine scalar_times_vector_h_upstream(scalar_field,in_vector_x,in_vector_y,result_field_x,result_field_y)
-  
+    
     ! This subroutine multiplies a scalar with a vector field at horizontal points.
     
     real(wp), intent(in)  :: scalar_field(:,:,:)   ! input scalar field
@@ -71,7 +71,7 @@ module mo_multiplications
     real(wp), intent(in)  :: in_vector_y(:,:,:)    ! input vector field, y-component
     real(wp), intent(out) :: result_field_x(:,:,:) ! output vector field, x-component
     real(wp), intent(out) :: result_field_y(:,:,:) ! output vector field, y-component
-  
+    
     ! local variables
     integer :: ji,jk,jl ! spatial indices
     
@@ -140,7 +140,7 @@ module mo_multiplications
       result_field_y(ny+1,:,:) = result_field_y(1,:,:)
       !$omp end parallel workshare
     endif
-  
+    
   end subroutine scalar_times_vector_h_upstream
   
   subroutine scalar_times_vector_v(scalar_field,in_vector_z,result_field_z)
@@ -150,7 +150,7 @@ module mo_multiplications
     real(wp), intent(in)    :: scalar_field(:,:,:)   ! input scalar field
     real(wp), intent(in)    :: in_vector_z(:,:,:)    ! input vector field, z-component
     real(wp), intent(inout) :: result_field_z(:,:,:) ! output vector field, z-component
-  
+    
     ! local variables
     integer :: jl ! layer index
     
@@ -159,7 +159,7 @@ module mo_multiplications
       result_field_z(:,:,jl) = 0.5_wp*(scalar_field(:,:,jl-1) + scalar_field(:,:,jl))*in_vector_z(:,:,jl)
     enddo
     !$omp end parallel do
-  
+    
   end subroutine scalar_times_vector_v
 
 end module mo_multiplications

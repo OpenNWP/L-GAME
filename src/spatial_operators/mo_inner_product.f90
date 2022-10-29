@@ -13,7 +13,7 @@ module mo_inner_product
   contains
 
   subroutine inner_product(u_vector_1,v_vector_1,w_vector_1,u_vector_2,v_vector_2,w_vector_2,output_scalar,grid)
-  
+    
     ! This subroutine calculates the inner product of two vector fields.
     
     ! input arguments and output
@@ -44,7 +44,7 @@ module mo_inner_product
       enddo
     enddo
     !$omp end parallel do
-  
+    
   end subroutine inner_product
 
 end module mo_inner_product

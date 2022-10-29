@@ -2,14 +2,14 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_run_nml
-
+  
   ! This is the namelist that configures the basic run properties of a model integration.
   
   use mo_definitions, only: wp
   use mo_constants,   only: M_PI
   
   implicit none
-
+  
   integer           :: ny            ! number of gridpoints in y-direction
   integer           :: nx            ! number of gridpoints in x-direction
   integer           :: n_layers      ! number of layers
@@ -42,11 +42,11 @@ module mo_run_nml
   namelist /run/ny,nx,n_layers,dy,dx,run_span_min,sigma, &
                 toa,scenario,llinear,run_id,lcorio,n_oro_layers,lat_center,lon_center, &
                 start_year,start_month,start_day,start_hour,start_minute,lplane
-
-  contains
-
-  subroutine run_nml_setup()
   
+  contains
+  
+  subroutine run_nml_setup()
+    
     ! local variables
     integer :: fileunit
     
@@ -78,7 +78,7 @@ module mo_run_nml
     ! open and read namelist file
     open(action="read",file="namelist.nml",newunit=fileunit)
     read(nml=run,unit=fileunit)
-        
+    
     close(fileunit)
     
     ! derived quantities
@@ -134,7 +134,7 @@ module mo_run_nml
   end subroutine run_nml_setup
   
   function leap_year_correction(year)
-  
+    
     ! This is a helper function for calculating the Unix time.
     ! It returns the number of 29th of Februaries since 1970.
     
@@ -145,14 +145,14 @@ module mo_run_nml
     if (year>2000) then
       leap_year_correction = leap_year_correction - 1
     endif
-  
+    
   end function leap_year_correction
   
   function month_day_vector(month,year)
-  
+    
     ! This is a helper function for calculating the Unix time.
     ! It returns the amount of days in the wanted year in the previous months.
-  
+    
     integer, intent(in) :: month
     integer, intent(in) :: year
     integer             :: month_day_vector ! result

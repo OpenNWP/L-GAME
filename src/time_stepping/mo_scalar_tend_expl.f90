@@ -21,9 +21,9 @@ module mo_scalar_tend_expl
   contains
   
   subroutine scalar_tend_expl(grid,state_scalar,state_vector,tend,diag,rk_step)
-  
+    
     ! This subroutine manages the calculation of the explicit part of the scalar tendencies.
-  
+    
     type(t_grid),  intent(in)    :: grid         ! model grid
     type(t_state), intent(in)    :: state_scalar ! state from which to use the scalar quantities
     type(t_state), intent(in)    :: state_vector ! state from which to use the wind
@@ -115,7 +115,7 @@ module mo_scalar_tend_expl
       ! phase transitions
       + diag%phase_trans_rates(:,:,:,min(jc,n_condensed_constituents+1)))
       !$omp end parallel workshare
-    
+      
       ! Explicit virtual potential temperature density integration
       ! ----------------------------------------------------------
       ! calculating the virtual potential temperature density flux
@@ -158,7 +158,7 @@ module mo_scalar_tend_expl
       endif
       
     enddo
-        
+    
   end subroutine scalar_tend_expl
 
 end module mo_scalar_tend_expl

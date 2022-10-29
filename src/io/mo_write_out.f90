@@ -26,31 +26,31 @@ module mo_write_out
     type(t_grid),  intent(in)    :: grid                ! model grid
     
     ! local variables
-    logical           :: lcontains_nan             ! used for detecting if the model crashed
-    integer           :: ncid                      ! ID of the NetCDF file
-    integer           :: x_dimid                   ! ID of the x-dimension
-    integer           :: y_dimid                   ! ID of the y-dimension
-    integer           :: z_dimid                   ! ID of the z-dimension
-    integer           :: constituents_dimid        ! ID of the constituents dimension
-    integer           :: single_double_dimid       ! ID of the dimension cotaining one double
-    integer           :: dimids_2d(2)              ! dimensions of horizontal fields
-    integer           :: dimids_3d(3)              ! dimensions of 3D fields
-    integer           :: dimids_3d_rho(4)          ! dimensions of 3D mass density fields
-    integer           :: varid_lat                 ! variable ID of the lat coordinates
-    integer           :: varid_lon                 ! variable ID of the lon coordinates
-    integer           :: varid_lat_center          ! variable ID of the latitude of the center
-    integer           :: varid_lon_center          ! variable ID of the longitude of the center
-    integer           :: varid_z                   ! variable ID of the z coordinates
-    integer           :: varid_rho                 ! variable ID of the 3D mass density fields
-    integer           :: varid_r                   ! variable ID of the 3D relative humidity
-    integer           :: varid_t                   ! variable ID of the 3D temperature field
-    integer           :: varid_u                   ! variable ID of the 3D u wind field
-    integer           :: varid_v                   ! variable ID of the 3D v wind field
-    integer           :: varid_w                   ! variable ID of the 3D w wind field
-    character(len=64) :: filename                  ! output filename
-    character(len=64) :: time_since_init_min_str   ! time_since_init_min as string
-    integer           :: ji,jk,jl                  ! line indices
-    real(wp)          :: upper_weight(ny,nx) ! interpolation weights
+    logical           :: lcontains_nan           ! used for detecting if the model crashed
+    integer           :: ncid                    ! ID of the NetCDF file
+    integer           :: x_dimid                 ! ID of the x-dimension
+    integer           :: y_dimid                 ! ID of the y-dimension
+    integer           :: z_dimid                 ! ID of the z-dimension
+    integer           :: constituents_dimid      ! ID of the constituents dimension
+    integer           :: single_double_dimid     ! ID of the dimension cotaining one double
+    integer           :: dimids_2d(2)            ! dimensions of horizontal fields
+    integer           :: dimids_3d(3)            ! dimensions of 3D fields
+    integer           :: dimids_3d_rho(4)        ! dimensions of 3D mass density fields
+    integer           :: varid_lat               ! variable ID of the lat coordinates
+    integer           :: varid_lon               ! variable ID of the lon coordinates
+    integer           :: varid_lat_center        ! variable ID of the latitude of the center
+    integer           :: varid_lon_center        ! variable ID of the longitude of the center
+    integer           :: varid_z                 ! variable ID of the z coordinates
+    integer           :: varid_rho               ! variable ID of the 3D mass density fields
+    integer           :: varid_r                 ! variable ID of the 3D relative humidity
+    integer           :: varid_t                 ! variable ID of the 3D temperature field
+    integer           :: varid_u                 ! variable ID of the 3D u wind field
+    integer           :: varid_v                 ! variable ID of the 3D v wind field
+    integer           :: varid_w                 ! variable ID of the 3D w wind field
+    character(len=64) :: filename                ! output filename
+    character(len=64) :: time_since_init_min_str ! time_since_init_min as string
+    integer           :: ji,jk,jl                ! line indices
+    real(wp)          :: upper_weight(ny,nx)     ! interpolation weights
     
     write(*,*) "Writing output ..."
     

@@ -41,7 +41,7 @@ module mo_rrtmgp_coupler
   contains
   
   subroutine radiation_init()
-  
+    
     ! This subroutine is called only once, in the beginning.
     
     ! local variables
@@ -57,7 +57,7 @@ module mo_rrtmgp_coupler
   subroutine calc_radiative_flux_convergence(latitude_scalar,longitude_scalar,z_scalar,z_vector,rho, &
                                              temperature,radiation_tendency,temp_sfc,sfc_sw_in,sfc_lw_out,sfc_albedo, &
                                              time_coord)
-  
+    
     ! This subroutine is called by the dynamical core. The dycore hands over
     ! the thermodynamic state as well as meta data (time stamp, coordinates) and gets
     ! back radiative flux convergences in W/m^3.
@@ -109,8 +109,8 @@ module mo_rrtmgp_coupler
     real(wp)                            :: pressure_interface_rad_day(nx,n_levels) ! pressure at cell interfaces restricted to day points
     real(wp)                            :: liquid_water_path(nx,n_layers)          ! liquid water path in g/m**2
     real(wp)                            :: ice_water_path(nx,n_layers)             ! ice water path g/m**2
-    real(wp)                            :: liquid_eff_radius(nx,n_layers)          ! liquid particles effective radius in micro meters 
-    real(wp)                            :: ice_eff_radius(nx,n_layers)             ! ice particles effective radius in micro meters 
+    real(wp)                            :: liquid_eff_radius(nx,n_layers)          ! liquid particles effective radius in micro meters
+    real(wp)                            :: ice_eff_radius(nx,n_layers)             ! ice particles effective radius in micro meters
     real(wp)                            :: liquid_water_path_day(nx,n_layers)      ! liquid water path in g/m^2 restricted to the day points
     real(wp)                            :: ice_water_path_day(nx,n_layers)         ! ice water path in g/m^2 restricted to the day points
     real(wp)                            :: liquid_eff_radius_day(nx,n_layers)      ! liquid particles effective radius in micro meters restricted to the day points
@@ -417,7 +417,7 @@ module mo_rrtmgp_coupler
   end subroutine calc_radiative_flux_convergence
     
   subroutine calc_power_density(day_only,n_day_points,day_indices,fluxes,z_vector,radiation_tendency)
-  
+    
     ! This subroutine is essentially the negative vertical divergence operator.
     
     logical,                   intent(in)    :: day_only                        ! true for short wave calculations (for efficiency)
@@ -426,7 +426,7 @@ module mo_rrtmgp_coupler
     type(ty_fluxes_broadband), intent(in)    :: fluxes                          ! fluxes object based on which to compute the power density
     real(wp),                  intent(in)    :: z_vector(nx,n_levels)           ! as usual
     real(wp),                  intent(inout) :: radiation_tendency(nx,n_layers) ! the result (in W/m**3)
-  
+    
     ! local variables
     integer :: n_relevant_columns ! the number of columns taken into account
     integer :: j_column           ! the index of the relevant column
@@ -438,7 +438,7 @@ module mo_rrtmgp_coupler
     else
       n_relevant_columns = nx
     endif
-  
+    
     ! loop over all layers
     do jl=1,n_layers
       ! loop over all columns
@@ -472,9 +472,9 @@ module mo_rrtmgp_coupler
   end subroutine calc_power_density
   
   real(wp) function coszenith(lat,lon,t)
-  
+    
     ! This function calculates the cosine of the zenith angle at a given point and time.
-  
+    
     real(wp), intent(in) :: lat ! the latitude of the place we look at
     real(wp), intent(in) :: lon ! the longitude of the place we look at
     real(wp), intent(in) :: t   ! the unix time stamp of the time
@@ -628,11 +628,11 @@ module mo_rrtmgp_coupler
         call handle_error(gas_concentrations%set_vmr(gases_lowercase(jc),vol_mix_ratio(:,:)))
       endif
     enddo ! jc
-  
+    
   end subroutine set_vol_mix_ratios
   
   subroutine init_fluxes(fluxes,n_hor,n_vert)
-  
+    
     ! This subroutine initializes a flux object.
     
     type(ty_fluxes_broadband), intent(inout) :: fluxes ! the fluxes to initialize
@@ -663,7 +663,7 @@ module mo_rrtmgp_coupler
   end subroutine reset_fluxes
   
   subroutine free_fluxes(fluxes)
-  
+    
     ! This subroutine frees a flux object.
     
     type(ty_fluxes_broadband), intent(out) :: fluxes ! the fluxes to free
@@ -672,18 +672,18 @@ module mo_rrtmgp_coupler
     if (associated(fluxes%flux_dn)) deallocate(fluxes%flux_dn)
     if (associated(fluxes%flux_net)) deallocate(fluxes%flux_net)
     if (associated(fluxes%flux_dn_dir)) deallocate(fluxes%flux_dn_dir)
-  
+    
   end subroutine free_fluxes
   
   subroutine handle_error(error_message)
-  
+    
     character(len = *), intent(in) :: error_message
     
     ! write the error message if its real length is larger than zero
     if (len(trim(error_message))>0) then
       write(*,*) error_message
     endif
-  
+    
   end subroutine handle_error
   
 end module mo_rrtmgp_coupler

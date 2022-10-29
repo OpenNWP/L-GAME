@@ -38,9 +38,9 @@ module mo_derived
   end subroutine temperature_diagnostics
 
   function spec_heat_cap_diagnostics_v(state,ji,jk,jl)
-  
+    
     ! This function calculates the specific heat capacity at constant volume of the air at a certain gridpoint.
-  
+    
     ! input arguments
     type(t_state), intent(in) :: state    ! state with which to calculate c_v
     integer, intent(in)       :: ji,jk,jl ! spatial indices of the gridpoint
@@ -69,9 +69,9 @@ module mo_derived
   end function spec_heat_cap_diagnostics_v
 
   function spec_heat_cap_diagnostics_p(state,ji,jk,jl)
-  
+    
     ! This function calculates the specific heat capacity at constant pressure of the air at a certain gridpoint.
-  
+    
     ! input arguments
     type(t_state), intent(in) :: state    ! state with which to calculate c_p
     integer,       intent(in) :: ji,jk,jl ! spatial indices of the gridpoint
@@ -100,9 +100,9 @@ module mo_derived
   end function spec_heat_cap_diagnostics_p
     
   function gas_constant_diagnostics(state,ji,jk,jl)
-  
+    
     ! This function calculates the specific gas constant at a certain gridpoint.
-  
+    
     ! input arguments
     type(t_state), intent(in) :: state    ! state with which to calculate the gas constant
     integer,       intent(in) :: ji,jk,jl ! spatial indices of the gridpoint
@@ -156,7 +156,7 @@ module mo_derived
   end function rel_humidity
   
   function c_v_mass_weighted_air(rho,temperature,ji,jk,jl)
-  
+    
     ! This function calculates the mass-weighted c_v of the air.
     
     real(wp), intent(in) :: rho(ny,nx,n_layers,n_constituents),temperature(ny,nx,n_layers)
@@ -181,13 +181,13 @@ module mo_derived
       ! dry air
       c_v_mass_weighted_air = rho(ji,jk,jl,n_condensed_constituents+1)*c_d_v
     endif
-  
+    
   end function c_v_mass_weighted_air
 
   function calc_diffusion_coeff(temperature,density)
-  
+    
     ! This function calculates the molecular diffusion coefficient.
-  
+    
     real(wp) :: temperature,density
     real(wp) :: calc_diffusion_coeff
     

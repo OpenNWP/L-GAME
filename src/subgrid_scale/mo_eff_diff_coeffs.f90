@@ -22,10 +22,9 @@ module mo_eff_diff_coeffs
   contains
   
   subroutine hor_viscosity(state,diag)
-  
+    
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
     
-    ! input arguments and output
     type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     
@@ -88,7 +87,7 @@ module mo_eff_diff_coeffs
       
       ! periodic boundary conditions
       if (lperiodic) then
-      
+        
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
           diag%viscosity_molecular(1,jk-1,jl) + diag%viscosity_molecular(ny,jk-1,jl) &
@@ -101,7 +100,7 @@ module mo_eff_diff_coeffs
           + diag%viscosity_molecular(ji,nx,jl) + diag%viscosity_molecular(ji,1,jl))
           diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
         enddo
-      
+        
         ! corners
         diag%viscosity_coeff_curl_dual(1,1,jl) = 0.25*(diag%viscosity_molecular(1,1,jl) + diag%viscosity_molecular(ny,1,jl) &
         + diag%viscosity_molecular(1,nx,jl) + diag%viscosity_molecular(ny,nx,jl))
@@ -110,7 +109,7 @@ module mo_eff_diff_coeffs
         diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
         
       endif
-    
+      
     enddo
     !$omp end parallel do
         
@@ -129,7 +128,7 @@ module mo_eff_diff_coeffs
       
       ! periodic boundary conditions
       if (lperiodic) then
-      
+        
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
           tke2hor_diff_coeff(diag%tke(1,jk-1,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ny,jk-1,jl),eff_hor_res) &
@@ -142,7 +141,7 @@ module mo_eff_diff_coeffs
           + tke2hor_diff_coeff(diag%tke(ji,nx,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ji,1,jl),eff_hor_res))
           diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
         enddo
-      
+        
         ! corners
         diag%viscosity_coeff_curl_dual(1,1,jl) = 0.25*( &
         tke2hor_diff_coeff(diag%tke(1,1,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ny,1,jl),eff_hor_res) &
@@ -152,7 +151,7 @@ module mo_eff_diff_coeffs
         diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
         
       endif
-    
+      
     enddo
     !$omp end parallel do
     
@@ -172,7 +171,7 @@ module mo_eff_diff_coeffs
       
       ! periodic boundary conditions
       if (lperiodic) then
-      
+        
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl) &
           *(0.25_wp*( &
@@ -191,7 +190,7 @@ module mo_eff_diff_coeffs
           + state%rho(ji,1,jl,n_condensed_constituents+1)))
           diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
         enddo
-      
+        
         ! corners
         diag%viscosity_coeff_curl_dual(1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl) &
         *(0.25_wp*( &
@@ -218,16 +217,15 @@ module mo_eff_diff_coeffs
       enddo
     enddo
     !$omp end parallel do
-  
+    
   end subroutine hor_viscosity
   
   subroutine vert_hor_mom_viscosity(state,diag,grid)
-  
+    
     ! This subroutine computes the effective viscosity (eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
     ! This quantity is located at the half level edges.
     ! To obey the symmetry of the stress tensor, the same coefficient must be used for the horizontal diffusion of vertical velocity.
-  
-    ! input arguments and output
+    
     type(t_state), intent(in)    :: state ! state
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
@@ -394,10 +392,9 @@ module mo_eff_diff_coeffs
   end subroutine vert_hor_mom_viscosity
   
   subroutine vert_vert_mom_viscosity(state,diag,grid)
-  
+    
     ! This subroutine multiplies scalar_placeholder (containing dw/dz) by the diffusion coefficient acting on w because of w.
-   
-    ! input arguments and output
+    
     type(t_state), intent(in)    :: state ! state
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
@@ -410,7 +407,7 @@ module mo_eff_diff_coeffs
     do jl=1,n_layers
       do jk=1,nx
         do ji=1,ny
-    
+          
           mom_diff_coeff &
           ! molecular viscosity
           = diag%viscosity_molecular(ji,jk,jl) &
@@ -427,10 +424,9 @@ module mo_eff_diff_coeffs
   end subroutine vert_vert_mom_viscosity
   
   subroutine scalar_diffusion_coeffs(state,diag,grid)
-  
+    
     ! This subroutine computes the scalar diffusion coefficients (including eddies).
-  
-    ! input arguments and output
+    
     type(t_state), intent(in)    :: state ! state
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
@@ -480,7 +476,7 @@ module mo_eff_diff_coeffs
     
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h) then
-    
+      
       call hor_viscosity(state,diag)
       call tke_update(state,diag,grid)
       
@@ -568,7 +564,7 @@ module mo_eff_diff_coeffs
   end subroutine update_n_squared
   
   function tke2hor_diff_coeff(tke,effective_resolution)
-  
+    
     ! This function returns the horizontal kinematic eddy viscosity as a function of the specific TKE.
     
     real(wp), intent(in)  :: tke,effective_resolution
@@ -580,11 +576,11 @@ module mo_eff_diff_coeffs
     mean_velocity = (2._wp*tke)**0.5_wp
     mean_free_path = effective_resolution/6._wp
     tke2hor_diff_coeff = 1._wp/6._wp*mean_free_path*mean_velocity
-  
+    
   end function tke2hor_diff_coeff
 
   function tke2vert_diff_coeff(tke,n_squared,layer_thickness)
-
+    
     ! This function returns the vertical kinematic eddy viscosity as a function of the specific TKE and the Brunt-Väisälä frequency.
     
     real(wp), intent(in)  :: tke,n_squared,layer_thickness
@@ -592,10 +588,10 @@ module mo_eff_diff_coeffs
     
     ! local variables
     real(wp) :: tke_vert,mean_velocity,n_used,mean_free_path
-  
+    
     ! vertical component of the turbulent kinetic energy
     tke_vert = 3._wp*1e-3_wp*tke
-  
+    
     mean_velocity = (2._wp*tke_vert)**0.5_wp
     ! used Brunt-Väisälä frequency
     n_used = (max(n_squared,1e-4_wp))**0.5_wp

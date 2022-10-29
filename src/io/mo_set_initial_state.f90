@@ -203,14 +203,14 @@ module mo_set_initial_state
           enddo
         enddo
         !$omp end parallel do
-    
+        
         !$omp parallel workshare
         ! humidity
         state%rho(:,:,:,n_constituents) = 0._wp
         ! condensates
         state%rho(:,:,:,1:n_condensed_constituents) = 0._wp
         !$omp end parallel workshare
-        
+      
     endselect
     
     !$omp parallel do private(ji,jk)
@@ -226,12 +226,12 @@ module mo_set_initial_state
   end subroutine ideal_init
   
   subroutine restart(state,grid)
-  
+    
     ! This subroutine sets the initial state of a NWP run.
     
     type(t_state), intent(inout) :: state ! state to write the arrays to
     type(t_grid), intent(in)     :: grid  ! grid properties
-  
+    
     ! local variables
     character(len=64) :: filename ! file to read the initial state from
     
@@ -244,11 +244,11 @@ module mo_set_initial_state
     state%theta_v_pert = state%rhotheta_v/state%rho(:,:,:,n_condensed_constituents+1) - grid%theta_v_bg
     state%exner_pert = (r_d*state%rhotheta_v/p_0)**(r_d/c_d_v) - grid%exner_bg
     !$omp end parallel workshare
-  
+    
   end subroutine restart
   
   subroutine read_from_nc(rho,rhotheta_v,wind_u,wind_v,wind_w,filename)
-  
+    
     ! This subroutine reads a model state from a NetCDF file.
     
     ! input arguments and output
@@ -290,7 +290,7 @@ module mo_set_initial_state
   end subroutine read_from_nc
   
   subroutine unessential_ideal_init(state,diag,grid,pres_lowest_layer)
-  
+    
     ! setting the unessential quantities of an ideal initial state
     ! scalar_placeholder is the virtual temperature here
     
@@ -349,11 +349,10 @@ module mo_set_initial_state
   end subroutine unessential_ideal_init
   
   function bg_temp(height)
-  
+    
     ! This function returns the temperature of the background state.
     
     real(wp), intent(in) :: height  ! geometric height above mean sea level
-    ! output
     real(wp)             :: bg_temp ! the result
 
     ! troposphere
@@ -370,11 +369,10 @@ module mo_set_initial_state
   end function bg_temp
 
   function bg_pres(height)
-  
+    
     ! This function returns the pressure of the background state (only used in the lowest layer during the initialization).
     
     real(wp), intent(in) :: height  ! geomteric height above mean sea level
-    ! output
     real(wp)             :: bg_pres ! the result
 
     if (height<inv_height) then  
@@ -387,16 +385,14 @@ module mo_set_initial_state
       write(*,*) "Aborting."
       call exit(1)
     endif
-  
+    
   end function bg_pres
   
   function geopot(height)
-  
+    
     ! This function returns the geopotential as a function of the geometrical height.
-  
-    ! input
+    
     real(wp), intent(in) :: height
-    ! output
     real(wp)             :: geopot
     
     geopot = -gravity*r_e**2/(r_e+height)+gravity*r_e
@@ -405,20 +401,20 @@ module mo_set_initial_state
     if (lplane) then
       geopot = gravity*height
     endif
-  
+    
   end function geopot
   
   subroutine nc_check(i_status)
-  
+    
     ! This checks wether a NetCDF function threw an error.
-  
+    
     integer, intent(in) :: i_status
 
-    if(i_status/=nf90_noerr) then 
+    if(i_status/=nf90_noerr) then
       print *, trim(nf90_strerror(i_status))
       stop "Netcdf threw an error."
     end if
-  end subroutine nc_check  
+  end subroutine nc_check
 
 end module mo_set_initial_state
 

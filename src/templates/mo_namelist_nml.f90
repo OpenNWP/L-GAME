@@ -2,7 +2,7 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module run_nml
-
+  
   ! This is the namelist that configures the basic run properties of a model integration.
   
   use definitions, only: wp
@@ -13,11 +13,11 @@ module run_nml
   real(wp)          :: dtime  ! time step of this run
   
   namelist /run/run_id
-
-  contains
-
-  subroutine run_nml_setup()
   
+  contains
+  
+  subroutine run_nml_setup()
+    
     ! local variables
     integer :: fileunit
     
@@ -28,9 +28,9 @@ module run_nml
     ! open and read namelist file
     open(action="read",file="namelist.nml",newunit=fileunit)
     read(nml=run,unit=fileunit)
-        
+    
     close(fileunit)
-  
+    
   end subroutine run_nml_setup
   
 end module run_nml

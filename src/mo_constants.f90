@@ -2,7 +2,7 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_constants
-
+  
   ! This is a collection of some quantities that are hardly ever changed.
   
   use mo_definitions, only: wp
@@ -42,7 +42,7 @@ module mo_constants
   real(wp), parameter :: inv_height = 20000._wp    ! height where the temperature inversion begins
   real(wp), parameter :: t_grad_inv = 0.001_wp     ! temperature gradient above the inversion
   real(wp), parameter :: p_0_standard = 101325._wp ! reference pressure of the standard atmosphere
-
+  
 end module mo_constants
 
 

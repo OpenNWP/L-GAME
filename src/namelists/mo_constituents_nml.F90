@@ -2,11 +2,11 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_constituents_nml
-
+  
   ! This namelist defines the constituents of the model atmosphere.
-
+  
   use mo_definitions, only: wp
-
+  
   implicit none
   
   logical  :: lmoist                   ! moisture switch
@@ -17,13 +17,13 @@ module mo_constituents_nml
   real(wp) :: rain_velocity            ! sedimentation velocity of rain
   real(wp) :: cloud_droplets_velocity  ! sedimentation velocity of cloud droplets
   real(wp) :: graupel_velocity         ! sedimentation velocity of graupel
-
-  namelist /constituents/lmoist
-
-  contains
-
-  subroutine constituents_nml_setup()
   
+  namelist /constituents/lmoist
+  
+  contains
+  
+  subroutine constituents_nml_setup()
+    
     ! local variables
     integer :: fileunit
     
@@ -39,7 +39,7 @@ module mo_constituents_nml
     ! open and read namelist file
     open(action="read",file="namelist.nml",newunit=fileunit)
     read(nml=constituents,unit=fileunit)
-        
+    
     close(fileunit)
     
     ! the dry case

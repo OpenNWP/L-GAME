@@ -17,7 +17,7 @@ module mo_vorticities
   contains
 
   subroutine rel_vort(state,diag,grid)
-  
+    
     ! This subroutine calculates the relative vorticity.
     
     type(t_state), intent(in)    :: state ! state to work with
@@ -111,7 +111,7 @@ module mo_vorticities
     !$omp parallel workshare
     diag%zeta_y = diag%zeta_y/grid%area_dual_y
     !$omp end parallel workshare
-      
+    
     ! calculating the relative vorticity in z-direction
     !$omp parallel do private(ji,jk,jl)
     do jl=1,n_layers
@@ -122,20 +122,20 @@ module mo_vorticities
       enddo
     enddo
     !$omp end parallel do
-      
+    
   end subroutine rel_vort
   
   subroutine calc_pot_vort(state,diag,grid)
-  
+    
     ! This subroutine calculates the potential vorticity.
     
     type(t_state), intent(in)    :: state ! state to work with
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! model grid
-  
+    
     ! local variables
     integer :: ji,jk,jl ! spatial indices
-  
+    
     ! calculating the relative vorticity
     if (.not. llinear) then
       call rel_vort(state,diag,grid)
@@ -245,7 +245,7 @@ module mo_vorticities
       enddo
     enddo
     !$omp end parallel do
-  
+    
     ! horizontal vorticity in y-direction
     !$omp parallel do private(ji,jk,jl)
     do jl=1,n_levels
@@ -312,7 +312,7 @@ module mo_vorticities
           endif
           diag%eta_y(ji,nx+1,jl) = diag%eta_y(ji,1,jl)
         endif
-        
+      
       enddo
     enddo
     !$omp end parallel do
@@ -364,7 +364,7 @@ module mo_vorticities
   end subroutine calc_pot_vort
   
   function rel_vort_z_local(state,grid,ji,jk,jl)
-  
+    
     ! This function returns the vertical relative vorticity at a grid point.
     
     type(t_state) :: state            ! state with which to calculate the relative vorticity
@@ -469,7 +469,7 @@ module mo_vorticities
         endif
       enddo
     endif
-  
+    
   end function rel_vort_z_local
 
 end module mo_vorticities

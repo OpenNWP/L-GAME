@@ -2,28 +2,28 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_pgrad
-
+  
   ! This module manages the handling of the explicit component of the pressure gradient.
-
+  
   use mo_constants,          only: c_d_p
   use mo_gradient_operators, only: grad_vert,grad_hor
   use mo_definitions,        only: t_state,t_diag,t_grid,wp
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v
   use mo_constituents_nml,   only: n_condensed_constituents
-
+  
   implicit none
   
   contains
-
+  
   subroutine manage_pressure_gradient(state,diag,grid,lfirst)
-  
+    
     ! This subroutine manages the calculation of the pressure gradient.
-  
+    
     type(t_state), intent(in)    :: state  ! state to work with
     type(t_diag),  intent(inout) :: diag   ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid   ! model grid
     logical,       intent(in)    :: lfirst ! true for the lfirst model step
-  
+    
     ! saving the old pressure gradient acceleration before it is overwritten with the new one
     if (.not. lfirst) then
       !$omp parallel workshare
@@ -88,7 +88,7 @@ module mo_pgrad
                                           /sum(state%rho(:,:,:,1:n_condensed_constituents+1),4) - 1._wp
     !$omp end parallel workshare
     call scalar_times_vector_v(diag%pressure_gradient_decel_factor,grid%gravity_m_v,diag%pressure_grad_condensates_w)
-  
+    
   end subroutine calc_pressure_grad_condensates_v
 
 end module mo_pgrad

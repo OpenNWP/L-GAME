@@ -27,7 +27,7 @@ module mo_diff_nml
   contains
   
   subroutine diff_nml_setup
-
+    
     ! local variables
     integer :: fileunit
     
@@ -47,7 +47,7 @@ module mo_diff_nml
     ! Open and read namelist file.
     open(action="read",file="namelist.nml",newunit=fileunit)
     read(nml=diff,unit=fileunit)
-        
+    
     close(fileunit)
     
     if (lmom_diff_h) then
@@ -80,7 +80,7 @@ module mo_diff_nml
     else
       write(*,*) "Vertical mass diffusion is turned off."
     endif
-  
+    
   end subroutine diff_nml_setup
   
 end module mo_diff_nml

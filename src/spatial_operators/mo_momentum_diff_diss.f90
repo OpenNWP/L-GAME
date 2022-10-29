@@ -21,7 +21,7 @@ module mo_momentum_diff_diss
   contains
   
   subroutine mom_diff_h(state,diag,grid)
-  
+    
     ! This subroutine handles horizontal momentum diffusion.
     
     type(t_state), intent(in)    :: state ! state with which to calculate the horizontal diffusion
@@ -150,11 +150,11 @@ module mo_momentum_diff_diss
       enddo
     enddo
     !$omp end parallel do
-  
+    
   end subroutine mom_diff_h
 
   subroutine mom_diff_v(state,diag,grid)
-  
+    
     ! This subroutine handles vertical momentum diffusion.
     
     type(t_state), intent(in)    :: state ! state with which to calculate the horizontal diffusion
@@ -223,7 +223,7 @@ module mo_momentum_diff_diss
           /(0.5_wp*(sum(state%rho(ji,jk-1,jl,1:n_condensed_constituents+1)) &
                   + sum(state%rho(ji,jk,jl,1:n_condensed_constituents+1))))
         enddo
-      
+        
         ! periodic boundary conditions
         if (lperiodic) then
           diag%mom_diff_tend_x(ji,1,jl) = diag%mom_diff_tend_x(ji,1,jl) &
@@ -234,7 +234,7 @@ module mo_momentum_diff_diss
                   + sum(state%rho(ji,1,jl,1:n_condensed_constituents+1))))
           diag%mom_diff_tend_x(ji,nx+1,jl) = diag%mom_diff_tend_x(ji,1,jl)
         endif
-      
+        
       enddo
     enddo
     !$omp end parallel do
@@ -250,7 +250,7 @@ module mo_momentum_diff_diss
           /(0.5_wp*(sum(state%rho(ji-1,jk,jl,1:n_condensed_constituents+1)) &
                   + sum(state%rho(ji,jk,jl,1:n_condensed_constituents+1))))
         enddo
-      
+        
         ! periodic boundary conditions
         if (lperiodic) then
           diag%mom_diff_tend_y(1,jk,jl) = diag%mom_diff_tend_y(1,jk,jl) &
@@ -261,7 +261,7 @@ module mo_momentum_diff_diss
                   + sum(state%rho(1,jk,jl,1:n_condensed_constituents+1))))
           diag%mom_diff_tend_y(ny+1,jk,jl) = diag%mom_diff_tend_y(1,jk,jl)
         endif
-      
+        
       enddo
     enddo
     !$omp end parallel do
@@ -323,7 +323,7 @@ module mo_momentum_diff_diss
   end subroutine mom_diff_v
   
   subroutine simple_dissipation_rate(state,diag,grid)
-  
+    
     ! This subroutine calculates a simplified dissipation rate.
     
     ! input arguments and output
@@ -338,7 +338,7 @@ module mo_momentum_diff_diss
     !$omp parallel workshare
     diag%heating_diss = -sum(state%rho(:,:,:,1:n_condensed_constituents+1),4)*diag%heating_diss
     !$omp end parallel workshare
-  
+    
   end subroutine simple_dissipation_rate
 
 end module mo_momentum_diff_diss

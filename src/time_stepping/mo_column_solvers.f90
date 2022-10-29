@@ -2,9 +2,9 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_column_solvers
-
+  
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
-
+  
   use mo_run_nml,          only: ny,nx,n_layers,n_levels,dtime,toa
   use mo_constituents_nml, only: n_condensed_constituents,n_constituents,lmoist, &
                                  snow_velocity,rain_velocity,cloud_droplets_velocity,graupel_velocity
@@ -13,13 +13,13 @@ module mo_column_solvers
   use mo_surface_nml,      only: nsoillays,lprog_soil_temp,lsfc_sensible_heat_flux
   use mo_constants,        only: M_PI,r_d,c_d_v,c_d_p,m_d,m_v,impl_thermo_weight
   use mo_dictionary,       only: c_p_cond
-
+  
   implicit none
   
   contains
   
   subroutine three_band_solver_ver(state_old,state_new,state_target,diag,tend,grid,rk_step)
-  
+    
     ! This subroutine is the main implicit vertical solver.
     
     type(t_state), intent(in)    :: state_old    ! state at the old time step
@@ -29,7 +29,7 @@ module mo_column_solvers
     type(t_tend),  intent(inout) :: tend         ! explicit tendencies
     type(t_grid),  intent(in)    :: grid         ! model grid
     integer,       intent(in)    :: rk_step      ! Runge Kutta substep
-
+    
     ! local variables
     integer  :: soil_switch                           ! soil switch: 0 if soil does not have to be calculated off, 1 if soil has to be calculated
     real(wp) :: c_vector(n_layers-2+nsoillays)        ! needed for the vertical solver
@@ -73,13 +73,13 @@ module mo_column_solvers
       !$omp parallel do private(ji,jk,t_gas_lowest_layer_old,t_gas_lowest_layer_new)
       do ji=1,ny
         do jk=1,nx
-
+          
           ! gas temperature in the lowest layer
           t_gas_lowest_layer_old = (grid%exner_bg(ji,jk,n_layers)+state_old%exner_pert(ji,jk,n_layers)) &
           *(grid%theta_v_bg(ji,jk,n_layers)+state_old%theta_v_pert(ji,jk,n_layers))
           t_gas_lowest_layer_new = (grid%exner_bg(ji,jk,n_layers)+state_new%exner_pert(ji,jk,n_layers)) &
           *(grid%theta_v_bg(ji,jk,n_layers)+state_new%theta_v_pert(ji,jk,n_layers))
-        
+          
           ! converting the virtual temperature to the real temperature
           if (lmoist) then
             t_gas_lowest_layer_old = t_gas_lowest_layer_old/(1._wp+state_old%rho(ji,jk,n_layers,n_condensed_constituents+2) &
@@ -87,13 +87,13 @@ module mo_column_solvers
             t_gas_lowest_layer_new = t_gas_lowest_layer_new/(1._wp+state_new%rho(ji,jk,n_layers,n_condensed_constituents+2) &
                                      /state_new%rho(ji,jk,n_layers,n_condensed_constituents+1)*(m_d/m_v-1._wp))
           endif
-
+          
           ! the sensible power flux density
           diag%power_flux_density_sensible(ji,jk) = 0.5_wp*c_d_v*(state_new%rho(ji,jk,n_layers,n_condensed_constituents+1) &
           *(t_gas_lowest_layer_old - state_old%temperature_soil(ji,jk,1)) &
           + state_old%rho(ji,jk,n_layers,n_condensed_constituents+1) &
           *(t_gas_lowest_layer_new - state_new%temperature_soil(ji,jk,1)))/diag%scalar_flux_resistance(ji,jk)
-
+          
           ! contribution of sensible heat to rhotheta_v
           tend%rhotheta_v(ji,jk,n_layers) = tend%rhotheta_v(ji,jk,n_layers) &
           -grid%area_z(ji,jk,n_levels)*diag%power_flux_density_sensible(ji,jk) &
@@ -110,13 +110,13 @@ module mo_column_solvers
     !$omp beta_new,gamma_new,alpha,beta,gammaa,damping_coeff,above_damping,soil_switch)
     do ji=1,ny
       do jk=1,nx
-      
+        
         ! determining wether soil needs to be calculated
         soil_switch = 0
         if (lprog_soil_temp .and. grid%is_land(ji,jk)==1) then
           soil_switch=1
         endif
-      
+        
         ! explicit quantities
         do jl=1,n_layers
           ! explicit density
@@ -166,7 +166,7 @@ module mo_column_solvers
           theta_v_int_new(jl) = 0.5_wp*(state_new%rhotheta_v(ji,jk,jl)/state_new%rho(ji,jk,jl,n_condensed_constituents+1) &
           + state_new%rhotheta_v(ji,jk,jl+1)/state_new%rho(ji,jk,jl+1,n_condensed_constituents+1))
         enddo
-      
+        
         ! filling up the coefficient vectors
         do jl=1,n_layers-1
           ! main diagonal
@@ -243,7 +243,7 @@ module mo_column_solvers
             + heat_flux_density_expl(jl)) &
             /((grid%z_soil_interface(jl) - grid%z_soil_interface(jl+1))*grid%sfc_rho_c(ji,jk))*dtime
           enddo
-  
+          
           ! the diagonal component
           do jl=1,nsoillays
             if (jl==1) then
@@ -277,7 +277,7 @@ module mo_column_solvers
         
         ! calling the subroutine to solve the system of linear equations
         call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,n_layers-1+soil_switch*nsoillays)
-       
+         
         ! Klemp swamp layer
         do jl=1,n_layers-1
           above_damping = grid%z_w(ji,jk,jl+1)-damping_start_height
@@ -334,11 +334,11 @@ module mo_column_solvers
     state_target%theta_v_pert(:,:,:) = state_target%rhotheta_v(:,:,:)/state_target%rho(:,:,:,n_condensed_constituents+1) &
     - grid%theta_v_bg(:,:,:)
     !$omp end parallel workshare
-
+    
   end subroutine three_band_solver_ver
   
   subroutine three_band_solver_gen_densities(state_old,state_new,tend,diag,grid,rk_step)
-  
+    
     ! Vertical advection of generalized densities (of tracers) with 3-band matrices.
     ! mass densities, density x temperatures
     
@@ -371,7 +371,7 @@ module mo_column_solvers
     
     ! firstly the number of relevant constituents needs to be determined
     n_relevant_constituents = n_constituents ! the main gaseous constituent is excluded later
-
+    
     ! loop over all relevant constituents
     do jc=1,n_relevant_constituents
       ! This is done do all tracers apart from the main gaseous constituent.
@@ -382,7 +382,7 @@ module mo_column_solvers
         !$omp d_vector,e_vector,r_vector,solution_vector,added_mass,vertical_enthalpy_flux_vector,temperature_old_at_interface)
         do ji=1,ny
           do jk=1,nx
-
+            
             ! diagnozing the vertical fluxes
             do jl=1,n_layers-1
               ! resetting the vertical enthalpy flux density divergence
@@ -429,9 +429,9 @@ module mo_column_solvers
             if (rk_step==1 .and. jc==1) then
               diag%condensates_sediment_heat(ji,jk,n_layers) = 0._wp
             endif
-
+            
             ! Now we proceed to solving the vertical tridiagonal problems.
-
+            
             ! filling up the original vectors
             do jl=1,n_layers-1
               if (vertical_flux_vector_impl(jl)>=0._wp) then
@@ -528,32 +528,32 @@ module mo_column_solvers
                 endif
               endif
             enddo
-
+            
             ! calling the algorithm to solve the system of linear equations
             call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,n_layers)
-      
+            
             ! this should account for round-off errors only
             do jl=1,n_layers
               if (solution_vector(jl)<0._wp) then
                 solution_vector(jl) = 0._wp
               endif
             enddo
-
+            
             ! writing the result into the new state
             do jl=1,n_layers
               state_new%rho(ji,jk,jl,jc) = solution_vector(jl)
             enddo
-          
+            
           enddo ! column index
         enddo ! line index
         !$omp end parallel do
       endif
     enddo ! constituent
-  
+    
   end subroutine three_band_solver_gen_densities
   
   subroutine thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,solution_length)
-
+    
     ! This subroutine solves a system of linear equations with a three-band matrix.
     
     real(wp), intent(in)    :: c_vector(:)        ! lower diagonal vector
@@ -585,9 +585,9 @@ module mo_column_solvers
     do jl=solution_length-1,1,-1
       solution_vector(jl) = r_prime_vector(jl) - e_prime_vector(jl)*solution_vector(jl+1)
     enddo
-  
+    
   end subroutine thomas_algorithm
-
+  
 end module mo_column_solvers
 
 

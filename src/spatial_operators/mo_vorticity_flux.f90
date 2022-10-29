@@ -14,7 +14,7 @@ module mo_vorticity_flux
   contains
   
   subroutine calc_vorticity_flux_term(diag,grid)
-  
+    
     ! This module computes the vorticity flux.
     
     type(t_diag), intent(inout) :: diag ! diagnostic quantities (the vorticity flux term is included here)
@@ -165,7 +165,7 @@ module mo_vorticity_flux
       enddo
     enddo
     !$omp end parallel do
-  
+    
   end subroutine calc_vorticity_flux_term
 
 end module mo_vorticity_flux

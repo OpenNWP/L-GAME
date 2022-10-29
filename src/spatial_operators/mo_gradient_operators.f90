@@ -9,13 +9,13 @@ module mo_gradient_operators
   use mo_run_nml,     only: ny,nx,n_layers,toa,n_flat_layers
   use mo_averaging,   only: remap_ver2hor_x,remap_ver2hor_y
   use mo_bc_nml,      only: lperiodic
-    
+  
   implicit none
   
   contains
   
   subroutine grad_hor_cov(scalar_field,result_field_x,result_field_y,grid)
-
+    
     ! This subroutine computes the horizontal covariant gradient of a scalar field.
     
     real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
@@ -62,7 +62,7 @@ module mo_gradient_operators
   end subroutine grad_hor_cov
   
   subroutine grad_vert(scalar_field,result_field,grid)
-
+    
     ! This subroutine computes the vertical covariant gradient of a scalar field.
     
     real(wp),     intent(in)    :: scalar_field(:,:,:) ! scalar field of which to calculate the gradient
@@ -71,14 +71,14 @@ module mo_gradient_operators
     
     ! local variables
     integer :: jl ! spatial indices
-
+    
     ! calculating the vertical gradient in the inner levels
     !$omp parallel do private(jl)
     do jl=2,n_layers
       result_field(:,:,jl) = (scalar_field(:,:,jl-1) - scalar_field(:,:,jl))/grid%dz(:,:,jl)
     enddo
     !$omp end parallel do
-
+    
   end subroutine grad_vert
   
   subroutine grad_hor(scalar_field,result_field_x,result_field_y,result_field_z,grid)
@@ -97,7 +97,7 @@ module mo_gradient_operators
     
     ! computing the horizontal covariant gradient
     call grad_hor_cov(scalar_field,result_field_x,result_field_y,grid)
-
+    
     ! correction for terrain
     
     ! correction to the x-component
@@ -123,9 +123,9 @@ module mo_gradient_operators
       enddo
     enddo
     !$omp end parallel do
-  
+    
   end subroutine grad_hor
-
+  
 end module mo_gradient_operators
 
 

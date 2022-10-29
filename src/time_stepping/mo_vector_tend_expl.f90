@@ -2,9 +2,9 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_vector_tend_expl
-
+  
   ! This module manages the calculation of the explicit part of the wind tendencies.
-
+  
   use mo_definitions,        only: t_grid,t_state,t_diag,t_tend,wp
   use mo_constants,          only: impl_thermo_weight
   use mo_inner_product,      only: inner_product
@@ -20,15 +20,15 @@ module mo_vector_tend_expl
   use mo_tke,                only: tke_update
   use mo_pbl,                only: pbl_wind_tendency
   use mo_surface_nml,        only: lpbl
-
+  
   implicit none
   
   contains
-
+  
   subroutine vector_tend_expl(state,tend,diag,grid,rk_step,total_step_counter)
-  
+    
     ! This subroutine manages the calculation of the explicit part of the wind tendencies.
-  
+    
     type(t_state), intent(in)    :: state              ! state to use for calculating the tendencies
     type(t_tend),  intent(inout) :: tend               ! the tendency
     type(t_diag),  intent(inout) :: diag               ! diagnostic properties
@@ -41,7 +41,7 @@ module mo_vector_tend_expl
     real(wp) :: current_hor_pgrad_weight ! current time step horizontal pressure gradient weight
     real(wp) :: current_ver_pgrad_weight ! current time step vertical pressure gradient weight
     real(wp) :: old_weight,new_weight    ! Runge-Kutta weights
-     
+    
     ! momentum advection
     if ((rk_step==2 .or. total_step_counter==0) .and. ((.not. llinear) .or. lcorio)) then
       ! calculating the mass flux density
@@ -107,7 +107,7 @@ module mo_vector_tend_expl
     ! new time step pressure gradient component
     - current_hor_pgrad_weight*(diag%p_grad_acc_neg_nl_u + diag%p_grad_acc_neg_l_u) &
     ! momentum advection
-    - 0.5_wp*diag%v_squared_grad_x + diag%pot_vort_tend_x & 
+    - 0.5_wp*diag%v_squared_grad_x + diag%pot_vort_tend_x &
     ! momentum diffusion
     + diag%mom_diff_tend_x)
     !$omp end parallel workshare
@@ -141,7 +141,7 @@ module mo_vector_tend_expl
     !$omp end parallel workshare
     
   end subroutine vector_tend_expl
-
+  
 end module mo_vector_tend_expl
 
 

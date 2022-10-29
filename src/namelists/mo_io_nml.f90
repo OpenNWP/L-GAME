@@ -2,9 +2,9 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_io_nml
-
+  
   ! This nameslist configures the IO behaviour of the model.
-
+  
   use mo_definitions, only: wp
   
   implicit none
@@ -22,11 +22,11 @@ module mo_io_nml
   
   namelist /io/dt_write_min,lread_oro,lwrite_grid,grid_filename,restart_filename,lread_land_sea,land_sea_filename, &
   lset_oro
-
-  contains
-
-  subroutine io_nml_setup
   
+  contains
+  
+  subroutine io_nml_setup
+    
     ! local variables
     integer :: fileunit
     
@@ -54,7 +54,7 @@ module mo_io_nml
       write(*,*) "Error: lset_oro and lread_oro cannot both be true at the same time."
       call exit(1)
     endif
-  
+    
   end subroutine io_nml_setup
   
 end module mo_io_nml

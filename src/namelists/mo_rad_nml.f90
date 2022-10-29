@@ -2,7 +2,7 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_rad_nml
-
+  
   ! In this namelist, the radiation is configured.
   
   use mo_definitions, only: wp
@@ -23,7 +23,7 @@ module mo_rad_nml
   contains
   
   subroutine rad_nml_setup
-
+    
     ! local variables
     integer :: fileunit
     
@@ -38,9 +38,9 @@ module mo_rad_nml
     ! Open and read namelist file.
     open(action="read",file="namelist.nml",newunit=fileunit)
     read(nml=rad,unit=fileunit)
-        
+    
     close(fileunit)
-  
+    
   end subroutine rad_nml_setup
-
+  
 end module mo_rad_nml

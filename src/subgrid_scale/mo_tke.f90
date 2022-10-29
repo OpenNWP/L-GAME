@@ -17,9 +17,9 @@ module mo_tke
   contains
   
   subroutine tke_update(state,diag,grid)
-  
+    
     ! This subroutine updates the specific turbulent kinetic energy (TKE), unit: J/kg.
-  
+    
     ! input arguments and output
     type(t_state), intent(in)    :: state ! state
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
@@ -61,7 +61,7 @@ module mo_tke
       enddo
     enddo
     !$omp end parallel do
-  
+    
   end subroutine tke_update
   
 end module mo_tke

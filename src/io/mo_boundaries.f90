@@ -2,22 +2,22 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_boundaries
-
+  
   ! This module handles everything dealing with boundary conditions.
-
+  
   use mo_definitions,       only: t_state,t_bc,t_grid,wp
   use mo_run_nml,           only: ny,nx,n_layers,n_levels,t_init
   use mo_bc_nml,            only: n_swamp,bc_root_filename,bc_root_filename,dtime_bc,t_latest_bc
   use mo_constants,         only: M_PI,p_0,r_d,c_d_v
   use mo_constituents_nml,  only: n_condensed_constituents
   use mo_set_initial_state, only: read_from_nc
-
+  
   implicit none
   
   contains
   
   subroutine update_boundaries(state,bc,t_now,grid)
-  
+    
     ! This subroutine brings the boundary conditions into the model.
     
     ! input arguments and output
@@ -95,7 +95,7 @@ module mo_boundaries
   end subroutine update_boundaries
   
   subroutine read_boundaries(bc,t_update,time_step_index)
-  
+    
     ! This subroutine reads the boundary conditions from a NetCDF file.
     
     type(t_bc), intent(inout) :: bc              ! boundary conditions
@@ -111,21 +111,20 @@ module mo_boundaries
     trim(int2string(int(t_update - t_init))) // "s.nc"
     
     write(*,*) "Reading boundary conditions from file", trim(filename), "..."
-      
+    
     ! reading the boundary conditions from a the NetCDF file
     call read_from_nc(bc%rho(:,:,:,:,time_step_index),bc%rhotheta_v(:,:,:,time_step_index), &
     bc%wind_u(:,:,:,time_step_index),bc%wind_v(:,:,:,time_step_index),bc%wind_w(:,:,:,time_step_index),filename)
     
     write(*,*) "Boundary conditions read."
-  
+    
   end subroutine read_boundaries
   
   subroutine setup_bc_factor(bc)
-  
+    
     ! This subroutine calculates the boundary conditions rescale factors.
     ! It only needs to be called once (in the beginning).
-  
-    ! argument and output
+    
     type(t_bc), intent(inout) :: bc ! boundary conditions type
     
     ! local variables
@@ -164,13 +163,13 @@ module mo_boundaries
       enddo
     enddo
     !$omp end parallel do
-  
+    
   end subroutine setup_bc_factor
   
   character(len=64) function int2string(input)
-  
+    
     ! This is a helper function which converts an integer to a string.
-  
+    
     integer, intent(in) :: input
     
     write(int2string,*) input

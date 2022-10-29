@@ -4,7 +4,7 @@
 module mo_definitions
 
   ! This file contains some definitions.
-                            
+  
   implicit none
   
   ! setting the floating point precision
@@ -28,7 +28,7 @@ module mo_definitions
   
   ! type containing information on the model grid
   type t_grid
-  
+    
     real(wp), allocatable :: lat_scalar(:)                  ! latitudes of the scalar gridpoints
     real(wp), allocatable :: lon_scalar(:)                  ! longitudes of the scalar gridpoints
     real(wp), allocatable :: lat_geo_scalar(:,:)            ! geographic latitudes of the scalar gridpoints
@@ -90,7 +90,7 @@ module mo_definitions
   
   ! type containing the state variables
   type t_state
-  
+    
     real(wp), allocatable :: rho(:,:,:,:)            ! mass densities
     real(wp), allocatable :: rhotheta_v(:,:,:)       ! virtual potential temperature density
     real(wp), allocatable :: theta_v_pert(:,:,:)     ! virtual potential temperature perturbation
@@ -99,23 +99,23 @@ module mo_definitions
     real(wp), allocatable :: wind_v(:,:,:)           ! y-component of the wind
     real(wp), allocatable :: wind_w(:,:,:)           ! vertical wind
     real(wp), allocatable :: temperature_soil(:,:,:) ! temperature of the soil
-  
+    
   end type t_state
   
   ! type containing tendencies
   type t_tend
-  
+    
     real(wp), allocatable :: rho(:,:,:,:)      ! mass densities
     real(wp), allocatable :: rhotheta_v(:,:,:) ! virtual potential temperature densities
     real(wp), allocatable :: wind_u(:,:,:)     ! x-component of the wind
     real(wp), allocatable :: wind_v(:,:,:)     ! y-component of the wind
     real(wp), allocatable :: wind_w(:,:,:)     ! vertical wind
-  
+    
   end type t_tend
   
   ! type containing information on boundary conditions
   type t_bc
-  
+    
     real(wp), allocatable :: rho(:,:,:,:,:)        ! mass densities
     real(wp), allocatable :: rhotheta_v(:,:,:,:)   ! virtual potential temperature densities
     real(wp), allocatable :: wind_u(:,:,:,:)       ! x-component of the wind
@@ -131,7 +131,7 @@ module mo_definitions
   
   ! type containing diagnostic quantities
   type t_diag
-  
+    
     real(wp), allocatable :: v_squared(:,:,:)                        ! specific kinetic energy
     real(wp), allocatable :: p_grad_acc_neg_l_u(:,:,:)               ! x-component of linear pressure gradient acceleration
     real(wp), allocatable :: p_grad_acc_neg_l_v(:,:,:)               ! y-component of linear pressure gradient acceleration
@@ -200,7 +200,7 @@ module mo_definitions
     real(wp), allocatable :: temp_diff_heating(:,:,:)                ! heating due to temperature diffusion
     real(wp), allocatable :: condensates_sediment_heat(:,:,:)        ! heating rate due to falling condensates
     real(wp), allocatable :: mass_diff_tendency(:,:,:,:)             ! mass source rate due to mass diffusion
-  
+    
   end type t_diag
   
 end module mo_definitions

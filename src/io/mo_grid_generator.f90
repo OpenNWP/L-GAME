@@ -25,9 +25,9 @@ module mo_grid_generator
   contains
   
   subroutine grid_setup(grid)
-  
+    
     ! This module computes the grid quantities.
-  
+    
     type(t_grid), intent(inout) :: grid ! the model grid
     
     ! local variables
@@ -854,7 +854,7 @@ module mo_grid_generator
   end subroutine grid_setup
   
   subroutine bg_setup(grid)
-  
+    
     ! This subroutine sets up the background state.
     
     type(t_grid), intent(inout) :: grid ! the model grid
@@ -894,14 +894,14 @@ module mo_grid_generator
     ! calculating the gradient of the background Exner pressure (only needs to be done once)
     call grad_vert(grid%exner_bg,grid%exner_bg_grad_w,grid)
     call grad_hor(grid%exner_bg,grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
-  
+    
     ! calculating the vertical acceleration due to gravity
     call grad_vert(grid%gravity_potential,grid%gravity_m_v,grid)
-  
+    
   end subroutine bg_setup
   
   subroutine set_orography(grid)
-  
+    
     ! This subroutine interpolates the real orography from ETOPO1 to the model grid.
     
     type(t_grid), intent(inout) :: grid ! grid quantities
@@ -969,14 +969,14 @@ module mo_grid_generator
     
         lat_index = find_min_index(lat_distance_vector)
         lon_index = find_min_index(lon_distance_vector)
-          
+        
         grid%z_w(ji,jk,n_levels) = real(z_input(lon_index,lat_index),wp)
 
         ! check
         if (grid%z_w(ji,jk,n_levels)<-382._wp .or. grid%z_w(ji,jk,n_levels)>8850._wp) then
           write(*,*) "Warning: orography value out of usual range."
         endif
-      
+        
       enddo
     enddo
 
@@ -986,11 +986,11 @@ module mo_grid_generator
     deallocate(z_input)
     deallocate(latitude_input)
     deallocate(longitude_input)
-  
+    
   end subroutine set_orography
   
   subroutine smooth_hor_scalar(array)
-  
+    
     ! This subroutine smoothes a scalar field on one layer.
     
     real(wp), intent(inout) :: array(ny,nx) ! The field to smooth.
@@ -1016,7 +1016,7 @@ module mo_grid_generator
     array(1,nx) = sum(original_array(1:2,nx-1:nx))/4._wp
     array(ny,1) = sum(original_array(ny-1:ny,1:2))/4._wp
     array(ny,nx) = sum(original_array(ny-1:ny,nx-1:nx))/4._wp
-  
+    
     ! boundaries
     !$omp parallel do private(jk)
     do jk=2,nx-1
@@ -1042,7 +1042,7 @@ module mo_grid_generator
   end subroutine smooth_hor_scalar
   
   function find_min_index(input_vector)
-  
+    
     ! This function finds the index where a vector assumes its minimum.
     
     real(wp) :: input_vector(:)
@@ -1061,7 +1061,7 @@ module mo_grid_generator
         find_min_index = ji
       endif
     enddo
-  
+    
   end function find_min_index
   
   function patch_area(center_lat,dx_as_angle,dy_as_angle)
@@ -1084,7 +1084,7 @@ module mo_grid_generator
   end function patch_area
   
   function vertical_face_area(lower_z,upper_z,lower_length)
-  
+    
     ! This function calculates the area of a vertical face.
     
     ! input
@@ -1100,11 +1100,11 @@ module mo_grid_generator
     if (lplane) then
       vertical_face_area = lower_length*(upper_z - lower_z)
     endif
-  
+    
   end function vertical_face_area
   
   function vegetation_height_ideal(latitude,oro)
-  
+    
     ! This function calculates a latitude- and height-dependant idealized vegetation height.
 
     real(wp) :: latitude                ! latitude of this point
