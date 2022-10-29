@@ -158,9 +158,9 @@ module mo_grid_generator
     rot_z(3,2) = 0._wp
     rot_z(3,3) = 1._wp
     rot = matmul(rot_z,rot_y)
-	
-	! calculating the geographic coordinates of the gridpoints
-	! scalar points
+    
+    ! calculating the geographic coordinates of the gridpoints
+    ! scalar points
     !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
     do jk=1,nx
       do ji=1,ny
@@ -206,7 +206,7 @@ module mo_grid_generator
       enddo
     enddo
     !$omp end parallel do
-	
+    
     ! v-vector points, including directions
     !$omp parallel do private(ji,jk,r_old,r_new,basis_old,basis_new,local_i,local_j,x_basis_local,y_basis_local)
     do jk=1,nx
@@ -328,14 +328,14 @@ module mo_grid_generator
     !$omp parallel do private(ji,jk,x_coord)
     do jk=1,nx
       do ji=1,ny
-		
-		! seabreeze land-sea mask
+        
+        ! seabreeze land-sea mask
         if (trim(scenario)=="seabreeze") then
           if (jk>=nx/4 .and. jk<=3*nx/4) then
             grid%is_land(ji,jk) = 1
           endif
         endif
-		    
+        
         grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
             
         ! albedo of water
@@ -343,13 +343,13 @@ module mo_grid_generator
 
         ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
         grid%roughness_length(ji,jk) = 0.08_wp
-		
+        
         ! will also not be used for water
         grid%sfc_rho_c(ji,jk) = rho_h2o*c_p_water
         
         grid%t_conduc_soil(ji,jk) = 1.4e-7_wp
-		
-		! land
+        
+        ! land
         if (grid%is_land(ji,jk)==1) then
         
           grid%t_conduc_soil(ji,jk) = 7.5e-7_wp
@@ -369,8 +369,8 @@ module mo_grid_generator
           grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_geo_scalar(ji,jk),grid%z_w(ji,jk,n_levels))/8._wp
           
         endif
-		
-	    ! restricting the roughness length to a minimum
+        
+        ! restricting the roughness length to a minimum
         grid%roughness_length(ji,jk) = max(0.0001_wp,grid%roughness_length(ji,jk))
       
       enddo

@@ -150,13 +150,13 @@ module mo_divergence_operators
   
   subroutine add_vertical_div(in_field,out_field,grid)
 
-    ! This subroutine adds the divergence of the vertical component of a vector field to the input scalar field.	
+    ! This subroutine adds the divergence of the vertical component of a vector field to the input scalar field.
 
     real(wp),     intent(in)    :: in_field(:,:,:)  ! input vertical vector field
     real(wp),     intent(inout) :: out_field(:,:,:) ! scalar field to which the vertical divergence will be added
     type(t_grid), intent(in)    :: grid             ! grid properties
 
-    !local variables
+    ! local variables
     integer  :: ji,jk,jl                         ! spatial indices
     real(wp) :: contra_upper,contra_lower,comp_v ! kinematic quantities for computing the vertical divergence
     

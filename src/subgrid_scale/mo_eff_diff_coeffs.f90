@@ -224,8 +224,8 @@ module mo_eff_diff_coeffs
   subroutine vert_hor_mom_viscosity(state,diag,grid)
   
     ! This subroutine computes the effective viscosity (eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
-	! This quantity is located at the half level edges.
-	! To obey the symmetry of the stress tensor, the same coefficient must be used for the horizontal diffusion of vertical velocity.
+    ! This quantity is located at the half level edges.
+    ! To obey the symmetry of the stress tensor, the same coefficient must be used for the horizontal diffusion of vertical velocity.
   
     ! input arguments and output
     type(t_state), intent(in)    :: state ! state
@@ -233,9 +233,9 @@ module mo_eff_diff_coeffs
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer :: ji,jk,jl               ! loop indices
-	
-	!  updating the TKE
+    integer :: ji,jk,jl ! loop indices
+    
+    !  updating the TKE
     call tke_update(state,diag,grid)
     
     !$omp parallel do private(ji,jk,jl)

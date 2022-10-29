@@ -103,7 +103,7 @@ module mo_column_solvers
       enddo
       !$omp end parallel do
     endif
-	
+    
     !$omp parallel do private(ji,jk,jl,c_vector,d_vector,e_vector,r_vector,solution_vector, &
     !$omp rho_expl,rhotheta_v_expl,exner_pert_expl,theta_v_pert_expl,rho_int_old, &
     !$omp rho_int_expl,theta_v_int_new,rho_int_new,alpha_old,beta_old,gamma_old,alpha_new, &
@@ -200,7 +200,7 @@ module mo_column_solvers
           + (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_thermo_weight*dtime*c_d_p)*0.5_wp &
           *state_old%wind_w(ji,jk,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
         enddo
-	
+        
         ! soil components of the matrix
         if (soil_switch==1) then
           ! calculating the explicit part of the heat flux density
@@ -274,7 +274,7 @@ module mo_column_solvers
             /(grid%z_soil_center(jl) - grid%z_soil_center(jl+1))
           enddo
         endif
-		
+        
         ! calling the subroutine to solve the system of linear equations
         call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,n_layers-1+soil_switch*nsoillays)
        
@@ -324,7 +324,7 @@ module mo_column_solvers
             state_target%temperature_soil(ji,jk,jl) = solution_vector(n_layers-1+jl)
           enddo
         endif
-		
+        
       enddo
     enddo
     !$omp end parallel do
