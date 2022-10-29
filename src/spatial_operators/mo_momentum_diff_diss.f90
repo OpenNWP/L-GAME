@@ -1,5 +1,5 @@
 ! This ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
-! Github repository: https:!github.com/OpenNWP/L-GAME
+! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_momentum_diff_diss
 
