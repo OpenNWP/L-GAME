@@ -98,8 +98,7 @@ module mo_rrtmgp_coupler
     real(wp)                              :: albedo_dif(n_sw_bands,nx)               ! surface albedo for diffusive radiation
     real(wp)                              :: albedo_dir_day(n_sw_bands,nx)           ! surface albedo for direct radiation (day points only)
     real(wp)                              :: albedo_dif_day(n_sw_bands,nx)           ! surface albedo for diffusive radiation (day points only)
-    real(wp)                              :: mu_0_day(nx)                            ! solar zenith angle (day points only)
-    real(wp)                              :: temp_sfc_day(nx)                        ! temperature at the surface (day points only)
+    real(wp), allocatable                 :: mu_0_day(:)                             ! solar zenith angle (day points only)
     real(wp)                              :: temperature_rad(nx,n_layers)            ! reformatted temperature field
     real(wp)                              :: pressure_rad(nx,n_layers)               ! reformatted pressure field
     real(wp)                              :: pressure_interface_rad(nx,n_levels)     ! pressure at cell interfaces
@@ -307,12 +306,12 @@ module mo_rrtmgp_coupler
     ! short wave first
     ! filling up the arrays restricted to day points
     allocate(ice_eff_radius_day(nx,n_layers))
+    allocate(mu_0_day(nx))
     do j_day=1,n_day_points
       temperature_rad_day(j_day,:) = temperature_rad(day_indices(j_day),:)
       pressure_rad_day(j_day,:) = pressure_rad(day_indices(j_day),:)
       pressure_interface_rad_day(j_day,:)= pressure_interface_rad(day_indices(j_day),:)
       mu_0_day(j_day) = mu_0(day_indices(j_day))
-      temp_sfc_day(j_day) = temp_sfc(day_indices(j_day))
       albedo_dir_day(:,j_day) = albedo_dir(:,day_indices(j_day))  
       albedo_dif_day(:,j_day) = albedo_dif(:,day_indices(j_day))
       liquid_water_path_day(j_day,:) = liquid_water_path(day_indices(j_day),:)
@@ -362,6 +361,7 @@ module mo_rrtmgp_coupler
     ! for efficiency)
     call handle_error(rte_sw(atmos_props_sw,.true.,mu_0_day(1:n_day_points),toa_flux,albedo_dir_day(:,1:n_day_points), &
                              albedo_dif_day(:,1:n_day_points),fluxes_day))
+    deallocate(mu_0_day)
     
     ! short wave result (in Wm^-3)
     call calc_power_density(.true.,n_day_points,day_indices,fluxes_day,z_vector,radiation_tendency)
