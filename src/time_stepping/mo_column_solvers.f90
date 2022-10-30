@@ -31,37 +31,37 @@ module mo_column_solvers
     integer,       intent(in)    :: rk_step      ! Runge Kutta substep
     
     ! local variables
-    integer  :: soil_switch                           ! soil switch: 0 if soil does not have to be calculated off, 1 if soil has to be calculated
-    real(wp) :: c_vector(n_layers-2+nsoillays)        ! needed for the vertical solver
-    real(wp) :: d_vector(n_layers-1+nsoillays)        ! needed for the vertical solver
-    real(wp) :: e_vector(n_layers-2+nsoillays)        ! needed for the vertical solver
-    real(wp) :: r_vector(n_layers-1+nsoillays)        ! needed for the vertical solver
-    real(wp) :: rho_expl(n_layers)                    ! explicit mass density
-    real(wp) :: rhotheta_v_expl(n_layers)             ! explicit virtual potential temperature density
-    real(wp) :: exner_pert_expl(n_layers)             ! explicit Exner pressure perturbation
-    real(wp) :: theta_v_pert_expl(n_layers)           ! explicit virtual potential temperature perturbation
-    real(wp) :: rho_int_old(n_layers-1)               ! old interface mass density
-    real(wp) :: rho_int_expl(n_layers-1)              ! explicit interface mass density
-    real(wp) :: theta_v_int_new(n_layers-1)           ! preliminary new virtual potential temperature interface values
-    real(wp) :: rho_int_new                           ! new density interface value
-    real(wp) :: alpha_old(n_layers)                   ! alpha at the old time step
-    real(wp) :: beta_old(n_layers)                    ! beta at the old time step
-    real(wp) :: gamma_old(n_layers)                   ! gamma at the old time step
-    real(wp) :: alpha_new(n_layers)                   ! alpha at the new time step
-    real(wp) :: beta_new(n_layers)                    ! beta at the new time step
-    real(wp) :: gamma_new(n_layers)                   ! gamma at the new time step
-    real(wp) :: alpha(n_layers)                       ! alpha
-    real(wp) :: beta(n_layers)                        ! beta
-    real(wp) :: gammaa(n_layers)                      ! gamma
-    real(wp) :: damping_start_height                  ! lower boundary height of the Klemp layer
-    real(wp) :: damping_coeff                         ! damping coefficient of the Klemp layer
-    real(wp) :: above_damping                         ! height above the lower boundary of the damping height
-    real(wp) :: t_gas_lowest_layer_old                ! temperature of the gas in the lowest layer of the model atmosphere, old time step
-    real(wp) :: t_gas_lowest_layer_new                ! temperature of the gas in the lowest layer of the model atmosphere, new time step
-    real(wp) :: heat_flux_density_expl(nsoillays)     ! explicit heat_flux_density in the soil
-    real(wp) :: solution_vector(n_layers-1+nsoillays) ! vector containing the solution of the linear problem to solve here
-    real(wp) :: partial_deriv_new_time_step_weight    ! partial derivatives weight of the new time step
-    integer  :: ji,jk,jl                              ! loop variables
+    integer  :: soil_switch                                 ! soil switch: 0 if soil does not have to be calculated off, 1 if soil has to be calculated
+    real(wp) :: c_vector(n_layers-2+nsoillays)              ! needed for the vertical solver
+    real(wp) :: d_vector(n_layers-1+nsoillays)              ! needed for the vertical solver
+    real(wp) :: e_vector(n_layers-2+nsoillays)              ! needed for the vertical solver
+    real(wp) :: r_vector(n_layers-1+nsoillays)              ! needed for the vertical solver
+    real(wp) :: rho_expl(n_layers)                          ! explicit mass density
+    real(wp) :: rhotheta_v_expl(n_layers)                   ! explicit virtual potential temperature density
+    real(wp) :: exner_pert_expl(n_layers)                   ! explicit Exner pressure perturbation
+    real(wp) :: theta_v_pert_expl(n_layers)                 ! explicit virtual potential temperature perturbation
+    real(wp) :: rho_int_old(n_layers-1)                     ! old interface mass density
+    real(wp) :: rho_int_expl(n_layers-1)                    ! explicit interface mass density
+    real(wp) :: theta_v_int_new(n_layers-1)                 ! preliminary new virtual potential temperature interface values
+    real(wp) :: rho_int_new                                 ! new density interface value
+    real(wp) :: alpha_old(n_layers)                         ! alpha at the old time step
+    real(wp) :: beta_old(n_layers)                          ! beta at the old time step
+    real(wp) :: gamma_old(n_layers)                         ! gamma at the old time step
+    real(wp) :: alpha_new(n_layers)                         ! alpha at the new time step
+    real(wp) :: beta_new(n_layers)                          ! beta at the new time step
+    real(wp) :: gamma_new(n_layers)                         ! gamma at the new time step
+    real(wp) :: alpha(n_layers)                             ! alpha
+    real(wp) :: beta(n_layers)                              ! beta
+    real(wp) :: gammaa(n_layers)                            ! gamma
+    real(wp) :: damping_start_height                        ! lower boundary height of the Klemp layer
+    real(wp) :: damping_coeff,damping_prefactor(n_layers-1) ! damping coefficients of the Klemp layer
+    real(wp) :: above_damping                               ! height above the lower boundary of the damping height
+    real(wp) :: t_gas_lowest_layer_old                      ! temperature of the gas in the lowest layer of the model atmosphere, old time step
+    real(wp) :: t_gas_lowest_layer_new                      ! temperature of the gas in the lowest layer of the model atmosphere, new time step
+    real(wp) :: heat_flux_density_expl(nsoillays)           ! explicit heat_flux_density in the soil
+    real(wp) :: solution_vector(n_layers-1+nsoillays)       ! vector containing the solution of the linear problem to solve here
+    real(wp) :: partial_deriv_new_time_step_weight          ! partial derivatives weight of the new time step
+    integer  :: ji,jk,jl                                    ! loop variables
     
     damping_start_height = klemp_begin_rel*toa
     
@@ -107,7 +107,7 @@ module mo_column_solvers
     !$omp parallel do private(ji,jk,jl,c_vector,d_vector,e_vector,r_vector,solution_vector, &
     !$omp rho_expl,rhotheta_v_expl,exner_pert_expl,theta_v_pert_expl,rho_int_old, &
     !$omp rho_int_expl,theta_v_int_new,rho_int_new,alpha_old,beta_old,gamma_old,alpha_new, &
-    !$omp beta_new,gamma_new,alpha,beta,gammaa,damping_coeff,above_damping,soil_switch)
+    !$omp beta_new,gamma_new,alpha,beta,gammaa,damping_coeff,damping_prefactor,above_damping,soil_switch)
     do ji=1,ny
       do jk=1,nx
         
@@ -170,12 +170,20 @@ module mo_column_solvers
         ! filling up the coefficient vectors
         do jl=1,n_layers-1
           ! main diagonal
+          ! Klemp swamp layer
+          above_damping = grid%z_w(ji,jk,jl+1)-damping_start_height
+          if (above_damping<0._wp .or. .not. lklemp) then
+            damping_coeff = 0._wp
+          else
+            damping_coeff = klemp_damp_max*sin(0.5_wp*M_PI*above_damping/(toa-damping_start_height))**2
+          endif
+          damping_prefactor(jl) = 1._wp + damping_coeff*dtime
           d_vector(jl) = -theta_v_int_new(jl)**2*(gammaa(jl)+gammaa(jl+1)) &
           + 0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)-alpha(jl)+theta_v_int_new(jl)*(beta(jl+1)-beta(jl))) &
           - (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_thermo_weight*dtime**2*c_d_p*rho_int_old(jl)) &
           *(2._wp/grid%area_z(ji,jk,jl+1)+dtime*state_old%wind_w(ji,jk,jl+1)*0.5_wp &
-          *(-1._wp/grid%volume(ji,jk,jl)+1._wp/grid%volume(ji,jk,jl+1)))
+          *(-1._wp/grid%volume(ji,jk,jl)+1._wp/grid%volume(ji,jk,jl+1)))*damping_prefactor(jl)
           ! right hand side
           r_vector(jl) = -(state_old%wind_w(ji,jk,jl+1)+dtime*tend%wind_w(ji,jk,jl+1))* &
           (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1)) &
@@ -192,13 +200,13 @@ module mo_column_solvers
           + 0.5_wp*(grid%exner_bg(ji,jk,jl+1)-grid%exner_bg(ji,jk,jl+2)) &
           *(alpha(jl+1)+beta(jl+1)*theta_v_int_new(jl)) &
           - (grid%z_scalar(ji,jk,jl+1)-grid%z_scalar(ji,jk,jl+2))/(impl_thermo_weight*dtime*c_d_p)*0.5_wp &
-          *state_old%wind_w(ji,jk,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))
+          *state_old%wind_w(ji,jk,jl+2)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl+1))*damping_prefactor(jl+1)
           ! upper diagonal
           e_vector(jl) = theta_v_int_new(jl)*gammaa(jl+1)*theta_v_int_new(jl+1) &
           - 0.5_wp*(grid%exner_bg(ji,jk,jl)-grid%exner_bg(ji,jk,jl+1)) &
           *(alpha(jl+1)+beta(jl+1)*theta_v_int_new(jl+1)) &
           + (grid%z_scalar(ji,jk,jl)-grid%z_scalar(ji,jk,jl+1))/(impl_thermo_weight*dtime*c_d_p)*0.5_wp &
-          *state_old%wind_w(ji,jk,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))
+          *state_old%wind_w(ji,jk,jl+1)/(grid%volume(ji,jk,jl+1)*rho_int_old(jl))*damping_prefactor(jl)
         enddo
         
         ! soil components of the matrix
@@ -277,17 +285,6 @@ module mo_column_solvers
         
         ! calling the subroutine to solve the system of linear equations
         call thomas_algorithm(c_vector,d_vector,e_vector,r_vector,solution_vector,n_layers-1+soil_switch*nsoillays)
-         
-        ! Klemp swamp layer
-        do jl=1,n_layers-1
-          above_damping = grid%z_w(ji,jk,jl+1)-damping_start_height
-          if (above_damping<0._wp .or. .not. lklemp) then
-            damping_coeff = 0._wp
-          else
-            damping_coeff = klemp_damp_max*sin(0.5_wp*M_PI*above_damping/(toa-damping_start_height))**2
-          endif
-          solution_vector(jl) = solution_vector(jl)/(1._wp+damping_coeff*dtime)
-        enddo
         
         ! results
         ! density, virtual potential temperature density
