@@ -8,7 +8,7 @@ module mo_pgrad
   use mo_constants,          only: c_d_p
   use mo_gradient_operators, only: grad_vert,grad_hor
   use mo_definitions,        only: t_state,t_diag,t_grid,wp
-  use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v
+  use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_h2,scalar_times_vector_v,scalar_times_vector_v2
   use mo_constituents_nml,   only: n_condensed_constituents
   
   implicit none
@@ -41,9 +41,8 @@ module mo_pgrad
     diag%scalar_placeholder = c_d_p*(grid%theta_v_bg + state%theta_v_pert)
     !$omp end parallel workshare
     ! multiplying the perturbed Exner pressure gradient by the full virtual potential temperature
-    call scalar_times_vector_h(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
-                               diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
-    call scalar_times_vector_v(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_w)
+    call scalar_times_vector_h2(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
+    call scalar_times_vector_v2(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_w)
     
     ! the linear pressure gradient term
     !$omp parallel workshare
@@ -58,12 +57,10 @@ module mo_pgrad
     diag%pressure_gradient_decel_factor = state%rho(:,:,:,n_condensed_constituents+1)/ &
                                           sum(state%rho(:,:,:,1:n_condensed_constituents+1),4)
     !$omp end parallel workshare
-    call scalar_times_vector_h(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v, &
-                               diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
-    call scalar_times_vector_v(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_w,diag%p_grad_acc_neg_nl_w)
-    call scalar_times_vector_h(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v, &
-                               diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
-    call scalar_times_vector_v(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_w,diag%p_grad_acc_neg_l_w)
+    call scalar_times_vector_h2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
+    call scalar_times_vector_v2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_w)
+    call scalar_times_vector_h2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
+    call scalar_times_vector_v2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_w)
     
     ! At the very first step of the model integration, the "old" pressure gradient acceleration is saved for the first time.
     if (lfirst) then

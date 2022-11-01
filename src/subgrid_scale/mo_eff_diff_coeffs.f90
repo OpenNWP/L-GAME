@@ -13,7 +13,7 @@ module mo_eff_diff_coeffs
   use mo_tke,                  only: tke_update
   use mo_divergence_operators, only: div_h
   use mo_gradient_operators,   only: grad_vert
-  use mo_multiplications,      only: scalar_times_vector_v
+  use mo_multiplications,      only: scalar_times_vector_v2
   use mo_derived,              only: spec_heat_cap_diagnostics_v
   use mo_bc_nml,               only: lperiodic
   
@@ -537,10 +537,12 @@ module mo_eff_diff_coeffs
     !$omp parallel workshare
     diag%scalar_placeholder = 1.0/diag%scalar_placeholder
     !$omp end parallel workshare
-    call scalar_times_vector_v(diag%scalar_placeholder,diag%w_placeholder,diag%w_placeholder)
+    call scalar_times_vector_v2(diag%scalar_placeholder,diag%w_placeholder)
     
     ! multiplying by the gravity acceleration
-    call scalar_times_vector_v(diag%w_placeholder,grid%gravity_m_v,diag%w_placeholder)
+    !$omp parallel workshare
+    diag%w_placeholder = grid%gravity_m_v*diag%w_placeholder
+    !$omp end parallel workshare
     
     ! averaging vertically to the scalar points
     !$omp parallel do private(ji,jk,jl)
