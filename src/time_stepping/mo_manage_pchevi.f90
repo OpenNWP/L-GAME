@@ -99,12 +99,7 @@ module mo_manage_pchevi
       
       ! 3.) implicit dynamic vertical solver
       ! ------------------------------------
-      if (rk_step==1) then
-        call three_band_solver_ver(state_old,state_old,state_new,diag,tend,grid,rk_step)
-      endif
-      if (rk_step==2) then
-        call three_band_solver_ver(state_old,state_new,state_new,diag,tend,grid,rk_step)
-      endif
+      call three_band_solver_ver(state_old,state_new,diag,tend,grid,rk_step)
       
       ! 4.) vertical tracer advection
       ! -----------------------------
