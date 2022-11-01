@@ -14,7 +14,7 @@ module mo_vector_tend_expl
   use mo_vorticities,        only: calc_pot_vort
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v
   use mo_vorticity_flux,     only: calc_vorticity_flux_term
-  use mo_diff_nml,           only: lmom_diff_h,lmom_diff_v,lmass_diff_h,ltemp_diff_h
+  use mo_diff_nml,           only: lmom_diff_h,lmom_diff_v,lmass_diff_h,ltemp_diff_h,lklemp
   use mo_momentum_diff_diss, only: mom_diff_h,mom_diff_v,simple_dissipation_rate
   use mo_eff_diff_coeffs,    only: update_n_squared
   use mo_tke,                only: tke_update
@@ -82,7 +82,7 @@ module mo_vector_tend_expl
         call pbl_wind_tendency(state,diag,grid)
       endif
       ! calculation of the dissipative heating rate
-      if (lmom_diff_h .or. lpbl) then
+      if (lmom_diff_h .or. lpbl .or. lklemp) then
         call simple_dissipation_rate(state,diag,grid)
       endif
     endif
