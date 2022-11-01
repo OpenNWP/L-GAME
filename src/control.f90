@@ -475,7 +475,9 @@ program control
   call write_output(state_1,diag,0,grid)
   
   ! copying the first state to the second state
+  !$omp parallel workshare
   state_2 = state_1
+  !$omp end parallel workshare
   
   ! the loop over the time steps
   t_write = t_0 + dt_write
