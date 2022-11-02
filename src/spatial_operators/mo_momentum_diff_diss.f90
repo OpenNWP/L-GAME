@@ -12,6 +12,7 @@ module mo_momentum_diff_diss
   use mo_run_nml,              only: ny,nx,n_layers,n_levels,toa,dtime
   use mo_diff_nml,             only: h_prandtl,lklemp,klemp_begin_rel,klemp_damp_max
   use mo_constituents_nml,     only: n_constituents,n_condensed_constituents
+  use mo_grid_generator,       only: n_damping_levels
   use mo_inner_product,        only: inner_product
   use mo_eff_diff_coeffs,      only: hor_viscosity,vert_vert_mom_viscosity
   use mo_bc_nml,               only: lperiodic
@@ -349,7 +350,7 @@ module mo_momentum_diff_diss
       damping_start_height = klemp_begin_rel*toa
     
       !$omp parallel do private(ji,jk,jl,z_above_damping,damping_coeff,damping_prefactor)
-      do jl=2,n_layers
+      do jl=2,n_damping_levels
         do jk=1,nx
           do ji=1,ny
             z_above_damping = grid%z_w(ji,jk,jl) - damping_start_height

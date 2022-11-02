@@ -9,6 +9,7 @@ module mo_grid_generator
   use mo_definitions,        only: wp,t_grid
   use mo_run_nml,            only: ny,nx,n_layers,n_levels,dy,dx,toa,n_oro_layers,sigma,scenario,lat_center, &
                                    lon_center,lplane,n_flat_layers
+  use mo_diff_nml,           only: klemp_begin_rel
   use mo_constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                    lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv, &
                                    r_d,c_d_p
@@ -21,6 +22,8 @@ module mo_grid_generator
   use mo_bc_nml,             only: lperiodic
 
   implicit none
+  
+  integer  :: n_damping_levels              ! number of levels in which the swamp layer is active
   
   contains
   
@@ -521,6 +524,16 @@ module mo_grid_generator
         grid%z_w(:,:,jl) = toa
       else
         grid%z_w(:,:,jl) = 0.5_wp*(grid%z_scalar(:,:,jl-1) + grid%z_scalar(:,:,jl))
+      endif
+    enddo
+    !$omp end parallel do
+    
+    ! calculating n_damping_layers
+    n_damping_levels = 0
+    !$omp parallel do private(jl)
+    do jl=1,n_levels
+      if (maxval(grid%z_w(:,:,jl))>klemp_begin_rel*toa) then
+        n_damping_levels = n_damping_levels + 1
       endif
     enddo
     !$omp end parallel do
