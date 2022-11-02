@@ -65,7 +65,7 @@ module mo_grid_generator
     real(wp) :: local_i(3)                    ! local i-vector
     real(wp) :: local_j(3)                    ! local j-vector
     real(wp) :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
-    real(wp) :: lat_local,lon_local           ! helper variables
+    real(wp) :: lat_local,lon_local,max_z     ! helper variables     
     integer  :: ji,jk,jl                      ! loop indices
     
     ! Horizontal grid properties
@@ -530,13 +530,14 @@ module mo_grid_generator
     
     ! calculating n_damping_layers
     n_damping_levels = 0
-    !$omp parallel do private(jl)
     do jl=1,n_levels
-      if (maxval(grid%z_w(:,:,jl))>klemp_begin_rel*toa) then
+      !$omp parallel workshare
+      max_z = maxval(grid%z_w(:,:,jl))
+      !$omp end parallel workshare
+      if (max_z>klemp_begin_rel*toa) then
         n_damping_levels = n_damping_levels + 1
       endif
     enddo
-    !$omp end parallel do
     
     ! setting the layer thicknesses
     !$omp parallel do private(jl)
