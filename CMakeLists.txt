@@ -55,10 +55,8 @@ ${rrtmgp_home}/rrtmgp/mo_gas_optics.F90
 ${rrtmgp_home}/rrtmgp/mo_gas_optics_rrtmgp.F90
 ${rrtmgp_home}/rrtmgp/mo_rrtmgp_constants.F90
 ${rrtmgp_home}/rrtmgp/mo_rrtmgp_util_string.F90
-${rrtmgp_home}/rrtmgp/mo_rrtmgp_util_reorder.F90
 ${rrtmgp_home}/rrtmgp/mo_gas_concentrations.F90
 ${rrtmgp_home}/rrtmgp/kernels/mo_gas_optics_kernels.F90
-${rrtmgp_home}/rrtmgp/kernels/mo_rrtmgp_util_reorder_kernels.F90
 ${rrtmgp_home}/rte/mo_rte_lw.F90
 ${rrtmgp_home}/rte/mo_rte_sw.F90
 ${rrtmgp_home}/rte/mo_fluxes.F90
@@ -86,10 +84,8 @@ if (FAST)
   set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_gas_optics_rrtmgp.F90 PROPERTIES COMPILE_OPTIONS "-O3")
   set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_rrtmgp_constants.F90 PROPERTIES COMPILE_OPTIONS "-O3")
   set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_rrtmgp_util_string.F90 PROPERTIES COMPILE_OPTIONS "-O3")
-  set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_rrtmgp_util_reorder.F90 PROPERTIES COMPILE_OPTIONS "-O3")
   set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_gas_concentrations.F90 PROPERTIES COMPILE_OPTIONS "-O3")
   set_source_files_properties(${rrtmgp_home}/rrtmgp/kernels/mo_gas_optics_kernels.F90 PROPERTIES COMPILE_OPTIONS "-O3")
-  set_source_files_properties(${rrtmgp_home}/rrtmgp/kernels/mo_rrtmgp_util_reorder_kernels.F90 PROPERTIES COMPILE_OPTIONS "-O3")
   set_source_files_properties(${rrtmgp_home}/rte/mo_rte_lw.F90 PROPERTIES COMPILE_OPTIONS "-O3")
   set_source_files_properties(${rrtmgp_home}/rte/mo_rte_sw.F90 PROPERTIES COMPILE_OPTIONS "-O3")
   set_source_files_properties(${rrtmgp_home}/rte/mo_fluxes.F90 PROPERTIES COMPILE_OPTIONS "-O3")
@@ -120,16 +116,13 @@ if(SINGLE_PRECISION)
 endif()
 
 # OpenMP is disabled for RTE+RRTMGP
-set_source_files_properties(src/io/mo_write_out.f90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
 set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_gas_optics.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
 set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_gas_optics.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
 set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_gas_optics_rrtmgp.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
 set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_rrtmgp_constants.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
 set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_rrtmgp_util_string.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
-set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_rrtmgp_util_reorder.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
 set_source_files_properties(${rrtmgp_home}/rrtmgp/mo_gas_concentrations.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
 set_source_files_properties(${rrtmgp_home}/rrtmgp/kernels/mo_gas_optics_kernels.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
-set_source_files_properties(${rrtmgp_home}/rrtmgp/kernels/mo_rrtmgp_util_reorder_kernels.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
 set_source_files_properties(${rrtmgp_home}/rte/mo_rte_lw.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
 set_source_files_properties(${rrtmgp_home}/rte/mo_rte_sw.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
 set_source_files_properties(${rrtmgp_home}/rte/mo_fluxes.F90 PROPERTIES COMPILE_OPTIONS "-fno-openmp")
