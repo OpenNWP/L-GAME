@@ -96,12 +96,12 @@ module mo_boundaries
   
   subroutine read_boundaries(bc,t_update,time_step_index)
     
-    ! This subroutine reads the boundary conditions from a NetCDF file.
+    ! This subroutine reads the boundary conditions from a netCDF file.
     
     type(t_bc), intent(inout) :: bc              ! boundary conditions
     real(wp),   intent(in)    :: t_update        ! valid time of the boundary conditions
     integer,    intent(in)    :: time_step_index ! index of the boundary conditions time step (1 or 2) to which the
-                                                 ! data in the NetCDF file will be written
+                                                 ! data in the netCDF file will be written
     
     ! local variables
     character(len=64) :: filename ! file to read the boundary state from
@@ -112,7 +112,7 @@ module mo_boundaries
     
     write(*,*) "Reading boundary conditions from file", trim(filename), "..."
     
-    ! reading the boundary conditions from a the NetCDF file
+    ! reading the boundary conditions from a the netCDF file
     call read_from_nc(bc%rho(:,:,:,:,time_step_index),bc%rhotheta_v(:,:,:,time_step_index), &
     bc%wind_u(:,:,:,time_step_index),bc%wind_v(:,:,:,time_step_index),bc%wind_w(:,:,:,time_step_index),filename)
     

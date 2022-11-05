@@ -23,7 +23,7 @@ module mo_read_write_grid
     type(t_grid), intent(in) :: grid ! grid properties
     
     ! local variables
-    integer           :: ncid                   ! ID of the NetCDF file
+    integer           :: ncid                   ! ID of the netCDF file
     character(len=64) :: filename               ! output filename
     integer           :: x_dimid                ! ID of the x dimension
     integer           :: y_dimid                ! ID of the y dimension
@@ -45,7 +45,7 @@ module mo_read_write_grid
     
     filename = "../../grids/" // trim(grid_filename)
     
-    ! creating the NetCDF file
+    ! creating the netCDF file
     call nc_check(nf90_create(trim(filename),NF90_CLOBBER,ncid))
     
     call nc_check(nf90_put_att(ncid,NF90_GLOBAL,"Description","This is a grid of L-GAME."))
@@ -108,7 +108,7 @@ module mo_read_write_grid
     ! ending the definition section
     call nc_check(nf90_enddef(ncid))
     
-    ! writing the data to the NetCDF file
+    ! writing the data to the netCDF file
     call nc_check(nf90_put_var(ncid,varid_lat,grid%lat_geo_scalar))
     call nc_check(nf90_put_var(ncid,varid_lon,grid%lon_geo_scalar))
     call nc_check(nf90_put_var(ncid,varid_lat_u,grid%lat_geo_u))
@@ -120,7 +120,7 @@ module mo_read_write_grid
     call nc_check(nf90_put_var(ncid,varid_dir_geo_v,grid%dir_geo_v))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u_scalar,grid%dir_geo_u_scalar))
     
-    ! closing the NetCDF file
+    ! closing the netCDF file
     call nc_check(nf90_close(ncid))
     
   end subroutine write_grid
@@ -132,14 +132,14 @@ module mo_read_write_grid
     type(t_grid), intent(inout) :: grid ! grid properties
     
     ! local variables
-    integer           :: ncid      ! ID of the NetCDF file
+    integer           :: ncid      ! ID of the netCDF file
     character(len=64) :: filename  ! input filename
     integer           :: varid_z_w ! variable ID of the orography
     
     ! the filename of the grid file including the relative path
     filename = "../../grids/" // trim(grid_filename)
     
-    ! opening the NetCDF file
+    ! opening the netCDF file
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
@@ -152,7 +152,7 @@ module mo_read_write_grid
     grid%z_w(:,:,n_levels) = merge(grid%z_w(:,:,n_levels),0._wp,grid%z_w(:,:,n_levels)>=0._wp)
     !$omp end parallel workshare
     
-    ! closing the NetCDF file
+    ! closing the netCDF file
     call nc_check(nf90_close(ncid))
     
   end subroutine read_oro
@@ -164,14 +164,14 @@ module mo_read_write_grid
     type(t_grid), intent(inout) :: grid ! grid properties
     
     ! local variables
-    integer           :: ncid          ! ID of the NetCDF file
+    integer           :: ncid          ! ID of the netCDF file
     character(len=64) :: filename      ! input filename
     integer           :: varid_is_land ! variable ID of the land-sea-mask
     
     ! the filename of the grid file including the relative path
     filename = "../../grids/phys_sfc_properties/" // trim(land_sea_filename)
     
-    ! creating the NetCDF file
+    ! creating the netCDF file
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
@@ -180,7 +180,7 @@ module mo_read_write_grid
     ! reading the arrays
     call nc_check(nf90_get_var(ncid,varid_is_land,grid%is_land))
     
-    ! closing the NetCDF file
+    ! closing the netCDF file
     call nc_check(nf90_close(ncid))
     
   end subroutine read_land_sea

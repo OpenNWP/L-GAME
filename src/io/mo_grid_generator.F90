@@ -921,7 +921,7 @@ module mo_grid_generator
     type(t_grid), intent(inout) :: grid ! grid quantities
     
     ! local variables
-    integer               :: ncid                   ! ID of the NetCDF file
+    integer               :: ncid                   ! ID of the netCDF file
     character(len=64)     :: filename               ! input filename
     integer               :: lat_in_id              ! variable ID of the latitude vector
     integer               :: lon_in_id              ! variable ID of the longitude vector
@@ -942,7 +942,7 @@ module mo_grid_generator
     ! the filename of the grid file including the relative path
     filename = "../../grids/phys_sfc_properties/" // trim(oro_raw_filename)
     
-    ! opening the NetCDF file
+    ! opening the netCDF file
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
@@ -960,7 +960,7 @@ module mo_grid_generator
     call nc_check(nf90_get_var(ncid,lon_in_id,longitude_input))
     call nc_check(nf90_get_var(ncid,z_in_id,z_input))
     
-    ! closing the NetCDF file
+    ! closing the netCDF file
     call nc_check(nf90_close(ncid))
     
     ! allocating memory for the distance vectors

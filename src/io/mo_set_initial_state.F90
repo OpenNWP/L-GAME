@@ -249,7 +249,7 @@ module mo_set_initial_state
   
   subroutine read_from_nc(rho,rhotheta_v,wind_u,wind_v,wind_w,filename)
     
-    ! This subroutine reads a model state from a NetCDF file.
+    ! This subroutine reads a model state from a netCDF file.
     
     ! input arguments and output
     real(wp),          intent(out) :: rho(:,:,:,:)      ! mass densities
@@ -260,14 +260,14 @@ module mo_set_initial_state
     character(len=64), intent(in)  :: filename          ! filename to read from
     
     ! local variables
-    integer :: ncid             ! ID of the NetCDF file
+    integer :: ncid             ! ID of the netCDF file
     integer :: varid_rho        ! variable ID of the densities
     integer :: varid_rhotheta_v ! variable ID of the virtual potential temperature density
     integer :: varid_u          ! variable ID of the u-wind
     integer :: varid_v          ! variable ID of the v-wind
     integer :: varid_w          ! variable ID of the w-wind
     
-    ! opening the NetCDF file
+    ! opening the netCDF file
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
@@ -277,14 +277,14 @@ module mo_set_initial_state
     call nc_check(nf90_inq_varid(ncid,"v",varid_v))
     call nc_check(nf90_inq_varid(ncid,"w",varid_w))
     
-    ! reading the NetCDF fields
+    ! reading the netCDF fields
     call nc_check(nf90_get_var(ncid,varid_rho,rho))
     call nc_check(nf90_get_var(ncid,varid_rhotheta_v,rhotheta_v))
     call nc_check(nf90_get_var(ncid,varid_u,wind_u))
     call nc_check(nf90_get_var(ncid,varid_v,wind_v))
     call nc_check(nf90_get_var(ncid,varid_w,wind_w))
     
-    ! closing the NetCDF file
+    ! closing the netCDF file
     call nc_check(nf90_close(ncid))
     
   end subroutine read_from_nc
@@ -406,13 +406,13 @@ module mo_set_initial_state
   
   subroutine nc_check(i_status)
     
-    ! This checks wether a NetCDF function threw an error.
+    ! This checks wether a netCDF function threw an error.
     
     integer, intent(in) :: i_status
 
     if(i_status/=nf90_noerr) then
       print *, trim(nf90_strerror(i_status))
-      stop "Netcdf threw an error."
+      stop "netCDF threw an error."
     end if
   end subroutine nc_check
 

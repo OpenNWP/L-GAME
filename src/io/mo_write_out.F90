@@ -18,7 +18,7 @@ module mo_write_out
   
   subroutine write_output(state,diag,time_since_init_min,grid)
     
-    ! This subroutine writes the state of the model atmosphere at a single time step to a NetCDF file.
+    ! This subroutine writes the state of the model atmosphere at a single time step to a netCDF file.
     
     type(t_state), intent(in)    :: state               ! state to write out
     type(t_diag),  intent(inout) :: diag                ! diagnostic quantities
@@ -27,7 +27,7 @@ module mo_write_out
     
     ! local variables
     logical           :: lcontains_nan           ! used for detecting if the model crashed
-    integer           :: ncid                    ! ID of the NetCDF file
+    integer           :: ncid                    ! ID of the netCDF file
     integer           :: x_dimid                 ! ID of the x-dimension
     integer           :: y_dimid                 ! ID of the y-dimension
     integer           :: z_dimid                 ! ID of the z-dimension
@@ -63,7 +63,7 @@ module mo_write_out
       call exit(1)
     endif
     
-    ! creating the NetCDF file
+    ! creating the netCDF file
     write(time_since_init_min_str,*) time_since_init_min
     time_since_init_min_str = adjustl(time_since_init_min_str)
     filename = trim(run_id) // "+" // trim(time_since_init_min_str) // "min.nc"
@@ -212,7 +212,7 @@ module mo_write_out
     !$omp end parallel do
     call nc_check(nf90_put_var(ncid,varid_w,diag%scalar_placeholder))
     
-    ! closing the NetCDF file
+    ! closing the netCDF file
     call nc_check(nf90_close(ncid))
     
     write(*,*) "Output written."
