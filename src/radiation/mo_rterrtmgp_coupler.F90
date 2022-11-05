@@ -26,9 +26,9 @@ module mo_rrtmgp_coupler
   
   implicit none
   
-  ! the number of bands in the short wave region
+  ! the number of bands in the shortwave region
   integer,parameter :: n_sw_bands = 14
-  ! the number of bands in the long wave region
+  ! the number of bands in the longwave region
   integer,parameter :: n_lw_bands = 16
 
   character(len = 3),dimension(8) :: active_gases = (/ &
@@ -91,10 +91,10 @@ module mo_rrtmgp_coupler
     integer                               :: j_day                           ! cell index, restricted to day points
     integer, allocatable                  :: day_indices(:)                  ! the indices of columns where it is day
     type(ty_fluxes_broadband)             :: fluxes,fluxes_day               ! the resulting fluxes
-    type(ty_optical_props_2str)           :: atmos_props_sw,cloud_props_sw   ! short wave optical properties
-    type(ty_optical_props_1scl)           :: atmos_props_lw,cloud_props_lw   ! long wave optical properties
-    real(wp), dimension(:,:), allocatable :: toa_flux                        ! top of atmosphere short wave flux(n_day_points,n_sw_g_points)
-    type(ty_source_func_lw)               :: sources_lw                      ! long wave source function
+    type(ty_optical_props_2str)           :: atmos_props_sw,cloud_props_sw   ! shortwave optical properties
+    type(ty_optical_props_1scl)           :: atmos_props_lw,cloud_props_lw   ! longwave optical properties
+    real(wp), dimension(:,:), allocatable :: toa_flux                        ! top of atmosphere shortwave flux(n_day_points,n_sw_g_points)
+    type(ty_source_func_lw)               :: sources_lw                      ! longwave source function
     real(wp), allocatable                 :: surface_emissivity(:,:)         ! the surface emissivity
     real(wp), allocatable                 :: albedo_dir(:,:)                 ! surface albedo for direct radiation
     real(wp), allocatable                 :: albedo_dif(:,:)                 ! surface albedo for diffusive radiation
@@ -134,9 +134,9 @@ module mo_rrtmgp_coupler
     call handle_error(gas_concentrations_lw%init(gases_lowercase))
     
     !$omp critical
-    ! loading the short wave radiation properties
+    ! loading the shortwave radiation properties
     call load_and_init(k_dist_sw,trim(rrtmgp_coefficients_file_sw),gas_concentrations_sw)
-    ! loading the long wave radiation properties
+    ! loading the longwave radiation properties
     call load_and_init(k_dist_lw,trim(rrtmgp_coefficients_file_lw),gas_concentrations_lw)
     
     ! reading the SW spectral properties of clouds
@@ -315,7 +315,7 @@ module mo_rrtmgp_coupler
     ! from the dycore)
     radiation_tendency = 0._wp
     
-    ! short wave first
+    ! shortwave first
     ! filling up the arrays restricted to day points
     allocate(ice_eff_radius_day(nx,n_layers))
     allocate(mu_0_day(nx))
@@ -344,25 +344,25 @@ module mo_rrtmgp_coupler
     deallocate(albedo_dif)
     deallocate(mu_0)
     
-    ! setting the volume mixing ratios of the gases for the short wave calculation
+    ! setting the volume mixing ratios of the gases for the shortwave calculation
     call set_vol_mix_ratios(rho,.true.,n_day_points,day_indices,z_scalar,gas_concentrations_sw)
     
-    ! initializing the short wave fluxes
+    ! initializing the shortwave fluxes
     call init_fluxes(fluxes_day,n_day_points,n_levels)
     
     ! setting the bands for the SW cloud properties
     call handle_error(cloud_props_sw%init(k_dist_sw%get_band_lims_wavenumber()))
     
-    ! allocating the short wave optical properties
+    ! allocating the shortwave optical properties
     call handle_error(atmos_props_sw%alloc_2str(n_day_points,n_layers,k_dist_sw))
     
-    ! allocating the short wave optical properties of the clouds
+    ! allocating the shortwave optical properties of the clouds
     call handle_error(cloud_props_sw%alloc_2str(n_day_points,n_layers))
     
     ! allocating the TOA flux
     allocate(toa_flux(n_day_points,k_dist_sw%get_ngpt()))
     
-    ! setting the short wave optical properties of the gas phase
+    ! setting the shortwave optical properties of the gas phase
     call handle_error(k_dist_sw%gas_optics(pressure_rad_day(1:n_day_points,:),pressure_interface_rad_day(1:n_day_points,:), &
                                            temperature_rad_day(1:n_day_points,:),gas_concentrations_sw,atmos_props_sw, &
                                            toa_flux))
@@ -395,7 +395,7 @@ module mo_rrtmgp_coupler
     deallocate(albedo_dir_day)
     deallocate(albedo_dif_day)
     
-    ! short wave result (in Wm^-3)
+    ! shortwave result (in Wm^-3)
     call calc_power_density(.true.,n_day_points,day_indices,fluxes_day,z_vector,radiation_tendency)
     
     ! saving the surface shortwave inward radiative flux density
@@ -403,30 +403,30 @@ module mo_rrtmgp_coupler
       sfc_sw_in(day_indices(jk)) = fluxes_day%flux_dn(jk,n_levels) - fluxes_day%flux_up(jk,n_levels)
     enddo
     
-    ! freeing the short wave fluxes
+    ! freeing the shortwave fluxes
     call free_fluxes(fluxes_day)
     
-    ! now long wave
+    ! now longwave
 1   continue
-    ! setting the volume mixing ratios of the gases for the long wave calculation
+    ! setting the volume mixing ratios of the gases for the longwave calculation
     call set_vol_mix_ratios(rho,.false.,n_day_points,day_indices,z_scalar,gas_concentrations_lw)
     
-    ! initializing the long wave fluxes
+    ! initializing the longwave fluxes
     call init_fluxes(fluxes,nx,n_levels)
     
     ! setting the bands for the LW cloud properties
     call handle_error(cloud_props_lw%init(k_dist_lw%get_band_lims_wavenumber()))
     
-    ! allocating the long wave optical properties of the gas phase
+    ! allocating the longwave optical properties of the gas phase
     call handle_error(atmos_props_lw%alloc_1scl(nx,n_layers,k_dist_lw))
     
-    ! allocating the long wave optical properties of the clouds
+    ! allocating the longwave optical properties of the clouds
     call handle_error(cloud_props_lw%alloc_1scl(nx,n_layers))
     
-    ! allocating the long wave source function
+    ! allocating the longwave source function
     call handle_error(sources_lw%alloc(nx,n_layers,k_dist_lw))
     
-    ! setting the long wave optical properties of the gas phase
+    ! setting the longwave optical properties of the gas phase
     call handle_error(k_dist_lw%gas_optics(pressure_rad,pressure_interface_rad,temperature_rad,temp_sfc,gas_concentrations_lw, &
                                            atmos_props_lw,sources_lw,tlev=temperature_interface_rad))
     deallocate(temperature_rad)
@@ -449,7 +449,7 @@ module mo_rrtmgp_coupler
     call handle_error(rte_lw(atmos_props_lw,.true.,sources_lw,surface_emissivity,fluxes))
     deallocate(surface_emissivity)
    
-    ! add long wave result (in Wm^-3)
+    ! add longwave result (in Wm^-3)
     call calc_power_density(.false.,n_day_points,day_indices,fluxes,z_vector,radiation_tendency)
     deallocate(day_indices)
     
@@ -459,7 +459,7 @@ module mo_rrtmgp_coupler
       - fluxes%flux_dn(jk,n_levels)
     enddo
     
-    ! freeing the long wave fluxes
+    ! freeing the longwave fluxes
     call free_fluxes(fluxes)
     
   end subroutine calc_radiative_flux_convergence
@@ -468,7 +468,7 @@ module mo_rrtmgp_coupler
     
     ! This subroutine is essentially the negative vertical divergence operator.
     
-    logical,                   intent(in)    :: day_only                        ! true for short wave calculations (for efficiency)
+    logical,                   intent(in)    :: day_only                        ! true for shortwave calculations (for efficiency)
     integer,                   intent(in)    :: n_day_points                    ! as usual
     integer,                   intent(in)    :: day_indices(nx)                 ! the indices of the columns where it is day
     type(ty_fluxes_broadband), intent(in)    :: fluxes                          ! fluxes object based on which to compute the power density
@@ -605,7 +605,7 @@ module mo_rrtmgp_coupler
     ! This subroutine computes volume mixing ratios based on the model variables.
     
     real(wp),           intent(in)    :: rho(nx,n_layers,n_constituents) ! mass densities of the constituents
-    logical,            intent(in)    :: sw_bool                         ! short wave switch
+    logical,            intent(in)    :: sw_bool                         ! shortwave switch
     integer,            intent(in)    :: n_day_points                    ! as usual
     integer,            intent(in)    :: day_indices(nx)                 ! the indices of the points where it is day
     real(wp),           intent(in)    :: z_scalar(nx,n_layers)           ! z coordinates of scalar data points
@@ -649,7 +649,7 @@ module mo_rrtmgp_coupler
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(11)
         case("h2o")
           ! lmoist is equivalent to the presence of water in the model atmosphere
-          ! in the short wave case,only the day points matter
+          ! in the shortwave case,only the day points matter
           if (sw_bool .and. lmoist) then
             do jl=1,n_layers
               do jk=1,n_day_points
@@ -658,7 +658,7 @@ module mo_rrtmgp_coupler
                 /((rho(day_indices(jk),jl,n_condensed_constituents+1)-rho(day_indices(jk),jl,n_condensed_constituents+2))*r_d)
               enddo
             enddo
-          ! in the long wave case,all points matter
+          ! in the longwave case,all points matter
           elseif (lmoist) then
             do jl=1,n_layers
               do jk=1,nx

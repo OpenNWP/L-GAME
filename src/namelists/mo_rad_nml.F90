@@ -12,10 +12,10 @@ module mo_rad_nml
   
   logical            :: lrad                        ! thickness of the horizontal swamp layer
   real(wp)           :: dtime_rad                   ! radiation time step
-  character(len=128) :: rrtmgp_coefficients_file_sw ! name of the short wave data file
-  character(len=128) :: rrtmgp_coefficients_file_lw ! name of the long wave data file
-  character(len=128) :: cloud_coefficients_file_sw  ! name of the short wave cloud optics file
-  character(len=128) :: cloud_coefficients_file_lw  ! name of the long wave cloud optics file
+  character(len=128) :: rrtmgp_coefficients_file_sw ! name of the shortwave data file
+  character(len=128) :: rrtmgp_coefficients_file_lw ! name of the longwave data file
+  character(len=128) :: cloud_coefficients_file_sw  ! name of the shortwave cloud optics file
+  character(len=128) :: cloud_coefficients_file_lw  ! name of the longwave cloud optics file
   
   namelist /rad/lrad,dtime_rad,rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
                 cloud_coefficients_file_sw,cloud_coefficients_file_lw
