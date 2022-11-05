@@ -21,7 +21,9 @@ module mo_vorticity_flux
     type(t_grid), intent(in)    :: grid ! model grid
     
     ! local variables
-    integer :: ji,jk,jl ! spatial indices
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
+    integer :: jl ! layer index
     
     ! horizontal velocity tendency due to vertical vorticity and horizontal wind (TRSK)
     ! u

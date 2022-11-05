@@ -25,7 +25,9 @@ module mo_vorticities
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    integer :: ji,jk,jl ! spatial indices
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
+    integer :: jl ! layer index
     
     ! calculating the relative vorticity in x-direction
     !$omp parallel do private(ji,jk,jl)
@@ -134,7 +136,9 @@ module mo_vorticities
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    integer :: ji,jk,jl ! spatial indices
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
+    integer :: jl ! layer index
     
     ! calculating the relative vorticity
     if (.not. llinear) then
