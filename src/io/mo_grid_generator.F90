@@ -23,7 +23,7 @@ module mo_grid_generator
 
   implicit none
   
-  integer  :: n_damping_levels              ! number of levels in which the swamp layer is active
+  integer  :: n_damping_levels ! number of levels in which the swamp layer is active
   
   contains
   
@@ -878,7 +878,9 @@ module mo_grid_generator
     ! local variables
     real(wp) :: pressure ! pressure at the respective gridpoint
     real(wp) :: b,c      ! abbreviations needed for the hydrostatic initialization routine
-    integer  :: ji,jk,jl ! index variables
+    integer  :: ji       ! horizontal index
+    integer  :: jk       ! horizontal index
+    integer  :: jl       ! layer index
     
     ! integrating the hydrostatic background state according to the given temperature profile and pressure in the lowest layer
     !$omp parallel do private(ji,jk,jl,b,c,pressure)

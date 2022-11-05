@@ -300,9 +300,9 @@ module mo_set_initial_state
     real(wp),      intent(in)    :: pres_lowest_layer(:,:) ! pressure in the lowest layer
     
     ! local variables
-    real(wp) :: b,c         ! abbreviations needed for the hydrostatic initialization routine
-    real(wp) :: pressure    ! single pressure value
-    integer  :: ji,jk,jl    ! loop indices
+    real(wp) :: b,c      ! abbreviations needed for the hydrostatic initialization routine
+    real(wp) :: pressure ! single pressure value
+    integer  :: ji,jk,jl ! loop indices
     
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
     !$omp parallel do private(ji,jk,jl,b,c,pressure)
