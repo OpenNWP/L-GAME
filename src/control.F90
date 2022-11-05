@@ -28,11 +28,14 @@ program control
   
   implicit none
   
+  type(t_state)     :: state_1              ! state (containing prognostic quantities)
+  type(t_state)     :: state_2              ! state (containing prognostic quantities)
   integer           :: omp_num_threads      ! number of OMP threads
   integer           :: time_step_counter    ! counter of the time step
-  real(wp)          :: t_0,run_span,t_write ! time information
+  real(wp)          :: t_0                  ! Unix timestamp of the old time step
+  real(wp)          :: run_span             ! run span
+  real(wp)          :: t_write              ! Unix timestamp of the next output time
   type(t_grid)      :: grid                 ! grid properties
-  type(t_state)     :: state_1,state_2      ! states at different time steps
   type(t_state)     :: state_write          ! states to write out
   type(t_diag)      :: diag                 ! diagnostic quantities
   type(t_tend)      :: tend                 ! state containing the tendency
