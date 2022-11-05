@@ -75,7 +75,7 @@ module mo_grid_generator
     grid%lat_center = lat_center
     grid%lon_center = lon_center
     
-    ! setting the latitude and longitude coordinates of the scalar grid points
+    ! setting the latitude and longitude coordinates of the scalar gridpoints
     ! setting the dy of the model grid
     dlat = dy/r_e
     dlon = dx/r_e
@@ -874,7 +874,7 @@ module mo_grid_generator
     type(t_grid), intent(inout) :: grid ! the model grid
     
     ! local variables
-    real(wp) :: pressure ! pressure at the respective grid point
+    real(wp) :: pressure ! pressure at the respective gridpoint
     real(wp) :: b,c      ! abbreviations needed for the hydrostatic initialization routine
     integer  :: ji,jk,jl ! index variables
     

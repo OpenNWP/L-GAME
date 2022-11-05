@@ -365,7 +365,7 @@ module mo_vorticities
   
   function rel_vort_z_local(state,grid,ji,jk,jl)
     
-    ! This function returns the vertical relative vorticity at a grid point.
+    ! This function returns the vertical relative vorticity at a gridpoint.
     
     type(t_state) :: state            ! state with which to calculate the relative vorticity
     type(t_grid)  :: grid             ! grid properties

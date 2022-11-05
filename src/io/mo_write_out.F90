@@ -109,15 +109,15 @@ module mo_write_out
     call nc_check(nf90_def_var(ncid,"lat_model",NF90_REAL,y_dimid,varid_lat))
     call nc_check(nf90_put_att(ncid,varid_lat,"Unit","rad"))
     call nc_check(nf90_put_att(ncid,varid_lat, &
-    "Description","latitudes of the grid points (in the frame of reference of the model)"))
+    "Description","latitudes of the gridpoints (in the frame of reference of the model)"))
     
     call nc_check(nf90_def_var(ncid,"lon_model",NF90_REAL,x_dimid,varid_lon))
     call nc_check(nf90_put_att(ncid,varid_lon, &
-    "Description","longitudes of the grid points (in the frame of reference of the model)"))
+    "Description","longitudes of the gridpoints (in the frame of reference of the model)"))
     call nc_check(nf90_put_att(ncid,varid_lon,"Unit","rad"))
     
     call nc_check(nf90_def_var(ncid,"z",NF90_REAL,dimids_3d,varid_z))
-    call nc_check(nf90_put_att(ncid,varid_z,"Description","z coordinates of the grid points (MSL)"))
+    call nc_check(nf90_put_att(ncid,varid_z,"Description","z coordinates of the gridpoints (MSL)"))
     call nc_check(nf90_put_att(ncid,varid_z,"Unit","m"))
     
     call nc_check(nf90_def_var(ncid,"rho",NF90_REAL,dimids_3d_rho,varid_rho))
@@ -152,11 +152,11 @@ module mo_write_out
     call nc_check(nf90_put_var(ncid,varid_lat_center,grid%lat_center))
     ! longitude of the center
     call nc_check(nf90_put_var(ncid,varid_lon_center,grid%lon_center))
-    ! latitude coordinates of the grid points
+    ! latitude coordinates of the gridpoints
     call nc_check(nf90_put_var(ncid,varid_lat,grid%lat_scalar(:)))
-    ! longitude coordinates of the grid points
+    ! longitude coordinates of the gridpoints
     call nc_check(nf90_put_var(ncid,varid_lon,grid%lon_scalar(:)))
-    ! z coordinates of the grid points
+    ! z coordinates of the gridpoints
     call nc_check(nf90_put_var(ncid,varid_z,grid%z_scalar))
     
     ! writing the data to the output file

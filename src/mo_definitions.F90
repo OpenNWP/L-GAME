@@ -41,12 +41,12 @@ module mo_definitions
     real(wp), allocatable :: dir_geo_v(:,:)                 ! geographic directions of the v-vectors
     real(wp), allocatable :: dir_geo_u_scalar(:,:)          ! geographic directions of the u-vectors at the scalar points
     real(wp), allocatable :: z_scalar(:,:,:)                ! geometric heights of the scalar gridpoints
-    real(wp), allocatable :: dx(:,:,:)                      ! grid point distance in x-direction
-    real(wp), allocatable :: dy(:,:,:)                      ! grid point distance in y-direction
-    real(wp), allocatable :: dz(:,:,:)                      ! grid point distance in z-direction
+    real(wp), allocatable :: dx(:,:,:)                      ! gridpoint distance in x-direction
+    real(wp), allocatable :: dy(:,:,:)                      ! gridpoint distance in y-direction
+    real(wp), allocatable :: dz(:,:,:)                      ! gridpoint distance in z-direction
     real(wp), allocatable :: layer_thickness(:,:,:)         ! layer thicknesses
-    real(wp), allocatable :: dx_dual(:,:,:)                 ! grid point distance in x-direction of the dual grid
-    real(wp), allocatable :: dy_dual(:,:,:)                 ! grid point distance in y-direction of the dual grid
+    real(wp), allocatable :: dx_dual(:,:,:)                 ! gridpoint distance in x-direction of the dual grid
+    real(wp), allocatable :: dy_dual(:,:,:)                 ! gridpoint distance in y-direction of the dual grid
     real(wp), allocatable :: z_u(:,:,:)                     ! geomtric height of the u-vectors
     real(wp), allocatable :: z_v(:,:,:)                     ! geomtric height of the v-vectors
     real(wp), allocatable :: z_w(:,:,:)                     ! geomtric height of the w-vectors

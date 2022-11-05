@@ -30,7 +30,7 @@ module mo_pbl
     real(wp) :: agl                     ! height above ground f the lowest model layer
     real(wp) :: theta_v_lowest_layer    ! virtual potential temperature in the lowest layer
     real(wp) :: theta_v_second_layer    ! virtual potential temperature in the second-lowest layer
-    real(wp) :: dz                      ! vertical grid point distance
+    real(wp) :: dz                      ! vertical gridpoint distance
     real(wp) :: dtheta_v_dz             ! vertical gradient of the virtual potential temperature
     real(wp) :: w_pert                  ! vertical velocity perturbation near the surface
     real(wp) :: theta_v_pert            ! virtual potential temperature perturbation near the surface
@@ -304,7 +304,7 @@ module mo_pbl
 
     ! input variables
     real(wp), intent(in) :: wind_h_lowest_layer        ! wind speed in the lowest model layer
-    real(wp), intent(in) :: z_agl                      ! height of the target grid point above the surface (m)
+    real(wp), intent(in) :: z_agl                      ! height of the target gridpoint above the surface (m)
     real(wp), intent(in) :: roughness_length_value     ! roughness length  of the surface (m)
     real(wp), intent(in) :: monin_obukhov_length_value ! Monin-Obukhiv-length (m)
     ! output variable
