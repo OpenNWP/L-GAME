@@ -66,7 +66,9 @@ module mo_grid_generator
     real(wp) :: local_j(3)                    ! local j-vector
     real(wp) :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
     real(wp) :: lat_local,lon_local,max_z     ! helper variables     
-    integer  :: ji,jk,jl                      ! loop indices
+    integer  :: ji                            ! horizontal index
+    integer  :: jk                            ! horizontal index
+    integer  :: jl                            ! layer or level index
     
     ! Horizontal grid properties
     ! --------------------------
@@ -934,7 +936,9 @@ module mo_grid_generator
     real(wp), allocatable :: lon_distance_vector(:) ! longitudes distance vector
     integer,  allocatable :: z_input(:,:)           ! the input dataset
     integer               :: lat_index,lon_index    ! minimum distance indices
-    integer               :: ji,jk,jl               ! loop indices
+    integer               :: ji                     ! horizontal index
+    integer               :: jk                     ! horizontal index
+    integer               :: jl                     ! layer or level index
     
     n_lat_points = 10801
     n_lon_points = 21601
@@ -1060,8 +1064,8 @@ module mo_grid_generator
     
     ! This function finds the index where a vector assumes its minimum.
     
-    real(wp) :: input_vector(:)
-    integer  :: find_min_index ! the result
+    real(wp) :: input_vector(:) ! the vector to operate with
+    integer  :: find_min_index  ! the result
     
     ! local variables
     integer  :: ji

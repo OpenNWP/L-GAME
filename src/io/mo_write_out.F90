@@ -49,7 +49,9 @@ module mo_write_out
     integer           :: varid_w                 ! variable ID of the 3D w wind field
     character(len=64) :: filename                ! output filename
     character(len=64) :: time_since_init_min_str ! time_since_init_min as string
-    integer           :: ji,jk,jl                ! line indices
+    integer           :: ji                      ! horizontal index
+    integer           :: jk                      ! horizontal index
+    integer           :: jl                      ! layer or level index
     real(wp)          :: upper_weight(ny,nx)     ! interpolation weights
     
     write(*,*) "Writing output ..."

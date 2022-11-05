@@ -28,21 +28,22 @@ program control
   
   implicit none
   
-  integer           :: omp_num_threads             ! number of OMP threads
-  integer           :: time_step_counter           ! counter of the time step
-  real(wp)          :: t_0,run_span,t_write        ! time information
-  type(t_grid)      :: grid                        ! grid properties
-  type(t_state)     :: state_1,state_2,state_write ! states at different time steps
-  type(t_diag)      :: diag                        ! diagnostic quantities
-  type(t_tend)      :: tend                        ! state containing the tendency
-  type(t_bc)        :: bc                          ! boundary conditions
-  logical           :: lrad_update                 ! radiation update switch
-  real(wp)          :: normal_dist_min_vert        ! minimum vertical gridpoint distance
-  real(wp)          :: t_rad_update                ! radiation update time
-  real(wp)          :: init_timestamp              ! used for measuring model runtime
-  real(wp)          :: begin_timestamp             ! used for measuring model runtime
-  real(wp)          :: end_timestamp               ! used for measuring model runtime
-  character(len=82) :: stars                       ! character containing stars
+  integer           :: omp_num_threads      ! number of OMP threads
+  integer           :: time_step_counter    ! counter of the time step
+  real(wp)          :: t_0,run_span,t_write ! time information
+  type(t_grid)      :: grid                 ! grid properties
+  type(t_state)     :: state_1,state_2      ! states at different time steps
+  type(t_state)     :: state_write          ! states to write out
+  type(t_diag)      :: diag                 ! diagnostic quantities
+  type(t_tend)      :: tend                 ! state containing the tendency
+  type(t_bc)        :: bc                   ! boundary conditions
+  logical           :: lrad_update          ! radiation update switch
+  real(wp)          :: normal_dist_min_vert ! minimum vertical gridpoint distance
+  real(wp)          :: t_rad_update         ! radiation update time
+  real(wp)          :: init_timestamp       ! used for measuring model runtime
+  real(wp)          :: begin_timestamp      ! used for measuring model runtime
+  real(wp)          :: end_timestamp        ! used for measuring model runtime
+  character(len=82) :: stars                ! character containing stars
   
   ! taking the timestamp to measure the performance
   call cpu_time(init_timestamp)
