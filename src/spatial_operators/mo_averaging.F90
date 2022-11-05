@@ -21,7 +21,9 @@ module mo_averaging
     real(wp),     intent(in) :: vector_field_x(:,:,:) ! x-component of vector field to work with
     real(wp),     intent(in) :: vector_field_y(:,:,:) ! y-component of vector field to work with
     type(t_grid), intent(in) :: grid                  ! model grid
-    integer,      intent(in) :: ji,jk,jl              ! spatial indices
+    integer,      intent(in) :: ji                    ! horizontal index
+    integer,      intent(in) :: jk                    ! horizontal index
+    integer,      intent(in) :: jl                    ! vertical index
     real(wp) :: vertical_contravariant_corr           ! result
     
     vertical_contravariant_corr = 0._wp
