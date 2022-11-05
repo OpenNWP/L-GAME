@@ -1011,7 +1011,8 @@ module mo_grid_generator
     
     ! local variables
     real(wp) :: original_array(ny,nx) ! the unsmoothed input array
-    integer  :: ji,jk                 ! spatial indices
+    integer  :: ji                    ! horizontal index
+    integer  :: jk                    ! horizontal index
     
     ! copying the original array
     original_array = array
