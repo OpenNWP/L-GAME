@@ -24,7 +24,8 @@ module mo_gradient_operators
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
-    integer :: ji,jk ! spatial indices
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
 
     ! inner domain
     ! calculating the x-component of the gradient
@@ -70,7 +71,7 @@ module mo_gradient_operators
     type(t_grid), intent(in)    :: grid                ! the grid properties
     
     ! local variables
-    integer :: jl ! spatial indices
+    integer :: jl ! level index
     
     ! calculating the vertical gradient in the inner levels
     !$omp parallel do private(jl)
@@ -93,7 +94,9 @@ module mo_gradient_operators
     type(t_grid), intent(in)    :: grid                  ! the grid properties
     
     ! local variables
-    integer :: ji,jk,jl ! spatial indices
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
+    integer :: jl ! vertical index
     
     ! computing the horizontal covariant gradient
     call grad_hor_cov(scalar_field,result_field_x,result_field_y,grid)
