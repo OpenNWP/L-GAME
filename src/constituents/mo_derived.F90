@@ -43,7 +43,9 @@ module mo_derived
     
     ! input arguments
     type(t_state), intent(in) :: state    ! state with which to calculate c_v
-    integer, intent(in)       :: ji,jk,jl ! spatial indices of the gridpoint
+    integer, intent(in)       :: ji       ! horizontal index of the gridpoint
+    integer, intent(in)       :: jk       ! horizontal index of the gridpoint
+    integer, intent(in)       :: jl       ! vertical index of the gridpoint
     
     ! output
     real(wp) :: spec_heat_cap_diagnostics_v
@@ -74,7 +76,9 @@ module mo_derived
     
     ! input arguments
     type(t_state), intent(in) :: state    ! state with which to calculate c_p
-    integer,       intent(in) :: ji,jk,jl ! spatial indices of the gridpoint
+    integer, intent(in)       :: ji       ! horizontal index of the gridpoint
+    integer, intent(in)       :: jk       ! horizontal index of the gridpoint
+    integer, intent(in)       :: jl       ! vertical index of the gridpoint
     
     ! output
     real(wp) :: spec_heat_cap_diagnostics_p
@@ -105,7 +109,9 @@ module mo_derived
     
     ! input arguments
     type(t_state), intent(in) :: state    ! state with which to calculate the gas constant
-    integer,       intent(in) :: ji,jk,jl ! spatial indices of the gridpoint
+    integer, intent(in)       :: ji       ! horizontal index of the gridpoint
+    integer, intent(in)       :: jk       ! horizontal index of the gridpoint
+    integer, intent(in)       :: jl       ! vertical index of the gridpoint
     ! output
     real(wp)                  :: gas_constant_diagnostics
     

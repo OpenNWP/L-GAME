@@ -86,7 +86,9 @@ module mo_rrtmgp_coupler
     type(ty_cloud_optics)                 :: cloud_optics_lw                 ! the spectral properties of the clouds for the LW calculation
     real(wp), allocatable                 :: mu_0(:)                         ! solar zenith angle
     integer                               :: n_day_points                    ! number of points where it is day
-    integer                               :: jk,jl,j_day                     ! spatial indices
+    integer                               :: jk                              ! cell index
+    integer                               :: jl                              ! layer/level index
+    integer                               :: j_day                           ! cell index, restricted to day points
     integer, allocatable                  :: day_indices(:)                  ! the indices of columns where it is day
     type(ty_fluxes_broadband)             :: fluxes,fluxes_day               ! the resulting fluxes
     type(ty_optical_props_2str)           :: atmos_props_sw,cloud_props_sw   ! short wave optical properties
