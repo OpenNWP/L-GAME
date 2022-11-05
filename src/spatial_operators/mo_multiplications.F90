@@ -24,7 +24,8 @@ module mo_multiplications
     real(wp), intent(out) :: result_field_y(:,:,:) ! output vector field, y-component
   
     ! local variables
-    integer :: ji,jk ! horizontal indices
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
     
     ! inner domain
     ! x
@@ -71,7 +72,8 @@ module mo_multiplications
     real(wp), intent(inout) :: vector_y(:,:,:)     ! vector field, y-component
   
     ! local variables
-    integer :: ji,jk ! horizontal indices
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
     
     ! inner domain
     ! x
