@@ -367,7 +367,9 @@ module mo_column_solvers
     real(wp) :: density_old_at_interface,added_mass       ! abbreviations
     real(wp) :: temperature_old_at_interface              ! temperature in a level at the old PC substep
     integer  :: jc                                        ! constituent index
-    integer  :: ji,jk,jl                                  ! spatial indices
+    integer  :: ji                                        ! horizontal index
+    integer  :: jk                                        ! horizontal index
+    integer  :: jl                                        ! layer index
     
     ! setting the time stepping weights
     impl_thermo_weight = 0.5_wp

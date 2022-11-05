@@ -32,7 +32,9 @@ module mo_scalar_tend_expl
     integer,       intent(in)    :: rk_step      ! RK substep index
     
     ! local variables
-    integer  :: ji,jk,jl                   ! spatial indices
+    integer  :: ji                         ! horizontal index
+    integer  :: jk                         ! horizontal index
+    integer  :: jl                         ! layer index
     integer  :: jc                         ! constituent index
     real(wp) :: old_weight(n_constituents) ! time stepping weight
     real(wp) :: new_weight(n_constituents) ! time stepping weight
