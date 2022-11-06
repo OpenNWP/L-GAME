@@ -14,8 +14,8 @@ module mo_linear_combination
 
   subroutine linear_combine_two_states(state_1,state_2,state_res,coeff_1,coeff_2,grid)
     
-    type(t_state), intent(inout) :: state_1   ! first state to linearly combine
-    type(t_state), intent(inout) :: state_2   ! second state to linearly combine
+    type(t_state), intent(in)    :: state_1   ! first state to linearly combine
+    type(t_state), intent(in)    :: state_2   ! second state to linearly combine
     type(t_state), intent(inout) :: state_res ! the resulting state
     real(wp),      intent(in)    :: coeff_1   ! coefficient for the first state
     real(wp),      intent(in)    :: coeff_2   ! coefficient for the second state
