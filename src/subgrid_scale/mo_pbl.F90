@@ -36,7 +36,8 @@ module mo_pbl
     real(wp) :: theta_v_pert            ! virtual potential temperature perturbation near the surface
     real(wp) :: w_pert_theta_v_pert_avg ! correlation between vertical velocity and virtual potential temperature perturbations
     real(wp) :: w_theta_v_corr          ! semi-empirical coefficient for computing w_pert_theta_v_pert_avg
-    integer  :: ji,jk                   ! loop variables
+    integer  :: ji                      ! horizontal index
+    integer  :: jk                      ! horizontal index
 
     w_theta_v_corr = 0.2_wp
     
@@ -245,11 +246,13 @@ module mo_pbl
     
     ! This function returns the roughness length as a function of the mean wind speed at 10 m above a fully developed sea.
     
-    real(wp), intent(in) :: u10 ! wind velocity 10 m above the surface
-    real(wp)             :: roughness_length_from_u10_sea
+    real(wp), intent(in) :: u10                           ! wind velocity 10 m above the surface
+    real(wp)             :: roughness_length_from_u10_sea ! result
 
     ! local variables
-    real(wp) :: swh,period,wavelength ! properties of the wave field
+    real(wp) :: swh        ! significant wave height
+    real(wp) :: period     ! mean period of the sea surface waves
+    real(wp) :: wavelength ! mean wavelength of the sea surface waves
 
     ! refer to Stensrud,Parameterization schemes (2007),p.130
 
@@ -302,13 +305,11 @@ module mo_pbl
     
     ! This function returns the surface flux resistance for momentum.
 
-    ! input variables
     real(wp), intent(in) :: wind_h_lowest_layer        ! wind speed in the lowest model layer
     real(wp), intent(in) :: z_agl                      ! height of the target gridpoint above the surface (m)
     real(wp), intent(in) :: roughness_length_value     ! roughness length  of the surface (m)
     real(wp), intent(in) :: monin_obukhov_length_value ! Monin-Obukhiv-length (m)
-    ! output variable
-    real(wp)             :: momentum_flux_resistance ! result
+    real(wp)             :: momentum_flux_resistance   ! result
 
     ! local variables
     real(wp) :: used_vertical_height
@@ -357,11 +358,9 @@ module mo_pbl
   function psi_h(eff,l)
 
     ! This is a helper function for the correction to the surface scalar flux resistance for non-neutral conditions.
-
-    ! input variables
+    
     real(wp), intent(in) :: eff   ! effective height above the surface
     real(wp), intent(in) :: l     ! Monin-Obukhov length
-    ! output variable
     real(wp)             :: psi_h ! the value of the helper function
 
     ! local variables
