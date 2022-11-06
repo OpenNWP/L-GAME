@@ -108,7 +108,7 @@ else()
 endif()
 # switching on debugging options
 if(DEBUGGING)
-  SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fbounds-check -Wall -Wno-c-binding-type -ffpe-trap=invalid,zero,overflow,underflow,denormal -fbacktrace -fdump-core")
+  SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fbounds-check -Wall -Wno-c-binding-type -ffpe-trap=invalid,zero,overflow -fbacktrace -fdump-core")
 endif()
 # single precision for more performance
 if(SINGLE_PRECISION)
