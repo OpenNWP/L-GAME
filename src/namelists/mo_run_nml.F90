@@ -48,7 +48,7 @@ module mo_run_nml
   subroutine run_nml_setup()
     
     ! local variables
-    integer :: fileunit
+    integer :: fileunit ! file unit of the namelist file
     
     ny = 35
     nx = 35

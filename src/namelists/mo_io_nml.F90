@@ -28,7 +28,7 @@ module mo_io_nml
   subroutine io_nml_setup
     
     ! local variables
-    integer :: fileunit
+    integer :: fileunit ! file unit of the namelist file
     
     dt_write_min = 60
     lread_oro = .true.

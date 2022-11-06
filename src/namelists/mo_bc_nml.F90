@@ -23,7 +23,7 @@ module mo_bc_nml
   subroutine bc_nml_setup
     
     ! local variables
-    integer :: fileunit
+    integer :: fileunit ! file unit of the namelist file
     
     ! default values
     n_swamp = 5

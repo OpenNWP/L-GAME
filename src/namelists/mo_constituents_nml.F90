@@ -25,7 +25,7 @@ module mo_constituents_nml
   subroutine constituents_nml_setup()
     
     ! local variables
-    integer :: fileunit
+    integer :: fileunit ! file unit of the namelist file
     
     lmoist = .true.
     n_condensed_constituents = 5

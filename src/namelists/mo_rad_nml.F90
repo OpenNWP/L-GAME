@@ -25,7 +25,7 @@ module mo_rad_nml
   subroutine rad_nml_setup
     
     ! local variables
-    integer :: fileunit
+    integer :: fileunit ! file unit of the namelist file
     
     ! default values
     lrad = .true.
