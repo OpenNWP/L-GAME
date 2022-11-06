@@ -29,7 +29,9 @@ module mo_eff_diff_coeffs
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     
     ! local variables
-    integer :: ji,jk,jl ! loop indices
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
+    integer :: jl ! layer index
     
     ! computing the eddy viscosity
     !$omp parallel do private(ji,jk,jl)
@@ -231,7 +233,9 @@ module mo_eff_diff_coeffs
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer :: ji,jk,jl ! loop indices
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
+    integer :: jl ! layer index
     
     !  updating the TKE
     call tke_update(state,diag,grid)
@@ -400,8 +404,10 @@ module mo_eff_diff_coeffs
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    real(wp) :: mom_diff_coeff        ! the diffusion coefficient
-    integer  :: ji,jk,jl              ! loop indices
+    real(wp) :: mom_diff_coeff ! the diffusion coefficient
+    integer  :: ji             ! horizontal index
+    integer  :: jk             ! horizontal index
+    integer  :: jl             ! layer index
     
     !$omp parallel do private(ji,jk,jl,mom_diff_coeff)
     do jl=1,n_layers
@@ -432,8 +438,10 @@ module mo_eff_diff_coeffs
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer  :: ji,jk,jl ! loop variables
-    real(wp) :: c_g_v    ! specific heat capacity
+    integer  :: ji    ! horizontal index
+    integer  :: jk    ! horizontal index
+    integer  :: jl    ! layer index
+    real(wp) :: c_g_v ! specific heat capacity
     
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
@@ -525,7 +533,9 @@ module mo_eff_diff_coeffs
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer :: ji,jk,jl
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
+    integer :: jl ! layer index
     
     ! calculating the full virtual potential temperature
     !$omp parallel workshare
