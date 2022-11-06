@@ -230,7 +230,7 @@ module mo_set_initial_state
     ! This subroutine sets the initial state of a NWP run.
     
     type(t_state), intent(inout) :: state ! state to write the arrays to
-    type(t_grid), intent(in)     :: grid  ! grid properties
+    type(t_grid),  intent(in)    :: grid  ! grid properties
     
     ! local variables
     character(len=64) :: filename ! file to read the initial state from
@@ -260,12 +260,12 @@ module mo_set_initial_state
     character(len=64), intent(in)  :: filename          ! filename to read from
     
     ! local variables
-    integer :: ncid             ! ID of the netCDF file
-    integer :: varid_rho        ! variable ID of the densities
-    integer :: varid_rhotheta_v ! variable ID of the virtual potential temperature density
-    integer :: varid_u          ! variable ID of the u-wind
-    integer :: varid_v          ! variable ID of the v-wind
-    integer :: varid_w          ! variable ID of the w-wind
+    integer :: ncid             ! netCDF ID of the file
+    integer :: varid_rho        ! netCDF ID of the densities
+    integer :: varid_rhotheta_v ! netCDF ID of the virtual potential temperature density
+    integer :: varid_u          ! netCDF ID of the u-wind
+    integer :: varid_v          ! netCDF ID of the v-wind
+    integer :: varid_w          ! netCDF ID of the w-wind
     
     ! opening the netCDF file
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
@@ -300,9 +300,12 @@ module mo_set_initial_state
     real(wp),      intent(in)    :: pres_lowest_layer(:,:) ! pressure in the lowest layer
     
     ! local variables
-    real(wp) :: b,c      ! abbreviations needed for the hydrostatic initialization routine
+    real(wp) :: b        ! variable needed for the hydrostatic initialization routine
+    real(wp) :: c        ! variable needed for the hydrostatic initialization routine
     real(wp) :: pressure ! single pressure value
-    integer  :: ji,jk,jl ! loop indices
+    integer  :: ji       ! horizontal index
+    integer  :: jk       ! horizontal index
+    integer  :: jl       ! layer index
     
     ! integrating the hydrostatic initial state according to the given temperature field and pressure in the lowest layer
     !$omp parallel do private(ji,jk,jl,b,c,pressure)

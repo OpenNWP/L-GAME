@@ -116,9 +116,15 @@ module mo_pbl
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    real(wp) :: flux_resistance,wind_speed_lowest_layer,z_agl,roughness_length ! variables needed for the surface friction
-    real(wp) :: layer_thickness,monin_obukhov_length_value,wind_rescale_factor ! variables needed for the surface friction
-    integer  :: ji,jk                                                          ! loop indices
+    real(wp) :: flux_resistance            ! momentum flux resistance value
+    real(wp) :: wind_speed_lowest_layer    ! wind speed in the lowest layer
+    real(wp) :: z_agl                      ! height above ground level of the lowest layer
+    real(wp) :: roughness_length           ! roughness length
+    real(wp) :: layer_thickness            ! thickness of the lowest layer
+    real(wp) :: monin_obukhov_length_value ! Monin-Obukhov length
+    real(wp) :: wind_rescale_factor        ! factor taking into account the distance of the wind vector from the surface
+    integer  :: ji                         ! horizontal index
+    integer  :: jk                         ! horizontal index
 
     !$omp parallel do private(ji,jk,wind_speed_lowest_layer,z_agl,layer_thickness,roughness_length,monin_obukhov_length_value, &
     !$omp flux_resistance,wind_rescale_factor)
@@ -277,11 +283,14 @@ module mo_pbl
     
     ! This function returns the surface flux resistance for scalar quantities.
     
-    real(wp), intent(in) :: roughness_velocity_value,z_agl,roughness_length_value,monin_obukhov_length_value
-    real(wp)             :: scalar_flux_resistance ! result
+    real(wp), intent(in) :: roughness_velocity_value   ! roughness velocity
+    real(wp), intent(in) :: z_agl                      ! height above ground level
+    real(wp), intent(in) :: roughness_length_value     ! roughness length
+    real(wp), intent(in) :: monin_obukhov_length_value ! Monin-Obukhov length
+    real(wp)             :: scalar_flux_resistance     ! result
     
     ! local variables
-    real(wp) :: used_vertical_height
+    real(wp) :: used_vertical_height ! vertical height above ground level actually used in the calculation
     
     ! height of the prandtl layer
     used_vertical_height = min(z_agl,h_prandtl)
@@ -312,7 +321,7 @@ module mo_pbl
     real(wp)             :: momentum_flux_resistance   ! result
 
     ! local variables
-    real(wp) :: used_vertical_height
+    real(wp) :: used_vertical_height ! vertical height above ground level actually used in the calculation
 
     ! height of the prandtl layer
     used_vertical_height = min(z_agl,h_prandtl)
