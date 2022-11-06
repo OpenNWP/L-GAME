@@ -26,13 +26,22 @@ module mo_set_initial_state
     type(t_grid),  intent(in)    :: grid  ! model grid
     
     ! local variables
-    real(wp) :: pres_lowest_layer(ny,nx)                    ! pressure in the lowest layer
-    real(wp) :: n_squared                                   ! Brunt-Väisälä frequency for the Schär test case
-    real(wp) :: gravity_local                               ! gravity acceleration
-    real(wp) :: delta_z                                     ! delta z
-    real(wp) :: T_0                                         ! MSLP temperature variable
-    integer  :: ji,jk,jl                                    ! loop indices
-    real(wp) :: u_0,z_1,z_2,r,rho_0,x_0,z_0,A_x,A_Z,x_coord ! variables needed for the advection test
+    real(wp) :: pres_lowest_layer(ny,nx) ! pressure in the lowest layer
+    real(wp) :: n_squared                ! Brunt-Väisälä frequency for the Schär test case
+    real(wp) :: gravity_local            ! gravity acceleration
+    real(wp) :: delta_z                  ! delta z
+    real(wp) :: T_0                      ! MSLP temperature variable
+    integer  :: ji,jk,jl                 ! loop indices
+    real(wp) :: u_0                      ! needed for the advection test case
+    real(wp) :: z_1                      ! needed for the advection test case
+    real(wp) :: z_2                      ! needed for the advection test case
+    real(wp) :: r                        ! needed for the advection test case
+    real(wp) :: rho_0                    ! needed for the advection test case
+    real(wp) :: x_0                      ! needed for the advection test case
+    real(wp) :: z_0                      ! needed for the advection test case
+    real(wp) :: A_x                      ! needed for the advection test case
+    real(wp) :: A_Z                      ! needed for the advection test case
+    real(wp) :: x_coord                  ! needed for the advection test case
       
     select case (trim(scenario))
     
@@ -395,12 +404,12 @@ module mo_set_initial_state
     
     ! This function returns the geopotential as a function of the geometrical height.
     
-    real(wp), intent(in) :: height
-    real(wp)             :: geopot
+    real(wp), intent(in) :: height ! geometrical height above mean sea level
+    real(wp)             :: geopot ! geopotential (result)
     
     geopot = -gravity*r_e**2/(r_e+height)+gravity*r_e
     
-    ! Schaer test case
+    ! plane geometry
     if (lplane) then
       geopot = gravity*height
     endif
@@ -409,9 +418,9 @@ module mo_set_initial_state
   
   subroutine nc_check(i_status)
     
-    ! This checks wether a netCDF function threw an error.
+    ! This subroutine checks wether a netCDF function threw an error.
     
-    integer, intent(in) :: i_status
+    integer, intent(in) :: i_status ! status ID
 
     if(i_status/=nf90_noerr) then
       print *, trim(nf90_strerror(i_status))
