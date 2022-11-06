@@ -23,19 +23,32 @@ module mo_phase_trans
     
     ! This subroutine calculates phase transition rates and associated heat source rates.
     ! It assumes the following order for the constituents:
-    ! precipitating ice - precipitating liquid water - cloud ice - liquid cloud water - moist air - water vapour
+    ! precipitating ice - precipitating liquid water - cloud ice - liquid cloud water - graupel - moist air - water vapour
     
     type(t_state), intent(in)    :: state ! the state which to use for computing the phase transition rates
     type(t_diag),  intent(inout) :: diag  ! the diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer  :: ji,jk,jl
-    real(wp) :: diff_density,phase_trans_density,saturation_pressure,water_vapour_pressure, &
-                diff_density_sfc,saturation_pressure_sfc,dry_pressure,air_pressure, &
-                a,b,c,p,q,enhancement_factor,maximum_cloud_water_content
+    integer  :: ji                          ! horizontal index
+    integer  :: jk                          ! horizontal index
+    integer  :: jl                          ! layer index
+    real(wp) :: diff_density                ! difference between saturation water vapour density and actual water vapour density and 
+    real(wp) :: phase_trans_density         ! actual phase transition density
+    real(wp) :: saturation_pressure         ! saturation water vapour pressure
+    real(wp) :: water_vapour_pressure       ! actual water vapour pressure
+    real(wp) :: diff_density_sfc            ! diff_density at the surface
+    real(wp) :: saturation_pressure_sfc     ! saturation water vapour pressure at the surface
+    real(wp) :: dry_pressure                ! dry air pressure
+    real(wp) :: air_pressure                ! complete air pressure
+    real(wp) :: a                           ! helper variable for computing the second-order phase transition rates
+    real(wp) :: b                           ! helper variable for computing the second-order phase transition rates
+    real(wp) :: c                           ! helper variable for computing the second-order phase transition rates
+    real(wp) :: p                           ! helper variable for computing the second-order phase transition rates
+    real(wp) :: q                           ! helper variable for computing the second-order phase transition rates
+    real(wp) :: enhancement_factor          ! factor taking into account non-ideal effects of air
+    real(wp) :: maximum_cloud_water_content ! maximum cloud water content in (kg cloud)/(kg dry air)
     
-    ! maximum cloud water content in (kg cloud)/(kg dry air).
     maximum_cloud_water_content = 0.2e-3_wp
     
     ! loop over all grid boxes
