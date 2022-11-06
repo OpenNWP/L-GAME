@@ -29,10 +29,8 @@ module mo_divergence_operators
     integer  :: jl           ! layer index
     real(wp) :: comp_h       ! horizontal component of divergence
     real(wp) :: comp_v       ! vertical component of divergence
-    real(wp) :: contra_upper ! contravariant mass flux density resulting
-                             ! from the horizontal vector components through the upper area
-    real(wp) :: contra_lower ! contravariant mass flux density resulting
-                             ! from the horizontal vector components through the lower area
+    real(wp) :: contra_upper ! contravariant mass flux density resulting from the horizontal vector components through the upper area
+    real(wp) :: contra_lower ! contravariant mass flux density resulting from the horizontal vector components through the lower area
 
     !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_h,comp_v)
     do jl=1,n_layers
@@ -89,10 +87,8 @@ module mo_divergence_operators
     integer  :: jl            ! layer index
     real(wp) :: comp_h        ! horizontal component of divergence
     real(wp) :: comp_v        ! vertical component of divergence
-    real(wp) :: contra_upper  ! contravariant mass flux density resulting
-                              ! from the horizontal vector components through the upper area
-    real(wp) :: contra_lower  ! contravariant mass flux density resulting
-                              ! from the horizontal vector components through the lower area
+    real(wp) :: contra_upper  ! contravariant mass flux density resulting from the horizontal vector components through the upper area
+    real(wp) :: contra_lower  ! contravariant mass flux density resulting from the horizontal vector components through the lower area
     real(wp) :: density_upper ! density at the upper interface
     real(wp) :: density_lower ! density at the lower interface
 
@@ -161,26 +157,28 @@ module mo_divergence_operators
     type(t_grid), intent(in)    :: grid             ! grid properties
 
     ! local variables
-    integer  :: ji                               ! horizontal index
-    integer  :: jk                               ! horizontal index
-    integer  :: jl                               ! layer index
-    real(wp) :: contra_upper,contra_lower,comp_v ! kinematic quantities for computing the vertical divergence
+    integer  :: ji        ! horizontal index
+    integer  :: jk        ! horizontal index
+    integer  :: jl        ! layer index
+    real(wp) :: cov_upper ! covariant upper component of the vector field
+    real(wp) :: cov_lower ! covariant lower component of the vector field
+    real(wp) :: comp_v    ! vertical divergence value to add
     
-    !$omp parallel do private(ji,jk,jl,contra_upper,contra_lower,comp_v)
+    !$omp parallel do private(ji,jk,jl,cov_upper,cov_lower,comp_v)
     do jl=1,n_layers
       do jk=1,nx
         do ji=1,ny
           if (jl==0) then
-            contra_upper = 0._wp
-            contra_lower = in_field(ji,jk,jl+1)
+            cov_upper = 0._wp
+            cov_lower = in_field(ji,jk,jl+1)
           elseif (jl==n_layers) then
-            contra_upper = in_field(ji,jk,jl)
-            contra_lower = 0._wp
+            cov_upper = in_field(ji,jk,jl)
+            cov_lower = 0._wp
           else
-            contra_upper = in_field(ji,jk,jl)
-            contra_lower = in_field(ji,jk,jl+1)
+            cov_upper = in_field(ji,jk,jl)
+            cov_lower = in_field(ji,jk,jl+1)
           endif
-          comp_v = contra_upper*grid%area_z(ji,jk,jl) - contra_lower*grid%area_z(ji,jk,jl+1)
+          comp_v = cov_upper*grid%area_z(ji,jk,jl) - cov_lower*grid%area_z(ji,jk,jl+1)
           out_field(ji,jk,jl) = out_field(ji,jk,jl) + 1._wp/grid%volume(ji,jk,jl)*comp_v
         enddo
       enddo

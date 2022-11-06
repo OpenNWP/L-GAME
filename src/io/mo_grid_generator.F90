@@ -877,7 +877,8 @@ module mo_grid_generator
     
     ! local variables
     real(wp) :: pressure ! pressure at the respective gridpoint
-    real(wp) :: b,c      ! abbreviations needed for the hydrostatic initialization routine
+    real(wp) :: b        ! parameter needed for the hydrostatic initialization routine
+    real(wp) :: c        ! parameter needed for the hydrostatic initialization routine
     integer  :: ji       ! horizontal index
     integer  :: jk       ! horizontal index
     integer  :: jl       ! layer index
@@ -1108,7 +1109,6 @@ module mo_grid_generator
     
     ! This function calculates the area of a vertical face.
     
-    ! input
     real(wp) :: lower_z            ! geometric height of the lower boundary of the face
     real(wp) :: upper_z            ! geometric height of the upper boundary of the face
     real(wp) :: lower_length       ! length of the lower boundary of the face

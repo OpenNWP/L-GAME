@@ -18,13 +18,13 @@ module mo_averaging
     ! This function calculates (the vertical contravariant component - the vertical covariant component)
     ! of a vector field out of the horizontal contravariant components.
     
-    real(wp),     intent(in) :: vector_field_x(:,:,:) ! x-component of vector field to work with
-    real(wp),     intent(in) :: vector_field_y(:,:,:) ! y-component of vector field to work with
-    type(t_grid), intent(in) :: grid                  ! model grid
-    integer,      intent(in) :: ji                    ! horizontal index
-    integer,      intent(in) :: jk                    ! horizontal index
-    integer,      intent(in) :: jl                    ! vertical index
-    real(wp) :: vertical_contravariant_corr           ! result
+    real(wp),     intent(in) :: vector_field_x(:,:,:)       ! x-component of vector field to work with
+    real(wp),     intent(in) :: vector_field_y(:,:,:)       ! y-component of vector field to work with
+    type(t_grid), intent(in) :: grid                        ! model grid
+    integer,      intent(in) :: ji                          ! horizontal index
+    integer,      intent(in) :: jk                          ! horizontal index
+    integer,      intent(in) :: jl                          ! vertical index
+    real(wp)                 :: vertical_contravariant_corr ! result
     
     vertical_contravariant_corr = 0._wp
     
