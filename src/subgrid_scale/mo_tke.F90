@@ -27,7 +27,9 @@ module mo_tke
     
     ! local variables
     real(wp) :: decay_constant ! defines how quickly the TKE decays
-    integer  :: ji,jk,jl       ! loop variables
+    integer  :: ji             ! horizontal index
+    integer  :: jk             ! horizontal index
+    integer  :: jl             ! layer index
     
     ! computing the advection
     call grad_vert(diag%tke,diag%w_placeholder,grid)
