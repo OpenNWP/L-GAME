@@ -38,7 +38,7 @@ module mo_eff_diff_coeffs
     do jl=1,n_layers
       do jk=1,nx
         do ji=1,ny
-          diag%viscosity_coeff_div(ji,jk,jl) = tke2hor_diff_coeff(diag%tke(ji,jk,jl),eff_hor_res)
+          diag%viscosity_coeff_div(ji,jk,jl) = tke2hor_diff_coeff(diag%tke(ji,jk,jl))
         enddo
       enddo
     enddo
@@ -121,10 +121,10 @@ module mo_eff_diff_coeffs
       do ji=2,ny
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*( &
-          tke2hor_diff_coeff(diag%tke(ji-1,jk-1,jl),eff_hor_res) &
-          + tke2hor_diff_coeff(diag%tke(ji-1,jk,jl),eff_hor_res) &
-          + tke2hor_diff_coeff(diag%tke(ji,jk-1,jl),eff_hor_res) &
-          + tke2hor_diff_coeff(diag%tke(ji,jk,jl),eff_hor_res))
+          tke2hor_diff_coeff(diag%tke(ji-1,jk-1,jl)) &
+          + tke2hor_diff_coeff(diag%tke(ji-1,jk,jl)) &
+          + tke2hor_diff_coeff(diag%tke(ji,jk-1,jl)) &
+          + tke2hor_diff_coeff(diag%tke(ji,jk,jl)))
         enddo
       enddo
       
@@ -133,21 +133,21 @@ module mo_eff_diff_coeffs
         
         do jk=2,nx
           diag%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
-          tke2hor_diff_coeff(diag%tke(1,jk-1,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ny,jk-1,jl),eff_hor_res) &
-          + tke2hor_diff_coeff(diag%tke(1,jk,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ny,jk,jl),eff_hor_res))
+          tke2hor_diff_coeff(diag%tke(1,jk-1,jl)) + tke2hor_diff_coeff(diag%tke(ny,jk-1,jl)) &
+          + tke2hor_diff_coeff(diag%tke(1,jk,jl)) + tke2hor_diff_coeff(diag%tke(ny,jk,jl)))
           diag%viscosity_coeff_curl_dual(ny+1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl)
         enddo
         do ji=2,ny
           diag%viscosity_coeff_curl_dual(ji,1,jl) = 0.25_wp*( &
-          tke2hor_diff_coeff(diag%tke(ji-1,nx,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ji-1,1,jl),eff_hor_res) &
-          + tke2hor_diff_coeff(diag%tke(ji,nx,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ji,1,jl),eff_hor_res))
+          tke2hor_diff_coeff(diag%tke(ji-1,nx,jl)) + tke2hor_diff_coeff(diag%tke(ji-1,1,jl)) &
+          + tke2hor_diff_coeff(diag%tke(ji,nx,jl)) + tke2hor_diff_coeff(diag%tke(ji,1,jl)))
           diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
         enddo
         
         ! corners
         diag%viscosity_coeff_curl_dual(1,1,jl) = 0.25*( &
-        tke2hor_diff_coeff(diag%tke(1,1,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ny,1,jl),eff_hor_res) &
-        + tke2hor_diff_coeff(diag%tke(1,nx,jl),eff_hor_res) + tke2hor_diff_coeff(diag%tke(ny,nx,jl),eff_hor_res))
+        tke2hor_diff_coeff(diag%tke(1,1,jl)) + tke2hor_diff_coeff(diag%tke(ny,1,jl)) &
+        + tke2hor_diff_coeff(diag%tke(1,nx,jl)) + tke2hor_diff_coeff(diag%tke(ny,nx,jl)))
         diag%viscosity_coeff_curl_dual(1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
         diag%viscosity_coeff_curl_dual(ny+1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
         diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
@@ -575,20 +575,19 @@ module mo_eff_diff_coeffs
     
   end subroutine update_n_squared
   
-  function tke2hor_diff_coeff(tke,effective_resolution)
+  function tke2hor_diff_coeff(tke)
     
     ! This function returns the horizontal kinematic eddy viscosity as a function of the specific TKE.
     
-    real(wp), intent(in) :: tke                  ! specific turbulent kinetic energy
-    real(wp), intent(in) :: effective_resolution ! effective horizontal resolution
-    real(wp)             :: tke2hor_diff_coeff   ! result
+    real(wp), intent(in) :: tke                ! specific turbulent kinetic energy
+    real(wp)             :: tke2hor_diff_coeff ! result
     
     ! local variables
     real(wp) :: mean_velocity  ! mean velocity of a sub-grid scale movement
     real(wp) :: mean_free_path ! mean free path of a sub-grid scale movement
     
     mean_velocity = (2._wp*tke)**0.5_wp
-    mean_free_path = effective_resolution/6._wp
+    mean_free_path = eff_hor_res/6._wp
     tke2hor_diff_coeff = 1._wp/6._wp*mean_free_path*mean_velocity
     
   end function tke2hor_diff_coeff

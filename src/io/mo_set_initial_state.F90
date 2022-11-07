@@ -31,12 +31,14 @@ module mo_set_initial_state
     real(wp) :: gravity_local            ! gravity acceleration
     real(wp) :: delta_z                  ! delta z
     real(wp) :: T_0                      ! MSLP temperature variable
-    integer  :: ji,jk,jl                 ! loop indices
-    real(wp) :: u_0                      ! needed for the advection test case
+    integer  :: ji                       ! horizontal index
+    integer  :: jk                       ! horizontal index
+    integer  :: jl                       ! vertical index
+    real(wp) :: u_0                      ! needed for the advection test case (advection velocity)
     real(wp) :: z_1                      ! needed for the advection test case
     real(wp) :: z_2                      ! needed for the advection test case
     real(wp) :: r                        ! needed for the advection test case
-    real(wp) :: rho_0                    ! needed for the advection test case
+    real(wp) :: rho_0                    ! needed for the advection test case (maximum tracer density)
     real(wp) :: x_0                      ! needed for the advection test case
     real(wp) :: z_0                      ! needed for the advection test case
     real(wp) :: A_x                      ! needed for the advection test case
