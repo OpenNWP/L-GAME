@@ -40,7 +40,8 @@ module mo_vector_tend_expl
     real(wp) :: old_hor_pgrad_weight     ! old time step pressure gradient weight
     real(wp) :: current_hor_pgrad_weight ! current time step horizontal pressure gradient weight
     real(wp) :: current_ver_pgrad_weight ! current time step vertical pressure gradient weight
-    real(wp) :: old_weight,new_weight    ! Runge-Kutta weights
+    real(wp) :: old_weight               ! weight of the old predictor-corrector substep
+    real(wp) :: new_weight               ! weight of the new predictor-corrector substep
     
     ! momentum advection
     if ((rk_step==2 .or. total_step_counter==0) .and. ((.not. llinear) .or. lcorio)) then
