@@ -30,38 +30,41 @@ module mo_column_solvers
     integer,       intent(in)            :: rk_step   ! Runge Kutta substep
     
     ! local variables
-    type(t_state), pointer :: state_new_used                              ! pointer to the state that is used as the new state in the calculation
-    integer                :: soil_switch                                 ! soil switch: 0 if soil does not have to be calculated off, 1 if soil has to be calculated
-    real(wp)               :: c_vector(n_layers-2+nsoillays)              ! needed for the vertical solver
-    real(wp)               :: d_vector(n_layers-1+nsoillays)              ! needed for the vertical solver
-    real(wp)               :: e_vector(n_layers-2+nsoillays)              ! needed for the vertical solver
-    real(wp)               :: r_vector(n_layers-1+nsoillays)              ! needed for the vertical solver
-    real(wp)               :: rho_expl(n_layers)                          ! explicit mass density
-    real(wp)               :: rhotheta_v_expl(n_layers)                   ! explicit virtual potential temperature density
-    real(wp)               :: exner_pert_expl(n_layers)                   ! explicit Exner pressure perturbation
-    real(wp)               :: theta_v_pert_expl(n_layers)                 ! explicit virtual potential temperature perturbation
-    real(wp)               :: rho_int_old(n_layers-1)                     ! old interface mass density
-    real(wp)               :: rho_int_expl(n_layers-1)                    ! explicit interface mass density
-    real(wp)               :: theta_v_int_new(n_layers-1)                 ! preliminary new virtual potential temperature interface values
-    real(wp)               :: rho_int_new                                 ! new density interface value
-    real(wp)               :: alpha_old(n_layers)                         ! alpha at the old time step
-    real(wp)               :: beta_old(n_layers)                          ! beta at the old time step
-    real(wp)               :: gamma_old(n_layers)                         ! gamma at the old time step
-    real(wp)               :: alpha_new(n_layers)                         ! alpha at the new time step
-    real(wp)               :: beta_new(n_layers)                          ! beta at the new time step
-    real(wp)               :: gamma_new(n_layers)                         ! gamma at the new time step
-    real(wp)               :: alpha(n_layers)                             ! alpha
-    real(wp)               :: beta(n_layers)                              ! beta
-    real(wp)               :: gammaa(n_layers)                            ! gamma
-    real(wp)               :: damping_start_height                        ! lower boundary height of the Klemp layer
-    real(wp)               :: damping_coeff,damping_prefactor(n_layers-1) ! damping coefficients of the Klemp layer
-    real(wp)               :: above_damping                               ! height above the lower boundary of the damping height
-    real(wp)               :: t_gas_lowest_layer_old                      ! temperature of the gas in the lowest layer of the model atmosphere, old time step
-    real(wp)               :: t_gas_lowest_layer_new                      ! temperature of the gas in the lowest layer of the model atmosphere, new time step
-    real(wp)               :: heat_flux_density_expl(nsoillays)           ! explicit heat_flux_density in the soil
-    real(wp)               :: solution_vector(n_layers-1+nsoillays)       ! vector containing the solution of the linear problem to solve here
-    real(wp)               :: partial_deriv_new_time_step_weight          ! partial derivatives weight of the new time step
-    integer                :: ji,jk,jl                                    ! loop variables
+    type(t_state), pointer :: state_new_used                        ! pointer to the state that is used as the new state in the calculation
+    integer                :: soil_switch                           ! soil switch: 0 if soil does not have to be calculated off, 1 if soil has to be calculated
+    real(wp)               :: c_vector(n_layers-2+nsoillays)        ! needed for the vertical solver
+    real(wp)               :: d_vector(n_layers-1+nsoillays)        ! needed for the vertical solver
+    real(wp)               :: e_vector(n_layers-2+nsoillays)        ! needed for the vertical solver
+    real(wp)               :: r_vector(n_layers-1+nsoillays)        ! needed for the vertical solver
+    real(wp)               :: rho_expl(n_layers)                    ! explicit mass density
+    real(wp)               :: rhotheta_v_expl(n_layers)             ! explicit virtual potential temperature density
+    real(wp)               :: exner_pert_expl(n_layers)             ! explicit Exner pressure perturbation
+    real(wp)               :: theta_v_pert_expl(n_layers)           ! explicit virtual potential temperature perturbation
+    real(wp)               :: rho_int_old(n_layers-1)               ! old interface mass density
+    real(wp)               :: rho_int_expl(n_layers-1)              ! explicit interface mass density
+    real(wp)               :: theta_v_int_new(n_layers-1)           ! preliminary new virtual potential temperature interface values
+    real(wp)               :: rho_int_new                           ! new density interface value
+    real(wp)               :: alpha_old(n_layers)                   ! alpha at the old time step
+    real(wp)               :: beta_old(n_layers)                    ! beta at the old time step
+    real(wp)               :: gamma_old(n_layers)                   ! gamma at the old time step
+    real(wp)               :: alpha_new(n_layers)                   ! alpha at the new time step
+    real(wp)               :: beta_new(n_layers)                    ! beta at the new time step
+    real(wp)               :: gamma_new(n_layers)                   ! gamma at the new time step
+    real(wp)               :: alpha(n_layers)                       ! alpha
+    real(wp)               :: beta(n_layers)                        ! beta
+    real(wp)               :: gammaa(n_layers)                      ! gamma
+    real(wp)               :: damping_start_height                  ! lower boundary height of the Klemp layer
+    real(wp)               :: damping_coeff                         ! damping coefficient of the Klemp layer
+    real(wp)               :: damping_prefactor(n_layers-1)         ! damping coefficient of the Klemp layer
+    real(wp)               :: above_damping                         ! height above the lower boundary of the damping height
+    real(wp)               :: t_gas_lowest_layer_old                ! temperature of the gas in the lowest layer of the model atmosphere, old time step
+    real(wp)               :: t_gas_lowest_layer_new                ! temperature of the gas in the lowest layer of the model atmosphere, new time step
+    real(wp)               :: heat_flux_density_expl(nsoillays)     ! explicit heat_flux_density in the soil
+    real(wp)               :: solution_vector(n_layers-1+nsoillays) ! vector containing the solution of the linear problem to solve here
+    real(wp)               :: partial_deriv_new_time_step_weight    ! partial derivatives weight of the new time step
+    integer                :: ji                                    ! horizontal index
+    integer                :: jk                                    ! horizontal index
+    integer                :: jl                                    ! vertical index
     
     if (rk_step==1) then
       state_new_used => state_old
@@ -355,7 +358,8 @@ module mo_column_solvers
     
     ! local variables
     integer  :: n_relevant_constituents                   ! number of relevant constituents for a certain quantity
-    real(wp) :: impl_thermo_weight,expl_weight            ! time stepping weights
+    real(wp) :: impl_thermo_weight                        ! implicit time stepping weight
+    real(wp) :: expl_weight                               ! explicit time stepping weight
     real(wp) :: c_vector(n_layers-1)                      ! vector for solving the system of linear equations
     real(wp) :: d_vector(n_layers)                        ! vector for solving the system of linear equations
     real(wp) :: e_vector(n_layers-1)                      ! vector for solving the system of linear equations
@@ -364,7 +368,7 @@ module mo_column_solvers
     real(wp) :: vertical_flux_vector_rhs(n_layers-1)      ! vertical flux at the old time step
     real(wp) :: vertical_enthalpy_flux_vector(n_layers-1) ! vertical enthalpy flux density vector
     real(wp) :: solution_vector(n_layers)                 ! solution of the system of linear equations
-    real(wp) :: density_old_at_interface,added_mass       ! abbreviations
+    real(wp) :: density_old_at_interface                  ! old density in a level
     real(wp) :: temperature_old_at_interface              ! temperature in a level at the old PC substep
     integer  :: jc                                        ! constituent index
     integer  :: ji                                        ! horizontal index
@@ -385,7 +389,7 @@ module mo_column_solvers
         
         ! loop over all columns
         !$omp parallel do private(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
-        !$omp d_vector,e_vector,r_vector,solution_vector,added_mass,vertical_enthalpy_flux_vector,temperature_old_at_interface)
+        !$omp d_vector,e_vector,r_vector,solution_vector,vertical_enthalpy_flux_vector,temperature_old_at_interface)
         do ji=1,ny
           do jk=1,nx
             
