@@ -338,12 +338,13 @@ module mo_momentum_diff_diss
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer  :: ji                              ! horizontal index
-    integer  :: jk                              ! horizontal index
-    integer  :: jl                              ! layer index
-    real(wp) :: damping_start_height            ! the height in which the Klemp layer begins
-    real(wp) :: z_above_damping                 ! height of a given gridpoint above damping_start_height
-    real(wp) :: damping_coeff,damping_prefactor ! coefficients needed for the Klemp damping layer
+    integer  :: ji                   ! horizontal index
+    integer  :: jk                   ! horizontal index
+    integer  :: jl                   ! layer index
+    real(wp) :: damping_start_height ! the height in which the Klemp layer begins
+    real(wp) :: z_above_damping      ! height of a given gridpoint above damping_start_height
+    real(wp) :: damping_coeff        ! coefficient needed for the Klemp damping layer
+    real(wp) :: damping_prefactor    ! coefficient needed for the Klemp damping layer
     
     ! copying the vertical diffusion acceleration into w_placeholder
     !$omp parallel workshare
