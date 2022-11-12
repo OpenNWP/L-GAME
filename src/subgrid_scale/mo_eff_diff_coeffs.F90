@@ -235,7 +235,7 @@ module mo_eff_diff_coeffs
     ! local variables
     integer :: ji ! horizontal index
     integer :: jk ! horizontal index
-    integer :: jl ! layer index
+    integer :: jl ! level index
     
     !  updating the TKE
     call tke_update(state,diag,grid)
