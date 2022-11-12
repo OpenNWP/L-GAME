@@ -373,12 +373,20 @@ module mo_vorticities
     
     type(t_state) :: state            ! state with which to calculate the relative vorticity
     type(t_grid)  :: grid             ! grid properties
-    integer       :: ji,jk,jl         ! indices of the gridpoint
+    integer       :: ji               ! horizontal index
+    integer       :: jk               ! horizontal index
+    integer       :: jl               ! layer index
     real(wp)      :: rel_vort_z_local ! result
     
     ! local variables
-    real(wp) :: delta_z,l_rescale,vertical_gradient       ! needed for terrain handling
-    integer  :: ind_shift,j_i(4),j_k(4),jm,sign_vector(4) ! helper variables containing indices
+    real(wp) :: delta_z           ! vertical distance used for computing the vertical gradient of horizontal velocity
+    real(wp) :: l_rescale         ! rescaling factor for the dual edge length (needed for vertical interpolation in terrain-following coordinates)
+    real(wp) :: vertical_gradient ! vertical gradient of horizontal velocity (needed for vertical interpolation in terrain-following coordinates, unit: 1/s)
+    integer  :: ind_shift         ! needed for computing the vertical gradient of horizontal velocity
+    integer  :: j_i(4)            ! horizontal indices of the four edges over which to compute the sum
+    integer  :: j_k(4)            ! horizontal indices of the four edges over which to compute the sum
+    integer  :: jm                ! will loop over the four edges over which to compute the sum
+    integer  :: sign_vector(4)    ! vector holding the signs which to use when computing the vorticity
     
     ! setting the indices
     j_i(1) = ji
