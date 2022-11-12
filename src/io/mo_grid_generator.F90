@@ -39,11 +39,11 @@ module mo_grid_generator
     real(wp) :: dlat                          ! mesh size in y direction as angle
     real(wp) :: dlon                          ! mesh size in x direction as angle
     real(wp) :: max_oro                       ! variable for orography check
-    real(wp) :: A                             ! variable for calculating the vertical grid
-    real(wp) :: B                             ! variable for calculating the vertical grid
-    real(wp) :: sigma_z                       ! variable for calculating the vertical grid
-    real(wp) :: z_rel                         ! variable for calculating the vertical grid
-    real(wp) :: vertical_vector_pre(n_levels) ! variable for calculating the vertical grid
+    real(wp) :: A                             ! variable for calculating the vertical grid (height of a level without orography)
+    real(wp) :: B                             ! variable for calculating the vertical grid (orography weighting factor)
+    real(wp) :: sigma_z                       ! variable for calculating the vertical grid (A/toa)
+    real(wp) :: z_rel                         ! variable for calculating the vertical grid (z/toa with equidistant levels)
+    real(wp) :: vertical_vector_pre(n_levels) ! heights of the levels in a column
     real(wp) :: base_area                     ! variable for calculating the vertical grid
     real(wp) :: lower_z,upper_z,lower_length  ! variables needed for area calculations
     real(wp) :: height_mountain               ! height of Gaussian mountain (needed for test case)
@@ -392,7 +392,7 @@ module mo_grid_generator
       do jk=1,nx
         ! filling up vertical_vector_pre
         do jl=1,n_levels
-          z_rel = 1._wp-(jl-1._wp)/n_layers ! z/toa
+          z_rel = 1._wp-(jl-1._wp)/n_layers
           sigma_z = z_rel**sigma
           A = sigma_z*toa ! the height without orography
           ! B corrects for orography
