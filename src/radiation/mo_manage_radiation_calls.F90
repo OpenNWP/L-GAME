@@ -23,7 +23,7 @@ module mo_manage_radiation_calls
     real(wp),      intent(in)    :: time_coordinate ! Unix time
     
     ! local variables
-    integer :: ji ! line index
+    integer :: ji ! horizontal index
     
     write(*,*) "Starting update of radiative fluxes ..."
     
