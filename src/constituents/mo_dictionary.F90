@@ -90,20 +90,20 @@ module mo_dictionary
     ! This function calculates the phase transition heat.
     
     integer  :: direction        ! defines the kind of phase transition (definition see below)
-    real(wp) :: temperature      ! air temperature
+    real(wp) :: temperature      ! temperature
     real(wp) :: phase_trans_heat ! result
 
     phase_trans_heat = 0._wp
-    ! 0: gas to liquid
-    if (direction==0) then
+    ! 1: gas to liquid
+    if (direction==1) then
       phase_trans_heat = enthalpy_evaporation(temperature)
     endif
-    ! 1: gas to solid
-    if (direction==1) then
+    ! 2: gas to solid
+    if (direction==2) then
       phase_trans_heat = enthalpy_sublimation(temperature)
     endif
-    ! 2: liquid to solid
-    if (direction==2) then
+    ! 3: liquid to solid
+    if (direction==3) then
       phase_trans_heat = enthalpy_sublimation(temperature) - enthalpy_evaporation(temperature)
     endif
     
