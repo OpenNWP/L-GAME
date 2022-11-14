@@ -7,6 +7,7 @@ module mo_rrtmgp_coupler
   
   use mo_definitions,             only: wp
   use mo_constants,               only: EPSILON_SECURITY,r_d,r_v
+  use mo_dictionary,              only: molar_fraction_in_dry_air,calc_o3_vmr,marshall_palmer_diameter
   use mo_rrtmgp_util_string,      only: lower_case
   use mo_gas_optics_rrtmgp,       only: ty_gas_optics_rrtmgp
   use mo_load_coefficients,       only: load_and_init
@@ -18,7 +19,6 @@ module mo_rrtmgp_coupler
   use mo_optical_props,           only: ty_optical_props_1scl,ty_optical_props_2str,ty_optical_props_arry
   use mo_cloud_optics,            only: ty_cloud_optics
   use mo_load_cloud_coefficients, only: load_cld_lutcoeff,load_cld_padecoeff
-  use mo_dictionary,              only: molar_fraction_in_dry_air,calc_o3_vmr
   use mo_rad_nml,                 only: rrtmgp_coefficients_file_sw,rrtmgp_coefficients_file_lw, &
                                         cloud_coefficients_file_sw,cloud_coefficients_file_lw
   use mo_constituents_nml,        only: lmoist,n_condensed_constituents,n_constituents
@@ -169,7 +169,6 @@ module mo_rrtmgp_coupler
     ! reformatting the clouds for RTE+RRTMGP
     ! the moist case
     ice_precip_radius = cloud_optics_sw%get_max_radius_ice()
-    liquid_precip_radius = cloud_optics_sw%get_max_radius_liq()
     ice_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
     liquid_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
     allocate(ice_water_path(nx,n_layers))
@@ -179,16 +178,26 @@ module mo_rrtmgp_coupler
     if (lmoist) then
       do jl=1,n_layers
         do jk=1,nx
-          ! the solid condensates' effective radius
+          ! Calculating the solid condensates' effective radius
           ice_precip_weight = rho(jk,jl,1)+rho(jk,jl,5)+EPSILON_SECURITY
           ice_cloud_weight = rho(jk,jl,3)+EPSILON_SECURITY
           ice_eff_radius_value = (ice_precip_weight*ice_precip_radius+ice_cloud_weight*ice_cloud_radius) &
           /(ice_precip_weight+ice_cloud_weight)
-          ! the liquid condensates' effective radius
+          
+          ! Calculating the liquid condensates' effective radius
           liquid_precip_weight = rho(jk,jl,2)+EPSILON_SECURITY
           liquid_cloud_weight = rho(jk,jl,4)+EPSILON_SECURITY
+          ! calculating the radius of raindrops
+          liquid_precip_radius = 0.5_wp*marshall_palmer_diameter(rho(jk,jl,2)+rho(jk,jl,4))*1.e6_wp
+          ! clipping too extreme values
+          if (liquid_precip_radius>cloud_optics_sw%get_max_radius_liq()) then
+            liquid_precip_radius = cloud_optics_sw%get_max_radius_liq()
+          elseif (liquid_precip_radius<cloud_optics_sw%get_min_radius_liq()) then
+            liquid_precip_radius = cloud_optics_sw%get_min_radius_liq()
+          endif
           liquid_eff_radius_value = (liquid_precip_weight*liquid_precip_radius+liquid_cloud_weight*liquid_cloud_radius) &
           /(liquid_precip_weight+liquid_cloud_weight)
+          
           ! thickness of the gridbox
           thickness = z_vector(jk,jl)-z_vector(jk,jl+1)
           ! solid water "content"
