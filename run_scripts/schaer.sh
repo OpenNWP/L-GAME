@@ -36,9 +36,9 @@ lmoist=.false.
 /
 
 &diff
-lmom_diff_h=.true.
+lmom_diff_h=.false.
 lmom_diff_v=.false.
-ltemp_diff_h=.true.
+ltemp_diff_h=.false.
 ltemp_diff_v=.false.
 lmass_diff_h=.false.
 lmass_diff_v=.false.
