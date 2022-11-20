@@ -263,6 +263,7 @@ program control
   allocate(diag%temp_diff_heating(ny,nx,n_layers))
   allocate(diag%condensates_sediment_heat(ny,nx,n_layers))
   allocate(diag%mass_diff_tendency(ny,nx,n_layers,n_constituents))
+  allocate(diag%a_radius(ny,nx,n_layers))
   
   ! initializing arrays to zero
   !$omp parallel workshare
@@ -425,6 +426,7 @@ program control
   diag%temp_diff_heating = 0._wp
   diag%condensates_sediment_heat = 0._wp
   diag%mass_diff_tendency = 0._wp
+  diag%a_radius = 0._wp
   !$omp end parallel workshare
   write(*,*) "... finished."
   
@@ -692,6 +694,7 @@ program control
   deallocate(diag%temp_diff_heating)
   deallocate(diag%condensates_sediment_heat)
   deallocate(diag%mass_diff_tendency)
+  deallocate(diag%a_radius)
   write(*,*) "... finished."
   call cpu_time(end_timestamp)
   write(*,fmt="(A,F9.3)") "Average speed:",(60._wp*run_span_min+300._wp)/((end_timestamp-init_timestamp)/omp_num_threads)
