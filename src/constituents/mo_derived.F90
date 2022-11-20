@@ -7,7 +7,7 @@ module mo_derived
   
   use mo_definitions,      only: wp,t_grid,t_state,t_diag
   use mo_run_nml,          only: ny,nx,n_layers
-  use mo_constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0,m_v
+  use mo_constants,        only: k_b,M_PI,m_d,n_a,r_d,r_v,c_d_p,c_v_p,c_d_v,c_v_v,t_0,m_v,rho_h2o,gravity
   use mo_constituents_nml, only: n_condensed_constituents,n_gaseous_constituents,n_constituents,lmoist
   use mo_dictionary,       only: saturation_pressure_over_ice,saturation_pressure_over_water,c_p_cond
   
@@ -212,6 +212,28 @@ module mo_derived
     calc_diffusion_coeff = 1._wp/3._wp*thermal_velocity*mean_free_path
     
   end function calc_diffusion_coeff
+  
+  function v_sink_liquid(state,diag,radius,ji,jk,jl)
+    
+    ! This function returns the sink velocity of water droplets as a function of the radius of the droplets and the air density.
+    
+    type(t_state), intent(in)    :: state         ! state variables
+    type(t_diag),  intent(inout) :: diag          ! diagnostic quantities
+    real(wp),      intent(in)    :: radius        ! radius of the droplet
+    integer,       intent(in)    :: ji            ! horizontal index
+    integer,       intent(in)    :: jk            ! horizontal index
+    integer,       intent(in)    :: jl            ! layer index
+    real(wp)                     :: v_sink_liquid ! result
+    
+    ! local variables
+    real(wp) :: kinematic_viscosity ! kinematic viscosity
+    
+    kinematic_viscosity = calc_diffusion_coeff(diag%temperature(ji,jk,jl),state%rho(ji,jk,jl,n_condensed_constituents+1))
+    
+    v_sink_liquid = 2._wp*M_PI*radius**2*rho_h2o*gravity &
+                    /(9._wp*M_PI*state%rho(ji,jk,jl,n_condensed_constituents+1)*kinematic_viscosity)
+    
+  end function v_sink_liquid
 
 end module mo_derived
 
