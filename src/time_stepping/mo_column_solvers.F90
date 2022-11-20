@@ -9,10 +9,11 @@ module mo_column_solvers
   use mo_constituents_nml, only: n_condensed_constituents,n_constituents,lmoist, &
                                  snow_velocity,rain_velocity,cloud_droplets_velocity,graupel_velocity
   use mo_definitions,      only: t_grid,t_state,t_tend,t_diag,wp
+  use mo_dictionary,       only: c_p_cond,cloud_droplets_radius
+  use mo_derived,          only: v_sink_liquid
   use mo_diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
   use mo_surface_nml,      only: nsoillays,lprog_soil_temp,lsfc_sensible_heat_flux
   use mo_constants,        only: M_PI,r_d,c_d_v,c_d_p,m_d,m_v,impl_thermo_weight
-  use mo_dictionary,       only: c_p_cond
   
   implicit none
   
@@ -370,6 +371,9 @@ module mo_column_solvers
     real(wp) :: solution_vector(n_layers)                 ! solution of the system of linear equations
     real(wp) :: density_old_at_interface                  ! old density in a level
     real(wp) :: temperature_old_at_interface              ! temperature in a level at the old PC substep
+    real(wp) :: v_sink_upper                              ! sink velocity of hydrometeor particles in the lower grid box
+    real(wp) :: v_sink_lower                              ! sink velocity of hydrometeor particles in the upper grid box
+    real(wp) :: v_sink                                    ! sink velocity of a droplet
     integer  :: jc                                        ! constituent index
     integer  :: ji                                        ! horizontal index
     integer  :: jk                                        ! horizontal index
@@ -389,7 +393,8 @@ module mo_column_solvers
         
         ! loop over all columns
         !$omp parallel do private(ji,jk,jl,vertical_flux_vector_impl,vertical_flux_vector_rhs,density_old_at_interface,c_vector, &
-        !$omp d_vector,e_vector,r_vector,solution_vector,vertical_enthalpy_flux_vector,temperature_old_at_interface)
+        !$omp d_vector,e_vector,r_vector,solution_vector,vertical_enthalpy_flux_vector,temperature_old_at_interface, &
+        !$omp v_sink_upper,v_sink_lower,v_sink)
         do ji=1,ny
           do jk=1,nx
             
@@ -405,19 +410,26 @@ module mo_column_solvers
               ! for condensed constituents, a sink velocity must be added.
               ! precipitation
               ! snow
-              if (jc<=n_condensed_constituents/4) then
+              if (jc==1) then
                 vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - snow_velocity
                 vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - snow_velocity
               ! rain
-              elseif (jc<=n_condensed_constituents/2) then
+              elseif (jc==2) then
                 vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - rain_velocity
                 vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - rain_velocity
-              ! clouds
-              elseif (jc<=n_condensed_constituents-1) then
+              ! ice clouds
+              elseif (jc==3) then
                 vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - cloud_droplets_velocity
                 vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - cloud_droplets_velocity
+              ! water clouds
+              elseif (jc==4) then
+                v_sink_upper = v_sink_liquid(state_old,diag,cloud_droplets_radius(),ji,jk,jl)
+                v_sink_lower = v_sink_liquid(state_old,diag,cloud_droplets_radius(),ji,jk,jl+1)
+                v_sink = 0.5_wp*(v_sink_upper + v_sink_lower)
+                vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - v_sink
+                vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - v_sink
               ! graupel
-              elseif (jc==n_condensed_constituents) then
+              elseif (jc==5) then
                 vertical_flux_vector_impl(jl) = vertical_flux_vector_impl(jl) - graupel_velocity
                 vertical_flux_vector_rhs(jl) = vertical_flux_vector_rhs(jl) - graupel_velocity
               endif
