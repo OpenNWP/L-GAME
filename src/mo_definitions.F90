@@ -51,7 +51,7 @@ module mo_definitions
     real(wp), allocatable :: z_w(:,:,:)                     ! geomtric height of the w-vectors
     real(wp), allocatable :: gravity_potential(:,:,:)       ! geopotential
     real(wp), allocatable :: gravity_m_v(:,:,:)             ! vertical acceleration due to gravity
-    real(wp), allocatable :: volume(:,:,:)                  ! volumes of the gridboxes
+    real(wp), allocatable :: volume(:,:,:)                  ! volumes of the grid boxes
     real(wp), allocatable :: area_x(:,:,:)                  ! areas of the grid in x-direction
     real(wp), allocatable :: area_y(:,:,:)                  ! areas of the grid in y-direction
     real(wp), allocatable :: area_z(:,:,:)                  ! areas of the grid in z-direction
