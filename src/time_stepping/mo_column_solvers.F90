@@ -371,9 +371,9 @@ module mo_column_solvers
     real(wp) :: solution_vector(n_layers)                 ! solution of the system of linear equations
     real(wp) :: density_old_at_interface                  ! old density in a level
     real(wp) :: temperature_old_at_interface              ! temperature in a level at the old PC substep
-    real(wp) :: v_sink_upper                              ! sink velocity of hydrometeor particles in the lower grid box
-    real(wp) :: v_sink_lower                              ! sink velocity of hydrometeor particles in the upper grid box
-    real(wp) :: v_sink                                    ! sink velocity of a droplet
+    real(wp) :: v_sink_upper                              ! sink velocity of a hydrometeor particle in the lower grid box
+    real(wp) :: v_sink_lower                              ! sink velocity of a hydrometeor particle in the upper grid box
+    real(wp) :: v_sink                                    ! sink velocity of a hydrometeor particle in a level
     integer  :: jc                                        ! constituent index
     integer  :: ji                                        ! horizontal index
     integer  :: jk                                        ! horizontal index
