@@ -6,11 +6,10 @@ module mo_column_solvers
   ! This module contains the implicit vertical routines (implicit part of the HEVI scheme).
   
   use mo_run_nml,          only: ny,nx,n_layers,n_levels,dtime,toa
-  use mo_constituents_nml, only: n_condensed_constituents,n_constituents,lmoist, &
-                                 snow_velocity,rain_velocity,cloud_droplets_velocity,graupel_velocity
+  use mo_constituents_nml, only: n_condensed_constituents,n_constituents,lmoist
   use mo_definitions,      only: t_grid,t_state,t_tend,t_diag,wp
-  use mo_dictionary,       only: c_p_cond,cloud_droplets_radius
-  use mo_derived,          only: v_fall_liquid
+  use mo_dictionary,       only: c_p_cond,snow_particles_radius,ice_particles_radius,cloud_droplets_radius
+  use mo_derived,          only: v_fall_solid,v_fall_liquid
   use mo_diff_nml,         only: lklemp,klemp_damp_max,klemp_begin_rel
   use mo_surface_nml,      only: nsoillays,lprog_soil_temp,lsfc_sensible_heat_flux
   use mo_constants,        only: M_PI,r_d,c_d_v,c_d_p,m_d,m_v,impl_thermo_weight
@@ -411,18 +410,18 @@ module mo_column_solvers
               ! precipitation
               ! snow
               if (jc==1) then
-                v_fall_upper = snow_velocity
-                v_fall_lower = snow_velocity
+                v_fall_upper = v_fall_solid(state_old,diag,snow_particles_radius(),ji,jk,jl)
+                v_fall_lower = v_fall_solid(state_old,diag,snow_particles_radius(),ji,jk,jl+1)
                 v_fall(jl) = 0.5_wp*(v_fall_upper + v_fall_lower)
               ! rain
               elseif (jc==2) then
-                v_fall_upper = rain_velocity
-                v_fall_lower = rain_velocity
+                v_fall_upper = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,jl),ji,jk,jl)
+                v_fall_lower = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,jl+1),ji,jk,jl+1)
                 v_fall = 0.5_wp*(v_fall_upper + v_fall_lower)
               ! ice clouds
               elseif (jc==3) then
-                v_fall_upper = cloud_droplets_velocity
-                v_fall_lower = cloud_droplets_velocity
+                v_fall_upper = v_fall_solid(state_old,diag,ice_particles_radius(),ji,jk,jl)
+                v_fall_lower = v_fall_solid(state_old,diag,ice_particles_radius(),ji,jk,jl+1)
                 v_fall = 0.5_wp*(v_fall_upper + v_fall_lower)
               ! water clouds
               elseif (jc==4) then
@@ -431,8 +430,8 @@ module mo_column_solvers
                 v_fall = 0.5_wp*(v_fall_upper + v_fall_lower)
               ! graupel
               elseif (jc==5) then
-                v_fall_upper = graupel_velocity
-                v_fall_lower = graupel_velocity
+                v_fall_upper = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,jl),ji,jk,jl)
+                v_fall_lower = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,jl+1),ji,jk,jl+1)
                 v_fall = 0.5_wp*(v_fall_upper + v_fall_lower)
               else
                 v_fall(jl) = 0._wp
@@ -461,19 +460,19 @@ module mo_column_solvers
             ! sink velocities at the surface
             ! ice
             if (jc==1) then
-              v_fall(n_layers) = snow_velocity
+              v_fall(n_layers) = v_fall_solid(state_old,diag,snow_particles_radius(),ji,jk,n_layers)
             ! rain
             elseif (jc==2) then
-              v_fall(n_layers) = rain_velocity
+              v_fall(n_layers) = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,n_layers),ji,jk,n_layers)
             ! ice clouds
             elseif (jc==3) then
-              v_fall(n_layers) = cloud_droplets_velocity
+              v_fall(n_layers) = v_fall_solid(state_old,diag,ice_particles_radius(),ji,jk,n_layers)
             ! water clouds
             elseif (jc==4) then
               v_fall(n_layers) = v_fall_liquid(state_old,diag,cloud_droplets_radius(),ji,jk,n_layers)
             ! graupel
             elseif (jc==5) then
-              v_fall(n_layers) = graupel_velocity
+              v_fall(n_layers) = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,n_layers),ji,jk,n_layers)
             endif
             
             ! Now we proceed to solving the vertical tridiagonal problems.

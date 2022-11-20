@@ -8,8 +8,7 @@ program control
   use mo_run_nml,                only: run_nml_setup,run_span_min,dtime,t_init,ny,nx,n_layers,lrestart, &
                                        lideal,n_levels
   use mo_io_nml,                 only: io_nml_setup,dt_write
-  use mo_constituents_nml,       only: constituents_nml_setup,n_condensed_constituents,n_constituents, &
-                                       snow_velocity,rain_velocity
+  use mo_constituents_nml,       only: constituents_nml_setup,n_condensed_constituents,n_constituents
   use mo_diff_nml,               only: diff_nml_setup
   use mo_surface_nml,            only: surface_nml_setup,nsoillays
   use mo_definitions,            only: t_grid,t_state,wp,t_diag,t_tend,t_bc
@@ -41,7 +40,6 @@ program control
   type(t_tend)      :: tend                 ! state containing the tendency
   type(t_bc)        :: bc                   ! boundary conditions
   logical           :: lrad_update          ! radiation update switch
-  real(wp)          :: normal_dist_min_vert ! minimum vertical gridpoint distance
   real(wp)          :: t_rad_update         ! radiation update time
   real(wp)          :: init_timestamp       ! used for measuring model runtime
   real(wp)          :: begin_timestamp      ! used for measuring model runtime
@@ -263,7 +261,7 @@ program control
   allocate(diag%temp_diff_heating(ny,nx,n_layers))
   allocate(diag%condensates_sediment_heat(ny,nx,n_layers))
   allocate(diag%mass_diff_tendency(ny,nx,n_layers,n_constituents))
-  allocate(diag%a_radius(ny,nx,n_layers))
+  allocate(diag%a_rain(ny,nx,n_layers))
   
   ! initializing arrays to zero
   !$omp parallel workshare
@@ -426,7 +424,7 @@ program control
   diag%temp_diff_heating = 0._wp
   diag%condensates_sediment_heat = 0._wp
   diag%mass_diff_tendency = 0._wp
-  diag%a_radius = 0._wp
+  diag%a_rain = 0._wp
   !$omp end parallel workshare
   write(*,*) "... finished."
   
@@ -442,13 +440,6 @@ program control
   if (.not. lperiodic) then
     call setup_bc_factor(bc)
   endif
-  
-  ! limitting the hydrometeor sedimentation velocities for stability reasons
-  normal_dist_min_vert = minval(grid%dz(:,:,n_levels))
-  rain_velocity = min(0.8_wp*normal_dist_min_vert/dtime,rain_velocity)
-  snow_velocity = min(0.8_wp*normal_dist_min_vert/dtime,snow_velocity)
-  write(*,*) "Rain falling velocity set to", rain_velocity, "m/s."
-  write(*,*) "Snow falling velocity set to", snow_velocity, "m/s."
   
   ! setting up the background state
   call bg_setup(grid)
@@ -694,7 +685,7 @@ program control
   deallocate(diag%temp_diff_heating)
   deallocate(diag%condensates_sediment_heat)
   deallocate(diag%mass_diff_tendency)
-  deallocate(diag%a_radius)
+  deallocate(diag%a_rain)
   write(*,*) "... finished."
   call cpu_time(end_timestamp)
   write(*,fmt="(A,F9.3)") "Average speed:",(60._wp*run_span_min+300._wp)/((end_timestamp-init_timestamp)/omp_num_threads)

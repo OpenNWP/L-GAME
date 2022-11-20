@@ -199,7 +199,7 @@ module mo_definitions
     real(wp), allocatable :: temp_diff_heating(:,:,:)                ! heating due to temperature diffusion
     real(wp), allocatable :: condensates_sediment_heat(:,:,:)        ! heating rate due to falling condensates
     real(wp), allocatable :: mass_diff_tendency(:,:,:,:)             ! mass source rate due to mass diffusion
-    real(wp), allocatable :: a_radius(:,:,:)                         ! radius of raindrops
+    real(wp), allocatable :: a_rain(:,:,:)                           ! radius of raindrops
     
   end type t_diag
   

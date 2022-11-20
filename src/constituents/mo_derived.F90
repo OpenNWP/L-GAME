@@ -235,7 +235,7 @@ module mo_derived
     
   end function v_fall_liquid
   
-  function v_fall_solid(state,diag,radius,ji,jl)
+  function v_fall_solid(state,diag,radius,ji,jk,jl)
     
     ! This function returns the fall velocity of ice particles (including snow) as a function of the radius of the droplets and the air density.
     
@@ -243,6 +243,7 @@ module mo_derived
     type(t_diag),  intent(inout) :: diag         ! diagnostic quantities
     real(wp),      intent(in)    :: radius       ! radius of the droplet
     integer,       intent(in)    :: ji           ! horizontal index
+    integer,       intent(in)    :: jk           ! horizontal index
     integer,       intent(in)    :: jl           ! layer index
     real(wp)                     :: v_fall_solid ! result
     
