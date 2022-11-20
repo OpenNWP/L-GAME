@@ -515,6 +515,16 @@ module mo_dictionary
     snow_particles_radius = 500.e-6_wp
   
   end function snow_particles_radius
+  
+  function graupel_particles_radius()
+  
+    ! This function returns the mean radius of graupel particles.
+  
+    real(wp) :: graupel_particles_radius ! result
+    
+    graupel_particles_radius = 95.e-6_wp
+  
+  end function graupel_particles_radius
 
 end module mo_dictionary
 
