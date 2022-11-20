@@ -213,7 +213,7 @@ module mo_derived
     
   end function calc_diffusion_coeff
   
-  function v_sink_liquid(state,diag,radius,ji,jk,jl)
+  function v_fall_liquid(state,diag,radius,ji,jk,jl)
     
     ! This function returns the sink velocity of water droplets as a function of the radius of the droplets and the air density.
     
@@ -223,17 +223,17 @@ module mo_derived
     integer,       intent(in)    :: ji            ! horizontal index
     integer,       intent(in)    :: jk            ! horizontal index
     integer,       intent(in)    :: jl            ! layer index
-    real(wp)                     :: v_sink_liquid ! result
+    real(wp)                     :: v_fall_liquid ! result
     
     ! local variables
     real(wp) :: kinematic_viscosity ! kinematic viscosity
     
     kinematic_viscosity = calc_diffusion_coeff(diag%temperature(ji,jk,jl),state%rho(ji,jk,jl,n_condensed_constituents+1))
     
-    v_sink_liquid = 2._wp*M_PI*radius**2*rho_h2o*gravity &
+    v_fall_liquid = 2._wp*M_PI*radius**2*rho_h2o*gravity &
                     /(9._wp*M_PI*state%rho(ji,jk,jl,n_condensed_constituents+1)*kinematic_viscosity)
     
-  end function v_sink_liquid
+  end function v_fall_liquid
 
 end module mo_derived
 
