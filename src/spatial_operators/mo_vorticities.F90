@@ -165,17 +165,11 @@ module mo_vorticities
       enddo
       !$omp end parallel do
     else
-      !$omp parallel do private(jl)
-      do jl=1,n_levels
-        diag%eta_x(:,:,jl) = diag%zeta_x(:,:,jl)
-        diag%eta_y(:,:,jl) = diag%zeta_y(:,:,jl)
-      enddo
-      !$omp end parallel do
-      !$omp parallel do private(jl)
-      do jl=1,n_layers
-        diag%eta_z(:,:,jl) = diag%zeta_z(:,:,jl)
-      enddo
-      !$omp end parallel do
+      !$omp parallel workshare
+      diag%eta_x = diag%zeta_x
+      diag%eta_y = diag%zeta_y
+      diag%eta_z = diag%zeta_z
+      !$omp end parallel workshare
     endif
     
     ! dividing by the averaged density to obtain the "potential vorticity"
