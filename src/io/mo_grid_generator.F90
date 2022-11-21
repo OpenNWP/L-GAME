@@ -388,15 +388,15 @@ module mo_grid_generator
     ! calculating the vertical positions of the scalar points
     ! the heights are defined according to k = A_k + B_k*surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
     !$omp parallel do private(ji,jk,jl,z_rel,sigma_z,A,B,vertical_vector_pre,max_oro)
-    do ji=1,ny
-      do jk=1,nx
+    do jk=1,nx
+      do ji=1,ny
         ! filling up vertical_vector_pre
         do jl=1,n_levels
           z_rel = 1._wp-(jl-1._wp)/n_layers
           sigma_z = z_rel**sigma
           A = sigma_z*toa ! the height without orography
           ! B corrects for orography
-          if (jl>=n_flat_layers+1._wp) then
+          if (jl>n_flat_layers) then
             B = (jl-(n_flat_layers+1._wp))/n_oro_layers
           else
             B = 0._wp
@@ -485,8 +485,6 @@ module mo_grid_generator
     if (lplane) then
       !$omp parallel workshare
       grid%dx = dx
-      !$omp end parallel workshare
-      !$omp parallel workshare
       grid%dy = dy
       !$omp end parallel workshare
     endif
@@ -510,8 +508,6 @@ module mo_grid_generator
     if (lplane) then
       !$omp parallel workshare
       grid%dx_dual = dx
-      !$omp end parallel workshare
-      !$omp parallel workshare
       grid%dy_dual = dy
       !$omp end parallel workshare
     endif
