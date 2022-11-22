@@ -332,7 +332,6 @@ module mo_momentum_diff_diss
     
     ! This subroutine calculates a simplified dissipation rate.
     
-    ! input arguments and output
     type(t_state), intent(in)    :: state ! the state with which to calculate the dissipation rates
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
     type(t_grid),  intent(in)    :: grid  ! grid quantities

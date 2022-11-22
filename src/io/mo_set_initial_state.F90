@@ -262,7 +262,6 @@ module mo_set_initial_state
     
     ! This subroutine reads a model state from a netCDF file.
     
-    ! input arguments and output
     real(wp),          intent(out) :: rho(:,:,:,:)      ! mass densities
     real(wp),          intent(out) :: rhotheta_v(:,:,:) ! virtual potential temperature density
     real(wp),          intent(out) :: wind_u(:,:,:)     ! u-wind

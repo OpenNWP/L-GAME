@@ -17,7 +17,6 @@ module mo_divergence_operators
     
     ! This subroutine computes the divergence of a vector field.
     
-    ! input arguments and output
     real(wp),     intent(in)    :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
     real(wp),     intent(in)    :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
     real(wp),     intent(inout) :: result_field(:,:,:)   ! resulting scalar field
@@ -72,7 +71,6 @@ module mo_divergence_operators
 
     ! This subroutine computes the divergence of a vector field for tracers.
     
-    ! input arguments and output
     real(wp),     intent(in)    :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
     real(wp),     intent(in)    :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
     real(wp),     intent(inout) :: result_field(:,:,:)   ! resulting scalar field
@@ -168,7 +166,7 @@ module mo_divergence_operators
     do jl=1,n_layers
       do jk=1,nx
         do ji=1,ny
-          if (jl==0) then
+          if (jl==1) then
             cov_upper = 0._wp
             cov_lower = in_field(ji,jk,jl+1)
           elseif (jl==n_layers) then

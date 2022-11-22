@@ -20,7 +20,6 @@ module mo_boundaries
     
     ! This subroutine brings the boundary conditions into the model.
     
-    ! input arguments and output
     type(t_state), intent(inout) :: state ! state of the model (which will be modified)
     type(t_bc),    intent(inout) :: bc    ! boundary conditions
     real(wp),      intent(in)    :: t_now ! model time
@@ -170,7 +169,7 @@ module mo_boundaries
     
     ! This is a helper function which converts an integer to a string.
     
-    integer, intent(in) :: input
+    integer, intent(in) :: input ! integer which will be converted to a string
     
     write(int2string,*) input
     int2string = adjustl(int2string)
