@@ -102,6 +102,11 @@ module mo_manage_pchevi
       ! ------------------------------------
       call three_band_solver_ver(state_old,state_new,diag,tend,grid,rk_step)
       
+      ! free slip boundary conditions for the vertical velocity at the surface
+      if (lfreeslip) then
+        call w_free_slip(state_new,grid)
+      endif
+    
       ! 4.) vertical tracer advection
       ! -----------------------------
       if (n_constituents>1) then
@@ -113,11 +118,6 @@ module mo_manage_pchevi
     ! calling the boundary conditions subroutine in real-data simulations
     if (.not. lperiodic) then
       call update_boundaries(state_new,bc,(total_step_counter+1)*dtime,grid)
-    endif
-    
-    ! free slip boundary conditions for the vertical velocity at the surface
-    if (lfreeslip) then
-      call w_free_slip(state_new,grid)
     endif
     
   end subroutine pchevi

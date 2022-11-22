@@ -7,7 +7,7 @@ module mo_averaging
 
   use mo_definitions, only: t_grid,wp
   use mo_run_nml,     only: n_layers,n_oro_layers,ny,nx,n_flat_layers
-  use mo_bc_nml,      only: lperiodic
+  use mo_bc_nml,      only: lperiodic,lfreeslip
   
   implicit none
   
@@ -72,7 +72,7 @@ module mo_averaging
         remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(5,ji,nx,jl)*vertical_cov(ji,nx,jl)
         remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(5,ji,1,jl)*vertical_cov(ji,1,jl)
         ! layer below
-        if (jl<n_layers) then
+        if (jl<n_layers .or. lfreeslip) then
           remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(6,ji,nx,jl)*vertical_cov(ji,nx,jl+1)
           remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(6,ji,1,jl)*vertical_cov(ji,1,jl+1)
         endif
@@ -83,7 +83,7 @@ module mo_averaging
       remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(5,ji,jk-1,jl)*vertical_cov(ji,jk-1,jl)
       remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(5,ji,jk,jl)*vertical_cov(ji,jk,jl)
       ! layer below
-      if (jl<n_layers) then
+      if (jl<n_layers .or. lfreeslip) then
         remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(6,ji,jk-1,jl)*vertical_cov(ji,jk-1,jl+1)
         remap_ver2hor_x = remap_ver2hor_x + grid%inner_product_weights(6,ji,jk,jl)*vertical_cov(ji,jk,jl+1)
       endif
@@ -113,7 +113,7 @@ module mo_averaging
         remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(5,ny,jk,jl)*vertical_cov(ny,jk,jl)
         remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(5,1,jk,jl)*vertical_cov(1,jk,jl)
         ! layer below
-        if (jl<n_layers) then
+        if (jl<n_layers .or. lfreeslip) then
           remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(6,ny,jk,jl)*vertical_cov(ny,jk,jl+1)
           remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(6,1,jk,jl)*vertical_cov(1,jk,jl+1)
         endif
@@ -124,7 +124,7 @@ module mo_averaging
       remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(5,ji-1,jk,jl)*vertical_cov(ji-1,jk,jl)
       remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(5,ji,jk,jl)*vertical_cov(ji,jk,jl)
       ! layer below
-      if (jl<n_layers) then
+      if (jl<n_layers .or. lfreeslip) then
         remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(6,ji-1,jk,jl)*vertical_cov(ji-1,jk,jl+1)
         remap_ver2hor_y = remap_ver2hor_y + grid%inner_product_weights(6,ji,jk,jl)*vertical_cov(ji,jk,jl+1)
       endif
