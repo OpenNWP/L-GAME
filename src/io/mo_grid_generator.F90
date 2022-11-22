@@ -792,28 +792,25 @@ module mo_grid_generator
     ! u
     do ji=1,ny
       base_area = patch_area(grid%lat_scalar(ji),dlon,dlat)
-      grid%trsk_weights_u(ji,1) = (0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
+      grid%trsk_weights_u(1,ji) = (0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
       if (lplane) then
-        grid%trsk_weights_u(ji,1) = grid%trsk_weights_u(ji,1)*dx/dx
+        grid%trsk_weights_u(1,ji) = grid%trsk_weights_u(1,ji)*dx/dx
       else
-        grid%trsk_weights_u(ji,1) = grid%trsk_weights_u(ji,1)*dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)/(dx*cos(grid%lat_scalar(ji)))
+        grid%trsk_weights_u(1,ji) = grid%trsk_weights_u(1,ji)*dx*cos(grid%lat_scalar(ji)+0.5_wp*dlat)/(dx*cos(grid%lat_scalar(ji)))
       endif
-      grid%trsk_weights_u(ji,2) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area)
+      grid%trsk_weights_u(2,ji) = -(0.5_wp - patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat)/base_area)
       if (lplane) then
-        grid%trsk_weights_u(ji,2) = grid%trsk_weights_u(ji,2)*dy/dx
+        grid%trsk_weights_u(2,ji) = grid%trsk_weights_u(2,ji)*dy/dx
       else
-        grid%trsk_weights_u(ji,2) = grid%trsk_weights_u(ji,2)*dy/(dx*cos(grid%lat_scalar(ji)))
+        grid%trsk_weights_u(2,ji) = grid%trsk_weights_u(2,ji)*dy/(dx*cos(grid%lat_scalar(ji)))
       endif
-      grid%trsk_weights_u(ji,3) = -(0.5_wp - (patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
+      grid%trsk_weights_u(3,ji) = -(0.5_wp - (patch_area(grid%lat_scalar(ji)+0.25_wp*dlat,dlon,0.5_wp*dlat) &
       + patch_area(grid%lat_scalar(ji)-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat))/base_area)
       if (lplane) then
-        grid%trsk_weights_u(ji,3) = grid%trsk_weights_u(ji,3)*dx/dx
+        grid%trsk_weights_u(3,ji) = grid%trsk_weights_u(3,ji)*dx/dx
       else
-        grid%trsk_weights_u(ji,3) = grid%trsk_weights_u(ji,3)*dx*cos(grid%lat_scalar(ji)-0.5_wp*dlat)/(dx*cos(grid%lat_scalar(ji)))
+        grid%trsk_weights_u(3,ji) = grid%trsk_weights_u(3,ji)*dx*cos(grid%lat_scalar(ji)-0.5_wp*dlat)/(dx*cos(grid%lat_scalar(ji)))
       endif
-      grid%trsk_weights_u(ji,4) = grid%trsk_weights_u(ji,3)
-      grid%trsk_weights_u(ji,5) = -grid%trsk_weights_u(ji,2)
-      grid%trsk_weights_u(ji,6) = grid%trsk_weights_u(ji,1)
     enddo
     ! v
     do ji=1,ny+1
@@ -823,16 +820,14 @@ module mo_grid_generator
         lat_lower_center = grid%lat_scalar(ji)
       endif
       base_area = patch_area(lat_lower_center,dlon,dlat)
-      grid%trsk_weights_v(ji,1) = -(0.5_wp - patch_area(lat_lower_center+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
-      grid%trsk_weights_v(ji,2) = grid%trsk_weights_v(ji,1)
+      grid%trsk_weights_v(1,ji) = -(0.5_wp - patch_area(lat_lower_center+0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
       if (ji==1) then
         lat_upper_center = grid%lat_scalar(1)+dlat
       else
         lat_upper_center = grid%lat_scalar(ji-1)
       endif
       base_area = patch_area(lat_upper_center,dlon,dlat)
-      grid%trsk_weights_v(ji,3) = -(0.5_wp - patch_area(lat_upper_center-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
-      grid%trsk_weights_v(ji,4) = grid%trsk_weights_v(ji,3)
+      grid%trsk_weights_v(2,ji) = -(0.5_wp - patch_area(lat_upper_center-0.25_wp*dlat,0.5_wp*dlon,0.5_wp*dlat)/base_area)
     enddo
     
     ! Soil grid

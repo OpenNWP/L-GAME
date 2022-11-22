@@ -31,34 +31,34 @@ module mo_vorticity_flux
     do ji=1,ny
       do jk=2,nx
         diag%pot_vort_tend_x(ji,jk,:) = &
-        grid%trsk_weights_u(ji,1)*diag%v_placeholder(ji,jk-1,:)*0.25_wp* &
+        grid%trsk_weights_u(1,ji)*diag%v_placeholder(ji,jk-1,:)*0.25_wp* &
         (diag%eta_z(ji,jk-1,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji+1,jk,:)) &
-        + grid%trsk_weights_u(ji,2)*diag%u_placeholder(ji,jk-1,:)*0.25_wp* &
+        + grid%trsk_weights_u(2,ji)*diag%u_placeholder(ji,jk-1,:)*0.25_wp* &
         (diag%eta_z(ji,jk-1,:)+diag%eta_z(ji+1,jk-1,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji+1,jk,:)) &
-        + grid%trsk_weights_u(ji,3)*diag%v_placeholder(ji+1,jk-1,:)*0.25_wp* &
+        + grid%trsk_weights_u(3,ji)*diag%v_placeholder(ji+1,jk-1,:)*0.25_wp* &
         (diag%eta_z(ji+1,jk-1,:)+diag%eta_z(ji+1,jk,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji+1,jk,:)) &
-        + grid%trsk_weights_u(ji,4)*diag%v_placeholder(ji+1,jk,:)*0.25_wp* &
+        + grid%trsk_weights_u(3,ji)*diag%v_placeholder(ji+1,jk,:)*0.25_wp* &
         (diag%eta_z(ji+1,jk,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji+1,jk,:)) &
-        + grid%trsk_weights_u(ji,5)*diag%u_placeholder(ji,jk+1,:)*0.25_wp* &
+        + grid%trsk_weights_u(2,ji)*diag%u_placeholder(ji,jk+1,:)*0.25_wp* &
         (diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji,jk+1,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji+1,jk,:)) &
-        + grid%trsk_weights_u(ji,6)*diag%v_placeholder(ji,jk,:)*0.25_wp* &
+        + grid%trsk_weights_u(1,ji)*diag%v_placeholder(ji,jk,:)*0.25_wp* &
         (diag%eta_z(ji,jk,:)+diag%eta_z(ji,jk+1,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji+1,jk,:))
       enddo
       
       ! boundary conditions
       if (lperiodic) then
         diag%pot_vort_tend_x(ji,1,:) = &
-        grid%trsk_weights_u(ji,1)*diag%v_placeholder(ji,nx,:)*0.25_wp* &
+        grid%trsk_weights_u(1,ji)*diag%v_placeholder(ji,nx,:)*0.25_wp* &
         (diag%eta_z(ji,nx,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:)) &
-        + grid%trsk_weights_u(ji,2)*diag%u_placeholder(ji,nx,:)*0.25_wp* &
+        + grid%trsk_weights_u(2,ji)*diag%u_placeholder(ji,nx,:)*0.25_wp* &
         (diag%eta_z(ji,nx,:)+diag%eta_z(ji+1,nx,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:)) &
-        + grid%trsk_weights_u(ji,3)*diag%v_placeholder(ji+1,nx,:)*0.25_wp* &
+        + grid%trsk_weights_u(3,ji)*diag%v_placeholder(ji+1,nx,:)*0.25_wp* &
         (diag%eta_z(ji+1,nx,:)+diag%eta_z(ji+1,1,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:)) &
-        + grid%trsk_weights_u(ji,4)*diag%v_placeholder(ji+1,1,:)*0.25_wp* &
+        + grid%trsk_weights_u(3,ji)*diag%v_placeholder(ji+1,1,:)*0.25_wp* &
         (diag%eta_z(ji+1,1,:)+diag%eta_z(ji+1,2,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:)) &
-        + grid%trsk_weights_u(ji,5)*diag%u_placeholder(ji,2,:)*0.25_wp* &
+        + grid%trsk_weights_u(2,ji)*diag%u_placeholder(ji,2,:)*0.25_wp* &
         (diag%eta_z(ji+1,2,:)+diag%eta_z(ji,2,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:)) &
-        + grid%trsk_weights_u(ji,6)*diag%v_placeholder(ji,1,:)*0.25_wp* &
+        + grid%trsk_weights_u(1,ji)*diag%v_placeholder(ji,1,:)*0.25_wp* &
         (diag%eta_z(ji,1,:)+diag%eta_z(ji,2,:)+diag%eta_z(ji,1,:)+diag%eta_z(ji+1,1,:))
          diag%pot_vort_tend_x(ji,nx+1,:) = diag%pot_vort_tend_x(ji,1,:)
       endif
@@ -70,13 +70,13 @@ module mo_vorticity_flux
     do jk=1,nx
       do ji=2,ny
         diag%pot_vort_tend_y(ji,jk,:) = &
-        grid%trsk_weights_v(ji,1)*diag%u_placeholder(ji,jk,:)*0.25_wp* &
+        grid%trsk_weights_v(1,ji)*diag%u_placeholder(ji,jk,:)*0.25_wp* &
         (diag%eta_z(ji,jk,:)+diag%eta_z(ji+1,jk,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji,jk+1,:)) &
-        + grid%trsk_weights_v(ji,2)*diag%u_placeholder(ji,jk+1,:)*0.25_wp* &
+        + grid%trsk_weights_v(1,ji)*diag%u_placeholder(ji,jk+1,:)*0.25_wp* &
         (diag%eta_z(ji,jk+1,:)+diag%eta_z(ji+1,jk+1,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji,jk+1,:)) &
-        + grid%trsk_weights_v(ji,3)*diag%u_placeholder(ji-1,jk+1,:)*0.25_wp* &
+        + grid%trsk_weights_v(2,ji)*diag%u_placeholder(ji-1,jk+1,:)*0.25_wp* &
         (diag%eta_z(ji-1,jk+1,:)+diag%eta_z(ji,jk+1,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji,jk+1,:)) &
-        + grid%trsk_weights_v(ji,4)*diag%u_placeholder(ji-1,jk,:)*0.25_wp* &
+        + grid%trsk_weights_v(2,ji)*diag%u_placeholder(ji-1,jk,:)*0.25_wp* &
         (diag%eta_z(ji-1,jk,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji,jk,:)+diag%eta_z(ji,jk+1,:))
       enddo
       
@@ -85,11 +85,11 @@ module mo_vorticity_flux
         diag%pot_vort_tend_y(1,jk,:) = &
         grid%trsk_weights_v(1,1)*diag%u_placeholder(1,jk,:)*0.25_wp* &
         (diag%eta_z(1,jk,:)+diag%eta_z(2,jk,:)+diag%eta_z(1,jk,:)+diag%eta_z(1,jk+1,:)) &
-        + grid%trsk_weights_v(1,2)*diag%u_placeholder(1,jk+1,:)*0.25_wp* &
+        + grid%trsk_weights_v(1,1)*diag%u_placeholder(1,jk+1,:)*0.25_wp* &
         (diag%eta_z(1,jk+1,:)+diag%eta_z(2,jk+1,:)+diag%eta_z(1,jk,:)+diag%eta_z(1,jk+1,:)) &
-        + grid%trsk_weights_v(1,3)*diag%u_placeholder(ny,jk+1,:)*0.25_wp* &
+        + grid%trsk_weights_v(2,1)*diag%u_placeholder(ny,jk+1,:)*0.25_wp* &
         (diag%eta_z(ny,jk+1,:)+diag%eta_z(1,jk+1,:)+diag%eta_z(1,jk,:)+diag%eta_z(1,jk+1,:)) &
-        + grid%trsk_weights_v(1,4)*diag%u_placeholder(ny,jk,:)*0.25_wp* &
+        + grid%trsk_weights_v(2,1)*diag%u_placeholder(ny,jk,:)*0.25_wp* &
         (diag%eta_z(ny,jk,:)+diag%eta_z(1,jk,:)+diag%eta_z(1,jk,:)+diag%eta_z(1,jk+1,:))
         diag%pot_vort_tend_y(ny+1,jk,:) = diag%pot_vort_tend_y(1,jk,:)
       endif
