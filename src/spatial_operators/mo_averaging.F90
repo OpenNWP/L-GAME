@@ -23,7 +23,7 @@ module mo_averaging
     type(t_grid), intent(in) :: grid                        ! model grid
     integer,      intent(in) :: ji                          ! horizontal index
     integer,      intent(in) :: jk                          ! horizontal index
-    integer,      intent(in) :: jl                          ! vertical index
+    integer,      intent(in) :: jl                          ! level index
     real(wp)                 :: vertical_contravariant_corr ! result
     
     vertical_contravariant_corr = 0._wp
@@ -59,7 +59,9 @@ module mo_averaging
     
     real(wp),     intent(in) :: vertical_cov(:,:,:) ! z-component of vector field to work with
     type(t_grid), intent(in) :: grid                ! the grid properties
-    integer,      intent(in) :: ji,jk,jl            ! positional indices
+    integer,      intent(in) :: ji                  ! horizontal index
+    integer,      intent(in) :: jk                  ! horizontal index
+    integer,      intent(in) :: jl                  ! layer index
     real(wp)                 :: remap_ver2hor_x     ! result
     
     ! initialization with zero
@@ -98,7 +100,9 @@ module mo_averaging
     
     real(wp),     intent(in) :: vertical_cov(:,:,:) ! z-component of vector field to work with
     type(t_grid), intent(in) :: grid                ! the grid properties
-    integer,      intent(in) :: ji,jk,jl            ! positional indices
+    integer,      intent(in) :: ji                  ! horizontal index
+    integer,      intent(in) :: jk                  ! horizontal index
+    integer,      intent(in) :: jl                  ! layer index
     real(wp)                 :: remap_ver2hor_y     ! result
     
     ! initialization with zero
@@ -138,7 +142,9 @@ module mo_averaging
     real(wp),     intent(in) :: hor_comp_x(:,:,:)      ! horizontal component in x-direction of vector field to work with
     real(wp),     intent(in) :: vert_comp(:,:,:)       ! vertical component of vector field to work with
     type(t_grid), intent(in) :: grid                   ! model grid
-    integer,      intent(in) :: ji,jk,jl               ! positional indices
+    integer,      intent(in) :: ji                     ! horizontal index
+    integer,      intent(in) :: jk                     ! horizontal index
+    integer,      intent(in) :: jl                     ! layer index
     real(wp)                 :: horizontal_covariant_x ! result
     
     horizontal_covariant_x = hor_comp_x(ji,jk,jl)
@@ -156,7 +162,9 @@ module mo_averaging
     real(wp),     intent(in) :: hor_comp_y(:,:,:)      ! horizontal component in x-direction of vector field to work with
     real(wp),     intent(in) :: vert_comp(:,:,:)       ! vertical component of vector field to work with
     type(t_grid), intent(in) :: grid                   ! model grid
-    integer,      intent(in) :: ji,jk,jl               ! positional indices
+    integer,      intent(in) :: ji                     ! horizontal index
+    integer,      intent(in) :: jk                     ! horizontal index
+    integer,      intent(in) :: jl                     ! layer index
     real(wp)                 :: horizontal_covariant_y ! result
     
     horizontal_covariant_y = hor_comp_y(ji,jk,jl)
