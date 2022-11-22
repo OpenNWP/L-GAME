@@ -5,8 +5,8 @@ module mo_inner_product
 
   ! The calculation of the inner product is executed in this module.
 
-  use mo_run_nml,     only: ny,nx,n_layers
-  use mo_definitions, only: t_grid,wp
+  use mo_run_nml,     only: ny,nx,n_layers,n_levels
+  use mo_definitions, only: t_grid,t_state,wp
   
   implicit none
   
@@ -47,6 +47,31 @@ module mo_inner_product
     !$omp end parallel do
     
   end subroutine inner_product
+  
+  subroutine w_free_slip(state,grid)
+    
+    ! This subroutine calculates the inner product of two vector fields.
+    
+    type(t_state), intent(inout) :: state ! state variables
+    type(t_grid),  intent(in)    :: grid  ! grid properties
+    
+    ! local variables
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
+    
+    !$omp parallel do private(ji,jk)
+    do jk=1,nx
+      do ji=1,ny
+        state%wind_w(ji,jk,n_levels) = &
+        grid%inner_product_weights(1,ji,jk,n_layers)*state%wind_u(ji,jk+1,n_layers)*grid%slope_x(ji,jk+1,n_layers) &
+        + grid%inner_product_weights(2,ji,jk,n_layers)*state%wind_v(ji,jk,n_layers)*grid%slope_y(ji,jk,n_layers) &
+        + grid%inner_product_weights(3,ji,jk,n_layers)*state%wind_u(ji,jk,n_layers)*grid%slope_x(ji,jk,n_layers) &
+        + grid%inner_product_weights(4,ji,jk,n_layers)*state%wind_v(ji+1,jk,n_layers)*grid%slope_y(ji+1,jk,n_layers)
+      enddo
+    enddo
+    !$omp end parallel do
+    
+  end subroutine w_free_slip
 
 end module mo_inner_product
 

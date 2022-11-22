@@ -12,11 +12,12 @@ module mo_manage_pchevi
   use mo_vector_tend_expl,       only: vector_tend_expl
   use mo_column_solvers,         only: three_band_solver_ver,three_band_solver_gen_densities
   use mo_boundaries,             only: update_boundaries
+  use mo_inner_product,          only: w_free_slip
   use mo_derived,                only: temperature_diagnostics
   use mo_constituents_nml,       only: n_constituents
   use mo_surface_nml,            only: lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl
   use mo_pbl,                    only: update_sfc_turb_quantities
-  use mo_bc_nml,                 only: lperiodic
+  use mo_bc_nml,                 only: lperiodic,lfreeslip
   use mo_manage_radiation_calls, only: update_rad_fluxes
   
   implicit none
@@ -112,6 +113,11 @@ module mo_manage_pchevi
     ! calling the boundary conditions subroutine in real-data simulations
     if (.not. lperiodic) then
       call update_boundaries(state_new,bc,(total_step_counter+1)*dtime,grid)
+    endif
+    
+    ! free slip boundary conditions for the vertical velocity at the surface
+    if (lfreeslip) then
+      call w_free_slip(state_new,grid)
     endif
     
   end subroutine pchevi
