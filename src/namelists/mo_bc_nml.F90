@@ -12,11 +12,12 @@ module mo_bc_nml
   
   integer           :: n_swamp          ! thickness of the swamp layer
   logical           :: lperiodic        ! periodic boundary conditions switch
+  logical           :: lfreeslip        ! free slip boundary conditions (surface) switch
   integer           :: dtime_bc         ! time step for the boundary conditions update
   character(len=64) :: bc_root_filename ! root filename of the boundary conditions
   real(wp)          :: t_latest_bc      ! latest boundary conditions update time
   
-  namelist /bc/n_swamp,lperiodic,dtime_bc,bc_root_filename
+  namelist /bc/n_swamp,lperiodic,lfreeslip,dtime_bc,bc_root_filename
   
   contains
   
@@ -28,6 +29,7 @@ module mo_bc_nml
     ! default values
     n_swamp = 5
     lperiodic = .false.
+    lfreeslip = .false.
     dtime_bc = 10800
     bc_root_filename = "bc"
     t_latest_bc = 0._wp

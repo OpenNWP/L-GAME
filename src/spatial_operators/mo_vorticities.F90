@@ -10,7 +10,7 @@ module mo_vorticities
   use mo_constants,        only: r_e
   use mo_constituents_nml, only: n_condensed_constituents
   use mo_averaging,        only: horizontal_covariant_x,horizontal_covariant_y
-  use mo_bc_nml,           only: lperiodic
+  use mo_bc_nml,           only: lperiodic,lfreeslip
   
   implicit none
   
@@ -66,6 +66,12 @@ module mo_vorticities
     !$omp parallel workshare
     diag%zeta_x(:,:,1) = diag%zeta_x(:,:,2)
     !$omp end parallel workshare
+    ! free slip boundary conditions
+    if (lfreeslip) then
+      !$omp parallel workshare
+      diag%zeta_x(:,:,n_levels) = diag%zeta_x(:,:,n_layers)
+      !$omp end parallel workshare
+    endif
     ! dividing by the area
     !$omp parallel workshare
     diag%zeta_x = diag%zeta_x/grid%area_dual_x
@@ -101,7 +107,6 @@ module mo_vorticities
           diag%zeta_y(ji,jk,n_levels) = grid%dx(ji,jk,n_layers) &
                                         *horizontal_covariant_x(state%wind_u,state%wind_w,grid,ji,jk,n_layers)
         enddo
-        
       enddo
     enddo
     !$omp end parallel do
@@ -109,6 +114,12 @@ module mo_vorticities
     !$omp parallel workshare
     diag%zeta_y(:,:,1) = diag%zeta_y(:,:,2)
     !$omp end parallel workshare
+    ! free slip boundary conditions
+    if (lfreeslip) then
+      !$omp parallel workshare
+      diag%zeta_y(:,:,n_levels) = diag%zeta_y(:,:,n_layers)
+      !$omp end parallel workshare
+    endif
     ! dividing by the area
     !$omp parallel workshare
     diag%zeta_y = diag%zeta_y/grid%area_dual_y

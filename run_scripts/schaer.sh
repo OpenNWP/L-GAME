@@ -58,6 +58,7 @@ lpbl=.false.
 
 &bc
 lperiodic=.true.
+lfreeslip=.true.
 /
 
 EOF
