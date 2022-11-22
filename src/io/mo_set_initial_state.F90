@@ -12,6 +12,8 @@ module mo_set_initial_state
   use mo_constants,        only: tropo_height,surface_temp,lapse_rate,inv_height,p_0, &
                                  gravity,p_0_standard,r_e,t_grad_inv,M_PI,r_d,c_d_p,c_d_v
   use mo_io_nml,           only: restart_filename
+  use mo_bc_nml,           only: lfreeslip
+  use mo_inner_product,    only: w_free_slip
 
   implicit none
   
@@ -233,6 +235,11 @@ module mo_set_initial_state
     !$omp end parallel do
     
     call unessential_ideal_init(state,diag,grid,pres_lowest_layer)
+    
+    ! setting the vertical velocity at the surface under free slip conditions
+    if (lfreeslip) then
+      call w_free_slip(state,grid)
+    endif
     
   end subroutine ideal_init
   

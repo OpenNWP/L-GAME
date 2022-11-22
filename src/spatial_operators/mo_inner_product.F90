@@ -50,7 +50,7 @@ module mo_inner_product
   
   subroutine w_free_slip(state,grid)
     
-    ! This subroutine calculates the inner product of two vector fields.
+    ! This subroutine calculates the vertical velocity at the surface under kinematic boundary conditions.
     
     type(t_state), intent(inout) :: state ! state variables
     type(t_grid),  intent(in)    :: grid  ! grid properties
