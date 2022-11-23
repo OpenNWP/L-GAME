@@ -17,10 +17,10 @@ module mo_divergence_operators
     
     ! This subroutine computes the divergence of a vector field.
     
-    real(wp),     intent(in)    :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
-    real(wp),     intent(in)    :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
-    real(wp),     intent(inout) :: result_field(:,:,:)   ! resulting scalar field
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
+    real(wp),     intent(in)  :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
+    real(wp),     intent(in)  :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
+    real(wp),     intent(out) :: result_field(:,:,:)   ! resulting scalar field
+    type(t_grid), intent(in)  :: grid                  ! the grid properties
     
     ! local variables
     integer  :: ji           ! horizontal index
@@ -71,13 +71,13 @@ module mo_divergence_operators
 
     ! This subroutine computes the divergence of a vector field for tracers.
     
-    real(wp),     intent(in)    :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
-    real(wp),     intent(in)    :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
-    real(wp),     intent(inout) :: result_field(:,:,:)   ! resulting scalar field
-    real(wp),     intent(in)    :: density_field(:,:,:)  ! density field at the current time step
-    real(wp),     intent(in)    :: wind_field_x(:,:,:)   ! x-component of horizontal wind field
-    real(wp),     intent(in)    :: wind_field_y(:,:,:)   ! y-component of horizontal wind field
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
+    real(wp),     intent(in)  :: vector_field_x(:,:,:) ! x-component of horizontal vector field of which to calculate the divergence
+    real(wp),     intent(in)  :: vector_field_y(:,:,:) ! y-component of horizontal vector field of which to calculate the divergence
+    real(wp),     intent(out) :: result_field(:,:,:)   ! resulting scalar field
+    real(wp),     intent(in)  :: density_field(:,:,:)  ! density field at the current time step
+    real(wp),     intent(in)  :: wind_field_x(:,:,:)   ! x-component of horizontal wind field
+    real(wp),     intent(in)  :: wind_field_y(:,:,:)   ! y-component of horizontal wind field
+    type(t_grid), intent(in)  :: grid                  ! the grid properties
     
     ! local variables
     integer  :: ji            ! horizontal index
@@ -177,7 +177,7 @@ module mo_divergence_operators
             cov_lower = in_field(ji,jk,jl+1)
           endif
           comp_v = cov_upper*grid%area_z(ji,jk,jl) - cov_lower*grid%area_z(ji,jk,jl+1)
-          out_field(ji,jk,jl) = out_field(ji,jk,jl) + 1._wp/grid%volume(ji,jk,jl)*comp_v
+          out_field(ji,jk,jl) = out_field(ji,jk,jl) + comp_v/grid%volume(ji,jk,jl)
         enddo
       enddo
     enddo
