@@ -62,6 +62,10 @@ module mo_vorticities
       enddo
     enddo
     !$omp end parallel do
+    ! dividing by the area
+    !$omp parallel workshare
+    diag%zeta_x = diag%zeta_x/grid%area_dual_x
+    !$omp end parallel workshare
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
     !$omp parallel workshare
     diag%zeta_x(:,:,1) = diag%zeta_x(:,:,2)
@@ -72,10 +76,6 @@ module mo_vorticities
       diag%zeta_x(:,:,n_levels) = diag%zeta_x(:,:,n_layers)
       !$omp end parallel workshare
     endif
-    ! dividing by the area
-    !$omp parallel workshare
-    diag%zeta_x = diag%zeta_x/grid%area_dual_x
-    !$omp end parallel workshare
     
     ! calculating the relative vorticity in y-direction
     !$omp parallel do private(ji,jk,jl)
@@ -110,6 +110,10 @@ module mo_vorticities
       enddo
     enddo
     !$omp end parallel do
+    ! dividing by the area
+    !$omp parallel workshare
+    diag%zeta_y = diag%zeta_y/grid%area_dual_y
+    !$omp end parallel workshare
     ! At the TOA, the horizontal vorticity is assumed to have no vertical shear.
     !$omp parallel workshare
     diag%zeta_y(:,:,1) = diag%zeta_y(:,:,2)
@@ -120,10 +124,6 @@ module mo_vorticities
       diag%zeta_y(:,:,n_levels) = diag%zeta_y(:,:,n_layers)
       !$omp end parallel workshare
     endif
-    ! dividing by the area
-    !$omp parallel workshare
-    diag%zeta_y = diag%zeta_y/grid%area_dual_y
-    !$omp end parallel workshare
     
     ! calculating the relative vorticity in z-direction
     !$omp parallel do private(ji,jk,jl)
