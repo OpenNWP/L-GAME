@@ -18,10 +18,10 @@ module mo_gradient_operators
     
     ! This subroutine computes the horizontal covariant gradient of a scalar field.
     
-    real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
-    real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
-    real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
+    real(wp),     intent(in)  :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
+    real(wp),     intent(out) :: result_field_x(:,:,:) ! x-component of resulting vector field
+    real(wp),     intent(out) :: result_field_y(:,:,:) ! y-component of resulting vector field
+    type(t_grid), intent(in)  :: grid                  ! the grid properties
     
     ! local variables
     integer :: ji ! horizontal index
@@ -66,9 +66,9 @@ module mo_gradient_operators
     
     ! This subroutine computes the vertical covariant gradient of a scalar field.
     
-    real(wp),     intent(in)    :: scalar_field(:,:,:) ! scalar field of which to calculate the gradient
-    real(wp),     intent(inout) :: result_field(:,:,:) ! z-component of resulting vector field
-    type(t_grid), intent(in)    :: grid                ! the grid properties
+    real(wp),     intent(in)  :: scalar_field(:,:,:) ! scalar field of which to calculate the gradient
+    real(wp),     intent(out) :: result_field(:,:,:) ! z-component of resulting vector field
+    type(t_grid), intent(in)  :: grid                ! the grid properties
     
     ! local variables
     integer :: jl ! level index
@@ -87,11 +87,11 @@ module mo_gradient_operators
     ! This subroutine computes the covariant gradient of a scalar field.
     ! result_field_z must be computed already
     
-    real(wp),     intent(in)    :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
-    real(wp),     intent(inout) :: result_field_x(:,:,:) ! x-component of resulting vector field
-    real(wp),     intent(inout) :: result_field_y(:,:,:) ! y-component of resulting vector field
-    real(wp),     intent(in)    :: result_field_z(:,:,:) ! z-component of resulting vector field
-    type(t_grid), intent(in)    :: grid                  ! the grid properties
+    real(wp),     intent(in)  :: scalar_field(:,:,:)   ! scalar field of which to calculate the gradient
+    real(wp),     intent(out) :: result_field_x(:,:,:) ! x-component of resulting vector field
+    real(wp),     intent(out) :: result_field_y(:,:,:) ! y-component of resulting vector field
+    real(wp),     intent(in)  :: result_field_z(:,:,:) ! z-component of resulting vector field
+    type(t_grid), intent(in)  :: grid                  ! the grid properties
     
     ! local variables
     integer :: ji ! horizontal index
