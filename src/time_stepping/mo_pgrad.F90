@@ -5,8 +5,10 @@ module mo_pgrad
   
   ! This module manages the handling of the explicit component of the pressure gradient.
   
+  use mo_run_nml,            only: theta_adv_order
   use mo_constants,          only: c_d_p
   use mo_gradient_operators, only: grad_vert,grad_hor
+  use mo_inner_product,      only: theta_v_adv_3rd_order
   use mo_definitions,        only: t_state,t_diag,t_grid,wp
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_h2,scalar_times_vector_v,scalar_times_vector_v2
   use mo_constituents_nml,   only: n_condensed_constituents
@@ -36,12 +38,21 @@ module mo_pgrad
     ! calculating the gradient of the perturbed Exner pressure
     call grad_vert(state%exner_pert,diag%p_grad_acc_neg_nl_w,grid)
     call grad_hor(state%exner_pert,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v,diag%p_grad_acc_neg_nl_w,grid)
+    
     ! calculating the full virtual potential temperature
     !$omp parallel workshare
     diag%scalar_placeholder = c_d_p*(grid%theta_v_bg + state%theta_v_pert)
     !$omp end parallel workshare
     ! multiplying the perturbed Exner pressure gradient by the full virtual potential temperature
-    call scalar_times_vector_h2(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
+    if (theta_adv_order==2) then
+      call scalar_times_vector_h2(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
+    elseif (theta_adv_order==3) then
+      call theta_v_adv_3rd_order(state,diag,grid)
+      !$omp parallel workshare
+      diag%p_grad_acc_neg_nl_u = diag%theta_v_u*diag%p_grad_acc_neg_nl_u
+      diag%p_grad_acc_neg_nl_v = diag%theta_v_v*diag%p_grad_acc_neg_nl_v
+      !$omp end parallel workshare
+    endif
     call scalar_times_vector_v2(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_w)
     
     ! the linear pressure gradient term
@@ -49,8 +60,16 @@ module mo_pgrad
     diag%scalar_placeholder = c_d_p*state%theta_v_pert
     !$omp end parallel workshare
     ! multiplying the background Exner pressure gradient by the perturbed virtual potential temperature
-    call scalar_times_vector_h(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
-                               diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
+    if (theta_adv_order==2) then
+      call scalar_times_vector_h(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
+                                 diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
+    elseif (theta_adv_order==3) then
+      call theta_v_adv_3rd_order(state,diag,grid)
+      !$omp parallel workshare
+      diag%p_grad_acc_neg_l_u = diag%theta_v_u*grid%exner_bg_grad_u
+      diag%p_grad_acc_neg_l_v = diag%theta_v_v*grid%exner_bg_grad_v
+      !$omp end parallel workshare
+    endif
     call scalar_times_vector_v(diag%scalar_placeholder,grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_w)
     
     !$omp parallel workshare

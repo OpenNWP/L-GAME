@@ -214,6 +214,8 @@ program control
   allocate(diag%u_placeholder(ny,nx+1,n_layers))
   allocate(diag%v_placeholder(ny+1,nx,n_layers))
   allocate(diag%w_placeholder(ny,nx,n_levels))
+  allocate(diag%theta_v_u(ny,nx+1,n_layers))
+  allocate(diag%theta_v_v(ny+1,nx,n_layers))
   allocate(diag%u_10(ny,nx))
   allocate(diag%v_10(ny,nx))
   allocate(diag%gust(ny,nx))
@@ -377,6 +379,8 @@ program control
   diag%u_placeholder = 0._wp
   diag%v_placeholder = 0._wp
   diag%w_placeholder = 0._wp
+  diag%theta_v_u = 0._wp
+  diag%theta_v_v = 0._wp
   diag%u_10 = 0._wp
   diag%v_10 = 0._wp
   diag%gust = 0._wp
@@ -638,6 +642,8 @@ program control
   deallocate(diag%u_placeholder)
   deallocate(diag%v_placeholder)
   deallocate(diag%w_placeholder)
+  deallocate(diag%theta_v_u)
+  deallocate(diag%theta_v_v)
   deallocate(diag%u_10)
   deallocate(diag%v_10)
   deallocate(diag%gust)

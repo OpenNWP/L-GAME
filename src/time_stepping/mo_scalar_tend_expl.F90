@@ -5,7 +5,7 @@ module mo_scalar_tend_expl
 
   ! This module manages the calculation of the explicit component of the scalar tendencies.
 
-  use mo_run_nml,              only: dtime,ny,nx,n_layers
+  use mo_run_nml,              only: dtime,ny,nx,n_layers,theta_adv_order
   use mo_constants,            only: c_d_p,c_d_v
   use mo_definitions,          only: wp,t_grid,t_state,t_diag,t_tend
   use mo_multiplications,      only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
@@ -14,6 +14,7 @@ module mo_scalar_tend_expl
   use mo_diff_nml,             only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
   use mo_eff_diff_coeffs,      only: scalar_diffusion_coeffs
   use mo_gradient_operators,   only: grad_hor,grad_vert
+  use mo_inner_product,        only: theta_v_adv_3rd_order
   use mo_derived,              only: c_v_mass_weighted_air
 
   implicit none
@@ -97,7 +98,7 @@ module mo_scalar_tend_expl
       ! calculating the divergence of the mass flux density
       ! main gaseous constituent
       if (jc==n_condensed_constituents+1) then
-        call scalar_times_vector_h(state_scalar%rho(:,:,:,jc),state_scalar%wind_u,state_scalar%wind_v, &
+        call scalar_times_vector_h(state_scalar%rho(:,:,:,jc),state_vector%wind_u,state_vector%wind_v, &
                                    diag%flux_density_u,diag%flux_density_v)
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
       ! all other constituents
@@ -125,8 +126,16 @@ module mo_scalar_tend_expl
         !$omp parallel workshare
         diag%scalar_placeholder = grid%theta_v_bg + state_scalar%theta_v_pert
         !$omp end parallel workshare
-        call scalar_times_vector_h(diag%scalar_placeholder,diag%flux_density_u,diag%flux_density_v, &
-                                   diag%u_placeholder,diag%v_placeholder)
+        if (theta_adv_order==2) then
+          call scalar_times_vector_h(diag%scalar_placeholder,diag%flux_density_u,diag%flux_density_v, &
+                                     diag%u_placeholder,diag%v_placeholder)
+        elseif (theta_adv_order==3) then
+          call theta_v_adv_3rd_order(state_vector,diag,grid)
+          !$omp parallel workshare
+          diag%u_placeholder = diag%theta_v_u*diag%flux_density_u
+          diag%v_placeholder = diag%theta_v_v*diag%flux_density_v
+          !$omp end parallel workshare
+        endif
         ! calculating the divergence of the virtual potential temperature flux density
         call div_h(diag%u_placeholder,diag%v_placeholder,diag%flux_density_div,grid)
         

@@ -23,6 +23,7 @@ scenario="schaer"
 lcorio=.false.
 sigma=1.0
 lplane=.true.
+theta_adv_order=3
 /
 
 &io

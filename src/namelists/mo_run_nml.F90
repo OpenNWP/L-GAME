@@ -10,36 +10,37 @@ module mo_run_nml
   
   implicit none
   
-  integer           :: ny            ! number of gridpoints in y-direction
-  integer           :: nx            ! number of gridpoints in x-direction
-  integer           :: n_layers      ! number of layers
-  integer           :: n_levels      ! number of levels
-  integer           :: n_oro_layers  ! number of layers following the orography
-  integer           :: n_flat_layers ! number of flat layers
-  real(wp)          :: dy            ! mesh size in y direction at sea level
-  real(wp)          :: dx            ! mesh size in x direction at sea level at the equator
-  real(wp)          :: eff_hor_res   ! effective horizontal resolution
-  real(wp)          :: dtime         ! time step
-  real(wp)          :: toa           ! top of atmosphere
-  real(wp)          :: sigma         ! vertical grid stretching parameter
-  integer           :: run_span_min  ! run span in minutes
-  real(wp)          :: t_init        ! epoch timestamp of the initialization
-  integer           :: start_year    ! year of the model run beginning
-  integer           :: start_month   ! month of the model run beginning
-  integer           :: start_day     ! day of the model run beginning
-  integer           :: start_hour    ! hour of the model run beginning
-  integer           :: start_minute  ! minute of the model run beginning
-  logical           :: lrestart      ! switch for restart runs
-  logical           :: lcorio        ! switch for the Coriolis force
-  logical           :: lideal        ! switch for analytic test cases
-  logical           :: lplane        ! plane geometry switch
-  character(len=64) :: scenario      ! scenario for ideal runs
-  character(len=64) :: run_id        ! ID of the model run
-  logical           :: llinear       ! switch to turn momentum advection on or off
-  real(wp)          :: lat_center    ! latitude of the center of the model domain
-  real(wp)          :: lon_center    ! longitude of the center of the model domain
+  integer           :: ny              ! number of gridpoints in y-direction
+  integer           :: nx              ! number of gridpoints in x-direction
+  integer           :: n_layers        ! number of layers
+  integer           :: n_levels        ! number of levels
+  integer           :: n_oro_layers    ! number of layers following the orography
+  integer           :: n_flat_layers   ! number of flat layers
+  real(wp)          :: dy              ! mesh size in y direction at sea level
+  real(wp)          :: dx              ! mesh size in x direction at sea level at the equator
+  real(wp)          :: eff_hor_res     ! effective horizontal resolution
+  real(wp)          :: dtime           ! time step
+  real(wp)          :: toa             ! top of atmosphere
+  real(wp)          :: sigma           ! vertical grid stretching parameter
+  integer           :: run_span_min    ! run span in minutes
+  real(wp)          :: t_init          ! epoch timestamp of the initialization
+  integer           :: start_year      ! year of the model run beginning
+  integer           :: start_month     ! month of the model run beginning
+  integer           :: start_day       ! day of the model run beginning
+  integer           :: start_hour      ! hour of the model run beginning
+  integer           :: start_minute    ! minute of the model run beginning
+  logical           :: lrestart        ! switch for restart runs
+  logical           :: lcorio          ! switch for the Coriolis force
+  logical           :: lideal          ! switch for analytic test cases
+  logical           :: lplane          ! plane geometry switch
+  character(len=64) :: scenario        ! scenario for ideal runs
+  character(len=64) :: run_id          ! ID of the model run
+  logical           :: llinear         ! switch to turn momentum advection on or off
+  real(wp)          :: lat_center      ! latitude of the center of the model domain
+  real(wp)          :: lon_center      ! longitude of the center of the model domain
+  integer           :: theta_adv_order ! theta advection order (2 or 3)
   
-  namelist /run/ny,nx,n_layers,dy,dx,run_span_min,sigma, &
+  namelist /run/ny,nx,n_layers,dy,dx,run_span_min,sigma,theta_adv_order, &
                 toa,scenario,llinear,run_id,lcorio,n_oro_layers,lat_center,lon_center, &
                 start_year,start_month,start_day,start_hour,start_minute,lplane
   
@@ -74,6 +75,7 @@ module mo_run_nml
     lcorio = .true.
     lat_center = 0._wp
     lon_center = 0._wp
+    theta_adv_order = 3
     
     ! open and read namelist file
     open(action="read",file="namelist.nml",newunit=fileunit)
@@ -128,6 +130,11 @@ module mo_run_nml
     
     if (n_oro_layers>=n_layers) then
       write(*,*) "Error: it must be n_oro_layers<n_layers."
+      call exit(1)
+    endif
+    
+    if (theta_adv_order/=2 .and. theta_adv_order/=3) then
+      write(*,*) "Error: it must be theta_adv_order=2 or theta_adv_order=3."
       call exit(1)
     endif
     
