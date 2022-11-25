@@ -21,24 +21,32 @@ module mo_scalar_tend_expl
   
   contains
   
-  subroutine scalar_tend_expl(grid,state_scalar,state_vector,tend,diag,rk_step)
+  subroutine scalar_tend_expl(grid,state_old,state_new,tend,diag,rk_step)
     
     ! This subroutine manages the calculation of the explicit part of the scalar tendencies.
     
-    type(t_grid),  intent(in)    :: grid         ! model grid
-    type(t_state), intent(in)    :: state_scalar ! state from which to use the scalar quantities
-    type(t_state), intent(in)    :: state_vector ! state from which to use the wind
-    type(t_tend),  intent(inout) :: tend         ! state which will contain the tendencies
-    type(t_diag),  intent(inout) :: diag         ! diagnostic quantities
-    integer,       intent(in)    :: rk_step      ! RK substep index
+    type(t_grid),  intent(in)           :: grid      ! model grid
+    type(t_state), intent(in),   target :: state_old ! state from which to use the scalar quantities
+    type(t_state), intent(in),   target :: state_new ! state from which to use the wind
+    type(t_tend),  intent(inout)        :: tend      ! state which will contain the tendencies
+    type(t_diag),  intent(inout)        :: diag      ! diagnostic quantities
+    integer,       intent(in)           :: rk_step   ! RK substep index
     
     ! local variables
-    integer  :: ji                         ! horizontal index
-    integer  :: jk                         ! horizontal index
-    integer  :: jl                         ! layer index
-    integer  :: jc                         ! constituent index
-    real(wp) :: old_weight(n_constituents) ! time stepping weight
-    real(wp) :: new_weight(n_constituents) ! time stepping weight
+    integer                :: ji                         ! horizontal index
+    integer                :: jk                         ! horizontal index
+    integer                :: jl                         ! layer index
+    integer                :: jc                         ! constituent index
+    real(wp)               :: old_weight(n_constituents) ! time stepping weight
+    real(wp)               :: new_weight(n_constituents) ! time stepping weight
+    type(t_state), pointer :: state_scalar               ! state from which to use the scalar quantities
+    
+    ! setting the scalar state
+    if (rk_step==1) then
+      state_scalar => state_old
+    else
+      state_scalar => state_new
+    endif
     
     ! setting the time stepping weights
     do jc=1,n_constituents
@@ -98,15 +106,15 @@ module mo_scalar_tend_expl
       ! calculating the divergence of the mass flux density
       ! main gaseous constituent
       if (jc==n_condensed_constituents+1) then
-        call scalar_times_vector_h(state_scalar%rho(:,:,:,jc),state_vector%wind_u,state_vector%wind_v, &
+        call scalar_times_vector_h(state_scalar%rho(:,:,:,jc),state_new%wind_u,state_new%wind_v, &
                                    diag%flux_density_u,diag%flux_density_v)
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%flux_density_div,grid)
       ! all other constituents
       else
-        call scalar_times_vector_h_upstream(state_scalar%rho(:,:,:,jc),state_vector%wind_u,state_vector%wind_v, &
+        call scalar_times_vector_h_upstream(state_scalar%rho(:,:,:,jc),state_new%wind_u,state_new%wind_v, &
                                             diag%flux_density_u,diag%flux_density_v)
         call div_h_tracers(diag%flux_density_u,diag%flux_density_v,state_scalar%rho(:,:,:,jc), &
-                           state_vector%wind_u,state_vector%wind_v,diag%flux_density_div,grid)
+                           state_new%wind_u,state_new%wind_v,diag%flux_density_div,grid)
       endif
       
       !$omp parallel workshare
@@ -130,7 +138,7 @@ module mo_scalar_tend_expl
           call scalar_times_vector_h(diag%scalar_placeholder,diag%flux_density_u,diag%flux_density_v, &
                                      diag%u_placeholder,diag%v_placeholder)
         elseif (theta_adv_order==3) then
-          call theta_v_adv_3rd_order(state_vector,diag,grid)
+          call theta_v_adv_3rd_order(state_new,diag,grid)
           !$omp parallel workshare
           diag%u_placeholder = diag%theta_v_u*diag%flux_density_u
           diag%v_placeholder = diag%theta_v_v*diag%flux_density_v

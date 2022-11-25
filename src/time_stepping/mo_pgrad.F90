@@ -41,7 +41,7 @@ module mo_pgrad
     
     ! calculating the full virtual potential temperature
     !$omp parallel workshare
-    diag%scalar_placeholder = c_d_p*(grid%theta_v_bg + state%theta_v_pert)
+    diag%scalar_placeholder = grid%theta_v_bg + state%theta_v_pert
     !$omp end parallel workshare
     ! multiplying the perturbed Exner pressure gradient by the full virtual potential temperature
     if (theta_adv_order==2) then
@@ -57,13 +57,14 @@ module mo_pgrad
     
     ! the linear pressure gradient term
     !$omp parallel workshare
-    diag%scalar_placeholder = c_d_p*state%theta_v_pert
+    diag%scalar_placeholder = state%theta_v_pert
     !$omp end parallel workshare
     ! multiplying the background Exner pressure gradient by the perturbed virtual potential temperature
     if (theta_adv_order==2) then
       call scalar_times_vector_h(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
                                  diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
     elseif (theta_adv_order==3) then
+      call theta_v_adv_3rd_order(state,diag,grid)
       !$omp parallel workshare
       diag%p_grad_acc_neg_l_u = diag%theta_v_u*grid%exner_bg_grad_u
       diag%p_grad_acc_neg_l_v = diag%theta_v_v*grid%exner_bg_grad_v
@@ -72,7 +73,7 @@ module mo_pgrad
     call scalar_times_vector_v(diag%scalar_placeholder,grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_w)
     
     !$omp parallel workshare
-    diag%pressure_gradient_decel_factor = state%rho(:,:,:,n_condensed_constituents+1)/ &
+    diag%pressure_gradient_decel_factor = c_d_p*state%rho(:,:,:,n_condensed_constituents+1)/ &
                                           sum(state%rho(:,:,:,1:n_condensed_constituents+1),4)
     !$omp end parallel workshare
     call scalar_times_vector_h2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)

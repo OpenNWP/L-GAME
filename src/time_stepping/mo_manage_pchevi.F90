@@ -91,12 +91,7 @@ module mo_manage_pchevi
       
       ! 2.) Explicit component of the generalized density equations.
       ! ------------------------------------------------------------
-      if (rk_step==1) then
-        call scalar_tend_expl(grid,state_old,state_new,tend,diag,rk_step)
-      endif
-      if (rk_step==2) then
-        call scalar_tend_expl(grid,state_new,state_new,tend,diag,rk_step)
-      endif
+      call scalar_tend_expl(grid,state_old,state_new,tend,diag,rk_step)
       
       ! 3.) implicit dynamic vertical solver
       ! ------------------------------------
