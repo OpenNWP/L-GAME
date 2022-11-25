@@ -26,8 +26,8 @@ module mo_scalar_tend_expl
     ! This subroutine manages the calculation of the explicit part of the scalar tendencies.
     
     type(t_grid),  intent(in)           :: grid      ! model grid
-    type(t_state), intent(in),   target :: state_old ! state from which to use the scalar quantities
-    type(t_state), intent(in),   target :: state_new ! state from which to use the wind
+    type(t_state), intent(in),   target :: state_old ! state variables at the old predictor-corrector substep
+    type(t_state), intent(in),   target :: state_new ! state variables at the new predictor-corrector substep
     type(t_tend),  intent(inout)        :: tend      ! state which will contain the tendencies
     type(t_diag),  intent(inout)        :: diag      ! diagnostic quantities
     integer,       intent(in)           :: rk_step   ! RK substep index
