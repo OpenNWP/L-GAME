@@ -167,7 +167,7 @@ module mo_set_initial_state
         n_squared = (0.01_wp)**2
         T_0 = 288._wp
        
-        ! background state not yet substracted here
+        ! background state not yet subtracted here
        
         !$omp parallel do private(ji,jk,jl,delta_z,gravity_local)
         do jk=1,nx
@@ -356,7 +356,7 @@ module mo_set_initial_state
     /(r_d*diag%scalar_placeholder)
     ! virtual potential temperature density
     state%rhotheta_v = state%rho(:,:,:,n_condensed_constituents+1)*state%theta_v_pert
-    ! substracting the background state
+    ! subtracting the background state
     state%theta_v_pert = state%theta_v_pert - grid%theta_v_bg
     state%exner_pert = state%exner_pert - grid%exner_bg
     !$omp end parallel workshare
