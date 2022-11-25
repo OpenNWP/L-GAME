@@ -202,7 +202,7 @@ module mo_set_initial_state
             do jl=n_layers-1,1,-1
               ! result
               state%exner_pert(ji,jk,jl) = state%exner_pert(ji,jk,jl+1) &
-              + 2._wp*(geopot(grid%z_scalar(ji,jk,jl+1)) - geopot(grid%z_scalar(ji,jk,jl))) &
+              - 2._wp*(geopot(grid%z_scalar(ji,jk,jl)) - geopot(grid%z_scalar(ji,jk,jl+1))) &
               /(c_d_p*(state%theta_v_pert(ji,jk,jl) + state%theta_v_pert(ji,jk,jl+1)))
             enddo
             
