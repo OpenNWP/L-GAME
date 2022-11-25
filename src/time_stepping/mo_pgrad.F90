@@ -64,7 +64,6 @@ module mo_pgrad
       call scalar_times_vector_h(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
                                  diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
     elseif (theta_adv_order==3) then
-      call theta_v_adv_3rd_order(state,diag,grid)
       !$omp parallel workshare
       diag%p_grad_acc_neg_l_u = diag%theta_v_u*grid%exner_bg_grad_u
       diag%p_grad_acc_neg_l_v = diag%theta_v_v*grid%exner_bg_grad_v
