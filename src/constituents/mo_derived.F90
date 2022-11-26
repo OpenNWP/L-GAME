@@ -132,13 +132,13 @@ module mo_derived
     
     ! This function returns the relative humidity as a function of the absolute humidity in kg/m^3 and the temperature in K.
     
-    real(wp), intent(in) :: abs_humidity
-    real(wp), intent(in) :: temperature
-    real(wp)             :: rel_humidity
+    real(wp), intent(in) :: abs_humidity ! absolute humidity (mass density of water vapour)
+    real(wp), intent(in) :: temperature  ! temperature
+    real(wp)             :: rel_humidity ! relative humidity
     
     ! local variables
-    real(wp)             :: vapour_pressure     ! actual water vapour pressure
-    real(wp)             :: saturation_pressure ! saturation water vapour pressure
+    real(wp) :: vapour_pressure     ! actual water vapour pressure
+    real(wp) :: saturation_pressure ! saturation water vapour pressure
     
     ! calculation of the water vapour pressure according to the equation of state
     vapour_pressure = abs_humidity*r_v*temperature
@@ -158,12 +158,15 @@ module mo_derived
     
     ! This function calculates the mass-weighted c_v of the air.
     
-    real(wp), intent(in) :: rho(ny,nx,n_layers,n_constituents),temperature(ny,nx,n_layers)
-    integer,  intent(in) :: ji,jk,jl
-    real(wp)             :: c_v_mass_weighted_air
+    real(wp), intent(in) :: rho(ny,nx,n_layers,n_constituents) ! mass densities
+    real(wp), intent(in) :: temperature(ny,nx,n_layers)        ! temperature
+    integer,  intent(in) :: ji                                 ! horizontal index
+    integer,  intent(in) :: jk                                 ! horizontal index
+    integer,  intent(in) :: jl                                 ! layer index
+    real(wp)             :: c_v_mass_weighted_air              ! result
     
     ! local variables
-    integer :: jc
+    integer :: jc ! constituent index
     
     c_v_mass_weighted_air = 0._wp
     do jc=1,n_condensed_constituents
@@ -187,11 +190,17 @@ module mo_derived
     
     ! This function calculates the molecular diffusion coefficient.
     
-    real(wp) :: temperature,density
-    real(wp) :: calc_diffusion_coeff
+    real(wp) :: temperature          ! temperature
+    real(wp) :: density              ! mass density
+    real(wp) :: calc_diffusion_coeff ! result
     
     ! local variables
-    real(wp) :: particle_radius,particle_mass,thermal_velocity,particle_density,cross_section,mean_free_path
+    real(wp) :: particle_radius  ! radius of the particles
+    real(wp) :: particle_mass    ! mass of the particles
+    real(wp) :: thermal_velocity ! thermal velocity of the particles
+    real(wp) :: particle_density ! numeric particle density
+    real(wp) :: cross_section    ! cross section of the particles
+    real(wp) :: mean_free_path   ! mean free path of the particles
 
     ! these things are hardly ever modified
     particle_radius = 130e-12_wp
