@@ -51,6 +51,7 @@ lrad=.false.
 
 &surface
 orography_id=2
+lsleve=.true.
 lprog_soil_temp=.false.
 lsfc_sensible_heat_flux=.false.
 lsfc_phase_trans=.false.

@@ -16,8 +16,9 @@ module mo_surface_nml
   logical :: lsfc_sensible_heat_flux ! surface sensible heat flux switch
   logical :: lsfc_phase_trans        ! surface phase transitions switch
   logical :: lpbl                    ! planetary boundary layer switch
+  logical :: lsleve                  ! SLEVE vertical coordinate switch
   
-  namelist /surface/orography_id,lprog_soil_temp,nsoillays,lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl
+  namelist /surface/orography_id,lprog_soil_temp,nsoillays,lsfc_sensible_heat_flux,lsfc_phase_trans,lpbl,lsleve
   
   contains
   
@@ -33,6 +34,7 @@ module mo_surface_nml
     lsfc_sensible_heat_flux = .true.
     lsfc_phase_trans = .true.
     lpbl = .true.
+    lsleve = .false.
     
     ! Open and read namelist file.
     open(action="read",file="namelist.nml",newunit=fileunit)

@@ -13,7 +13,7 @@ module mo_grid_generator
   use mo_constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                    lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv, &
                                    r_d,c_d_p
-  use mo_surface_nml,        only: nsoillays,orography_id
+  use mo_surface_nml,        only: nsoillays,orography_id,lsleve
   use mo_gradient_operators, only: grad_hor_cov,grad_hor,grad_vert
   use mo_io_nml,             only: lwrite_grid,lread_oro,lread_land_sea,lset_oro, &
                                    oro_raw_filename
@@ -34,41 +34,44 @@ module mo_grid_generator
     type(t_grid), intent(inout) :: grid ! the model grid
     
     ! local variables
-    real(wp) :: lat_left_upper                ! latitude coordinate of upper left corner
-    real(wp) :: lon_left_upper                ! longitude coordinate of upper left corner
-    real(wp) :: dlat                          ! mesh size in y direction as angle
-    real(wp) :: dlon                          ! mesh size in x direction as angle
-    real(wp) :: max_oro                       ! variable for orography check
-    real(wp) :: A                             ! variable for calculating the vertical grid (height of a level without orography)
-    real(wp) :: B                             ! variable for calculating the vertical grid (orography weighting factor)
-    real(wp) :: sigma_z                       ! variable for calculating the vertical grid (A/toa)
-    real(wp) :: z_rel                         ! variable for calculating the vertical grid (z/toa with equidistant levels)
-    real(wp) :: vertical_vector_pre(n_levels) ! heights of the levels in a column
-    real(wp) :: base_area                     ! variable for calculating the vertical grid
-    real(wp) :: lower_z,upper_z,lower_length  ! variables needed for area calculations
-    real(wp) :: height_mountain               ! height of Gaussian mountain (needed for test case)
-    real(wp) :: x_coord                       ! help variable needed for the Schär test
-    real(wp) :: rescale_factor                ! soil grid rescaling factor
-    real(wp) :: sigma_soil                    ! sigma of the soil grid
-    real(wp) :: density_soil                  ! typical density of soil
-    real(wp) :: c_p_soil                      ! typical c_p of soil
-    real(wp) :: c_p_water                     ! typical c_p of water
-    real(wp) :: lat_lower_center              ! variable for calculating the TRSK weights
-    real(wp) :: lat_upper_center              ! variable for calculating the TRSK weights
-    real(wp) :: rot_y(3,3)                    ! rotation matrix around the global y-axis
-    real(wp) :: rot_z(3,3)                    ! rotation matrix around the global z-axis
-    real(wp) :: rot(3,3)                      ! complete rotation matrix
-    real(wp) :: r_old(3)                      ! positional vector before rotation
-    real(wp) :: r_new(3)                      ! positional vector after rotation
-    real(wp) :: basis_old(3)                  ! old local basis vector
-    real(wp) :: basis_new(3)                  ! new local basis vector
-    real(wp) :: local_i(3)                    ! local i-vector
-    real(wp) :: local_j(3)                    ! local j-vector
-    real(wp) :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
-    real(wp) :: lat_local,lon_local,max_z     ! helper variables     
-    integer  :: ji                            ! horizontal index
-    integer  :: jk                            ! horizontal index
-    integer  :: jl                            ! layer or level index
+    real(wp)              :: lat_left_upper                ! latitude coordinate of upper left corner
+    real(wp)              :: lon_left_upper                ! longitude coordinate of upper left corner
+    real(wp)              :: dlat                          ! mesh size in y direction as angle
+    real(wp)              :: dlon                          ! mesh size in x direction as angle
+    real(wp)              :: max_oro                       ! variable for orography check
+    real(wp)              :: A                             ! variable for calculating the vertical grid (height of a level without orography)
+    real(wp)              :: B                             ! variable for calculating the vertical grid (orography weighting factor)
+    real(wp)              :: sigma_z                       ! variable for calculating the vertical grid (A/toa)
+    real(wp)              :: z_rel                         ! variable for calculating the vertical grid (z/toa with equidistant levels)
+    real(wp)              :: vertical_vector_pre(n_levels) ! heights of the levels in a column
+    real(wp)              :: base_area                     ! variable for calculating the vertical grid
+    real(wp)              :: lower_z,upper_z,lower_length  ! variables needed for area calculations
+    real(wp)              :: height_mountain               ! height of Gaussian mountain (needed for test case)
+    real(wp)              :: x_coord                       ! help variable needed for the Schär test
+    real(wp)              :: rescale_factor                ! soil grid rescaling factor
+    real(wp)              :: sigma_soil                    ! sigma of the soil grid
+    real(wp)              :: density_soil                  ! typical density of soil
+    real(wp)              :: c_p_soil                      ! typical c_p of soil
+    real(wp)              :: c_p_water                     ! typical c_p of water
+    real(wp)              :: lat_lower_center              ! variable for calculating the TRSK weights
+    real(wp)              :: lat_upper_center              ! variable for calculating the TRSK weights
+    real(wp)              :: rot_y(3,3)                    ! rotation matrix around the global y-axis
+    real(wp)              :: rot_z(3,3)                    ! rotation matrix around the global z-axis
+    real(wp)              :: rot(3,3)                      ! complete rotation matrix
+    real(wp)              :: r_old(3)                      ! positional vector before rotation
+    real(wp)              :: r_new(3)                      ! positional vector after rotation
+    real(wp)              :: basis_old(3)                  ! old local basis vector
+    real(wp)              :: basis_new(3)                  ! new local basis vector
+    real(wp)              :: local_i(3)                    ! local i-vector
+    real(wp)              :: local_j(3)                    ! local j-vector
+    real(wp)              :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
+    real(wp)              :: lat_local,lon_local,max_z     ! helper variables     
+    real(wp), allocatable :: oro_small_scale(:,:)          ! small-scale orography contribution
+    real(wp), allocatable :: oro_large_scale(:,:)          ! large-scale orography contribution
+    real(wp)              :: toa_oro                       ! top of terrain-following coordinates
+    integer               :: ji                            ! horizontal index
+    integer               :: jk                            ! horizontal index
+    integer               :: jl                            ! layer or level index
     
     ! Horizontal grid properties
     ! --------------------------
@@ -282,6 +285,9 @@ module mo_grid_generator
       call read_land_sea(grid)
     endif
     
+    allocate(oro_small_scale(ny,nx))
+    allocate(oro_large_scale(ny,nx))
+    
     select case (orography_id)
     
       ! no orography
@@ -306,6 +312,8 @@ module mo_grid_generator
         do jk=1,nx
           x_coord = dx*jk - (nx/2 + 1)*dx
           grid%z_w(:,jk,n_levels) = height_mountain*exp(-x_coord**2/5000._wp**2)*cos(M_PI*x_coord/4000._wp)**2
+          oro_large_scale(:,jk) = 0.5_wp*height_mountain*exp(-x_coord**2/5000._wp**2)
+          oro_small_scale(:,jk) = grid%z_w(:,jk,n_levels) - oro_large_scale(:,jk)
         enddo
         !$omp end parallel do
       
@@ -387,7 +395,7 @@ module mo_grid_generator
     
     ! calculating the vertical positions of the scalar points
     ! the heights are defined according to k = A_k + B_k*surface with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
-    !$omp parallel do private(ji,jk,jl,z_rel,sigma_z,A,B,vertical_vector_pre,max_oro)
+    !$omp parallel do private(ji,jk,jl,z_rel,sigma_z,A,B,vertical_vector_pre,max_oro,toa_oro)
     do jk=1,nx
       do ji=1,ny
         ! filling up vertical_vector_pre
@@ -395,14 +403,24 @@ module mo_grid_generator
           z_rel = 1._wp-(jl-1._wp)/n_layers
           sigma_z = z_rel**sigma
           A = sigma_z*toa ! the height without orography
-          ! B corrects for orography
-          if (jl>n_flat_layers) then
-            B = (jl-(n_flat_layers+1._wp))/n_oro_layers
+          ! including orography
+          if (jl>n_flat_layers+1) then
+            if (lsleve) then
+              vertical_vector_pre(jl) = A + sinh((toa_oro-A)/5.e3_wp)/sinh(toa_oro/5.e3_wp)*oro_large_scale(ji,jk) &
+                                        + sinh((toa_oro-A)/2.e3_wp)/sinh(toa_oro/2.e3_wp)*oro_small_scale(ji,jk)
+            else
+              B = (jl-(n_flat_layers+1._wp))/n_oro_layers
+              vertical_vector_pre(jl) = A + B*grid%z_w(ji,jk,n_levels)
+            endif
           else
-            B = 0._wp
+            vertical_vector_pre(jl) = A
           endif
-          vertical_vector_pre(jl)=A+B*grid%z_w(ji,jk,n_levels)
         enddo
+        
+        ! setting toa_oro
+        if (jl==n_flat_layers+1) then
+          toa_oro = vertical_vector_pre(jl)
+        endif
         
         ! doing a check
         if (ji==1 .and. jk==1) then
@@ -421,6 +439,9 @@ module mo_grid_generator
       enddo
     enddo
     !$omp end parallel do
+    
+    deallocate(oro_small_scale)
+    deallocate(oro_large_scale)
     
     ! setting the height of the u-vector points
     ! inner domain
