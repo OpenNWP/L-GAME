@@ -75,7 +75,7 @@ module mo_run_nml
     lcorio = .true.
     lat_center = 0._wp
     lon_center = 0._wp
-    theta_adv_order = 3
+    theta_adv_order = 2
     
     ! open and read namelist file
     open(action="read",file="namelist.nml",newunit=fileunit)
