@@ -9,7 +9,6 @@ module mo_vector_tend_expl
   use mo_constants,          only: impl_thermo_weight
   use mo_inner_product,      only: inner_product
   use mo_gradient_operators, only: grad_hor,grad_vert
-  use mo_run_nml,            only: ny,nx,n_layers,llinear,lcorio,n_levels
   use mo_constituents_nml,   only: n_condensed_constituents
   use mo_vorticities,        only: calc_pot_vort
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v
@@ -19,7 +18,9 @@ module mo_vector_tend_expl
   use mo_eff_diff_coeffs,    only: update_n_squared
   use mo_tke,                only: tke_update
   use mo_pbl,                only: pbl_wind_tendency
+  use mo_run_nml,            only: ny,nx,n_layers,llinear,lcorio,n_levels
   use mo_surface_nml,        only: lpbl
+  use mo_bc_nml,             only: lfreeslip
   
   implicit none
   
@@ -37,6 +38,9 @@ module mo_vector_tend_expl
     integer,       intent(in)    :: total_step_counter ! time step counter of the model integration
     
     ! local variables
+    integer  :: ji                       ! horizontal index
+    integer  :: jk                       ! horizontal index
+    real(wp) :: density_value            ! individual density value
     real(wp) :: old_hor_pgrad_weight     ! old time step pressure gradient weight
     real(wp) :: current_hor_pgrad_weight ! current time step horizontal pressure gradient weight
     real(wp) :: current_ver_pgrad_weight ! current time step vertical pressure gradient weight
@@ -45,14 +49,38 @@ module mo_vector_tend_expl
     
     ! momentum advection
     if ((rk_step==2 .or. total_step_counter==0) .and. ((.not. llinear) .or. lcorio)) then
+    
+      ! calculating the potential vorticity
+      call calc_pot_vort(state,diag,grid)
+      
       ! calculating the mass flux density
       call scalar_times_vector_h(state%rho(:,:,:,n_condensed_constituents+1),state%wind_u,state%wind_v, &
                                  diag%u_placeholder,diag%v_placeholder)
       call scalar_times_vector_v(state%rho(:,:,:,n_condensed_constituents+1),state%wind_w,diag%w_placeholder)
-      ! calculating the potential vorticity
-      call calc_pot_vort(state,diag,grid)
+      ! calculating the vertical mass flux density at the surface for free slip boundary conditions
+      if (lfreeslip) then
+        !$omp parallel do private(ji,jk,density_value)
+        do jk=1,nx
+          do ji=1,ny
+            density_value = state%rho(ji,jk,n_layers,n_condensed_constituents+1) &
+            + (state%rho(ji,jk,n_layers-1,n_condensed_constituents+1)-state%rho(ji,jk,n_layers,n_condensed_constituents+1)) &
+            /(grid%z_scalar(ji,jk,n_layers-1)-grid%z_scalar(ji,jk,n_layers)) &
+            *(grid%z_w(ji,jk,n_levels)-grid%z_scalar(ji,jk,n_layers))
+            diag%w_placeholder(ji,jk,n_levels) = density_value*state%wind_w(ji,jk,n_levels)
+          enddo
+        enddo
+        !$omp end parallel do
+      endif
+      
       ! calculating the potential voritcity flux term
       call calc_vorticity_flux_term(diag,grid)
+      
+      ! resetting the vertical mass flux density at the surface
+      if (lfreeslip) then
+        !$omp parallel workshare
+        diag%w_placeholder(:,:,n_levels) = 0._wp
+        !$omp end parallel workshare
+      endif
       
       if (.not. llinear) then
         ! Kinetic energy is prepared for the gradient term of the Lamb transformation.
