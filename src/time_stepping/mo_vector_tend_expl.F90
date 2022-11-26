@@ -9,7 +9,7 @@ module mo_vector_tend_expl
   use mo_constants,          only: impl_thermo_weight
   use mo_inner_product,      only: inner_product
   use mo_gradient_operators, only: grad_hor,grad_vert
-  use mo_run_nml,            only: ny,nx,n_layers,llinear,lcorio
+  use mo_run_nml,            only: ny,nx,n_layers,llinear,lcorio,n_levels
   use mo_constituents_nml,   only: n_condensed_constituents
   use mo_vorticities,        only: calc_pot_vort
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v

@@ -62,6 +62,36 @@ module mo_vorticities
       enddo
     enddo
     !$omp end parallel do
+    
+    ! free slip boundary conditions
+    if (lfreeslip) then
+      !$omp parallel do private(ji,jk)
+      do jk=1,nx
+        do ji=2,ny
+          diag%zeta_x(ji,jk,n_levels) = diag%zeta_x(ji,jk,n_levels) &
+          + 0.5_wp*grid%dz(ji-1,jk,n_levels)*state%wind_w(ji-1,jk,n_levels) &
+          - 0.5_wp*grid%dz(ji,jk,n_levels)*state%wind_w(ji,jk,n_levels) &
+          + grid%dy(ji,jk,n_layers)*(state%wind_v(ji,jk,n_layers) &
+          + (state%wind_v(ji,jk,n_layers-1)-state%wind_v(ji,jk,n_layers))/(grid%z_v(ji,jk,n_layers-1)-grid%z_v(ji,jk,n_layers)) &
+          *(0.5_wp*(grid%z_w(ji-1,jk,n_levels)+grid%z_w(ji,jk,n_levels)) - grid%z_v(ji,jk,n_layers)) &
+          + 0.5_wp*(state%wind_w(ji-1,jk,n_levels)+state%wind_w(ji,jk,n_levels)) &
+          *(grid%z_w(ji-1,jk,n_levels)-grid%z_w(ji,jk,n_levels))/grid%dy(ji,jk,n_layers))
+        enddo
+        if (lperiodic) then
+          diag%zeta_x(1,jk,n_levels) = diag%zeta_x(1,jk,n_levels) &
+          + 0.5_wp*grid%dz(ny,jk,n_levels)*state%wind_w(ny,jk,n_levels) &
+          - 0.5_wp*grid%dz(1,jk,n_levels)*state%wind_w(1,jk,n_levels) &
+          + grid%dy(1,jk,n_layers)*(state%wind_v(1,jk,n_layers) &
+          + (state%wind_v(1,jk,n_layers-1)-state%wind_v(1,jk,n_layers))/(grid%z_v(1,jk,n_layers-1)-grid%z_v(1,jk,n_layers)) &
+          *(0.5_wp*(grid%z_w(ny,jk,n_levels)+grid%z_w(1,jk,n_levels)) - grid%z_v(1,jk,n_layers)) &
+          + 0.5_wp*(state%wind_w(ny,jk,n_levels)+state%wind_w(1,jk,n_levels)) &
+          *(grid%z_w(ny,jk,n_levels)-grid%z_w(1,jk,n_levels))/grid%dy(1,jk,n_layers))
+          diag%zeta_x(ny+1,jk,n_levels) = diag%zeta_x(1,jk,n_levels)
+        endif
+      enddo
+      !$omp end parallel do
+    endif
+    
     ! dividing by the area
     !$omp parallel workshare
     diag%zeta_x = diag%zeta_x/grid%area_dual_x
@@ -70,12 +100,6 @@ module mo_vorticities
     !$omp parallel workshare
     diag%zeta_x(:,:,1) = diag%zeta_x(:,:,2)
     !$omp end parallel workshare
-    ! free slip boundary conditions
-    if (lfreeslip) then
-      !$omp parallel workshare
-      diag%zeta_x(:,:,n_levels) = diag%zeta_x(:,:,n_layers)
-      !$omp end parallel workshare
-    endif
     
     ! calculating the relative vorticity in y-direction
     !$omp parallel do private(ji,jk,jl)
@@ -110,6 +134,36 @@ module mo_vorticities
       enddo
     enddo
     !$omp end parallel do
+    
+    ! free slip boundary conditions
+    if (lfreeslip) then
+      !$omp parallel do private(ji,jk)
+      do ji=1,ny
+        do jk=2,nx
+          diag%zeta_y(ji,jk,n_levels) = diag%zeta_y(ji,jk,n_levels) &
+          + 0.5_wp*grid%dz(ji,jk-1,n_levels)*state%wind_w(ji,jk-1,n_levels) &
+          - 0.5_wp*grid%dz(ji,jk,n_levels)*state%wind_w(ji,jk,n_levels) &
+          - grid%dx(ji,jk,n_layers)*(state%wind_u(ji,jk,n_layers) &
+          + (state%wind_u(ji,jk,n_layers-1)-state%wind_u(ji,jk,n_layers))/(grid%z_u(ji,jk,n_layers-1)-grid%z_u(ji,jk,n_layers)) &
+          *(0.5_wp*(grid%z_w(ji,jk-1,n_levels)+grid%z_w(ji,jk,n_levels)) - grid%z_u(ji,jk,n_layers)) &
+          + 0.5_wp*(state%wind_w(ji,jk-1,n_levels)+state%wind_w(ji,jk,n_levels)) &
+          *(grid%z_w(ji,jk,n_levels)-grid%z_w(ji,jk-1,n_levels))/grid%dx(ji,jk,n_layers))
+        enddo
+        if (lperiodic) then
+          diag%zeta_y(ji,1,n_levels) = diag%zeta_y(ji,1,n_levels) &
+          + 0.5_wp*grid%dz(ji,nx,n_levels)*state%wind_w(ji,nx,n_levels) &
+          - 0.5_wp*grid%dz(ji,1,n_levels)*state%wind_w(ji,1,n_levels) &
+          - grid%dx(ji,1,n_layers)*(state%wind_u(ji,1,n_layers) &
+          + (state%wind_u(ji,1,n_layers-1)-state%wind_u(ji,1,n_layers))/(grid%z_u(ji,1,n_layers-1)-grid%z_u(ji,1,n_layers)) &
+          *(0.5_wp*(grid%z_w(ji,nx,n_levels)+grid%z_w(ji,1,n_levels)) - grid%z_u(ji,1,n_layers)) &
+          + 0.5_wp*(state%wind_w(ji,nx,n_levels)+state%wind_w(ji,1,n_levels)) &
+          *(grid%z_w(ji,1,n_levels)-grid%z_w(ji,nx,n_levels))/grid%dx(ji,1,n_layers))
+          diag%zeta_y(ji,nx+1,n_levels) = diag%zeta_y(ji,1,n_levels)
+        endif
+      enddo
+      !$omp end parallel do
+    endif
+    
     ! dividing by the area
     !$omp parallel workshare
     diag%zeta_y = diag%zeta_y/grid%area_dual_y
@@ -118,12 +172,6 @@ module mo_vorticities
     !$omp parallel workshare
     diag%zeta_y(:,:,1) = diag%zeta_y(:,:,2)
     !$omp end parallel workshare
-    ! free slip boundary conditions
-    if (lfreeslip) then
-      !$omp parallel workshare
-      diag%zeta_y(:,:,n_levels) = diag%zeta_y(:,:,n_layers)
-      !$omp end parallel workshare
-    endif
     
     ! calculating the relative vorticity in z-direction
     !$omp parallel do private(ji,jk,jl)
