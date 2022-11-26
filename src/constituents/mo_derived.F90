@@ -41,20 +41,17 @@ module mo_derived
     
     ! This function calculates the specific heat capacity at constant volume of the air at a certain gridpoint.
     
-    ! input arguments
-    type(t_state), intent(in) :: state    ! state with which to calculate c_v
-    integer, intent(in)       :: ji       ! horizontal index of the gridpoint
-    integer, intent(in)       :: jk       ! horizontal index of the gridpoint
-    integer, intent(in)       :: jl       ! vertical index of the gridpoint
-    
-    ! output
-    real(wp) :: spec_heat_cap_diagnostics_v
+    type(t_state), intent(in) :: state                       ! state with which to calculate c_v
+    integer,       intent(in) :: ji                          ! horizontal index of the gridpoint
+    integer,       intent(in) :: jk                          ! horizontal index of the gridpoint
+    integer,       intent(in) :: jl                          ! vertical index of the gridpoint
+    real(wp)                  :: spec_heat_cap_diagnostics_v ! result
     
     ! local variables
-    integer  :: n_relevant_constituents ! the number of relevant constituents for this calculation
-    integer  :: jc               ! constituent index
-    real(wp) :: rho_g                       ! gas density
-    real(wp) :: spec_heat_capacities_v_gas(2)
+    integer  :: n_relevant_constituents       ! the number of relevant constituents for this calculation
+    integer  :: jc                            ! constituent index
+    real(wp) :: rho_g                         ! gas density
+    real(wp) :: spec_heat_capacities_v_gas(2) ! vector containing specific heat capacities
     
     n_relevant_constituents = 1
     rho_g = state%rho(ji,jk,jl,n_condensed_constituents+1)
@@ -74,20 +71,17 @@ module mo_derived
     
     ! This function calculates the specific heat capacity at constant pressure of the air at a certain gridpoint.
     
-    ! input arguments
-    type(t_state), intent(in) :: state    ! state with which to calculate c_p
-    integer, intent(in)       :: ji       ! horizontal index of the gridpoint
-    integer, intent(in)       :: jk       ! horizontal index of the gridpoint
-    integer, intent(in)       :: jl       ! vertical index of the gridpoint
-    
-    ! output
-    real(wp) :: spec_heat_cap_diagnostics_p
+    type(t_state), intent(in) :: state                       ! state with which to calculate c_p
+    integer,       intent(in) :: ji                          ! horizontal index of the gridpoint
+    integer,       intent(in) :: jk                          ! horizontal index of the gridpoint
+    integer,       intent(in) :: jl                          ! vertical index of the gridpoint
+    real(wp)                  :: spec_heat_cap_diagnostics_p ! result
     
     ! local variables
-    integer  :: n_relevant_constituents ! the number of relevant constituents for this calculation
-    integer  :: jc               ! constituent index
-    real(wp) :: rho_g                       ! gas density
-    real(wp) :: spec_heat_capacities_p_gas(2)
+    integer  :: n_relevant_constituents       ! the number of relevant constituents for this calculation
+    integer  :: jc                            ! constituent index
+    real(wp) :: rho_g                         ! gas density
+    real(wp) :: spec_heat_capacities_p_gas(2) ! vector containing specific heat capacities
     
     n_relevant_constituents = 1
     rho_g = state%rho(ji,jk,jl,n_condensed_constituents+1)
@@ -107,19 +101,17 @@ module mo_derived
     
     ! This function calculates the specific gas constant at a certain gridpoint.
     
-    ! input arguments
-    type(t_state), intent(in) :: state    ! state with which to calculate the gas constant
-    integer, intent(in)       :: ji       ! horizontal index of the gridpoint
-    integer, intent(in)       :: jk       ! horizontal index of the gridpoint
-    integer, intent(in)       :: jl       ! vertical index of the gridpoint
-    ! output
-    real(wp)                  :: gas_constant_diagnostics
+    type(t_state), intent(in) :: state                    ! state with which to calculate the gas constant
+    integer,       intent(in) :: ji                       ! horizontal index of the gridpoint
+    integer,       intent(in) :: jk                       ! horizontal index of the gridpoint
+    integer,       intent(in) :: jl                       ! vertical index of the gridpoint
+    real(wp)                  :: gas_constant_diagnostics ! result
     
     ! local variables
-    integer  :: n_relevant_constituents ! the number of relevant constituents for this calculation
-    integer  :: jc               ! constituent index
-    real(wp) :: rho_g                       ! gas density
-    real(wp) :: specific_gas_constants(2)
+    integer  :: n_relevant_constituents   ! the number of relevant constituents for this calculation
+    integer  :: jc                        ! constituent index
+    real(wp) :: rho_g                     ! gas density
+    real(wp) :: specific_gas_constants(2) ! vector containing specific gas constants
     
     n_relevant_constituents = 1
     rho_g = state%rho(ji,jk,jl,n_condensed_constituents+1)
@@ -140,7 +132,8 @@ module mo_derived
     
     ! This function returns the relative humidity as a function of the absolute humidity in kg/m^3 and the temperature in K.
     
-    real(wp), intent(in) :: abs_humidity,temperature
+    real(wp), intent(in) :: abs_humidity
+    real(wp), intent(in) :: temperature
     real(wp)             :: rel_humidity
     
     ! local variables
