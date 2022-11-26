@@ -415,17 +415,16 @@ module mo_grid_generator
           else
             vertical_vector_pre(jl) = A
           endif
+          ! setting toa_oro
+          if (jl==n_flat_layers+1) then
+            toa_oro = vertical_vector_pre(jl)
+          endif
         enddo
-        
-        ! setting toa_oro
-        if (jl==n_flat_layers+1) then
-          toa_oro = vertical_vector_pre(jl)
-        endif
         
         ! doing a check
         if (ji==1 .and. jk==1) then
           max_oro = maxval(grid%z_w(:,:,n_levels))
-          if (max_oro >= vertical_vector_pre(n_flat_layers+1)) then
+          if (max_oro>=vertical_vector_pre(n_flat_layers+1)) then
             write(*,*) "Maximum of orography larger or equal to the height of the lowest flat level."
             write(*,*) "Aborting."
             call exit(1)
