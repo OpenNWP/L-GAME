@@ -138,7 +138,7 @@ module mo_scalar_tend_expl
           call scalar_times_vector_h(diag%scalar_placeholder,diag%flux_density_u,diag%flux_density_v, &
                                      diag%u_placeholder,diag%v_placeholder)
         elseif (theta_adv_order==3) then
-          call theta_v_adv_3rd_order(state_new,diag,grid)
+          call theta_v_adv_3rd_order(state_scalar,diag,grid)
           !$omp parallel workshare
           diag%u_placeholder = diag%theta_v_u*diag%flux_density_u
           diag%v_placeholder = diag%theta_v_v*diag%flux_density_v
