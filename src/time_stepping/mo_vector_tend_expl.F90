@@ -121,7 +121,7 @@ module mo_vector_tend_expl
     if (rk_step==2) then
       new_weight = 0.5_wp
     endif
-    old_weight = 1._wp-new_weight
+    old_weight = 1._wp - new_weight
     ! the weights for the pressure gradient
     current_hor_pgrad_weight = 0.5_wp + impl_thermo_weight
     old_hor_pgrad_weight = 1._wp - current_hor_pgrad_weight

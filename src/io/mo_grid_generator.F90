@@ -453,15 +453,11 @@ module mo_grid_generator
     if (lperiodic) then
       !$omp parallel workshare
       grid%z_u(:,1,:) = 0.5_wp*(grid%z_scalar(:,1,:) + grid%z_scalar(:,nx,:))
-      !$omp end parallel workshare
-      !$omp parallel workshare
       grid%z_u(:,nx+1,:) = grid%z_u(:,1,:)
       !$omp end parallel workshare
     else
       !$omp parallel workshare
       grid%z_u(:,1,:) = grid%z_scalar(:,1,:) + 0.5_wp*(grid%z_scalar(:,1,:) - grid%z_scalar(:,2,:))
-      !$omp end parallel workshare
-      !$omp parallel workshare
       grid%z_u(:,nx+1,:) = grid%z_scalar(:,nx,:) + 0.5_wp*(grid%z_scalar(:,nx,:) - grid%z_scalar(:,nx-1,:))
       !$omp end parallel workshare
     endif
@@ -477,15 +473,11 @@ module mo_grid_generator
     if (lperiodic) then
       !$omp parallel workshare
       grid%z_v(1,:,:) = 0.5_wp*(grid%z_scalar(1,:,:) + grid%z_scalar(ny,:,:))
-      !$omp end parallel workshare
-      !$omp parallel workshare
       grid%z_v(ny+1,:,:) = grid%z_v(1,:,:)
       !$omp end parallel workshare
     else
       !$omp parallel workshare
       grid%z_v(1,:,:) = grid%z_scalar(1,:,:) + 0.5_wp*(grid%z_scalar(1,:,:) - grid%z_scalar(2,:,:))
-      !$omp end parallel workshare
-      !$omp parallel workshare
       grid%z_v(ny+1,:,:) = grid%z_scalar(ny,:,:) + 0.5_wp*(grid%z_scalar(ny,:,:) - grid%z_scalar(ny-1,:,:))
       !$omp end parallel workshare
     endif

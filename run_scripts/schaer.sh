@@ -12,13 +12,13 @@ cat > namelist.nml << EOF
 &run
 run_id="$run_id"
 ny=3
-nx=401
-n_layers=65
-n_oro_layers=64
-toa=19500.0
+nx=601
+n_layers=70
+n_oro_layers=69
+toa=21000.0
 dy=500
 dx=500
-run_span_min=360
+run_span_min=300
 scenario="schaer"
 lcorio=.false.
 sigma=1.0
@@ -43,6 +43,7 @@ ltemp_diff_h=.false.
 ltemp_diff_v=.false.
 lmass_diff_h=.false.
 lmass_diff_v=.false.
+klemp_begin_rel=0.5
 /
 
 &rad
