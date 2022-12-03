@@ -13,10 +13,10 @@ lgame_home_dir = "/home/max/code/L-GAME"
 
 # end of usual input section
 
-plot_time_since_init_min = str(plot_time_since_init_min)
+plot_time_since_init_min_str = str(plot_time_since_init_min)
 
 # reading the model output
-input_filename = lgame_home_dir + "/output/" + run_id + "/" + run_id + "+" + plot_time_since_init_min + "min.nc"
+input_filename = lgame_home_dir + "/output/" + run_id + "/" + run_id + "+" + plot_time_since_init_min_str + "min.nc"
 ds = nc.Dataset(input_filename, "r", format="NETCDF4")
 lat_vector = ds["lat_model"][:]
 lon_vector = ds["lon_model"][:]
@@ -37,8 +37,8 @@ bounds = np.arange(-0.5, 0.5, 0.05)
 bounds = bounds[abs(bounds) > 0.01]
 fig = plt.figure()
 cf = plt.contour(1e-3*x_array[:,250:350], 1e-3*z_array[:,250:350,1], plot_array[:,250:350,1], levels = bounds, colors = "black")
-plt.title(run_id + " + " + plot_time_since_init_min + " min, var: " + varname)
+plt.title(run_id + " + " + plot_time_since_init_min_str + " min, var: " + varname)
 plt.ylim([0, 10])
 plt.xlabel("x / km")
 plt.ylabel("z / km")
-fig.savefig(lgame_home_dir + "/figs/" + run_id + "+" + plot_time_since_init_min + "min_" + varname + ".png")
+fig.savefig(lgame_home_dir + "/figs/" + run_id + "+" + plot_time_since_init_min_str + "min_" + varname + ".png")
