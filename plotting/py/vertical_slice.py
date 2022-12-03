@@ -6,10 +6,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import netCDF4 as nc
 
-run_id = sys.argv[1]
-plot_time_since_init_min = sys.argv[2]
-varname = sys.argv[3]
-lgame_home_dir = sys.argv[4]
+run_id = "schaer"
+plot_time_since_init_min = 300
+varname = "w"
+lgame_home_dir = "/home/max/code/L-GAME"
+
+# end of usual input section
+
+plot_time_since_init_min = str(plot_time_since_init_min)
 
 # reading the model output
 input_filename = lgame_home_dir + "/output/" + run_id + "/" + run_id + "+" + plot_time_since_init_min + "min.nc"
