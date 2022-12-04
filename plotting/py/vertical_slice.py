@@ -1,6 +1,8 @@
 # This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 # Github repository: https://github.com/OpenNWP/L-GAME
 
+# This file is for plotting vertical slices.
+
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
