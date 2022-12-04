@@ -19,9 +19,10 @@ module mo_io_nml
   character(len=64) :: land_sea_filename ! filename of the land-sea mask
   logical           :: lset_oro          ! switch for setting the orography
   character(len=64) :: oro_raw_filename  ! filename from which to read the raw orography
+  logical           :: lwrite_integrals  ! If set to true, fundamental integrals of the atmosphere will be written out at every time step.
   
   namelist /io/dt_write_min,lread_oro,lwrite_grid,grid_filename,restart_filename,lread_land_sea,land_sea_filename, &
-  lset_oro
+               lset_oro,lwrite_integrals
   
   contains
   
@@ -39,6 +40,7 @@ module mo_io_nml
     land_sea_filename = "is_land.nc"
     lset_oro = .false.
     oro_raw_filename = "etopo.nc"
+    lwrite_integrals = .false.
     
     ! Open and read namelist file.
     open(action="read",file="namelist.nml",newunit=fileunit)

@@ -7,14 +7,14 @@ program control
 
   use mo_run_nml,                only: run_nml_setup,run_span_min,dtime,t_init,ny,nx,n_layers,lrestart, &
                                        lideal,n_levels
-  use mo_io_nml,                 only: io_nml_setup,dt_write
+  use mo_io_nml,                 only: io_nml_setup,dt_write,lwrite_integrals
   use mo_constituents_nml,       only: constituents_nml_setup,n_condensed_constituents,n_constituents
   use mo_diff_nml,               only: diff_nml_setup
   use mo_surface_nml,            only: surface_nml_setup,nsoillays
   use mo_definitions,            only: t_grid,t_state,wp,t_diag,t_tend,t_bc
   use mo_grid_generator,         only: grid_setup,bg_setup
   use mo_set_initial_state,      only: restart,ideal_init
-  use mo_write_out,              only: write_output
+  use mo_write_out,              only: write_output,write_out_integrals
   use mo_manage_pchevi,          only: pchevi
   use mo_linear_combination,     only: linear_combine_two_states
   use mo_bc_nml,                 only: bc_nml_setup,lperiodic,t_latest_bc,dtime_bc
@@ -474,6 +474,9 @@ program control
   
   ! writing out the initial state
   call write_output(state_1,diag,0,grid)
+  if (lwrite_integrals) then
+    call write_out_integrals(state_1,diag,grid,0._wp)
+  endif
   
   ! copying the first state to the second state
   !$omp parallel workshare
@@ -496,11 +499,22 @@ program control
       lrad_update = .false.
     endif
 
-    ! this is the RKHEVI routine performing the time stepping
+    ! time step integration
     if (mod(time_step_counter,2)==0) then
       call pchevi(state_1,state_2,tend,bc,grid,diag,time_step_counter,lrad_update,t_0)
     else
       call pchevi(state_2,state_1,tend,bc,grid,diag,time_step_counter,lrad_update,t_0)
+    endif
+  
+    ! Writing out integrals over the model domain if requested by the user.
+    ! ---------------------------------------------------------------------
+  
+    if (lwrite_integrals) then
+      if (mod(time_step_counter,2)==0) then
+        call write_out_integrals(state_2,diag,grid,t_0+dtime-t_init)
+      else
+        call write_out_integrals(state_1,diag,grid,t_0+dtime-t_init)
+      endif
     endif
     
     ! managing the calls to the output routine

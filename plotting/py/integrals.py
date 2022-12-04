@@ -40,16 +40,16 @@ if write_out_dry_mass_integral == 1:
 		dry_mass_vector = data[:, 1]
 		plt.plot(time_vector, 100.0*(dry_mass_vector/dry_mass_vector[0] - 1.0))
 		plt.legend(["Dry mass"])
-	if no_of_constituents == 6:
+	if no_of_constituents == 7:
 		# dry mass
-		dry_mass_vector = data[:, 5] - data[:, 6]
+		dry_mass_vector = data[:, 6] - data[:, 7]
 		plt.plot(time_vector, 100.0*(dry_mass_vector/dry_mass_vector[0] - 1.0))
 		# the total amount of water in the atmosphere at the beginning
-		water_masses_init_sum = data[0, 1] + data[0, 2] + data[0, 3] + data[0, 4] + data[0, 6] + 1.0
+		water_masses_init_sum = data[0, 1] + data[0, 2] + data[0, 3] + data[0, 4] + data[0, 5] + data[0, 7] + 1.0
 		# water vapour
-		plt.plot(time_vector, 100.0*(data[:, 6]/(data[0, 6] + 1.0) - 1.0))
+		plt.plot(time_vector, 100.0*(data[:, 7]/(data[0, 7] + 1.0) - 1.0))
 		# water in all phases
-		plt.plot(time_vector, 100.0*((data[:, 1] + data[:, 2] + data[:, 3] + data[:, 4] + data[:, 6])/water_masses_init_sum - 1.0))
+		plt.plot(time_vector, 100.0*((data[:, 1] + data[:, 2] + data[:, 3] + data[:, 4] + data[0, 5] + data[:, 7])/water_masses_init_sum - 1.0))
 		plt.legend(["Dry mass", "Water vapour", "Water (all phases)"])
 	plt.grid()
 	print("relative dry mass change: " + str(100.0*(dry_mass_vector[-1] - dry_mass_vector[0])/dry_mass_vector[0]) + " %")
