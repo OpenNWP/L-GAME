@@ -419,9 +419,19 @@ module mo_grid_generator
           if (jl==n_flat_layers+1) then
             toa_oro = vertical_vector_pre(jl)
           endif
-        enddo
         
-        ! doing a check
+          ! check
+          if (jl>1) then
+            if (vertical_vector_pre(jl)>=vertical_vector_pre(jl-1)) then
+              write(*,*) "Problem in vertical grid generation. You might have to change SLEVE parameters."
+              write(*,*) "Aborting."
+              call exit(1)
+            endif
+          endif
+        
+        enddo
+          
+        ! check
         if (ji==1 .and. jk==1) then
           max_oro = maxval(grid%z_w(:,:,n_levels))
           if (max_oro>=vertical_vector_pre(n_flat_layers+1)) then

@@ -21,7 +21,7 @@ dx=500
 run_span_min=300
 scenario="schaer"
 lcorio=.false.
-sigma=1.0
+stretching_parameter=1.0
 lplane=.true.
 theta_adv_order=3
 /

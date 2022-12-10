@@ -24,7 +24,7 @@ dy=2000
 dx=2000
 scenario="seabreeze"
 lcorio=.false.
-sigma=1.0
+stretching_parameter=1.0
 lplane=.true.
 /
 

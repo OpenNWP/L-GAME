@@ -20,7 +20,7 @@ dx=1000
 run_span_min=120
 scenario="advection"
 lcorio=.false.
-sigma=1.0
+stretching_parameter=1.0
 lplane=.true.
 /
 
