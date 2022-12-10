@@ -77,9 +77,9 @@ module mo_inner_product
         do ji=1,ny
           diag%theta_v_u(ji,jk,jl) = 0.5_wp*(diag%scalar_placeholder(ji,jk-1,jl) + diag%scalar_placeholder(ji,jk,jl))
           if (state%wind_u(ji,jk,jl)>=0._wp) then
-            diag%theta_v_u(ji,jk,jl) = diag%theta_v_u(ji,jk,jl) - 1._wp/6._wp*dy*dx*diag%flux_density_div(ji,jk-1,jl)
+            diag%theta_v_u(ji,jk,jl) = diag%theta_v_u(ji,jk,jl) - 1._wp/8._wp*dy*dx*diag%flux_density_div(ji,jk-1,jl)
           else
-            diag%theta_v_u(ji,jk,jl) = diag%theta_v_u(ji,jk,jl) - 1._wp/6._wp*dy*dx*diag%flux_density_div(ji,jk,jl)
+            diag%theta_v_u(ji,jk,jl) = diag%theta_v_u(ji,jk,jl) - 1._wp/8._wp*dy*dx*diag%flux_density_div(ji,jk,jl)
           endif
         enddo
       enddo
@@ -93,9 +93,9 @@ module mo_inner_product
         do ji=2,ny
           diag%theta_v_v(ji,jk,jl) = 0.5_wp*(diag%scalar_placeholder(ji,jk,jl) + diag%scalar_placeholder(ji-1,jk,jl))
           if (state%wind_v(ji,jk,jl)>=0._wp) then
-            diag%theta_v_v(ji,jk,jl) = diag%theta_v_v(ji,jk,jl) - 1._wp/6._wp*dy*dx*diag%flux_density_div(ji,jk,jl)
+            diag%theta_v_v(ji,jk,jl) = diag%theta_v_v(ji,jk,jl) - 1._wp/8._wp*dy*dx*diag%flux_density_div(ji,jk,jl)
           else
-            diag%theta_v_v(ji,jk,jl) = diag%theta_v_v(ji,jk,jl) - 1._wp/6._wp*dy*dx*diag%flux_density_div(ji-1,jk,jl)
+            diag%theta_v_v(ji,jk,jl) = diag%theta_v_v(ji,jk,jl) - 1._wp/8._wp*dy*dx*diag%flux_density_div(ji-1,jk,jl)
           endif
         enddo
       enddo
@@ -109,9 +109,9 @@ module mo_inner_product
         do jl=1,n_layers
           diag%theta_v_u(ji,1,jl) = 0.5_wp*(diag%scalar_placeholder(ji,nx,jl) + diag%scalar_placeholder(ji,1,jl))
           if (state%wind_u(ji,1,jl)>=0._wp) then
-            diag%theta_v_u(ji,1,jl) = diag%theta_v_u(ji,1,jl) - 1._wp/6._wp*dy*dx*diag%flux_density_div(ji,nx,jl)
+            diag%theta_v_u(ji,1,jl) = diag%theta_v_u(ji,1,jl) - 1._wp/8._wp*dy*dx*diag%flux_density_div(ji,nx,jl)
           else
-            diag%theta_v_u(ji,1,jl) = diag%theta_v_u(ji,1,jl) - 1._wp/6._wp*dy*dx*diag%flux_density_div(ji,1,jl)
+            diag%theta_v_u(ji,1,jl) = diag%theta_v_u(ji,1,jl) - 1._wp/8._wp*dy*dx*diag%flux_density_div(ji,1,jl)
           endif
         enddo
       enddo
@@ -126,9 +126,9 @@ module mo_inner_product
         do jl=1,n_layers
           diag%theta_v_v(1,jk,jl) = 0.5_wp*(diag%scalar_placeholder(1,jk,jl) + diag%scalar_placeholder(ny,jk,jl))
           if (state%wind_v(1,jk,jl)>=0._wp) then
-            diag%theta_v_v(1,jk,jl) = diag%theta_v_v(1,jk,jl) - 1._wp/6._wp*dy*dx*diag%flux_density_div(1,jk,jl)
+            diag%theta_v_v(1,jk,jl) = diag%theta_v_v(1,jk,jl) - 1._wp/8._wp*dy*dx*diag%flux_density_div(1,jk,jl)
           else
-            diag%theta_v_v(1,jk,jl) = diag%theta_v_v(1,jk,jl) - 1._wp/6._wp*dy*dx*diag%flux_density_div(ny,jk,jl)
+            diag%theta_v_v(1,jk,jl) = diag%theta_v_v(1,jk,jl) - 1._wp/8._wp*dy*dx*diag%flux_density_div(ny,jk,jl)
           endif
         enddo
       enddo
