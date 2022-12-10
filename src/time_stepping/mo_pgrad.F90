@@ -8,9 +8,9 @@ module mo_pgrad
   use mo_run_nml,            only: theta_adv_order
   use mo_constants,          only: c_d_p
   use mo_gradient_operators, only: grad_vert,grad_hor
-  use mo_inner_product,      only: theta_v_adv_3rd_order
   use mo_definitions,        only: t_state,t_diag,t_grid,wp
-  use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_h2,scalar_times_vector_v,scalar_times_vector_v2
+  use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_h2,scalar_times_vector_v,scalar_times_vector_v2, &
+                                   theta_v_adv_3rd_order
   use mo_constituents_nml,   only: n_condensed_constituents
   
   implicit none

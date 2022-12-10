@@ -8,13 +8,13 @@ module mo_scalar_tend_expl
   use mo_run_nml,              only: dtime,ny,nx,n_layers,theta_adv_order
   use mo_constants,            only: c_d_p,c_d_v
   use mo_definitions,          only: wp,t_grid,t_state,t_diag,t_tend
-  use mo_multiplications,      only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v
+  use mo_multiplications,      only: scalar_times_vector_h,scalar_times_vector_h_upstream,scalar_times_vector_v, &
+                                     theta_v_adv_3rd_order
   use mo_divergence_operators, only: div_h,div_h_tracers,add_vertical_div
   use mo_constituents_nml,     only: n_condensed_constituents,n_constituents
   use mo_diff_nml,             only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
   use mo_eff_diff_coeffs,      only: scalar_diffusion_coeffs
   use mo_gradient_operators,   only: grad_hor,grad_vert
-  use mo_inner_product,        only: theta_v_adv_3rd_order
   use mo_derived,              only: c_v_mass_weighted_air
 
   implicit none
