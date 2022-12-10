@@ -7,7 +7,7 @@ module mo_grid_generator
 
   use netcdf
   use mo_definitions,        only: wp,t_grid
-  use mo_run_nml,            only: ny,nx,n_layers,n_levels,dy,dx,toa,n_oro_layers,sigma,scenario,lat_center, &
+  use mo_run_nml,            only: ny,nx,n_layers,n_levels,dy,dx,toa,n_oro_layers,stretching_parameter,scenario,lat_center, &
                                    lon_center,lplane,n_flat_layers
   use mo_diff_nml,           only: klemp_begin_rel
   use mo_constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
@@ -401,7 +401,7 @@ module mo_grid_generator
         ! filling up vertical_vector_pre
         do jl=1,n_levels
           z_rel = 1._wp-(jl-1._wp)/n_layers
-          sigma_z = z_rel**sigma
+          sigma_z = z_rel**stretching_parameter
           A = sigma_z*toa ! the height without orography
           ! including orography
           if (jl>n_flat_layers+1) then
