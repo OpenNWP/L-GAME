@@ -38,7 +38,7 @@ for i in range(len(x_array[:, 0])):
 bounds = np.arange(-0.5, 0.5, 0.05)
 bounds = bounds[abs(bounds) > 0.01]
 fig = plt.figure()
-cf = plt.contour(1e-3*x_array[:,250:350], 1e-3*z_array[:,250:350,1], plot_array[:,250:350,1], levels = bounds, colors = "black")
+cf = plt.contour(1e-3*x_array[:,150:250], 1e-3*z_array[:,150:250,1], plot_array[:,150:250,1], levels = bounds, colors = "black")
 plt.title(run_id + " + " + plot_time_since_init_min_str + " min, var: " + varname)
 plt.ylim([0, 10])
 plt.xlabel("x / km")
