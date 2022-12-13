@@ -953,6 +953,8 @@ module mo_grid_generator
     integer               :: z_in_id                ! variable ID of the orography
     integer               :: n_lat_points           ! number of latitude points of the input dataset
     integer               :: n_lon_points           ! number of longitude points of the input dataset
+    real(wp), allocatable :: z_u(:,:)               ! preliminary orography at u-vector positions
+    real(wp), allocatable :: z_v(:,:)               ! preliminary orography at v-vector positions
     real(wp), allocatable :: latitude_input(:)      ! latitudes of the input dataset
     real(wp), allocatable :: longitude_input(:)     ! longitudes of the input dataset
     real(wp), allocatable :: lat_distance_vector(:) ! latitudes distance vector
@@ -961,7 +963,7 @@ module mo_grid_generator
     integer               :: lat_index,lon_index    ! minimum distance indices
     integer               :: ji                     ! horizontal index
     integer               :: jk                     ! horizontal index
-    integer               :: jl                     ! layer or level index
+    integer               :: jm                     ! interpolation index
     
     n_lat_points = 10801
     n_lon_points = 21601
@@ -994,39 +996,102 @@ module mo_grid_generator
     allocate(lat_distance_vector(n_lat_points))
     allocate(lon_distance_vector(n_lon_points))
 
+    ! default
+    !$omp parallel workshare
+    grid%z_w = 0._wp
+    !$omp end parallel workshare
+
     ! setting the unfiltered orography
+    
+    ! preliminary orography at cell centers
+    !$omp parallel do private(ji,jk,jm,lat_distance_vector,lon_distance_vector,lat_index,lon_index)
     do jk=1,nx
       do ji=1,ny
-        ! default
-        grid%z_w(ji,jk,n_levels) = 0._wp
     
-        do jl=1,n_lat_points
-          lat_distance_vector(jl) = abs(2._wp*M_PI*latitude_input(jl)/360._wp - grid%lat_geo_scalar(ji,jk))
+        do jm=1,n_lat_points
+          lat_distance_vector(jm) = abs(2._wp*M_PI*latitude_input(jm)/360._wp - grid%lat_geo_scalar(ji,jk))
         enddo
     
-        do jl=1,n_lon_points
-          lon_distance_vector(jl) = abs(2._wp*M_PI*longitude_input(jl)/360._wp - grid%lon_geo_scalar(ji,jk))
+        do jm=1,n_lon_points
+          lon_distance_vector(jm) = abs(2._wp*M_PI*longitude_input(jm)/360._wp - grid%lon_geo_scalar(ji,jk))
         enddo
     
         lat_index = find_min_index(lat_distance_vector)
         lon_index = find_min_index(lon_distance_vector)
         
-        grid%z_w(ji,jk,n_levels) = real(z_input(lon_index,lat_index),wp)
-
-        ! check
-        if (grid%z_w(ji,jk,n_levels)<-382._wp .or. grid%z_w(ji,jk,n_levels)>8850._wp) then
-          write(*,*) "Warning: orography value out of usual range."
-        endif
+        grid%z_w(ji,jk,n_levels) = real(z_input(lon_index,lat_index),wp)/5._wp
         
       enddo
     enddo
-
+    !$omp end parallel do
+    
+    allocate(z_u(ny,nx+1))
+    
+    ! preliminary orography at u-vector positions
+    !$omp parallel do private(ji,jk,jm,lat_distance_vector,lon_distance_vector,lat_index,lon_index)
+    do jk=1,nx+1
+      do ji=1,ny
+    
+        do jm=1,n_lat_points
+          lat_distance_vector(jm) = abs(2._wp*M_PI*latitude_input(jm)/360._wp - grid%lat_geo_u(ji,jk))
+        enddo
+    
+        do jm=1,n_lon_points
+          lon_distance_vector(jm) = abs(2._wp*M_PI*longitude_input(jm)/360._wp - grid%lat_geo_u(ji,jk))
+        enddo
+    
+        lat_index = find_min_index(lat_distance_vector)
+        lon_index = find_min_index(lon_distance_vector)
+        
+        z_u(ji,jk) = real(z_input(lon_index,lat_index),wp)
+        
+      enddo
+    enddo
+    !$omp end parallel do
+    
+    allocate(z_v(ny+1,nx))
+    
+    ! preliminary orography at v-vector positions
+    !$omp parallel do private(ji,jk,jm,lat_distance_vector,lon_distance_vector,lat_index,lon_index)
+    do jk=1,nx
+      do ji=1,ny+1
+    
+        do jm=1,n_lat_points
+          lat_distance_vector(jm) = abs(2._wp*M_PI*latitude_input(jm)/360._wp - grid%lat_geo_v(ji,jk))
+        enddo
+    
+        do jm=1,n_lon_points
+          lon_distance_vector(jm) = abs(2._wp*M_PI*longitude_input(jm)/360._wp - grid%lat_geo_v(ji,jk))
+        enddo
+    
+        lat_index = find_min_index(lat_distance_vector)
+        lon_index = find_min_index(lon_distance_vector)
+        
+        z_v(ji,jk) = real(z_input(lon_index,lat_index),wp)
+        
+      enddo
+    enddo
+    !$omp end parallel do
+    
     ! freeing the memory
     deallocate(lat_distance_vector)
     deallocate(lon_distance_vector)
     deallocate(z_input)
     deallocate(latitude_input)
     deallocate(longitude_input)
+    
+    ! averaging the orography to cell centers
+    !$omp parallel do private(ji,jk)
+    do jk=1,nx
+      do ji=1,ny
+        grid%z_w(ji,jk,n_levels) = grid%z_w(ji,jk,n_levels) + (z_u(ji,jk) + z_u(ji,jk+1) + z_v(ji,jk) + z_v(ji+1,jk))/0.5_wp
+      enddo
+    enddo
+    !$omp end parallel do
+
+    ! freeing the memory
+    deallocate(z_u)
+    deallocate(z_v)
     
   end subroutine set_orography
   

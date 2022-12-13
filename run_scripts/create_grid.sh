@@ -15,8 +15,8 @@ lat_center=0.8929595951304794
 lon_center=0.1199133716060684
 ny=35
 nx=35
-dy=500
-dx=500
+dy=25000
+dx=25000
 run_span_min=0
 /
 
@@ -49,9 +49,9 @@ EOF
 # That's it, here we go. Do not change anything below this line.
 if [ ! -f $lgame_home_dir/grids/phys_sfc_properties/etopo.nc ]
 then
-cd $lgame_home_dir/grids/phys_sfc_properties
-./download_etopo.sh
-cd $lgame_home_dir
+  cd $lgame_home_dir/grids/phys_sfc_properties
+  ./download_etopo.sh
+  cd $lgame_home_dir
 fi
 
 source $lgame_home_dir/run_scripts/.sh/root_script.sh
