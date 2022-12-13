@@ -66,7 +66,6 @@ module mo_grid_generator
     real(wp)              :: local_j(3)                    ! local j-vector
     real(wp)              :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
     real(wp)              :: lat_local,lon_local,max_z     ! helper variables     
-    real(wp), allocatable :: oro_small_scale(:,:)          ! small-scale orography contribution
     real(wp), allocatable :: oro_large_scale(:,:)          ! large-scale orography contribution
     real(wp)              :: toa_oro                       ! top of terrain-following coordinates
     integer               :: ji                            ! horizontal index
@@ -285,7 +284,6 @@ module mo_grid_generator
       call read_land_sea(grid)
     endif
     
-    allocate(oro_small_scale(ny,nx))
     allocate(oro_large_scale(ny,nx))
     
     select case (orography_id)
@@ -302,7 +300,13 @@ module mo_grid_generator
           call read_oro(grid)
         elseif (lset_oro) then
           call set_orography(grid)
-          call smooth_hor_scalar(grid%z_w(:,:,n_levels))
+          !$omp parallel workshare
+          oro_large_scale = grid%z_w(:,:,n_levels)
+          !$omp end parallel workshare
+          call smooth_hor_scalar(oro_large_scale)
+          !$omp parallel workshare
+          grid%z_w(:,:,n_levels) = oro_large_scale + 0.2_wp*(grid%z_w(:,:,n_levels) - oro_large_scale)
+          !$omp end parallel workshare
         endif
       
       ! Schaer wave test orography
@@ -313,7 +317,6 @@ module mo_grid_generator
           x_coord = dx*jk - (nx/2 + 1)*dx
           grid%z_w(:,jk,n_levels) = height_mountain*exp(-x_coord**2/5000._wp**2)*cos(M_PI*x_coord/4000._wp)**2
           oro_large_scale(:,jk) = 0.5_wp*height_mountain*exp(-x_coord**2/5000._wp**2)
-          oro_small_scale(:,jk) = grid%z_w(:,jk,n_levels) - oro_large_scale(:,jk)
         enddo
         !$omp end parallel do
       
@@ -407,8 +410,16 @@ module mo_grid_generator
           if (jl>n_flat_layers+1) then
             if (lsleve) then
               toa_oro = vertical_vector_pre(n_flat_layers+1)
-              vertical_vector_pre(jl) = A + sinh((toa_oro-A)/5.e3_wp)/sinh(toa_oro/5.e3_wp)*oro_large_scale(ji,jk) &
-                                        + sinh((toa_oro-A)/2.e3_wp)/sinh(toa_oro/2.e3_wp)*oro_small_scale(ji,jk)
+              if (orography_id==2) then
+                vertical_vector_pre(jl) = A + sinh((toa_oro-A)/5.e3_wp)/sinh(toa_oro/5.e3_wp)*oro_large_scale(ji,jk) &
+                                          + sinh((toa_oro-A)/2.e3_wp)/sinh(toa_oro/2.e3_wp) &
+                                          *(grid%z_w(ji,jk,n_levels) - oro_large_scale(ji,jk))
+              else
+                vertical_vector_pre(jl) = A + sinh((toa_oro-A)/(0.5_wp*toa_oro))/sinh(toa_oro/(0.5_wp*toa_oro)) &
+                                          *oro_large_scale(ji,jk) &
+                                          + sinh((toa_oro-A)/(0.25_wp*toa_oro))/sinh(toa_oro/(0.25_wp*toa_oro)) &
+                                          *(grid%z_w(ji,jk,n_levels) - oro_large_scale(ji,jk))
+              endif
             else
               B = (jl-(n_flat_layers+1._wp))/n_oro_layers
               vertical_vector_pre(jl) = A + B*grid%z_w(ji,jk,n_levels)
@@ -446,7 +457,6 @@ module mo_grid_generator
     enddo
     !$omp end parallel do
     
-    deallocate(oro_small_scale)
     deallocate(oro_large_scale)
     
     ! setting the height of the u-vector points
