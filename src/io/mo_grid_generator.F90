@@ -304,9 +304,15 @@ module mo_grid_generator
           oro_large_scale = grid%z_w(:,:,n_levels)
           !$omp end parallel workshare
           call smooth_hor_scalar(oro_large_scale)
-          !$omp parallel workshare
-          grid%z_w(:,:,n_levels) = oro_large_scale + 0.2_wp*(grid%z_w(:,:,n_levels) - oro_large_scale)
-          !$omp end parallel workshare
+          if (lsleve) then
+            !$omp parallel workshare
+            grid%z_w(:,:,n_levels) = oro_large_scale + 0.2_wp*(grid%z_w(:,:,n_levels) - oro_large_scale)
+            !$omp end parallel workshare
+          else
+            !$omp parallel workshare
+            grid%z_w(:,:,n_levels) = oro_large_scale
+            !$omp end parallel workshare
+          endif
         endif
       
       ! Schaer wave test orography

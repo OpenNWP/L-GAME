@@ -347,7 +347,6 @@ module mo_rrtmgp_coupler
     
     ! shortwave first
     ! filling up the arrays restricted to day points
-    allocate(ice_eff_radius_day(nx,n_layers))
     allocate(mu_0_day(nx))
     allocate(albedo_dir_day(n_sw_bands,nx))
     allocate(albedo_dif_day(n_sw_bands,nx))
@@ -404,7 +403,6 @@ module mo_rrtmgp_coupler
     call handle_error(cloud_optics_sw%cloud_optics(liquid_water_path_day(1:n_day_points,:),ice_water_path_day(1:n_day_points,:), &
                                                    liquid_eff_radius_day(1:n_day_points,:),ice_eff_radius_day(1:n_day_points,:), &
                                                    cloud_props_sw))
-    deallocate(ice_eff_radius_day)
     deallocate(liquid_water_path_day)
     deallocate(ice_water_path_day)
     deallocate(liquid_eff_radius_day)
