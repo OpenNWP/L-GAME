@@ -146,7 +146,7 @@ program control
   allocate(grid%sfc_rho_c(ny,nx))
   allocate(grid%t_conduc_soil(ny,nx))
   allocate(grid%roughness_length(ny,nx))
-  allocate(grid%is_land(ny,nx))
+  allocate(grid%land_fraction(ny,nx))
   allocate(grid%z_soil_interface(nsoillays+1))
   allocate(grid%z_soil_center(nsoillays))
   allocate(grid%t_const_soil(ny,nx))
@@ -315,7 +315,7 @@ program control
   grid%sfc_rho_c = 0._wp
   grid%t_conduc_soil = 0._wp
   grid%roughness_length = 0._wp
-  grid%is_land = 0
+  grid%land_fraction = 0
   grid%z_soil_interface = 0._wp
   grid%z_soil_center = 0._wp
   grid%t_const_soil = 0._wp
@@ -588,7 +588,7 @@ program control
   deallocate(grid%sfc_rho_c)
   deallocate(grid%t_conduc_soil)
   deallocate(grid%roughness_length)
-  deallocate(grid%is_land)
+  deallocate(grid%land_fraction)
   deallocate(grid%z_soil_interface)
   deallocate(grid%z_soil_center)
   deallocate(grid%t_const_soil)

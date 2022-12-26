@@ -354,7 +354,7 @@ module mo_grid_generator
         ! seabreeze land-sea mask
         if (trim(scenario)=="seabreeze") then
           if (jk>=nx/4 .and. jk<=3*nx/4) then
-            grid%is_land(ji,jk) = 1
+            grid%land_fraction(ji,jk) = 1
           endif
         endif
         
@@ -372,7 +372,7 @@ module mo_grid_generator
         grid%t_conduc_soil(ji,jk) = 1.4e-7_wp
         
         ! land
-        if (grid%is_land(ji,jk)==1) then
+        if (grid%land_fraction(ji,jk)==1) then
         
           grid%t_conduc_soil(ji,jk) = 7.5e-7_wp
         

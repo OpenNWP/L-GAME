@@ -37,7 +37,7 @@ module mo_io_nml
     grid_filename = "grid.nc"
     restart_filename = "init.nc"
     lread_land_sea = .true.
-    land_sea_filename = "is_land.nc"
+    land_sea_filename = "land_fraction.nc"
     lset_oro = .false.
     oro_raw_filename = "etopo.nc"
     lwrite_integrals = .false.

@@ -164,9 +164,9 @@ module mo_read_write_grid
     type(t_grid), intent(inout) :: grid ! grid properties
     
     ! local variables
-    integer           :: ncid          ! ID of the netCDF file
-    character(len=64) :: filename      ! input filename
-    integer           :: varid_is_land ! variable ID of the land-sea-mask
+    integer           :: ncid                ! ID of the netCDF file
+    character(len=64) :: filename            ! input filename
+    integer           :: varid_land_fraction ! variable ID of the land fraction
     
     ! the filename of the grid file including the relative path
     filename = "../../grids/phys_sfc_properties/" // trim(land_sea_filename)
@@ -175,10 +175,10 @@ module mo_read_write_grid
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
-    call nc_check(nf90_inq_varid(ncid,"is_land",varid_is_land))
+    call nc_check(nf90_inq_varid(ncid,"land_fraction",varid_land_fraction))
     
     ! reading the arrays
-    call nc_check(nf90_get_var(ncid,varid_is_land,grid%is_land))
+    call nc_check(nf90_get_var(ncid,varid_land_fraction,grid%land_fraction))
     
     ! closing the netCDF file
     call nc_check(nf90_close(ncid))

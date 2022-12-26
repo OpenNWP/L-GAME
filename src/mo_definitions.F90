@@ -76,7 +76,7 @@ module mo_definitions
     real(wp), allocatable :: sfc_rho_c(:,:)                 ! volumetric heat capacity of the surface
     real(wp), allocatable :: t_conduc_soil(:,:)             ! temperature conductivity of the soil
     real(wp), allocatable :: roughness_length(:,:)          ! roughness length of the surface
-    integer,  allocatable :: is_land(:,:)                   ! land-sea-mask
+    integer,  allocatable :: land_fraction(:,:)             ! land fraction
     real(wp), allocatable :: z_soil_interface(:)            ! heights of the interfaces of the soil layers
     real(wp), allocatable :: z_soil_center(:)               ! heights of the centers of the soil layers
     real(wp), allocatable :: t_const_soil(:,:)              ! temperature of the soil below the depth where it is constant
