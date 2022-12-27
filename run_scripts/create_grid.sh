@@ -59,7 +59,7 @@ source $lgame_home_dir/run_scripts/.sh/root_script.sh
 cd $lgame_home_dir/grids/phys_sfc_properties
 echo "Creating land fraction ..."
 python3 land_fraction.py
-echo "Land fraction mask created."
+echo "Land fraction created."
 
 cd $lgame_home_dir
 

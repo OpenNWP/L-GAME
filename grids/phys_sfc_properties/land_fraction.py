@@ -12,6 +12,10 @@ output_filename = "land_fraction.nc"
 ds = nc.Dataset(input_filename, "r", format = "NETCDF4")
 lat_array = ds["lat_geo"][:, :]
 lon_array = ds["lon_geo"][:, :]
+lat_array_u = ds["lat_geo_u"][:, :]
+lon_array_u = ds["lon_geo_u"][:, :]
+lat_array_v = ds["lat_geo_v"][:, :]
+lon_array_v = ds["lon_geo_v"][:, :]
 ds.close()
 
 land_fraction = np.zeros([len(lat_array[:, 0]), len(lat_array[0, :])], dtype=np.int8)
