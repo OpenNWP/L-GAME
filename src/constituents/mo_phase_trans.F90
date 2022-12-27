@@ -265,7 +265,7 @@ module mo_phase_trans
           if (jl==n_layers .and. lsfc_phase_trans) then
             
             ! evaporation and latent heat rates
-            if (grid%land_fraction(ji,jk)==0) then
+            if (grid%land_fraction(ji,jk)<1._wp) then
               ! saturation pressure at surface temperature
               if (state%temperature_soil(ji,jk,1)>=t_0) then
                 saturation_pressure_sfc = saturation_pressure_over_water(state%temperature_soil(ji,jk,1))

@@ -25,7 +25,7 @@ output_filename = output_filename
 ds = nc.Dataset(output_filename, "w", format = "NETCDF4")
 ds.createDimension("lat", len(land_fraction[:, 0]))
 ds.createDimension("lon", len(land_fraction[0, :]))
-land_fraction_nc = ds.createVariable("land_fraction", int, ("lat", "lon"))
+land_fraction_nc = ds.createVariable("land_fraction", float, ("lat", "lon"))
 land_fraction_nc[:, :] = land_fraction
 ds.close()
 

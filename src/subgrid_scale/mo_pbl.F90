@@ -54,7 +54,7 @@ module mo_pbl
         u10 = u_lowest_layer*log(10._wp/grid%roughness_length(ji,jk))/log(agl/grid%roughness_length(ji,jk))
 
         ! only over the sea the roughness length is time-dependant (because of the waves)
-        if (grid%land_fraction(ji,jk)==0) then
+        if (grid%land_fraction(ji,jk)==0._wp) then
           ! calculating the roughness length fom the wind velocity
           grid%roughness_length(ji,jk) = roughness_length_from_u10_sea(u10)
         endif
