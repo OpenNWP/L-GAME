@@ -234,6 +234,7 @@ program control
   allocate(diag%power_flux_density_latent(ny,nx))
   allocate(diag%sfc_sw_in(ny,nx))
   allocate(diag%sfc_lw_out(ny,nx))
+  allocate(diag%roughness_length(ny,nx))
   allocate(diag%roughness_velocity(ny,nx))
   allocate(diag%flux_density_u(ny,nx+1,n_layers))
   allocate(diag%flux_density_v(ny+1,nx,n_layers))
@@ -399,6 +400,7 @@ program control
   diag%power_flux_density_latent = 0._wp
   diag%sfc_sw_in = 0._wp
   diag%sfc_lw_out = 0._wp
+  diag%roughness_length = 0._wp
   diag%roughness_velocity = 0._wp
   diag%flux_density_u = 0._wp
   diag%flux_density_v = 0._wp
@@ -440,6 +442,11 @@ program control
   write(*,*) "Setting up the grid ..."
   call grid_setup(grid)
   write(*,*) "... grid set up."
+  
+  ! initializing the diagnostic roughness length
+  !$omp parallel workshare
+  diag%roughness_length = grid%roughness_length
+  !$omp end parallel workshare
   
   if (.not. lperiodic) then
     call setup_bc_factor(bc)
@@ -676,6 +683,7 @@ program control
   deallocate(diag%power_flux_density_latent)
   deallocate(diag%sfc_sw_in)
   deallocate(diag%sfc_lw_out)
+  deallocate(diag%roughness_length)
   deallocate(diag%roughness_velocity)
   deallocate(diag%flux_density_u)
   deallocate(diag%flux_density_v)

@@ -75,7 +75,7 @@ module mo_definitions
     real(wp), allocatable :: sfc_albedo(:,:)                ! albedo of the surface
     real(wp), allocatable :: sfc_rho_c(:,:)                 ! volumetric heat capacity of the surface
     real(wp), allocatable :: t_conduc_soil(:,:)             ! temperature conductivity of the soil
-    real(wp), allocatable :: roughness_length(:,:)          ! roughness length of the surface
+    real(wp), allocatable :: roughness_length(:,:)          ! roughness length of the land
     real(wp), allocatable :: land_fraction(:,:)             ! land fraction
     real(wp), allocatable :: z_soil_interface(:)            ! heights of the interfaces of the soil layers
     real(wp), allocatable :: z_soil_center(:)               ! heights of the centers of the soil layers
@@ -172,6 +172,7 @@ module mo_definitions
     real(wp), allocatable :: power_flux_density_latent(:,:)          ! power flux density acting on the surface due to phase transitions
     real(wp), allocatable :: sfc_sw_in(:,:)                          ! shortwave radiation in the surface
     real(wp), allocatable :: sfc_lw_out(:,:)                         ! longwave radiation out of the surface
+    real(wp), allocatable :: roughness_length(:,:)                   ! actual roughness length
     real(wp), allocatable :: roughness_velocity(:,:)                 ! roughness velocity
     real(wp), allocatable :: flux_density_u(:,:,:)                   ! placeholder for flux densities
     real(wp), allocatable :: flux_density_v(:,:,:)                   ! placeholder for flux densities

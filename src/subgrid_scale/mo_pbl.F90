@@ -57,10 +57,13 @@ module mo_pbl
         if (grid%land_fraction(ji,jk)<1._wp) then
           ! calculating the roughness length fom the wind velocity
           grid%roughness_length(ji,jk) = roughness_length_from_u10_sea(u10)
+          ! calculating the roughness length fom the wind velocity
+          diag%roughness_length(ji,jk) = grid%land_fraction(ji,jk)*grid%roughness_length(ji,jk) &
+                                      + (1._wp - grid%land_fraction(ji,jk))*roughness_length_from_u10_sea(u10)
         endif
 
         ! updating the roughness velocity
-        diag%roughness_velocity(ji,jk) = roughness_velocity(u_lowest_layer,agl,grid%roughness_length(ji,jk))
+        diag%roughness_velocity(ji,jk) = roughness_velocity(u_lowest_layer,agl,diag%roughness_length(ji,jk))
 
         ! theta_v in the lowest layer
         theta_v_lowest_layer = grid%theta_v_bg(ji,jk,n_layers) + state%theta_v_pert(ji,jk,n_layers)
