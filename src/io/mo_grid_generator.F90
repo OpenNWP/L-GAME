@@ -1027,6 +1027,11 @@ module mo_grid_generator
         
         grid%z_w(ji,jk,n_levels) = real(z_input(lon_index,lat_index),wp)/5._wp
         
+        ! over the sea there is no orography
+        if (grid%land_fraction(ji,jk)<0.5_wp) then
+          grid%z_w(ji,jk,n_levels) = 0._wp
+        endif
+        
       enddo
     enddo
     !$omp end parallel do
@@ -1051,6 +1056,11 @@ module mo_grid_generator
         
         z_u(ji,jk) = real(z_input(lon_index,lat_index),wp)
         
+        ! over the sea there is no orography
+        if (grid%land_fraction(ji,min(jk,nx))<0.5_wp) then
+          z_u(ji,jk) = 0._wp
+        endif
+        
       enddo
     enddo
     !$omp end parallel do
@@ -1074,6 +1084,11 @@ module mo_grid_generator
         lon_index = find_min_index(lon_distance_vector)
         
         z_v(ji,jk) = real(z_input(lon_index,lat_index),wp)
+        
+        ! over the sea there is no orography
+        if (grid%land_fraction(min(ji,ny),jk)<0.5_wp) then
+          z_v(ji,jk) = 0._wp
+        endif
         
       enddo
     enddo
