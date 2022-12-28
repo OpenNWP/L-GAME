@@ -53,6 +53,9 @@ module mo_grid_generator
     real(wp)              :: density_soil                  ! typical density of soil
     real(wp)              :: c_p_soil                      ! typical c_p of soil
     real(wp)              :: c_p_water                     ! typical c_p of water
+    real(wp)              :: albedo_water                  ! albedo of water
+    real(wp)              :: albedo_soil                   ! albedo of soil
+    real(wp)              :: albedo_ice                    ! albedo of ice
     real(wp)              :: lat_lower_center              ! variable for calculating the TRSK weights
     real(wp)              :: lat_upper_center              ! variable for calculating the TRSK weights
     real(wp)              :: rot_y(3,3)                    ! rotation matrix around the global y-axis
@@ -342,10 +345,17 @@ module mo_grid_generator
     
     endselect
     
-    ! idealized soil properties are being set here
+    ! Other physical properties of the surface
+    ! ----------------------------------------
+    
     density_soil = 1442._wp
     c_p_soil = 830._wp
     c_p_water = 4184._wp
+    albedo_water = 0.06_wp
+    ! setting the land surface albedo to 0.12 (compare Zdunkowski, Trautmann & Bott:
+    ! Radiation in the Atmosphere, 2007, p. 444)
+    albedo_soil = 0.12_wp
+    albedo_ice = 0.8_wp
     
     !$omp parallel do private(ji,jk,x_coord)
     do jk=1,nx
@@ -361,7 +371,7 @@ module mo_grid_generator
         grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
             
         ! albedo of water
-        grid%sfc_albedo(ji,jk) = 0.06_wp
+        grid%sfc_albedo(ji,jk) = albedo_water
 
         ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
         grid%roughness_length(ji,jk) = 0.08_wp
@@ -371,7 +381,7 @@ module mo_grid_generator
         
         grid%t_conduc_soil(ji,jk) = 1.4e-7_wp
         
-        ! land
+        ! land is present in this grid cell
         if (grid%land_fraction(ji,jk)>0._wp) then
         
           grid%t_conduc_soil(ji,jk) = 7.5e-7_wp
@@ -381,10 +391,10 @@ module mo_grid_generator
           ! setting the surface albedo of land depending on the latitude
           ! ice
           if (abs(360._wp/(2._wp*M_PI)*grid%lat_geo_scalar(ji,jk))>70._wp) then
-            grid%sfc_albedo(ji,jk) = 0.8_wp
+            grid%sfc_albedo(ji,jk) = grid%land_fraction(ji,jk)*albedo_ice + (1._wp-grid%land_fraction(ji,jk))*albedo_water
           ! normal soil
           else
-            grid%sfc_albedo(ji,jk) = 0.12_wp
+            grid%sfc_albedo(ji,jk) = grid%land_fraction(ji,jk)*albedo_soil + (1._wp-grid%land_fraction(ji,jk))*albedo_water
           endif
           
           ! calculating a roughness length depending on the vegetation height
