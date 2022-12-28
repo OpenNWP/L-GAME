@@ -415,8 +415,8 @@ module mo_column_solvers
                 v_fall(jl) = 0.5_wp*(v_fall_upper + v_fall_lower)
               ! rain
               elseif (jc==2) then
-                v_fall_upper = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,jl),ji,jk,jl)
-                v_fall_lower = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,jl+1),ji,jk,jl+1)
+                v_fall_upper = v_fall_liquid(state_old,diag,grid,diag%a_rain(ji,jk,jl),ji,jk,jl)
+                v_fall_lower = v_fall_liquid(state_old,diag,grid,diag%a_rain(ji,jk,jl+1),ji,jk,jl+1)
                 v_fall = 0.5_wp*(v_fall_upper + v_fall_lower)
               ! ice clouds
               elseif (jc==3) then
@@ -425,13 +425,13 @@ module mo_column_solvers
                 v_fall = 0.5_wp*(v_fall_upper + v_fall_lower)
               ! water clouds
               elseif (jc==4) then
-                v_fall_upper = v_fall_liquid(state_old,diag,cloud_droplets_radius(),ji,jk,jl)
-                v_fall_lower = v_fall_liquid(state_old,diag,cloud_droplets_radius(),ji,jk,jl+1)
+                v_fall_upper = v_fall_liquid(state_old,diag,grid,cloud_droplets_radius(),ji,jk,jl)
+                v_fall_lower = v_fall_liquid(state_old,diag,grid,cloud_droplets_radius(),ji,jk,jl+1)
                 v_fall = 0.5_wp*(v_fall_upper + v_fall_lower)
               ! graupel
               elseif (jc==5) then
-                v_fall_upper = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,jl),ji,jk,jl)
-                v_fall_lower = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,jl+1),ji,jk,jl+1)
+                v_fall_upper = v_fall_liquid(state_old,diag,grid,diag%a_rain(ji,jk,jl),ji,jk,jl)
+                v_fall_lower = v_fall_liquid(state_old,diag,grid,diag%a_rain(ji,jk,jl+1),ji,jk,jl+1)
                 v_fall = 0.5_wp*(v_fall_upper + v_fall_lower)
               else
                 v_fall(jl) = 0._wp
@@ -463,16 +463,16 @@ module mo_column_solvers
               v_fall(n_layers) = v_fall_solid(state_old,diag,snow_particles_radius(),ji,jk,n_layers)
             ! rain
             elseif (jc==2) then
-              v_fall(n_layers) = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,n_layers),ji,jk,n_layers)
+              v_fall(n_layers) = v_fall_liquid(state_old,diag,grid,diag%a_rain(ji,jk,n_layers),ji,jk,n_layers)
             ! ice clouds
             elseif (jc==3) then
               v_fall(n_layers) = v_fall_solid(state_old,diag,ice_particles_radius(),ji,jk,n_layers)
             ! water clouds
             elseif (jc==4) then
-              v_fall(n_layers) = v_fall_liquid(state_old,diag,cloud_droplets_radius(),ji,jk,n_layers)
+              v_fall(n_layers) = v_fall_liquid(state_old,diag,grid,cloud_droplets_radius(),ji,jk,n_layers)
             ! graupel
             elseif (jc==5) then
-              v_fall(n_layers) = v_fall_liquid(state_old,diag,diag%a_rain(ji,jk,n_layers),ji,jk,n_layers)
+              v_fall(n_layers) = v_fall_liquid(state_old,diag,grid,diag%a_rain(ji,jk,n_layers),ji,jk,n_layers)
             endif
             
             ! Now we proceed to solving the vertical tridiagonal problems.
