@@ -719,7 +719,7 @@ program control
   deallocate(diag%a_rain)
   write(*,*) "... finished."
   call cpu_time(end_timestamp)
-  write(*,fmt="(A,F9.3)") "Average speed:",(60._wp*run_span_min+300._wp)/((end_timestamp-init_timestamp)/omp_num_threads)
+  write(*,fmt="(A,F9.3)") " Average speed:",(60._wp*run_span_min+300._wp)/((end_timestamp-init_timestamp)/omp_num_threads)
   write(*,*) "L-GAME over."
   
 end program control
