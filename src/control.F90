@@ -147,6 +147,7 @@ program control
   allocate(grid%t_conduc_soil(ny,nx))
   allocate(grid%roughness_length(ny,nx))
   allocate(grid%land_fraction(ny,nx))
+  allocate(grid%lake_fraction(ny,nx))
   allocate(grid%z_soil_interface(nsoillays+1))
   allocate(grid%z_soil_center(nsoillays))
   allocate(grid%t_const_soil(ny,nx))
@@ -317,6 +318,7 @@ program control
   grid%t_conduc_soil = 0._wp
   grid%roughness_length = 0._wp
   grid%land_fraction = 0._wp
+  grid%lake_fraction = 0._wp
   grid%z_soil_interface = 0._wp
   grid%z_soil_center = 0._wp
   grid%t_const_soil = 0._wp
@@ -596,6 +598,7 @@ program control
   deallocate(grid%t_conduc_soil)
   deallocate(grid%roughness_length)
   deallocate(grid%land_fraction)
+  deallocate(grid%lake_fraction)
   deallocate(grid%z_soil_interface)
   deallocate(grid%z_soil_center)
   deallocate(grid%t_const_soil)
