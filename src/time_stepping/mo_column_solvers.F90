@@ -122,7 +122,7 @@ module mo_column_solvers
         
         ! determining wether soil needs to be calculated
         soil_switch = 0
-        if (lprog_soil_temp .and. grid%land_fraction(ji,jk)>0._wp) then
+        if (lprog_soil_temp .and. grid%land_fraction(ji,jk)>=0.5_wp) then
           soil_switch=1
         endif
         
