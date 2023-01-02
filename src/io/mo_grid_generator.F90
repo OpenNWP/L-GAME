@@ -1038,7 +1038,7 @@ module mo_grid_generator
         grid%z_w(ji,jk,n_levels) = real(z_input(lon_index,lat_index),wp)/5._wp
         
         ! over the sea there is no orography
-        if (grid%land_fraction(ji,jk)<0.5_wp) then
+        if (grid%land_fraction(ji,jk)+grid%lake_fraction(ji,jk)<0.5_wp) then
           grid%z_w(ji,jk,n_levels) = 0._wp
         endif
         
@@ -1067,7 +1067,8 @@ module mo_grid_generator
         z_u(ji,jk) = real(z_input(lon_index,lat_index),wp)
         
         ! over the sea there is no orography
-        if (grid%land_fraction(ji,min(jk,nx))<0.5_wp) then
+        if (grid%land_fraction(ji,max(jk-1,1))+grid%land_fraction(ji,min(jk,nx)) & 
+            + grid%lake_fraction(ji,max(jk-1,1))+grid%lake_fraction(ji,min(jk,nx))<1._wp) then
           z_u(ji,jk) = 0._wp
         endif
         
@@ -1096,7 +1097,8 @@ module mo_grid_generator
         z_v(ji,jk) = real(z_input(lon_index,lat_index),wp)
         
         ! over the sea there is no orography
-        if (grid%land_fraction(min(ji,ny),jk)<0.5_wp) then
+        if (grid%land_fraction(max(ji-1,1),jk)+grid%land_fraction(min(ji,ny),jk) & 
+            + grid%lake_fraction(max(ji-1,1),jk)+grid%lake_fraction(min(ji,ny),jk)<1._wp) then
           z_v(ji,jk) = 0._wp
         endif
         
