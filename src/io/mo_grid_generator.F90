@@ -368,7 +368,7 @@ module mo_grid_generator
           endif
         endif
         
-        grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
+        grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk)) - lapse_rate*grid%z_w(ji,jk,n_levels)
             
         ! albedo of water
         grid%sfc_albedo(ji,jk) = albedo_water
