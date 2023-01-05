@@ -11,3 +11,4 @@ figs
 *.out
 *.xml
 *.toc
+GlobalLakeStatus.dat

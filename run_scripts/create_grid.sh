@@ -47,10 +47,20 @@ lrad=.false.
 EOF
 
 # That's it, here we go. Do not change anything below this line.
+
+# downloading orography if necessary
 if [ ! -f $lgame_home_dir/grids/phys_sfc_properties/etopo.nc ]
 then
   cd $lgame_home_dir/grids/phys_sfc_properties
   ./download_etopo.sh
+  cd $lgame_home_dir
+fi
+
+# downloading lake data if necessary
+if [ ! -f $lgame_home_dir/grids/phys_sfc_properties/GlobalLakeStatus.dat ]
+then
+  cd $lgame_home_dir/grids/phys_sfc_properties
+  ./download_gldbv2.sh
   cd $lgame_home_dir
 fi
 
