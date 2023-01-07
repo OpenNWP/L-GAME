@@ -57,7 +57,7 @@ then
 fi
 
 # downloading lake data if necessary
-if [ ! -f $lgame_home_dir/grids/phys_sfc_properties/GlobalLakeStatus.dat ]
+if [ ! -f $lgame_home_dir/grids/phys_sfc_properties/GlobalLakeDepth.dat ]
 then
   cd $lgame_home_dir/grids/phys_sfc_properties
   ./download_gldbv2.sh
