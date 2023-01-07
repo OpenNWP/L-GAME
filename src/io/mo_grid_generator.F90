@@ -34,46 +34,51 @@ module mo_grid_generator
     type(t_grid), intent(inout) :: grid ! the model grid
     
     ! local variables
-    real(wp)              :: lat_left_upper                ! latitude coordinate of upper left corner
-    real(wp)              :: lon_left_upper                ! longitude coordinate of upper left corner
-    real(wp)              :: dlat                          ! mesh size in y direction as angle
-    real(wp)              :: dlon                          ! mesh size in x direction as angle
-    real(wp)              :: max_oro                       ! variable for orography check
-    real(wp)              :: A                             ! variable for calculating the vertical grid (height of a level without orography)
-    real(wp)              :: B                             ! variable for calculating the vertical grid (orography weighting factor)
-    real(wp)              :: sigma_z                       ! variable for calculating the vertical grid (A/toa)
-    real(wp)              :: z_rel                         ! variable for calculating the vertical grid (z/toa with equidistant levels)
-    real(wp)              :: vertical_vector_pre(n_levels) ! heights of the levels in a column
-    real(wp)              :: base_area                     ! variable for calculating the vertical grid
-    real(wp)              :: lower_z,upper_z,lower_length  ! variables needed for area calculations
-    real(wp)              :: height_mountain               ! height of Gaussian mountain (needed for test case)
-    real(wp)              :: x_coord                       ! help variable needed for the Schär test
-    real(wp)              :: rescale_factor                ! soil grid rescaling factor
-    real(wp)              :: sigma_soil                    ! sigma of the soil grid
-    real(wp)              :: density_soil                  ! typical density of soil
-    real(wp)              :: c_p_soil                      ! typical c_p of soil
-    real(wp)              :: c_p_water                     ! typical c_p of water
-    real(wp)              :: albedo_water                  ! albedo of water
-    real(wp)              :: albedo_soil                   ! albedo of soil
-    real(wp)              :: albedo_ice                    ! albedo of ice
-    real(wp)              :: lat_lower_center              ! variable for calculating the TRSK weights
-    real(wp)              :: lat_upper_center              ! variable for calculating the TRSK weights
-    real(wp)              :: rot_y(3,3)                    ! rotation matrix around the global y-axis
-    real(wp)              :: rot_z(3,3)                    ! rotation matrix around the global z-axis
-    real(wp)              :: rot(3,3)                      ! complete rotation matrix
-    real(wp)              :: r_old(3)                      ! positional vector before rotation
-    real(wp)              :: r_new(3)                      ! positional vector after rotation
-    real(wp)              :: basis_old(3)                  ! old local basis vector
-    real(wp)              :: basis_new(3)                  ! new local basis vector
-    real(wp)              :: local_i(3)                    ! local i-vector
-    real(wp)              :: local_j(3)                    ! local j-vector
-    real(wp)              :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
-    real(wp)              :: lat_local,lon_local,max_z     ! helper variables     
-    real(wp), allocatable :: oro_large_scale(:,:)          ! large-scale orography contribution
-    real(wp)              :: toa_oro                       ! top of terrain-following coordinates
-    integer               :: ji                            ! horizontal index
-    integer               :: jk                            ! horizontal index
-    integer               :: jl                            ! layer or level index
+    real(wp)                :: lat_left_upper                ! latitude coordinate of upper left corner
+    real(wp)                :: lon_left_upper                ! longitude coordinate of upper left corner
+    real(wp)                :: dlat                          ! mesh size in y direction as angle
+    real(wp)                :: dlon                          ! mesh size in x direction as angle
+    real(wp)                :: max_oro                       ! variable for orography check
+    real(wp)                :: A                             ! variable for calculating the vertical grid (height of a level without orography)
+    real(wp)                :: B                             ! variable for calculating the vertical grid (orography weighting factor)
+    real(wp)                :: sigma_z                       ! variable for calculating the vertical grid (A/toa)
+    real(wp)                :: z_rel                         ! variable for calculating the vertical grid (z/toa with equidistant levels)
+    real(wp)                :: vertical_vector_pre(n_levels) ! heights of the levels in a column
+    real(wp)                :: base_area                     ! variable for calculating the vertical grid
+    real(wp)                :: lower_z,upper_z,lower_length  ! variables needed for area calculations
+    real(wp)                :: height_mountain               ! height of Gaussian mountain (needed for test case)
+    real(wp)                :: x_coord                       ! help variable needed for the Schär test
+    real(wp)                :: rescale_factor                ! soil grid rescaling factor
+    real(wp)                :: sigma_soil                    ! sigma of the soil grid
+    real(wp)                :: density_soil                  ! typical density of soil
+    real(wp)                :: c_p_soil                      ! typical c_p of soil
+    real(wp)                :: c_p_water                     ! typical c_p of water
+    real(wp)                :: albedo_water                  ! albedo of water
+    real(wp)                :: albedo_soil                   ! albedo of soil
+    real(wp)                :: albedo_ice                    ! albedo of ice
+    real(wp)                :: lat_lower_center              ! variable for calculating the TRSK weights
+    real(wp)                :: lat_upper_center              ! variable for calculating the TRSK weights
+    real(wp)                :: rot_y(3,3)                    ! rotation matrix around the global y-axis
+    real(wp)                :: rot_z(3,3)                    ! rotation matrix around the global z-axis
+    real(wp)                :: rot(3,3)                      ! complete rotation matrix
+    real(wp)                :: r_old(3)                      ! positional vector before rotation
+    real(wp)                :: r_new(3)                      ! positional vector after rotation
+    real(wp)                :: basis_old(3)                  ! old local basis vector
+    real(wp)                :: basis_new(3)                  ! new local basis vector
+    real(wp)                :: local_i(3)                    ! local i-vector
+    real(wp)                :: local_j(3)                    ! local j-vector
+    real(wp)                :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
+    real(wp)                :: lat_local,lon_local,max_z     ! helper variables     
+    real(wp), allocatable   :: oro_large_scale(:,:)          ! large-scale orography contribution
+    real(wp), allocatable   :: lake_depth_gldb(:,:)          ! GLDB lake depth data
+    real(wp)                :: toa_oro                       ! top of terrain-following coordinates
+    integer                 :: gldb_fileunit                 ! file unit of the GLDB (Global Lake Database) file
+    integer                 :: nlon_gldb                     ! number of longitude points of the GLDB grid
+    integer                 :: nlat_gldb                     ! number of latitude points of the GLDB grid
+    integer(2), allocatable :: lake_depth_gldb_raw(:,:)      ! GLDB lake depth data as read from file
+    integer                 :: ji                            ! horizontal index
+    integer                 :: jk                            ! horizontal index
+    integer                 :: jl                            ! layer or level index
     
     ! Horizontal grid properties
     ! --------------------------
@@ -408,6 +413,37 @@ module mo_grid_generator
       enddo
     enddo
     !$omp end parallel do
+    
+    ! Lake fraction
+    ! This is only done if real-world orography is used.
+    
+    nlat_gldb = 21600
+    nlon_gldb = 43200
+    
+    if (orography_id==1) then
+      
+      ! opening the lake depth file
+      open(action="read",file="../../grids/phys_sfc_properties/GlobalLakeDepth.dat",form="unformatted", &
+      access="direct",recl=2*nlon_gldb,newunit=gldb_fileunit)
+      
+      allocate(lake_depth_gldb_raw(nlat_gldb,nlon_gldb))
+      allocate(lake_depth_gldb(nlat_gldb,nlon_gldb))
+      
+      !$omp parallel do private(ji)
+      do ji=1,nlat_gldb
+        read(unit=gldb_fileunit,rec=ji) lake_depth_gldb_raw(ji,:)
+        lake_depth_gldb(ji,:) = lake_depth_gldb_raw(ji,:)/10._wp
+      enddo
+      !$omp end parallel do
+      
+      ! closing the lake depth file
+      close(gldb_fileunit)
+      
+      deallocate(lake_depth_gldb_raw)
+      
+      deallocate(lake_depth_gldb)
+      
+    endif
     
     ! Vertical grid
     ! -------------
