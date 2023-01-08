@@ -8,11 +8,11 @@ module mo_grid_generator
   use netcdf
   use mo_definitions,        only: wp,t_grid
   use mo_run_nml,            only: ny,nx,n_layers,n_levels,dy,dx,toa,n_oro_layers,stretching_parameter,scenario,lat_center, &
-                                   lon_center,lplane,n_flat_layers
+                                   lon_center,lplane,n_flat_layers,eff_hor_res
   use mo_diff_nml,           only: klemp_begin_rel
   use mo_constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                    lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv, &
-                                   r_d,c_d_p
+                                   r_d,c_d_p,epsilon_security
   use mo_surface_nml,        only: nsoillays,orography_id,lsleve
   use mo_gradient_operators, only: grad_hor_cov,grad_hor,grad_vert
   use mo_io_nml,             only: lwrite_grid,lread_oro,lread_land_sea,lset_oro, &
@@ -72,13 +72,30 @@ module mo_grid_generator
     real(wp), allocatable   :: oro_large_scale(:,:)          ! large-scale orography contribution
     real(wp), allocatable   :: lake_depth_gldb(:,:)          ! GLDB lake depth data
     real(wp)                :: toa_oro                       ! top of terrain-following coordinates
+    real(wp)                :: delta_lat_gldb                ! latitude resolution of the GLDB grid
+    real(wp)                :: delta_lon_gldb                ! longitude resolution of the GLDB grid
+    real(wp)                :: min_lake_fraction             ! minimum lake fraction
+    real(wp)                :: max_lake_fraction             ! maximum lake fraction
     integer                 :: gldb_fileunit                 ! file unit of the GLDB (Global Lake Database) file
     integer                 :: nlon_gldb                     ! number of longitude points of the GLDB grid
     integer                 :: nlat_gldb                     ! number of latitude points of the GLDB grid
+    integer                 :: lat_index_gldb                ! latitude index of a grid point of GLDB
+    integer                 :: lon_index_gldb                ! longitude index of a grid point of GLDB
+    integer                 :: lat_index_span_gldb           ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                 :: lon_index_span_gldb           ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                 :: left_index_gldb               ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                 :: right_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                 :: lower_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                 :: upper_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                 :: n_points_gldb_domain          ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                 :: jm_used                       ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                 :: jn_used                       ! helper variable for interpolating the GLDB data to the GAME grid
     integer(2), allocatable :: lake_depth_gldb_raw(:,:)      ! GLDB lake depth data as read from file
     integer                 :: ji                            ! horizontal index
     integer                 :: jk                            ! horizontal index
     integer                 :: jl                            ! layer or level index
+    integer                 :: jm                            ! helper index
+    integer                 :: jn                            ! helper index
     
     ! Horizontal grid properties
     ! --------------------------
@@ -298,15 +315,123 @@ module mo_grid_generator
     
       ! no orography
       case(0)
+        
         !$omp parallel workshare
         grid%z_w(:,:,n_levels) = 0._wp
         !$omp end parallel workshare
       
       ! real orography
       case(1)
+        
         if (lread_oro) then
           call read_oro(grid)
         elseif (lset_oro) then
+    
+          ! Lake fraction
+          ! This is only done if real-world orography is used.
+          
+          nlat_gldb = 21600
+          nlon_gldb = 43200
+            
+          ! opening the lake depth file
+          open(action="read",file="../../grids/phys_sfc_properties/GlobalLakeDepth.dat",form="unformatted", &
+          access="direct",recl=2*nlon_gldb,newunit=gldb_fileunit)
+          
+          allocate(lake_depth_gldb_raw(nlat_gldb,nlon_gldb))
+          allocate(lake_depth_gldb(nlat_gldb,nlon_gldb))
+          
+          !$omp parallel do private(ji)
+          do ji=1,nlat_gldb
+            read(unit=gldb_fileunit,rec=ji) lake_depth_gldb_raw(ji,:)
+            lake_depth_gldb(ji,:) = lake_depth_gldb_raw(ji,:)/10._wp
+          enddo
+          !$omp end parallel do
+          
+          ! closing the lake depth file
+          close(gldb_fileunit)
+          
+          deallocate(lake_depth_gldb_raw)
+          
+          delta_lat_gldb = M_PI/nlat_gldb
+          delta_lon_gldb = 2._wp*M_PI/nlon_gldb
+          
+          lat_index_span_gldb = int(eff_hor_res/(r_e*delta_lat_gldb))
+          
+          !$omp parallel do private(ji,jk,lat_index_gldb,lon_index_gldb,lon_index_span_gldb,left_index_gldb,right_index_gldb, &
+          !$omp lower_index_gldb,upper_index_gldb,n_points_gldb_domain,jm_used,jn_used)
+          do jk=1,nx
+            do ji=1,ny
+              
+              ! if there is no land in this grid cell, there can also be no lakes in this grid cell
+              if (grid%land_fraction(ji,jk)==0._wp) then
+                cycle
+              endif
+              
+              ! computing the indices of the GLDB grid point that is the closest to the center of this grid cell
+              lat_index_gldb = nlat_gldb/2 - int(grid%lat_geo_scalar(ji,jk)/delta_lat_gldb)
+              lon_index_gldb = nlon_gldb/2 + int(grid%lon_geo_scalar(ji,jk)/delta_lon_gldb)
+              
+              ! making sure the point is actually on the GLDB grid
+              lat_index_gldb = max(1,lat_index_gldb)
+              lat_index_gldb = min(nlat_gldb,lat_index_gldb)
+              lon_index_gldb = max(1,lon_index_gldb)
+              lon_index_gldb = min(nlon_gldb,lon_index_gldb)
+              
+              lon_index_span_gldb = int(eff_hor_res/(r_e*delta_lon_gldb*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)))
+              lon_index_span_gldb = min(lon_index_span_gldb,nlon_gldb)
+              n_points_gldb_domain = (lat_index_span_gldb+1)*(lon_index_span_gldb+1)
+              
+              lower_index_gldb = lat_index_gldb + lat_index_span_gldb/2
+              upper_index_gldb = lat_index_gldb - lat_index_span_gldb/2
+              left_index_gldb = lon_index_gldb - lon_index_span_gldb/2
+              right_index_gldb = lon_index_gldb + lon_index_span_gldb/2
+              
+              ! counting the number of lake points in the GLDB domain that is used to interpolate to the GAME grid cell
+              do jm=upper_index_gldb,lower_index_gldb
+                do jn=left_index_gldb,right_index_gldb
+                  jm_used = jm
+                  if (jm_used<1) then
+                    jm_used = 1
+                  endif
+                  if (jm_used>nlat_gldb) then
+                    jm_used = nlat_gldb
+                  endif
+                  jn_used = jn
+                  if (jn_used<1) then
+                    jn_used = jn_used + nlon_gldb
+                  endif
+                  if (jn_used>nlon_gldb) then
+                    jn_used = jn_used - nlon_gldb
+                  endif
+                  
+                  if (lake_depth_gldb(jm_used,jn_used)>0._wp) then
+                    grid%lake_fraction(ji,jk) = grid%lake_fraction(ji,jk)+1._wp
+                  endif
+                  
+                enddo
+              enddo
+              
+              grid%lake_fraction(ji,jk) = grid%lake_fraction(ji,jk)/n_points_gldb_domain
+              ! lakes belong to the land (not the sea), the lake fraction cannot be greater than the land fraction
+              grid%lake_fraction(ji,jk) = min(grid%lake_fraction(ji,jk),grid%land_fraction(ji,jk))
+              
+            enddo
+          enddo
+          !$omp end parallel do
+          
+          !$omp parallel workshare
+          min_lake_fraction = minval(grid%lake_fraction)
+          max_lake_fraction = maxval(grid%lake_fraction)
+          !$omp end parallel workshare
+          write(*,*) "minimum lake fraction:",min_lake_fraction
+          write(*,*) "maximum lake fraction:",max_lake_fraction
+          
+          deallocate(lake_depth_gldb)
+          
+          deallocate(lake_depth_gldb_raw)
+          
+          deallocate(lake_depth_gldb)
+          
           call set_orography(grid)
           !$omp parallel workshare
           oro_large_scale = grid%z_w(:,:,n_levels)
@@ -413,37 +538,6 @@ module mo_grid_generator
       enddo
     enddo
     !$omp end parallel do
-    
-    ! Lake fraction
-    ! This is only done if real-world orography is used.
-    
-    nlat_gldb = 21600
-    nlon_gldb = 43200
-    
-    if (orography_id==1 .and. lread_land_sea) then
-      
-      ! opening the lake depth file
-      open(action="read",file="../../grids/phys_sfc_properties/GlobalLakeDepth.dat",form="unformatted", &
-      access="direct",recl=2*nlon_gldb,newunit=gldb_fileunit)
-      
-      allocate(lake_depth_gldb_raw(nlat_gldb,nlon_gldb))
-      allocate(lake_depth_gldb(nlat_gldb,nlon_gldb))
-      
-      !$omp parallel do private(ji)
-      do ji=1,nlat_gldb
-        read(unit=gldb_fileunit,rec=ji) lake_depth_gldb_raw(ji,:)
-        lake_depth_gldb(ji,:) = lake_depth_gldb_raw(ji,:)/10._wp
-      enddo
-      !$omp end parallel do
-      
-      ! closing the lake depth file
-      close(gldb_fileunit)
-      
-      deallocate(lake_depth_gldb_raw)
-      
-      deallocate(lake_depth_gldb)
-      
-    endif
     
     ! Vertical grid
     ! -------------
