@@ -22,7 +22,6 @@ run_span_min=4320
 
 &io
 lread_geo=.true.
-lcompute_geo=.false.
 lwrite_grid=.false.
 /
 

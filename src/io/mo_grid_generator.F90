@@ -15,8 +15,7 @@ module mo_grid_generator
                                    r_d,c_d_p,epsilon_security
   use mo_surface_nml,        only: nsoillays,orography_id,lsleve
   use mo_gradient_operators, only: grad_hor_cov,grad_hor,grad_vert
-  use mo_io_nml,             only: lwrite_grid,lread_geo,lcompute_geo, &
-                                   oro_raw_filename
+  use mo_io_nml,             only: lwrite_grid,lread_geo,oro_raw_filename
   use mo_read_write_grid,    only: write_grid,read_geo
   use mo_set_initial_state,  only: bg_temp,bg_pres,geopot,nc_check
   use mo_bc_nml,             only: lperiodic
@@ -315,12 +314,12 @@ module mo_grid_generator
         grid%z_w(:,:,n_levels) = 0._wp
         !$omp end parallel workshare
       
-      ! real orography
+      ! real orography (and other surface properties)
       case(1)
         
         if (lread_geo) then
           call read_geo(grid)
-        elseif (lcompute_geo) then
+        else
     
           ! Lake fraction
           

@@ -22,7 +22,6 @@ run_span_min=0
 
 &io
 lread_geo=.false.
-lcompute_geo=.true.
 lwrite_grid=.true.
 /
 
@@ -38,7 +37,7 @@ lrad=.false.
 /
 
 &surface
-orography_id=0
+orography_id=1
 /
 
 &bc
@@ -65,13 +64,6 @@ then
 fi
 
 source $lgame_home_dir/run_scripts/.sh/root_script.sh
-
-cd $lgame_home_dir/grids/phys_sfc_properties
-echo "Creating land fraction ..."
-python3 land_fraction.py
-echo "Land fraction created."
-
-cd $lgame_home_dir
 
 
 
