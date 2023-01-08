@@ -420,7 +420,7 @@ module mo_grid_generator
     nlat_gldb = 21600
     nlon_gldb = 43200
     
-    if (orography_id==1) then
+    if (orography_id==1 .and. lread_land_sea) then
       
       ! opening the lake depth file
       open(action="read",file="../../grids/phys_sfc_properties/GlobalLakeDepth.dat",form="unformatted", &
