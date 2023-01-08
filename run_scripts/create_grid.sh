@@ -39,6 +39,7 @@ lrad=.false.
 /
 
 &surface
+orography_id=1
 /
 
 &bc
@@ -72,50 +73,6 @@ python3 land_fraction.py
 echo "Land fraction created."
 
 cd $lgame_home_dir
-
-# after the land fraction has been created, the grid creation can be repeated, this time with lread_land_sea=.true.,
-# which is necessary for calculating the lake fraction
-
-cat > namelist.nml << EOF
-
-&run
-run_id="$run_id"
-lat_center=0.8929595951304794
-lon_center=0.1199133716060684
-ny=35
-nx=35
-dy=25000
-dx=25000
-run_span_min=0
-/
-
-&io
-lread_oro=.false.
-lwrite_grid=.true.
-lread_land_sea=.true.
-lset_oro=.true.
-/
-
-&constituents
-lmoist=.false.
-/
-
-&diff
-/
-
-&rad
-lrad=.false.
-/
-
-&surface
-/
-
-&bc
-/
-
-EOF
-
-source $lgame_home_dir/run_scripts/.sh/root_script.sh
 
 
 
