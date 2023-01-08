@@ -15,9 +15,9 @@ module mo_grid_generator
                                    r_d,c_d_p,epsilon_security
   use mo_surface_nml,        only: nsoillays,orography_id,lsleve
   use mo_gradient_operators, only: grad_hor_cov,grad_hor,grad_vert
-  use mo_io_nml,             only: lwrite_grid,lread_oro,lread_land_sea,lset_oro, &
+  use mo_io_nml,             only: lwrite_grid,lread_geo,lcompute_geo, &
                                    oro_raw_filename
-  use mo_read_write_grid,    only: write_grid,read_oro,read_land_sea
+  use mo_read_write_grid,    only: write_grid,read_geo
   use mo_set_initial_state,  only: bg_temp,bg_pres,geopot,nc_check
   use mo_bc_nml,             only: lperiodic
 
@@ -304,11 +304,6 @@ module mo_grid_generator
     ! Physical grid properties
     ! ------------------------
     
-    ! reading the land-sea mask if configured to do so
-    if (lread_land_sea) then
-      call read_land_sea(grid)
-    endif
-    
     allocate(oro_large_scale(ny,nx))
     
     select case (orography_id)
@@ -323,12 +318,11 @@ module mo_grid_generator
       ! real orography
       case(1)
         
-        if (lread_oro) then
-          call read_oro(grid)
-        elseif (lset_oro) then
+        if (lread_geo) then
+          call read_geo(grid)
+        elseif (lcompute_geo) then
     
           ! Lake fraction
-          ! This is only done if real-world orography is used.
           
           nlat_gldb = 21600
           nlon_gldb = 43200
@@ -425,10 +419,6 @@ module mo_grid_generator
           !$omp end parallel workshare
           write(*,*) "minimum lake fraction:",min_lake_fraction
           write(*,*) "maximum lake fraction:",max_lake_fraction
-          
-          deallocate(lake_depth_gldb)
-          
-          deallocate(lake_depth_gldb_raw)
           
           deallocate(lake_depth_gldb)
           

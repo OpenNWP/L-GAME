@@ -21,10 +21,9 @@ run_span_min=0
 /
 
 &io
-lread_oro=.false.
+lread_geo=.false.
+lcompute_geo=.true.
 lwrite_grid=.true.
-lread_land_sea=.false.
-lset_oro=.true.
 /
 
 &constituents
@@ -39,7 +38,7 @@ lrad=.false.
 /
 
 &surface
-orography_id=1
+orography_id=0
 /
 
 &bc

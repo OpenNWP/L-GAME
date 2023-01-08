@@ -10,19 +10,18 @@ module mo_io_nml
   implicit none
   
   integer           :: dt_write_min      ! output interval in minutes
-  logical           :: lread_oro         ! wether or not to read the orography from a file
+  logical           :: lread_geo         ! wether or not to read the surface properties from a file
   logical           :: lwrite_grid       ! wether or not to write grid properties to a file
   character(len=64) :: grid_filename     ! filename of the grid to read or write
   real(wp)          :: dt_write          ! output interval in seconds
   character(len=64) :: restart_filename  ! filename from which to read the inital state in case restart mode is on
-  logical           :: lread_land_sea    ! switch for reading the land-sea mask
   character(len=64) :: land_sea_filename ! filename of the land-sea mask
-  logical           :: lset_oro          ! switch for setting the orography
+  logical           :: lcompute_geo      ! switch for computing the surface properties
   character(len=64) :: oro_raw_filename  ! filename from which to read the raw orography
   logical           :: lwrite_integrals  ! If set to true, fundamental integrals of the atmosphere will be written out at every time step.
   
-  namelist /io/dt_write_min,lread_oro,lwrite_grid,grid_filename,restart_filename,lread_land_sea,land_sea_filename, &
-               lset_oro,lwrite_integrals
+  namelist /io/dt_write_min,lread_geo,lwrite_grid,grid_filename,restart_filename,land_sea_filename, &
+               lcompute_geo,lwrite_integrals
   
   contains
   
@@ -32,13 +31,12 @@ module mo_io_nml
     integer :: fileunit ! file unit of the namelist file
     
     dt_write_min = 60
-    lread_oro = .true.
+    lread_geo = .true.
     lwrite_grid = .false.
     grid_filename = "grid.nc"
     restart_filename = "init.nc"
-    lread_land_sea = .true.
     land_sea_filename = "land_fraction.nc"
-    lset_oro = .false.
+    lcompute_geo = .false.
     oro_raw_filename = "etopo.nc"
     lwrite_integrals = .false.
     
@@ -52,8 +50,8 @@ module mo_io_nml
     dt_write = 60._wp*dt_write_min
     
     ! sanity check
-    if (lset_oro .and. lread_oro) then
-      write(*,*) "Error: lset_oro and lread_oro cannot both be true at the same time."
+    if (lcompute_geo .and. lread_geo) then
+      write(*,*) "Error: lcompute_geo and lread_geo cannot both be true at the same time."
       call exit(1)
     endif
     

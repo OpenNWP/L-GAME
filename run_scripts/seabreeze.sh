@@ -29,8 +29,7 @@ lplane=.true.
 /
 
 &io
-lread_oro=.false.
-lread_land_sea=.false.
+lread_geo=.false.
 /
 
 &constituents

@@ -8,7 +8,7 @@ module mo_read_write_grid
   use netcdf
   use mo_definitions,       only: t_grid,wp
   use mo_set_initial_state, only: nc_check
-  use mo_io_nml,            only: grid_filename,land_sea_filename
+  use mo_io_nml,            only: grid_filename
   use mo_run_nml,           only: ny,nx,n_layers,n_levels
   
   implicit none
@@ -38,7 +38,9 @@ module mo_read_write_grid
     integer           :: varid_lon_u            ! variable ID of the longitudes of the u-vectors
     integer           :: varid_lat_v            ! variable ID of the latitudes of the v-vectors
     integer           :: varid_lon_v            ! variable ID of the longitudes of the v-vectors
-    integer           :: varid_z_w              ! variable ID of the orography
+    integer           :: varid_oro              ! variable ID of the orography
+    integer           :: varid_land_fraction    ! variable ID of the land fraction
+    integer           :: varid_lake_fraction    ! variable ID of the lake fraction
     integer           :: varid_dir_geo_u        ! variable ID of the direction of u-vectors
     integer           :: varid_dir_geo_v        ! variable ID of the direction of v-vectors
     integer           :: varid_dir_geo_u_scalar ! variable ID of the direction of u-vectors at the scalar data points
@@ -89,9 +91,17 @@ module mo_read_write_grid
     call nc_check(nf90_put_att(ncid,varid_lon_v,"Description","longitude of v-vectors"))
     call nc_check(nf90_put_att(ncid,varid_lon_v,"Unit","radians"))
     
-    call nc_check(nf90_def_var(ncid,"oro",NF90_REAL,dimids,varid_z_w))
-    call nc_check(nf90_put_att(ncid,varid_z_w,"Description","orography"))
-    call nc_check(nf90_put_att(ncid,varid_z_w,"Unit","m"))
+    call nc_check(nf90_def_var(ncid,"oro",NF90_REAL,dimids,varid_oro))
+    call nc_check(nf90_put_att(ncid,varid_oro,"Description","orography"))
+    call nc_check(nf90_put_att(ncid,varid_oro,"Unit","m"))
+    
+    call nc_check(nf90_def_var(ncid,"land_fraction",NF90_REAL,dimids,varid_land_fraction))
+    call nc_check(nf90_put_att(ncid,varid_land_fraction,"Description","land fraction"))
+    call nc_check(nf90_put_att(ncid,varid_land_fraction,"Unit","1"))
+    
+    call nc_check(nf90_def_var(ncid,"lake_fraction",NF90_REAL,dimids,varid_lake_fraction))
+    call nc_check(nf90_put_att(ncid,varid_lake_fraction,"Description","lake fraction"))
+    call nc_check(nf90_put_att(ncid,varid_lake_fraction,"Unit","1"))
     
     call nc_check(nf90_def_var(ncid,"u_dir",NF90_REAL,dimids_u,varid_dir_geo_u))
     call nc_check(nf90_put_att(ncid,varid_dir_geo_u,"Description","direction of u-vectors"))
@@ -115,7 +125,9 @@ module mo_read_write_grid
     call nc_check(nf90_put_var(ncid,varid_lon_u,grid%lon_geo_u))
     call nc_check(nf90_put_var(ncid,varid_lat_v,grid%lat_geo_v))
     call nc_check(nf90_put_var(ncid,varid_lon_v,grid%lon_geo_v))
-    call nc_check(nf90_put_var(ncid,varid_z_w,grid%z_w(:,:,n_levels)))
+    call nc_check(nf90_put_var(ncid,varid_oro,grid%z_w(:,:,n_levels)))
+    call nc_check(nf90_put_var(ncid,varid_land_fraction,grid%land_fraction))
+    call nc_check(nf90_put_var(ncid,varid_lake_fraction,grid%lake_fraction))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u,grid%dir_geo_u))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_v,grid%dir_geo_v))
     call nc_check(nf90_put_var(ncid,varid_dir_geo_u_scalar,grid%dir_geo_u_scalar))
@@ -125,16 +137,18 @@ module mo_read_write_grid
     
   end subroutine write_grid
   
-  subroutine read_oro(grid)
+  subroutine read_geo(grid)
     
-    ! This subroutine reads the orography from a file.
+    ! This subroutine reads surface properties from a file.
     
     type(t_grid), intent(inout) :: grid ! grid properties
     
     ! local variables
-    integer           :: ncid      ! ID of the netCDF file
-    character(len=64) :: filename  ! input filename
-    integer           :: varid_z_w ! variable ID of the orography
+    integer           :: ncid                ! ID of the netCDF file
+    character(len=64) :: filename            ! input filename
+    integer           :: varid_oro           ! variable ID of the orography
+    integer           :: varid_land_fraction ! variable ID of the land fraction
+    integer           :: varid_lake_fraction ! variable ID of the lake fraction
     
     ! the filename of the grid file including the relative path
     filename = "../../grids/" // trim(grid_filename)
@@ -143,47 +157,19 @@ module mo_read_write_grid
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
     
     ! reading the variable IDs
-    call nc_check(nf90_inq_varid(ncid,"oro",varid_z_w))
-    
-    ! reading the arrays
-    call nc_check(nf90_get_var(ncid,varid_z_w,grid%z_w(:,:,n_levels)))
-    
-    !$omp parallel workshare
-    grid%z_w(:,:,n_levels) = merge(grid%z_w(:,:,n_levels),0._wp,grid%z_w(:,:,n_levels)>=0._wp)
-    !$omp end parallel workshare
-    
-    ! closing the netCDF file
-    call nc_check(nf90_close(ncid))
-    
-  end subroutine read_oro
-  
-  subroutine read_land_sea(grid)
-    
-    ! This subroutine reads the land-sea mask from a file.
-    
-    type(t_grid), intent(inout) :: grid ! grid properties
-    
-    ! local variables
-    integer           :: ncid                ! ID of the netCDF file
-    character(len=64) :: filename            ! input filename
-    integer           :: varid_land_fraction ! variable ID of the land fraction
-    
-    ! the filename of the grid file including the relative path
-    filename = "../../grids/phys_sfc_properties/" // trim(land_sea_filename)
-    
-    ! creating the netCDF file
-    call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
-    
-    ! reading the variable IDs
+    call nc_check(nf90_inq_varid(ncid,"oro",varid_oro))
     call nc_check(nf90_inq_varid(ncid,"land_fraction",varid_land_fraction))
+    call nc_check(nf90_inq_varid(ncid,"lake_fraction",varid_lake_fraction))
     
     ! reading the arrays
+    call nc_check(nf90_get_var(ncid,varid_oro,grid%z_w(:,:,n_levels)))
     call nc_check(nf90_get_var(ncid,varid_land_fraction,grid%land_fraction))
+    call nc_check(nf90_get_var(ncid,varid_lake_fraction,grid%lake_fraction))
     
     ! closing the netCDF file
     call nc_check(nf90_close(ncid))
     
-  end subroutine read_land_sea
+  end subroutine read_geo
 
 end module mo_read_write_grid
 

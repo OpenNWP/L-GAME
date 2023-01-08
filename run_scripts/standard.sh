@@ -21,8 +21,7 @@ run_span_min=4320
 /
 
 &io
-lread_oro=.true.
-lread_land_sea=.true.
+lread_geo=.true.
 /
 
 &constituents

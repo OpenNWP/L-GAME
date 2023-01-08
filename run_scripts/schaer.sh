@@ -27,8 +27,7 @@ theta_adv_order=3
 /
 
 &io
-lread_oro=.false.
-lread_land_sea=.false.
+lread_geo=.false.
 lwrite_integrals=.true.
 dt_write_min=10
 /
