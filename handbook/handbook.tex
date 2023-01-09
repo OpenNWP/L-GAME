@@ -115,6 +115,20 @@ The vertical grid structure is the same as in \texttt{GAME}, which is explained 
 \chapter{Boundary conditions}
 \label{chap:boundary_conditions}
 
+\chapter{Physical surface properties}
+\label{sec:physical_surface_properties}
+
+The properties of the surface of the Earth influence the evolution of the atmospheric fields. Therefore, physical surface properties need to be obtained from external sources and interpolated to the model grid. The following fields are required:
+%
+\begin{itemize}
+\item The orography. source: \url{https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/netcdf/ETOPO1_Ice_g_gmt4.grd.gz} \cite{etopo1}, \cite{etopo1_add}
+\item The lake fraction (share of a grid cell covered by lakes). source: \url{http://www.flake.igb-berlin.de/data/gldbv2.tar.gz} \cite{gldb}
+\item The density of the soil.
+\item The specific heat capacity of the soil.
+\item The temperature diffusivity of the soil.
+\item For NWP runs without coupling to an ocean model, the SST needs to be prescribed in order to calculate sensible and latent heating rates at the ocean surface. source: \url{https://nomads.ncep.noaa.gov/pub/data/nccf/com/nsst/prod/} (The SST is set analytically for idealized simulations.)
+\end{itemize}
+
 \appendix
 
 \printbibliography
