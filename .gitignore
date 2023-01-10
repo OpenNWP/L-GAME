@@ -11,4 +11,6 @@ figs
 *.out
 *.xml
 *.toc
+sfc-fields-usgs-veg30susgs
 GlobalLakeDepth.dat
+ETOPO1_Ice_g_gmt4.grd

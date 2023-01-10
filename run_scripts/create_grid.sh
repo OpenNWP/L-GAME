@@ -47,6 +47,14 @@ EOF
 
 # That's it, here we go. Do not change anything below this line.
 
+# downloading land use data if necessary
+if [ ! -f phys_quantities/sfc-fields-usgs-veg30susgs ]
+then
+  cd $lgame_home_dir/grids/phys_sfc_properties
+  ./download_glcc.sh
+  cd $lgame_home_dir
+fi
+
 # downloading orography if necessary
 if [ ! -f $lgame_home_dir/grids/phys_sfc_properties/etopo.nc ]
 then

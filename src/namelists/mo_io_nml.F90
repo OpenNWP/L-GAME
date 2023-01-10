@@ -32,7 +32,7 @@ module mo_io_nml
     lwrite_grid = .false.
     grid_filename = "grid.nc"
     restart_filename = "init.nc"
-    oro_raw_filename = "etopo.nc"
+    oro_raw_filename = "ETOPO1_Ice_g_gmt4.grd"
     lwrite_integrals = .false.
     
     ! Open and read namelist file.
