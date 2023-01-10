@@ -6,6 +6,7 @@
 lgame_home_dir=~/code/L-GAME
 run_id=grid_generation
 export OMP_NUM_THREADS=4
+orography_id=1
 
 cat > namelist.nml << EOF
 
@@ -37,7 +38,7 @@ lrad=.false.
 /
 
 &surface
-orography_id=1
+orography_id=$orography_id
 /
 
 &bc
@@ -48,27 +49,9 @@ EOF
 # That's it, here we go. Do not change anything below this line.
 
 # downloading land use data if necessary
-if [ ! -f phys_quantities/sfc-fields-usgs-veg30susgs ]
+if [ $orography_id -eq 1 ]
 then
-  cd $lgame_home_dir/grids/phys_sfc_properties
-  ./download_glcc.sh
-  cd $lgame_home_dir
-fi
-
-# downloading orography if necessary
-if [ ! -f $lgame_home_dir/grids/phys_sfc_properties/etopo.nc ]
-then
-  cd $lgame_home_dir/grids/phys_sfc_properties
-  ./download_etopo.sh
-  cd $lgame_home_dir
-fi
-
-# downloading lake data if necessary
-if [ ! -f $lgame_home_dir/grids/phys_sfc_properties/GlobalLakeDepth.dat ]
-then
-  cd $lgame_home_dir/grids/phys_sfc_properties
-  ./download_gldbv2.sh
-  cd $lgame_home_dir
+  source $lgame_home_dir/run_scripts/.sh/download_phys_sfc_quantities.sh
 fi
 
 source $lgame_home_dir/run_scripts/.sh/root_script.sh

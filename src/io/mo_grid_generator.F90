@@ -327,7 +327,7 @@ module mo_grid_generator
           nlon_gldb = 43200
             
           ! opening the lake depth file
-          open(action="read",file="../../grids/phys_sfc_properties/GlobalLakeDepth.dat",form="unformatted", &
+          open(action="read",file="../../grids/phys_sfc_quantities/GlobalLakeDepth.dat",form="unformatted", &
           access="direct",recl=2*nlon_gldb,newunit=gldb_fileunit)
           
           allocate(lake_depth_gldb_raw(nlat_gldb,nlon_gldb))
@@ -1104,7 +1104,7 @@ module mo_grid_generator
     n_lon_points = 21601
     
     ! the filename of the grid file including the relative path
-    filename = "../../grids/phys_sfc_properties/" // trim(oro_raw_filename)
+    filename = "../../grids/phys_sfc_quantities/" // trim(oro_raw_filename)
     
     ! opening the netCDF file
     call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
