@@ -33,68 +33,73 @@ module mo_grid_generator
     type(t_grid), intent(inout) :: grid ! the model grid
     
     ! local variables
-    real(wp)                :: lat_left_upper                ! latitude coordinate of upper left corner
-    real(wp)                :: lon_left_upper                ! longitude coordinate of upper left corner
-    real(wp)                :: dlat                          ! mesh size in y direction as angle
-    real(wp)                :: dlon                          ! mesh size in x direction as angle
-    real(wp)                :: max_oro                       ! variable for orography check
-    real(wp)                :: A                             ! variable for calculating the vertical grid (height of a level without orography)
-    real(wp)                :: B                             ! variable for calculating the vertical grid (orography weighting factor)
-    real(wp)                :: sigma_z                       ! variable for calculating the vertical grid (A/toa)
-    real(wp)                :: z_rel                         ! variable for calculating the vertical grid (z/toa with equidistant levels)
-    real(wp)                :: vertical_vector_pre(n_levels) ! heights of the levels in a column
-    real(wp)                :: base_area                     ! variable for calculating the vertical grid
-    real(wp)                :: lower_z,upper_z,lower_length  ! variables needed for area calculations
-    real(wp)                :: height_mountain               ! height of Gaussian mountain (needed for test case)
-    real(wp)                :: x_coord                       ! help variable needed for the Schär test
-    real(wp)                :: rescale_factor                ! soil grid rescaling factor
-    real(wp)                :: sigma_soil                    ! sigma of the soil grid
-    real(wp)                :: density_soil                  ! typical density of soil
-    real(wp)                :: c_p_soil                      ! typical c_p of soil
-    real(wp)                :: c_p_water                     ! typical c_p of water
-    real(wp)                :: albedo_water                  ! albedo of water
-    real(wp)                :: albedo_soil                   ! albedo of soil
-    real(wp)                :: albedo_ice                    ! albedo of ice
-    real(wp)                :: lat_lower_center              ! variable for calculating the TRSK weights
-    real(wp)                :: lat_upper_center              ! variable for calculating the TRSK weights
-    real(wp)                :: rot_y(3,3)                    ! rotation matrix around the global y-axis
-    real(wp)                :: rot_z(3,3)                    ! rotation matrix around the global z-axis
-    real(wp)                :: rot(3,3)                      ! complete rotation matrix
-    real(wp)                :: r_old(3)                      ! positional vector before rotation
-    real(wp)                :: r_new(3)                      ! positional vector after rotation
-    real(wp)                :: basis_old(3)                  ! old local basis vector
-    real(wp)                :: basis_new(3)                  ! new local basis vector
-    real(wp)                :: local_i(3)                    ! local i-vector
-    real(wp)                :: local_j(3)                    ! local j-vector
-    real(wp)                :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
-    real(wp)                :: lat_local,lon_local,max_z     ! helper variables     
-    real(wp), allocatable   :: oro_large_scale(:,:)          ! large-scale orography contribution
-    real(wp), allocatable   :: lake_depth_gldb(:,:)          ! GLDB lake depth data
-    real(wp)                :: toa_oro                       ! top of terrain-following coordinates
-    real(wp)                :: delta_lat_gldb                ! latitude resolution of the GLDB grid
-    real(wp)                :: delta_lon_gldb                ! longitude resolution of the GLDB grid
-    real(wp)                :: min_lake_fraction             ! minimum lake fraction
-    real(wp)                :: max_lake_fraction             ! maximum lake fraction
-    integer                 :: gldb_fileunit                 ! file unit of the GLDB (Global Lake Database) file
-    integer                 :: nlon_gldb                     ! number of longitude points of the GLDB grid
-    integer                 :: nlat_gldb                     ! number of latitude points of the GLDB grid
-    integer                 :: lat_index_gldb                ! latitude index of a grid point of GLDB
-    integer                 :: lon_index_gldb                ! longitude index of a grid point of GLDB
-    integer                 :: lat_index_span_gldb           ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                 :: lon_index_span_gldb           ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                 :: left_index_gldb               ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                 :: right_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                 :: lower_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                 :: upper_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                 :: n_points_gldb_domain          ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                 :: jm_used                       ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                 :: jn_used                       ! helper variable for interpolating the GLDB data to the GAME grid
-    integer(2), allocatable :: lake_depth_gldb_raw(:,:)      ! GLDB lake depth data as read from file
-    integer                 :: ji                            ! horizontal index
-    integer                 :: jk                            ! horizontal index
-    integer                 :: jl                            ! layer or level index
-    integer                 :: jm                            ! helper index
-    integer                 :: jn                            ! helper index
+    real(wp)                      :: lat_left_upper                ! latitude coordinate of upper left corner
+    real(wp)                      :: lon_left_upper                ! longitude coordinate of upper left corner
+    real(wp)                      :: dlat                          ! mesh size in y direction as angle
+    real(wp)                      :: dlon                          ! mesh size in x direction as angle
+    real(wp)                      :: max_oro                       ! variable for orography check
+    real(wp)                      :: A                             ! variable for calculating the vertical grid (height of a level without orography)
+    real(wp)                      :: B                             ! variable for calculating the vertical grid (orography weighting factor)
+    real(wp)                      :: sigma_z                       ! variable for calculating the vertical grid (A/toa)
+    real(wp)                      :: z_rel                         ! variable for calculating the vertical grid (z/toa with equidistant levels)
+    real(wp)                      :: vertical_vector_pre(n_levels) ! heights of the levels in a column
+    real(wp)                      :: base_area                     ! variable for calculating the vertical grid
+    real(wp)                      :: lower_z,upper_z,lower_length  ! variables needed for area calculations
+    real(wp)                      :: height_mountain               ! height of Gaussian mountain (needed for test case)
+    real(wp)                      :: x_coord                       ! help variable needed for the Schär test
+    real(wp)                      :: rescale_factor                ! soil grid rescaling factor
+    real(wp)                      :: sigma_soil                    ! sigma of the soil grid
+    real(wp)                      :: density_soil                  ! typical density of soil
+    real(wp)                      :: c_p_soil                      ! typical c_p of soil
+    real(wp)                      :: c_p_water                     ! typical c_p of water
+    real(wp)                      :: albedo_water                  ! albedo of water
+    real(wp)                      :: albedo_soil                   ! albedo of soil
+    real(wp)                      :: albedo_ice                    ! albedo of ice
+    real(wp)                      :: lat_lower_center              ! variable for calculating the TRSK weights
+    real(wp)                      :: lat_upper_center              ! variable for calculating the TRSK weights
+    real(wp)                      :: rot_y(3,3)                    ! rotation matrix around the global y-axis
+    real(wp)                      :: rot_z(3,3)                    ! rotation matrix around the global z-axis
+    real(wp)                      :: rot(3,3)                      ! complete rotation matrix
+    real(wp)                      :: r_old(3)                      ! positional vector before rotation
+    real(wp)                      :: r_new(3)                      ! positional vector after rotation
+    real(wp)                      :: basis_old(3)                  ! old local basis vector
+    real(wp)                      :: basis_new(3)                  ! new local basis vector
+    real(wp)                      :: local_i(3)                    ! local i-vector
+    real(wp)                      :: local_j(3)                    ! local j-vector
+    real(wp)                      :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
+    real(wp)                      :: lat_local,lon_local,max_z     ! helper variables     
+    real(wp), allocatable         :: oro_large_scale(:,:)          ! large-scale orography contribution
+    real(wp), allocatable         :: lake_depth_gldb(:,:)          ! GLDB lake depth data
+    real(wp)                      :: toa_oro                       ! top of terrain-following coordinates
+    real(wp)                      :: delta_lat_gldb                ! latitude resolution of the GLDB grid
+    real(wp)                      :: delta_lon_gldb                ! longitude resolution of the GLDB grid
+    real(wp)                      :: min_lake_fraction             ! minimum lake fraction
+    real(wp)                      :: max_lake_fraction             ! maximum lake fraction
+    integer                       :: glcc_fileunit                 ! file unit of the GLCC (Global Land Cover Characteristics) file
+    integer                       :: gldb_fileunit                 ! file unit of the GLDB (Global Lake Database) file
+    integer                       :: nlon_glcc                     ! number of longitude points of the GLCC grid
+    integer                       :: nlat_glcc                     ! number of latitude points of the GLCC grid
+    integer                       :: nlon_gldb                     ! number of longitude points of the GLDB grid
+    integer                       :: nlat_gldb                     ! number of latitude points of the GLDB grid
+    integer                       :: lat_index_gldb                ! latitude index of a grid point of GLDB
+    integer                       :: lon_index_gldb                ! longitude index of a grid point of GLDB
+    integer                       :: lat_index_span_gldb           ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                       :: lon_index_span_gldb           ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                       :: left_index_gldb               ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                       :: right_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                       :: lower_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                       :: upper_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                       :: n_points_gldb_domain          ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                       :: jm_used                       ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                       :: jn_used                       ! helper variable for interpolating the GLDB data to the GAME grid
+    integer(2),       allocatable :: lake_depth_gldb_raw(:,:)      ! GLDB lake depth data as read from file
+    character(len=1), allocatable :: glcc_raw(:,:)                 ! GLCC raw data
+    integer,          allocatable :: glcc(:,:)                     ! GLCC data
+    integer                       :: ji                            ! horizontal index
+    integer                       :: jk                            ! horizontal index
+    integer                       :: jl                            ! layer or level index
+    integer                       :: jm                            ! helper index
+    integer                       :: jn                            ! helper index
     
     ! Horizontal grid properties
     ! --------------------------
@@ -320,7 +325,33 @@ module mo_grid_generator
         if (lread_geo) then
           call read_geo(grid)
         else
-    
+          
+          ! Land fraction
+          ! -------------
+          
+          nlat_glcc = 21600
+          nlon_glcc = 43200
+          
+          ! opening the GLCC file
+          open(action="read",file="../../grids/phys_sfc_quantities/sfc-fields-usgs-veg30susgs",form="unformatted", &
+          access="direct",recl=nlon_glcc,newunit=glcc_fileunit)
+          
+          allocate(glcc_raw(nlat_glcc,nlon_glcc))
+          allocate(glcc(nlat_glcc,nlon_glcc))
+          
+          !$omp parallel do private(ji)
+          do ji=1,nlat_glcc
+            read(unit=glcc_fileunit,rec=ji) glcc_raw(ji,:)
+            glcc(ji,:) = ichar(glcc_raw(ji,:))
+          end do
+          !$omp end parallel do
+           
+          deallocate(glcc_raw)
+          
+          
+          
+          deallocate(glcc)
+          
           ! Lake fraction
           
           nlat_gldb = 21600
