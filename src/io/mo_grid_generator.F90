@@ -329,6 +329,8 @@ module mo_grid_generator
           ! Land fraction
           ! -------------
           
+          write(*,*) "Setting the land fraction ..."
+          
           nlat_glcc = 21600
           nlon_glcc = 43200
           
@@ -352,7 +354,12 @@ module mo_grid_generator
           
           deallocate(glcc)
           
+          write(*,*) "Land fraction set."
+          
           ! Lake fraction
+          ! -------------
+          
+          write(*,*) "Setting the lake fraction ..."
           
           nlat_gldb = 21600
           nlon_gldb = 43200
@@ -452,6 +459,12 @@ module mo_grid_generator
           
           deallocate(lake_depth_gldb)
           
+          write(*,*) "Lake fraction set."
+          
+          ! Orography
+          
+          write(*,*) "Setting the orography ..."
+          
           call set_orography(grid)
           !$omp parallel workshare
           oro_large_scale = grid%z_w(:,:,n_levels)
@@ -466,6 +479,9 @@ module mo_grid_generator
             grid%z_w(:,:,n_levels) = oro_large_scale
             !$omp end parallel workshare
           endif
+          
+          write(*,*) "Orography set."
+          
         endif
       
       ! Schaer wave test orography
