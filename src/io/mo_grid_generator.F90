@@ -68,7 +68,6 @@ module mo_grid_generator
     real(wp)                      :: local_j(3)                    ! local j-vector
     real(wp)                      :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
     real(wp)                      :: lat_local,lon_local,max_z     ! helper variables     
-    real(wp), allocatable         :: oro_large_scale(:,:)          ! large-scale orography contribution
     real(wp), allocatable         :: lake_depth_gldb(:,:)          ! GLDB lake depth data
     real(wp)                      :: toa_oro                       ! top of terrain-following coordinates
     real(wp)                      :: delta_lat_glcc                ! latitude resolution of the GLCC grid
@@ -320,15 +319,13 @@ module mo_grid_generator
     ! Physical grid properties
     ! ------------------------
     
-    allocate(oro_large_scale(ny,nx))
-    
     select case (orography_id)
     
       ! no orography
       case(0)
         
         !$omp parallel workshare
-        grid%z_w(:,:,n_levels) = 0._wp
+        grid%oro = 0._wp
         !$omp end parallel workshare
       
       ! real orography (and other surface properties)
@@ -552,16 +549,16 @@ module mo_grid_generator
           
           call set_orography(grid)
           !$omp parallel workshare
-          oro_large_scale = grid%z_w(:,:,n_levels)
+          grid%oro_smoothed = grid%oro
           !$omp end parallel workshare
-          call smooth_hor_scalar(oro_large_scale)
+          call smooth_hor_scalar(grid%oro_smoothed)
           if (lsleve) then
             !$omp parallel workshare
-            grid%z_w(:,:,n_levels) = oro_large_scale + 0.2_wp*(grid%z_w(:,:,n_levels) - oro_large_scale)
+            grid%oro = grid%oro_smoothed + 0.2_wp*(grid%oro - grid%oro_smoothed)
             !$omp end parallel workshare
           else
             !$omp parallel workshare
-            grid%z_w(:,:,n_levels) = oro_large_scale
+            grid%oro = grid%oro_smoothed
             !$omp end parallel workshare
           endif
           
@@ -576,7 +573,7 @@ module mo_grid_generator
         do jk=1,nx
           x_coord = dx*jk - (nx/2 + 1)*dx
           grid%z_w(:,jk,n_levels) = height_mountain*exp(-x_coord**2/5000._wp**2)*cos(M_PI*x_coord/4000._wp)**2
-          oro_large_scale(:,jk) = 0.5_wp*height_mountain*exp(-x_coord**2/5000._wp**2)
+          grid%oro_smoothed(:,jk) = 0.5_wp*height_mountain*exp(-x_coord**2/5000._wp**2)
         enddo
         !$omp end parallel do
       
@@ -596,69 +593,77 @@ module mo_grid_generator
     
     endselect
     
+    !$omp parallel workshare
+    grid%z_w(:,:,n_levels) = grid%oro
+    !$omp end parallel workshare
+    
     ! Other physical properties of the surface
     ! ----------------------------------------
     
-    density_soil = 1442._wp
-    c_p_soil = 830._wp
-    c_p_water = 4184._wp
-    albedo_water = 0.06_wp
-    ! setting the land surface albedo to 0.12 (compare Zdunkowski, Trautmann & Bott:
-    ! Radiation in the Atmosphere, 2007, p. 444)
-    albedo_soil = 0.12_wp
-    albedo_ice = 0.8_wp
-    
-    !$omp parallel do private(ji,jk,x_coord)
-    do jk=1,nx
-      do ji=1,ny
-        
-        ! seabreeze land-sea mask
-        if (trim(scenario)=="seabreeze") then
-          if (jk>=nx/4 .and. jk<=3*nx/4) then
-            grid%land_fraction(ji,jk) = 1._wp
-          endif
-        endif
-        
-        grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk)) - lapse_rate*grid%z_w(ji,jk,n_levels)
-            
-        ! albedo of water
-        grid%sfc_albedo(ji,jk) = albedo_water
-
-        ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
-        grid%roughness_length(ji,jk) = 0.08_wp
-        
-        ! will also not be used for water
-        grid%sfc_rho_c(ji,jk) = rho_h2o*c_p_water
-        
-        grid%t_conduc_soil(ji,jk) = 1.4e-7_wp
-        
-        ! land is present in this grid cell
-        if (grid%land_fraction(ji,jk)>0._wp) then
-        
-          grid%t_conduc_soil(ji,jk) = 7.5e-7_wp
-        
-          grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
-          
-          ! setting the surface albedo of land depending on the latitude
-          ! ice
-          if (abs(360._wp/(2._wp*M_PI)*grid%lat_geo_scalar(ji,jk))>70._wp) then
-            grid%sfc_albedo(ji,jk) = grid%land_fraction(ji,jk)*albedo_ice + (1._wp-grid%land_fraction(ji,jk))*albedo_water
-          ! normal soil
-          else
-            grid%sfc_albedo(ji,jk) = grid%land_fraction(ji,jk)*albedo_soil + (1._wp-grid%land_fraction(ji,jk))*albedo_water
-          endif
-          
-          ! calculating a roughness length depending on the vegetation height
-          grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_geo_scalar(ji,jk),grid%z_w(ji,jk,n_levels))/8._wp
-          
-        endif
-        
-        ! restricting the roughness length to a minimum
-        grid%roughness_length(ji,jk) = max(0.0001_wp,grid%roughness_length(ji,jk))
+    if (.not. lread_geo) then
       
+      density_soil = 1442._wp
+      c_p_soil = 830._wp
+      c_p_water = 4184._wp
+      albedo_water = 0.06_wp
+      ! setting the land surface albedo to 0.12 (compare Zdunkowski, Trautmann & Bott:
+      ! Radiation in the Atmosphere, 2007, p. 444)
+      albedo_soil = 0.12_wp
+      albedo_ice = 0.8_wp
+      
+      !$omp parallel do private(ji,jk,x_coord)
+      do jk=1,nx
+        do ji=1,ny
+          
+          ! seabreeze land-sea mask
+          if (trim(scenario)=="seabreeze") then
+            if (jk>=nx/4 .and. jk<=3*nx/4) then
+              grid%land_fraction(ji,jk) = 1._wp
+            endif
+          endif
+          
+          grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk)) - lapse_rate*grid%z_w(ji,jk,n_levels)
+              
+          ! albedo of water
+          grid%sfc_albedo(ji,jk) = albedo_water
+  
+          ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
+          grid%roughness_length(ji,jk) = 0.08_wp
+          
+          ! will also not be used for water
+          grid%sfc_rho_c(ji,jk) = rho_h2o*c_p_water
+          
+          grid%t_conduc_soil(ji,jk) = 1.4e-7_wp
+          
+          ! land is present in this grid cell
+          if (grid%land_fraction(ji,jk)>0._wp) then
+          
+            grid%t_conduc_soil(ji,jk) = 7.5e-7_wp
+          
+            grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
+            
+            ! setting the surface albedo of land depending on the latitude
+            ! ice
+            if (abs(360._wp/(2._wp*M_PI)*grid%lat_geo_scalar(ji,jk))>70._wp) then
+              grid%sfc_albedo(ji,jk) = grid%land_fraction(ji,jk)*albedo_ice + (1._wp-grid%land_fraction(ji,jk))*albedo_water
+            ! normal soil
+            else
+              grid%sfc_albedo(ji,jk) = grid%land_fraction(ji,jk)*albedo_soil + (1._wp-grid%land_fraction(ji,jk))*albedo_water
+            endif
+            
+            ! calculating a roughness length depending on the vegetation height
+            grid%roughness_length(ji,jk) = vegetation_height_ideal(grid%lat_geo_scalar(ji,jk),grid%z_w(ji,jk,n_levels))/8._wp
+            
+          endif
+          
+          ! restricting the roughness length to a minimum
+          grid%roughness_length(ji,jk) = max(0.0001_wp,grid%roughness_length(ji,jk))
+        
+        enddo
       enddo
-    enddo
-    !$omp end parallel do
+      !$omp end parallel do
+      
+    endif
     
     ! Vertical grid
     ! -------------
@@ -678,14 +683,14 @@ module mo_grid_generator
             if (lsleve) then
               toa_oro = vertical_vector_pre(n_flat_layers+1)
               if (orography_id==2) then
-                vertical_vector_pre(jl) = A + sinh((toa_oro-A)/5.e3_wp)/sinh(toa_oro/5.e3_wp)*oro_large_scale(ji,jk) &
+                vertical_vector_pre(jl) = A + sinh((toa_oro-A)/5.e3_wp)/sinh(toa_oro/5.e3_wp)*grid%oro_smoothed(ji,jk) &
                                           + sinh((toa_oro-A)/2.e3_wp)/sinh(toa_oro/2.e3_wp) &
-                                          *(grid%z_w(ji,jk,n_levels) - oro_large_scale(ji,jk))
+                                          *(grid%z_w(ji,jk,n_levels) - grid%oro_smoothed(ji,jk))
               else
                 vertical_vector_pre(jl) = A + sinh((toa_oro-A)/(0.5_wp*toa_oro))/sinh(toa_oro/(0.5_wp*toa_oro)) &
-                                          *oro_large_scale(ji,jk) &
+                                          *grid%oro_smoothed(ji,jk) &
                                           + sinh((toa_oro-A)/(0.25_wp*toa_oro))/sinh(toa_oro/(0.25_wp*toa_oro)) &
-                                          *(grid%z_w(ji,jk,n_levels) - oro_large_scale(ji,jk))
+                                          *(grid%z_w(ji,jk,n_levels) - grid%oro_smoothed(ji,jk))
               endif
             else
               B = (jl-(n_flat_layers+1._wp))/n_oro_layers
@@ -723,8 +728,6 @@ module mo_grid_generator
       enddo
     enddo
     !$omp end parallel do
-    
-    deallocate(oro_large_scale)
     
     ! setting the height of the u-vector points
     ! inner domain

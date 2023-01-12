@@ -110,6 +110,8 @@ program control
   allocate(grid%dir_geo_v(ny+1,nx))
   allocate(grid%dir_geo_u_scalar(ny,nx))
   allocate(grid%z_scalar(ny,nx,n_layers))
+  allocate(grid%oro(ny,nx))
+  allocate(grid%oro_smoothed(ny,nx))
   allocate(grid%dx(ny,nx+1,n_layers))
   allocate(grid%dy(ny+1,nx,n_layers))
   allocate(grid%dz(ny,nx,n_levels))
@@ -281,6 +283,8 @@ program control
   grid%dir_geo_v = 0._wp
   grid%dir_geo_u_scalar = 0._wp
   grid%z_scalar = 0._wp
+  grid%oro = 0._wp
+  grid%oro_smoothed = 0._wp
   grid%dx = 0._wp
   grid%dy = 0._wp
   grid%dz = 0._wp
@@ -561,6 +565,8 @@ program control
   deallocate(grid%dir_geo_v)
   deallocate(grid%dir_geo_u_scalar)
   deallocate(grid%z_scalar)
+  deallocate(grid%oro)
+  deallocate(grid%oro_smoothed)
   deallocate(grid%dy)
   deallocate(grid%dx)
   deallocate(grid%dz)

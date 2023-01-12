@@ -40,6 +40,8 @@ module mo_definitions
     real(wp), allocatable :: dir_geo_v(:,:)                 ! geographic directions of the v-vectors
     real(wp), allocatable :: dir_geo_u_scalar(:,:)          ! geographic directions of the u-vectors at the scalar points
     real(wp), allocatable :: z_scalar(:,:,:)                ! geometric heights of the scalar gridpoints
+    real(wp), allocatable :: oro(:,:)                       ! orography
+    real(wp), allocatable :: oro_smoothed(:,:)              ! smoothed orography
     real(wp), allocatable :: dx(:,:,:)                      ! gridpoint distance in x-direction
     real(wp), allocatable :: dy(:,:,:)                      ! gridpoint distance in y-direction
     real(wp), allocatable :: dz(:,:,:)                      ! gridpoint distance in z-direction
