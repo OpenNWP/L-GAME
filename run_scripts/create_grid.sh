@@ -39,6 +39,7 @@ lrad=.false.
 
 &surface
 orography_id=$orography_id
+lsleve=.true.
 /
 
 &bc

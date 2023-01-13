@@ -21,7 +21,7 @@ run_span_min=4320
 /
 
 &io
-lread_geo=.true.
+lread_geo=.false.
 lwrite_grid=.false.
 /
 
@@ -38,6 +38,7 @@ lrad=.true.
 
 &surface
 orography_id=1
+lsleve=.true.
 /
 
 &bc
