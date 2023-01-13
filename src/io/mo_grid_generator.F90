@@ -1268,7 +1268,7 @@ module mo_grid_generator
 
     ! default
     !$omp parallel workshare
-    grid%z_w = 0._wp
+    grid%oro = 0._wp
     !$omp end parallel workshare
 
     ! setting the unfiltered orography
@@ -1289,11 +1289,11 @@ module mo_grid_generator
         lat_index = find_min_index(lat_distance_vector)
         lon_index = find_min_index(lon_distance_vector)
         
-        grid%z_w(ji,jk,n_levels) = real(z_input(lon_index,lat_index),wp)/5._wp
+        grid%oro(ji,jk) = real(z_input(lon_index,lat_index),wp)/5._wp
         
         ! over the sea there is no orography
         if (grid%land_fraction(ji,jk)+grid%lake_fraction(ji,jk)<0.5_wp) then
-          grid%z_w(ji,jk,n_levels) = 0._wp
+          grid%oro(ji,jk) = 0._wp
         endif
         
       enddo
@@ -1371,7 +1371,7 @@ module mo_grid_generator
     !$omp parallel do private(ji,jk)
     do jk=1,nx
       do ji=1,ny
-        grid%z_w(ji,jk,n_levels) = grid%z_w(ji,jk,n_levels) + (z_u(ji,jk) + z_u(ji,jk+1) + z_v(ji,jk) + z_v(ji+1,jk))/0.5_wp
+        grid%oro(ji,jk) = grid%oro(ji,jk) + (z_u(ji,jk) + z_u(ji,jk+1) + z_v(ji,jk) + z_v(ji+1,jk))/0.5_wp
       enddo
     enddo
     !$omp end parallel do
