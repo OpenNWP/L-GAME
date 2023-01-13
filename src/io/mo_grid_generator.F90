@@ -366,7 +366,8 @@ module mo_grid_generator
               lon_index_ext = max(1,lon_index_ext)
               lon_index_ext = min(nlon_ext,lon_index_ext)
               
-              lon_index_span_ext = int(eff_hor_res/(r_e*delta_lon_ext*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)))
+              lon_index_span_ext = int(min(eff_hor_res/(r_e*delta_lon_ext*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)), &
+                                           0._wp+nlon_ext))
               lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
               n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
               
@@ -462,7 +463,8 @@ module mo_grid_generator
               lon_index_ext = max(1,lon_index_ext)
               lon_index_ext = min(nlon_ext,lon_index_ext)
               
-              lon_index_span_ext = int(eff_hor_res/(r_e*delta_lon_ext*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)))
+              lon_index_span_ext = int(min(eff_hor_res/(r_e*delta_lon_ext*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)), &
+                                           0._wp+nlon_ext))
               lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
               n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
               
