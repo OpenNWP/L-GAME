@@ -181,7 +181,7 @@ module mo_read_write_grid
     integer           :: varid_roughness_length ! variable ID of the roughness length
     integer           :: varid_sfc_albedo       ! variable ID of the surface albedo
     integer           :: varid_sfc_rho_c        ! variable ID of the surface volumetric heap capacity
-    integer           :: varid_t_conductivity   ! variable ID of the surface temperature conductivity
+    integer           :: varid_t_conduc_soil    ! variable ID of the surface temperature conductivity
     integer           :: varid_oro              ! variable ID of the orography
     integer           :: varid_oro_smoothed     ! variable ID of the smoothed orography
     
@@ -197,7 +197,7 @@ module mo_read_write_grid
     call nc_check(nf90_inq_varid(ncid,"roughness_length",varid_roughness_length))
     call nc_check(nf90_inq_varid(ncid,"sfc_albedo",varid_sfc_albedo))
     call nc_check(nf90_inq_varid(ncid,"sfc_rho_c",varid_sfc_rho_c))
-    call nc_check(nf90_inq_varid(ncid,"t_conductivity",varid_t_conductivity))
+    call nc_check(nf90_inq_varid(ncid,"t_conduc_soil",varid_t_conduc_soil))
     call nc_check(nf90_inq_varid(ncid,"oro",varid_oro))
     call nc_check(nf90_inq_varid(ncid,"oro_smoothed",varid_oro_smoothed))
     
@@ -207,7 +207,7 @@ module mo_read_write_grid
     call nc_check(nf90_get_var(ncid,varid_roughness_length,grid%roughness_length))
     call nc_check(nf90_get_var(ncid,varid_sfc_albedo,grid%sfc_albedo))
     call nc_check(nf90_get_var(ncid,varid_sfc_rho_c,grid%sfc_rho_c))
-    call nc_check(nf90_get_var(ncid,varid_t_conductivity,grid%t_conduc_soil))
+    call nc_check(nf90_get_var(ncid,varid_t_conduc_soil,grid%t_conduc_soil))
     call nc_check(nf90_get_var(ncid,varid_oro,grid%oro))
     call nc_check(nf90_get_var(ncid,varid_oro_smoothed,grid%oro_smoothed))
     
