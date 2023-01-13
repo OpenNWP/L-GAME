@@ -69,18 +69,18 @@ module mo_grid_generator
     real(wp)                      :: lat_local,lon_local,max_z     ! helper variables     
     real(wp), allocatable         :: lake_depth_gldb(:,:)          ! GLDB lake depth data
     real(wp)                      :: toa_oro                       ! top of terrain-following coordinates
-    real(wp)                      :: delta_lat_ext                 ! latitude resolution of the GLCC grid
-    real(wp)                      :: delta_lon_ext                 ! longitude resolution of the GLCC grid
+    real(wp)                      :: delta_lat_ext                 ! latitude resolution of the external data grid
+    real(wp)                      :: delta_lon_ext                 ! longitude resolution of the external data grid
     real(wp)                      :: min_lake_fraction             ! minimum lake fraction
     real(wp)                      :: max_lake_fraction             ! maximum lake fraction
     real(wp)                      :: fractions_sum                 ! sum of land fraction and lake fraction
     real(wp)                      :: min_oro                       ! minimum of the orography
     real(wp)                      :: max_oro                       ! maximum of the orography
     integer                       :: ext_fileunit                  ! file unit of an external data file
-    integer                       :: nlon_ext                      ! number of longitude points of the GLCC grid
-    integer                       :: nlat_ext                      ! number of latitude points of the GLCC grid
-    integer                       :: lat_index_ext                 ! latitude index of a grid point of GLCC
-    integer                       :: lon_index_ext                 ! longitude index of a grid point of GLCC
+    integer                       :: nlon_ext                      ! number of longitude points of the external data grid
+    integer                       :: nlat_ext                      ! number of latitude points of the external data grid
+    integer                       :: lat_index_ext                 ! latitude index of a grid point of the external data
+    integer                       :: lon_index_ext                 ! longitude index of a grid point of the external data
     integer                       :: lat_index_span_ext            ! helper variable for interpolating external data to the GAME grid
     integer                       :: lon_index_span_ext            ! helper variable for interpolating external data to the GAME grid
     integer                       :: left_index_ext                ! helper variable for interpolating external data to the GAME grid
