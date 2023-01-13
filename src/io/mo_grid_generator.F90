@@ -69,41 +69,27 @@ module mo_grid_generator
     real(wp)                      :: lat_local,lon_local,max_z     ! helper variables     
     real(wp), allocatable         :: lake_depth_gldb(:,:)          ! GLDB lake depth data
     real(wp)                      :: toa_oro                       ! top of terrain-following coordinates
-    real(wp)                      :: delta_lat_glcc                ! latitude resolution of the GLCC grid
-    real(wp)                      :: delta_lon_glcc                ! longitude resolution of the GLCC grid
-    real(wp)                      :: delta_lat_gldb                ! latitude resolution of the GLDB grid
-    real(wp)                      :: delta_lon_gldb                ! longitude resolution of the GLDB grid
+    real(wp)                      :: delta_lat_ext                 ! latitude resolution of the GLCC grid
+    real(wp)                      :: delta_lon_ext                 ! longitude resolution of the GLCC grid
     real(wp)                      :: min_lake_fraction             ! minimum lake fraction
     real(wp)                      :: max_lake_fraction             ! maximum lake fraction
     real(wp)                      :: fractions_sum                 ! sum of land fraction and lake fraction
     real(wp)                      :: min_oro                       ! minimum of the orography
     real(wp)                      :: max_oro                       ! maximum of the orography
-    integer                       :: glcc_fileunit                 ! file unit of the GLCC (Global Land Cover Characteristics) file
-    integer                       :: gldb_fileunit                 ! file unit of the GLDB (Global Lake Database) file
-    integer                       :: nlon_glcc                     ! number of longitude points of the GLCC grid
-    integer                       :: nlat_glcc                     ! number of latitude points of the GLCC grid
-    integer                       :: nlon_gldb                     ! number of longitude points of the GLDB grid
-    integer                       :: nlat_gldb                     ! number of latitude points of the GLDB grid
-    integer                       :: lat_index_glcc                ! latitude index of a grid point of GLCC
-    integer                       :: lon_index_glcc                ! longitude index of a grid point of GLCC
-    integer                       :: lat_index_gldb                ! latitude index of a grid point of GLDB
-    integer                       :: lon_index_gldb                ! longitude index of a grid point of GLDB
-    integer                       :: lat_index_span_glcc           ! helper variable for interpolating the GLCC data to the GAME grid
-    integer                       :: lon_index_span_glcc           ! helper variable for interpolating the GLCC data to the GAME grid
-    integer                       :: lat_index_span_gldb           ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                       :: lon_index_span_gldb           ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                       :: left_index_glcc               ! helper variable for interpolating the GLCC data to the GAME grid
-    integer                       :: right_index_glcc              ! helper variable for interpolating the GLCC data to the GAME grid
-    integer                       :: lower_index_glcc              ! helper variable for interpolating the GLCC data to the GAME grid
-    integer                       :: upper_index_glcc              ! helper variable for interpolating the GLCC data to the GAME grid
-    integer                       :: left_index_gldb               ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                       :: right_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                       :: lower_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                       :: upper_index_gldb              ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                       :: n_points_glcc_domain          ! helper variable for interpolating the GLCC data to the GAME grid
-    integer                       :: n_points_gldb_domain          ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                       :: jm_used                       ! helper variable for interpolating the GLDB data to the GAME grid
-    integer                       :: jn_used                       ! helper variable for interpolating the GLDB data to the GAME grid
+    integer                       :: ext_fileunit                  ! file unit of an external data file
+    integer                       :: nlon_ext                      ! number of longitude points of the GLCC grid
+    integer                       :: nlat_ext                      ! number of latitude points of the GLCC grid
+    integer                       :: lat_index_ext                 ! latitude index of a grid point of GLCC
+    integer                       :: lon_index_ext                 ! longitude index of a grid point of GLCC
+    integer                       :: lat_index_span_ext            ! helper variable for interpolating external data to the GAME grid
+    integer                       :: lon_index_span_ext            ! helper variable for interpolating external data to the GAME grid
+    integer                       :: left_index_ext                ! helper variable for interpolating external data to the GAME grid
+    integer                       :: right_index_ext               ! helper variable for interpolating external data to the GAME grid
+    integer                       :: lower_index_ext               ! helper variable for interpolating external data to the GAME grid
+    integer                       :: upper_index_ext               ! helper variable for interpolating external data to the GAME grid
+    integer                       :: n_points_ext_domain           ! helper variable for interpolating external data to the GAME grid
+    integer                       :: jm_used                       ! helper variable for interpolating external data to the GAME grid
+    integer                       :: jn_used                       ! helper variable for interpolating external data to the GAME grid
     integer(2),       allocatable :: lake_depth_gldb_raw(:,:)      ! GLDB lake depth data as read from file
     character(len=1), allocatable :: glcc_raw(:,:)                 ! GLCC raw data
     integer,          allocatable :: glcc(:,:)                     ! GLCC data
@@ -341,70 +327,70 @@ module mo_grid_generator
           
           write(*,*) "Setting the land fraction ..."
           
-          nlat_glcc = 21600
-          nlon_glcc = 43200
+          nlat_ext = 21600
+          nlon_ext = 43200
           
           ! opening the GLCC file
           open(action="read",file="../../grids/phys_sfc_quantities/sfc-fields-usgs-veg30susgs",form="unformatted", &
-          access="direct",recl=nlon_glcc,newunit=glcc_fileunit)
+          access="direct",recl=nlon_ext,newunit=ext_fileunit)
           
-          allocate(glcc_raw(nlat_glcc,nlon_glcc))
-          allocate(glcc(nlat_glcc,nlon_glcc))
+          allocate(glcc_raw(nlat_ext,nlon_ext))
+          allocate(glcc(nlat_ext,nlon_ext))
           
           !$omp parallel do private(ji)
-          do ji=1,nlat_glcc
-            read(unit=glcc_fileunit,rec=ji) glcc_raw(ji,:)
+          do ji=1,nlat_ext
+            read(unit=ext_fileunit,rec=ji) glcc_raw(ji,:)
             glcc(ji,:) = ichar(glcc_raw(ji,:))
           end do
           !$omp end parallel do
            
           deallocate(glcc_raw)
           
-          delta_lat_glcc = M_PI/nlat_glcc
-          delta_lon_glcc = 2._wp*M_PI/nlon_glcc
+          delta_lat_ext = M_PI/nlat_ext
+          delta_lon_ext = 2._wp*M_PI/nlon_ext
           
-          lat_index_span_glcc = int(eff_hor_res/(r_e*delta_lat_glcc))
+          lat_index_span_ext = int(eff_hor_res/(r_e*delta_lat_ext))
           
-          !$omp parallel do private(ji,jk,lat_index_glcc,lon_index_glcc,lon_index_span_glcc,left_index_glcc,right_index_glcc, &
-          !$omp lower_index_glcc,upper_index_glcc,n_points_glcc_domain,jm_used,jn_used)
+          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,lon_index_span_ext,left_index_ext,right_index_ext, &
+          !$omp lower_index_ext,upper_index_ext,n_points_ext_domain,jm_used,jn_used)
           do jk=1,nx
             do ji=1,ny
               
               ! computing the indices of the GLCC grid point that is the closest to the center of this grid cell
-              lat_index_glcc = nlat_glcc/2 - int(grid%lat_geo_scalar(ji,jk)/delta_lat_glcc)
-              lon_index_glcc = nlon_glcc/2 + int(grid%lon_geo_scalar(ji,jk)/delta_lon_glcc)
+              lat_index_ext = nlat_ext/2 - int(grid%lat_geo_scalar(ji,jk)/delta_lat_ext)
+              lon_index_ext = nlon_ext/2 + int(grid%lon_geo_scalar(ji,jk)/delta_lon_ext)
               
               ! making sure the point is actually on the GLCC grid
-              lat_index_glcc = max(1,lat_index_glcc)
-              lat_index_glcc = min(nlat_glcc,lat_index_glcc)
-              lon_index_glcc = max(1,lon_index_glcc)
-              lon_index_glcc = min(nlon_glcc,lon_index_glcc)
+              lat_index_ext = max(1,lat_index_ext)
+              lat_index_ext = min(nlat_ext,lat_index_ext)
+              lon_index_ext = max(1,lon_index_ext)
+              lon_index_ext = min(nlon_ext,lon_index_ext)
               
-              lon_index_span_glcc = int(eff_hor_res/(r_e*delta_lon_glcc*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)))
-              lon_index_span_glcc = min(lon_index_span_glcc,nlon_glcc)
-              n_points_glcc_domain = (lat_index_span_glcc+1)*(lon_index_span_glcc+1)
+              lon_index_span_ext = int(eff_hor_res/(r_e*delta_lon_ext*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)))
+              lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
+              n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
               
-              lower_index_glcc = lat_index_glcc + lat_index_span_glcc/2
-              upper_index_glcc = lat_index_glcc - lat_index_span_glcc/2
-              left_index_glcc = lon_index_glcc - lon_index_span_glcc/2
-              right_index_glcc = lon_index_glcc + lon_index_span_glcc/2
+              lower_index_ext = lat_index_ext + lat_index_span_ext/2
+              upper_index_ext = lat_index_ext - lat_index_span_ext/2
+              left_index_ext = lon_index_ext - lon_index_span_ext/2
+              right_index_ext = lon_index_ext + lon_index_span_ext/2
               
               ! counting the number of lake points in the GLCC domain that is used to interpolate to the GAME grid cell
-              do jm=upper_index_glcc,lower_index_glcc
-                do jn=left_index_glcc,right_index_glcc
+              do jm=upper_index_ext,lower_index_ext
+                do jn=left_index_ext,right_index_ext
                   jm_used = jm
                   if (jm_used<1) then
                     jm_used = 1
                   endif
-                  if (jm_used>nlat_glcc) then
-                    jm_used = nlat_glcc
+                  if (jm_used>nlat_ext) then
+                    jm_used = nlat_ext
                   endif
                   jn_used = jn
                   if (jn_used<1) then
-                    jn_used = jn_used + nlon_glcc
+                    jn_used = jn_used + nlon_ext
                   endif
-                  if (jn_used>nlon_glcc) then
-                    jn_used = jn_used - nlon_glcc
+                  if (jn_used>nlon_ext) then
+                    jn_used = jn_used - nlon_ext
                   endif
                   
                   if (glcc(jm_used,jn_used)/=16) then
@@ -414,7 +400,7 @@ module mo_grid_generator
                 enddo
               enddo
               
-              grid%land_fraction(ji,jk) = grid%land_fraction(ji,jk)/n_points_glcc_domain
+              grid%land_fraction(ji,jk) = grid%land_fraction(ji,jk)/n_points_ext_domain
               
             enddo
           enddo
@@ -429,35 +415,35 @@ module mo_grid_generator
           
           write(*,*) "Setting the lake fraction ..."
           
-          nlat_gldb = 21600
-          nlon_gldb = 43200
+          nlat_ext = 21600
+          nlon_ext = 43200
             
           ! opening the lake depth file
           open(action="read",file="../../grids/phys_sfc_quantities/GlobalLakeDepth.dat",form="unformatted", &
-          access="direct",recl=2*nlon_gldb,newunit=gldb_fileunit)
+          access="direct",recl=2*nlon_ext,newunit=ext_fileunit)
           
-          allocate(lake_depth_gldb_raw(nlat_gldb,nlon_gldb))
-          allocate(lake_depth_gldb(nlat_gldb,nlon_gldb))
+          allocate(lake_depth_gldb_raw(nlat_ext,nlon_ext))
+          allocate(lake_depth_gldb(nlat_ext,nlon_ext))
           
           !$omp parallel do private(ji)
-          do ji=1,nlat_gldb
-            read(unit=gldb_fileunit,rec=ji) lake_depth_gldb_raw(ji,:)
+          do ji=1,nlat_ext
+            read(unit=ext_fileunit,rec=ji) lake_depth_gldb_raw(ji,:)
             lake_depth_gldb(ji,:) = lake_depth_gldb_raw(ji,:)/10._wp
           enddo
           !$omp end parallel do
           
           ! closing the lake depth file
-          close(gldb_fileunit)
+          close(ext_fileunit)
           
           deallocate(lake_depth_gldb_raw)
           
-          delta_lat_gldb = M_PI/nlat_gldb
-          delta_lon_gldb = 2._wp*M_PI/nlon_gldb
+          delta_lat_ext = M_PI/nlat_ext
+          delta_lon_ext = 2._wp*M_PI/nlon_ext
           
-          lat_index_span_gldb = int(eff_hor_res/(r_e*delta_lat_gldb))
+          lat_index_span_ext = int(eff_hor_res/(r_e*delta_lat_ext))
           
-          !$omp parallel do private(ji,jk,lat_index_gldb,lon_index_gldb,lon_index_span_gldb,left_index_gldb,right_index_gldb, &
-          !$omp lower_index_gldb,upper_index_gldb,n_points_gldb_domain,jm_used,jn_used)
+          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,lon_index_span_ext,left_index_ext,right_index_ext, &
+          !$omp lower_index_ext,upper_index_ext,n_points_ext_domain,jm_used,jn_used)
           do jk=1,nx
             do ji=1,ny
               
@@ -467,40 +453,40 @@ module mo_grid_generator
               endif
               
               ! computing the indices of the GLDB grid point that is the closest to the center of this grid cell
-              lat_index_gldb = nlat_gldb/2 - int(grid%lat_geo_scalar(ji,jk)/delta_lat_gldb)
-              lon_index_gldb = nlon_gldb/2 + int(grid%lon_geo_scalar(ji,jk)/delta_lon_gldb)
+              lat_index_ext = nlat_ext/2 - int(grid%lat_geo_scalar(ji,jk)/delta_lat_ext)
+              lon_index_ext = nlon_ext/2 + int(grid%lon_geo_scalar(ji,jk)/delta_lon_ext)
               
               ! making sure the point is actually on the GLDB grid
-              lat_index_gldb = max(1,lat_index_gldb)
-              lat_index_gldb = min(nlat_gldb,lat_index_gldb)
-              lon_index_gldb = max(1,lon_index_gldb)
-              lon_index_gldb = min(nlon_gldb,lon_index_gldb)
+              lat_index_ext = max(1,lat_index_ext)
+              lat_index_ext = min(nlat_ext,lat_index_ext)
+              lon_index_ext = max(1,lon_index_ext)
+              lon_index_ext = min(nlon_ext,lon_index_ext)
               
-              lon_index_span_gldb = int(eff_hor_res/(r_e*delta_lon_gldb*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)))
-              lon_index_span_gldb = min(lon_index_span_gldb,nlon_gldb)
-              n_points_gldb_domain = (lat_index_span_gldb+1)*(lon_index_span_gldb+1)
+              lon_index_span_ext = int(eff_hor_res/(r_e*delta_lon_ext*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)))
+              lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
+              n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
               
-              lower_index_gldb = lat_index_gldb + lat_index_span_gldb/2
-              upper_index_gldb = lat_index_gldb - lat_index_span_gldb/2
-              left_index_gldb = lon_index_gldb - lon_index_span_gldb/2
-              right_index_gldb = lon_index_gldb + lon_index_span_gldb/2
+              lower_index_ext = lat_index_ext + lat_index_span_ext/2
+              upper_index_ext = lat_index_ext - lat_index_span_ext/2
+              left_index_ext = lon_index_ext - lon_index_span_ext/2
+              right_index_ext = lon_index_ext + lon_index_span_ext/2
               
               ! counting the number of lake points in the GLDB domain that is used to interpolate to the GAME grid cell
-              do jm=upper_index_gldb,lower_index_gldb
-                do jn=left_index_gldb,right_index_gldb
+              do jm=upper_index_ext,lower_index_ext
+                do jn=left_index_ext,right_index_ext
                   jm_used = jm
                   if (jm_used<1) then
                     jm_used = 1
                   endif
-                  if (jm_used>nlat_gldb) then
-                    jm_used = nlat_gldb
+                  if (jm_used>nlat_ext) then
+                    jm_used = nlat_ext
                   endif
                   jn_used = jn
                   if (jn_used<1) then
-                    jn_used = jn_used + nlon_gldb
+                    jn_used = jn_used + nlon_ext
                   endif
-                  if (jn_used>nlon_gldb) then
-                    jn_used = jn_used - nlon_gldb
+                  if (jn_used>nlon_ext) then
+                    jn_used = jn_used - nlon_ext
                   endif
                   
                   if (lake_depth_gldb(jm_used,jn_used)>0._wp) then
@@ -510,7 +496,7 @@ module mo_grid_generator
                 enddo
               enddo
               
-              grid%lake_fraction(ji,jk) = grid%lake_fraction(ji,jk)/n_points_gldb_domain
+              grid%lake_fraction(ji,jk) = grid%lake_fraction(ji,jk)/n_points_ext_domain
               ! lakes belong to the land (not the sea), the lake fraction cannot be greater than the land fraction
               grid%lake_fraction(ji,jk) = min(grid%lake_fraction(ji,jk),grid%land_fraction(ji,jk))
               
