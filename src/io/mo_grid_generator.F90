@@ -572,7 +572,7 @@ module mo_grid_generator
         !$omp parallel do private(jk,x_coord)
         do jk=1,nx
           x_coord = dx*jk - (nx/2 + 1)*dx
-          grid%z_w(:,jk,n_levels) = height_mountain*exp(-x_coord**2/5000._wp**2)*cos(M_PI*x_coord/4000._wp)**2
+          grid%oro(:,jk) = height_mountain*exp(-x_coord**2/5000._wp**2)*cos(M_PI*x_coord/4000._wp)**2
           grid%oro_smoothed(:,jk) = 0.5_wp*height_mountain*exp(-x_coord**2/5000._wp**2)
         enddo
         !$omp end parallel do
@@ -584,9 +584,9 @@ module mo_grid_generator
         do jk=1,nx
           x_coord = dx*jk - (nx/2 + 1)*dx
           if (abs(x_coord)<=25e3_wp) then
-            grid%z_w(:,jk,n_levels) = height_mountain*cos(0.5_wp*M_PI*x_coord/25000._wp)**2*cos(M_PI*x_coord/8000._wp)**2
+            grid%oro(:,jk) = height_mountain*cos(0.5_wp*M_PI*x_coord/25000._wp)**2*cos(M_PI*x_coord/8000._wp)**2
           else
-            grid%z_w(:,jk,n_levels) = 0._wp
+            grid%oro(:,jk) = 0._wp
           endif
         enddo
         !$omp end parallel do
