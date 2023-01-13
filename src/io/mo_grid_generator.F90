@@ -605,7 +605,7 @@ module mo_grid_generator
       albedo_soil = 0.12_wp
       albedo_ice = 0.8_wp
       
-      !$omp parallel do private(ji,jk,x_coord)
+      !$omp parallel do private(ji,jk)
       do jk=1,nx
         do ji=1,ny
           
