@@ -37,7 +37,6 @@ module mo_grid_generator
     real(wp)                      :: lon_left_upper                ! longitude coordinate of upper left corner
     real(wp)                      :: dlat                          ! mesh size in y direction as angle
     real(wp)                      :: dlon                          ! mesh size in x direction as angle
-    real(wp)                      :: max_oro                       ! variable for orography check
     real(wp)                      :: A                             ! variable for calculating the vertical grid (height of a level without orography)
     real(wp)                      :: B                             ! variable for calculating the vertical grid (orography weighting factor)
     real(wp)                      :: sigma_z                       ! variable for calculating the vertical grid (A/toa)
@@ -77,6 +76,8 @@ module mo_grid_generator
     real(wp)                      :: min_lake_fraction             ! minimum lake fraction
     real(wp)                      :: max_lake_fraction             ! maximum lake fraction
     real(wp)                      :: fractions_sum                 ! sum of land fraction and lake fraction
+    real(wp)                      :: min_oro                       ! minimum of the orography
+    real(wp)                      :: max_oro                       ! maximum of the orography
     integer                       :: glcc_fileunit                 ! file unit of the GLCC (Global Land Cover Characteristics) file
     integer                       :: gldb_fileunit                 ! file unit of the GLDB (Global Lake Database) file
     integer                       :: nlon_glcc                     ! number of longitude points of the GLCC grid
@@ -592,6 +593,13 @@ module mo_grid_generator
         !$omp end parallel do
     
     endselect
+  
+    !$omp parallel workshare
+    min_oro = minval(grid%oro)
+    max_oro = maxval(grid%oro)
+    !$omp end parallel workshare
+    write(*,*) "minimum orography:",min_oro,"m"
+    write(*,*) "maximum orography:",max_oro,"m"
     
     !$omp parallel workshare
     grid%z_w(:,:,n_levels) = grid%oro
