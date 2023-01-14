@@ -10,7 +10,7 @@ module mo_grid_generator
   use mo_run_nml,            only: ny,nx,n_layers,n_levels,dy,dx,toa,n_oro_layers,stretching_parameter,scenario,lat_center, &
                                    lon_center,lplane,n_flat_layers,eff_hor_res
   use mo_diff_nml,           only: klemp_begin_rel
-  use mo_constants,          only: r_e,rho_h2o,T_0,M_PI,p_0,omega,gravity,p_0_standard, &
+  use mo_constants,          only: r_e,rho_h2o,t_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                    lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv, &
                                    r_d,c_d_p,epsilon_security
   use mo_surface_nml,        only: nsoillays,orography_id,lsleve
@@ -33,6 +33,30 @@ module mo_grid_generator
     type(t_grid), intent(inout) :: grid ! the model grid
     
     ! local variables
+    integer                       :: ext_fileunit                  ! file unit of an external data file
+    integer                       :: ncid                          ! netCDF file ID
+    integer                       :: nlon_ext                      ! number of longitude points of the external data grid
+    integer                       :: nlat_ext                      ! number of latitude points of the external data grid
+    integer                       :: lat_index_ext                 ! latitude index of a grid point of the external data
+    integer                       :: lon_index_ext                 ! longitude index of a grid point of the external data
+    integer                       :: lat_index_span_ext            ! helper variable for interpolating external data to the GAME grid
+    integer                       :: lon_index_span_ext            ! helper variable for interpolating external data to the GAME grid
+    integer                       :: left_index_ext                ! helper variable for interpolating external data to the GAME grid
+    integer                       :: right_index_ext               ! helper variable for interpolating external data to the GAME grid
+    integer                       :: lower_index_ext               ! helper variable for interpolating external data to the GAME grid
+    integer                       :: upper_index_ext               ! helper variable for interpolating external data to the GAME grid
+    integer                       :: n_points_ext_domain           ! helper variable for interpolating external data to the GAME grid
+    integer                       :: jm_used                       ! helper variable for interpolating external data to the GAME grid
+    integer                       :: jn_used                       ! helper variable for interpolating external data to the GAME grid
+    integer                       :: etopo_oro_id           ! variable ID of the input orography
+    integer(2),       allocatable :: lake_depth_gldb_raw(:,:)      ! GLDB lake depth data as read from file
+    character(len=1), allocatable :: glcc_raw(:,:)                 ! GLCC raw data
+    integer,          allocatable :: glcc(:,:)                     ! GLCC data
+    integer                       :: ji                            ! horizontal index
+    integer                       :: jk                            ! horizontal index
+    integer                       :: jl                            ! layer or level index
+    integer                       :: jm                            ! helper index
+    integer                       :: jn                            ! helper index
     real(wp)                      :: lat_left_upper                ! latitude coordinate of upper left corner
     real(wp)                      :: lon_left_upper                ! longitude coordinate of upper left corner
     real(wp)                      :: dlat                          ! mesh size in y direction as angle
@@ -68,6 +92,7 @@ module mo_grid_generator
     real(wp)                      :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
     real(wp)                      :: lat_local,lon_local,max_z     ! helper variables     
     real(wp), allocatable         :: lake_depth_gldb(:,:)          ! GLDB lake depth data
+    integer,  allocatable         :: etopo_oro(:,:)                ! ETOPO orography
     real(wp)                      :: toa_oro                       ! top of terrain-following coordinates
     real(wp)                      :: delta_lat_ext                 ! latitude resolution of the external data grid
     real(wp)                      :: delta_lon_ext                 ! longitude resolution of the external data grid
@@ -76,28 +101,6 @@ module mo_grid_generator
     real(wp)                      :: fractions_sum                 ! sum of land fraction and lake fraction
     real(wp)                      :: min_oro                       ! minimum of the orography
     real(wp)                      :: max_oro                       ! maximum of the orography
-    integer                       :: ext_fileunit                  ! file unit of an external data file
-    integer                       :: nlon_ext                      ! number of longitude points of the external data grid
-    integer                       :: nlat_ext                      ! number of latitude points of the external data grid
-    integer                       :: lat_index_ext                 ! latitude index of a grid point of the external data
-    integer                       :: lon_index_ext                 ! longitude index of a grid point of the external data
-    integer                       :: lat_index_span_ext            ! helper variable for interpolating external data to the GAME grid
-    integer                       :: lon_index_span_ext            ! helper variable for interpolating external data to the GAME grid
-    integer                       :: left_index_ext                ! helper variable for interpolating external data to the GAME grid
-    integer                       :: right_index_ext               ! helper variable for interpolating external data to the GAME grid
-    integer                       :: lower_index_ext               ! helper variable for interpolating external data to the GAME grid
-    integer                       :: upper_index_ext               ! helper variable for interpolating external data to the GAME grid
-    integer                       :: n_points_ext_domain           ! helper variable for interpolating external data to the GAME grid
-    integer                       :: jm_used                       ! helper variable for interpolating external data to the GAME grid
-    integer                       :: jn_used                       ! helper variable for interpolating external data to the GAME grid
-    integer(2),       allocatable :: lake_depth_gldb_raw(:,:)      ! GLDB lake depth data as read from file
-    character(len=1), allocatable :: glcc_raw(:,:)                 ! GLCC raw data
-    integer,          allocatable :: glcc(:,:)                     ! GLCC data
-    integer                       :: ji                            ! horizontal index
-    integer                       :: jk                            ! horizontal index
-    integer                       :: jl                            ! layer or level index
-    integer                       :: jm                            ! helper index
-    integer                       :: jn                            ! helper index
     
     ! Horizontal grid properties
     ! --------------------------
@@ -536,7 +539,93 @@ module mo_grid_generator
           
           write(*,*) "Setting the orography ..."
           
-          call set_orography(grid)
+          nlat_ext = 10801
+          nlon_ext = 21601
+          
+          ! opening the netCDF file
+          call nc_check(nf90_open(trim("../../grids/phys_sfc_quantities/" // trim(oro_raw_filename)),NF90_CLOBBER,ncid))
+          
+          ! reading the variable IDs
+          call nc_check(nf90_inq_varid(ncid,"z",etopo_oro_id))
+          
+          ! allocating memory for reading the grid files
+          allocate(etopo_oro(nlon_ext,nlat_ext))
+          
+          ! reading the arrays
+          call nc_check(nf90_get_var(ncid,etopo_oro_id,etopo_oro))
+          
+          ! closing the netCDF file
+          call nc_check(nf90_close(ncid))
+      
+          ! setting the unfiltered orography
+          
+          delta_lat_ext = M_PI/nlat_ext
+          delta_lon_ext = 2._wp*M_PI/nlon_ext
+          
+          lat_index_span_ext = int(eff_hor_res/(r_e*delta_lat_ext))
+          
+          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,lon_index_span_ext,left_index_ext,right_index_ext, &
+          !$omp lower_index_ext,upper_index_ext,n_points_ext_domain,jm_used,jn_used)
+          do jk=1,nx
+            do ji=1,ny
+              
+              ! if there is primarily sea in this grid cell, the orography remains at zero
+              if (grid%land_fraction(ji,jk)+grid%lake_fraction(ji,jk)<0.5_wp) then
+                cycle
+              endif
+              
+              ! computing the indices of the GLDB grid point that is the closest to the center of this grid cell
+              lat_index_ext = nlat_ext/2 + int(grid%lat_geo_scalar(ji,jk)/delta_lat_ext)
+              lon_index_ext = nlon_ext/2 + int(grid%lon_geo_scalar(ji,jk)/delta_lon_ext)
+              
+              ! making sure the point is actually on the GLDB grid
+              lat_index_ext = max(1,lat_index_ext)
+              lat_index_ext = min(nlat_ext,lat_index_ext)
+              lon_index_ext = max(1,lon_index_ext)
+              lon_index_ext = min(nlon_ext,lon_index_ext)
+              
+              lon_index_span_ext = int(min(eff_hor_res/(r_e*delta_lon_ext*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)), &
+                                           0._wp+nlon_ext))
+              lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
+              n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
+              
+              lower_index_ext = lat_index_ext + lat_index_span_ext/2
+              upper_index_ext = lat_index_ext - lat_index_span_ext/2
+              left_index_ext = lon_index_ext - lon_index_span_ext/2
+              right_index_ext = lon_index_ext + lon_index_span_ext/2
+              
+              ! counting the number of lake points in the GLDB domain that is used to interpolate to the GAME grid cell
+              do jm=upper_index_ext,lower_index_ext
+                do jn=left_index_ext,right_index_ext
+                  jm_used = jm
+                  if (jm_used<1) then
+                    jm_used = 1
+                  endif
+                  if (jm_used>nlat_ext) then
+                    jm_used = nlat_ext
+                  endif
+                  jn_used = jn
+                  if (jn_used<1) then
+                    jn_used = jn_used + nlon_ext
+                  endif
+                  if (jn_used>nlon_ext) then
+                    jn_used = jn_used - nlon_ext
+                  endif
+                  
+                  grid%oro(ji,jk) = grid%oro(ji,jk)+etopo_oro(jn_used,jm_used)
+                  
+                enddo
+              enddo
+              
+              grid%oro(ji,jk) = grid%oro(ji,jk)/n_points_ext_domain
+              
+            enddo
+          enddo
+          !$omp end parallel do
+          
+          ! freeing the memory
+          deallocate(etopo_oro)
+          
           !$omp parallel workshare
           grid%oro_smoothed = grid%oro
           !$omp end parallel workshare
@@ -618,7 +707,7 @@ module mo_grid_generator
             endif
           endif
           
-          grid%t_const_soil(ji,jk) = T_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk)) - lapse_rate*grid%z_w(ji,jk,n_levels)
+          grid%t_const_soil(ji,jk) = t_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk)) - lapse_rate*grid%oro(ji,jk)
               
           ! albedo of water
           grid%sfc_albedo(ji,jk) = albedo_water
@@ -1204,179 +1293,6 @@ module mo_grid_generator
     call grad_vert(grid%gravity_potential,grid%gravity_m_v,grid)
     
   end subroutine bg_setup
-  
-  subroutine set_orography(grid)
-    
-    ! This subroutine interpolates the real orography from ETOPO1 to the model grid.
-    
-    type(t_grid), intent(inout) :: grid ! grid quantities
-    
-    ! local variables
-    integer               :: ncid                   ! ID of the netCDF file
-    character(len=64)     :: filename               ! input filename
-    integer               :: lat_in_id              ! variable ID of the latitude vector
-    integer               :: lon_in_id              ! variable ID of the longitude vector
-    integer               :: z_in_id                ! variable ID of the orography
-    integer               :: n_lat_points           ! number of latitude points of the input dataset
-    integer               :: n_lon_points           ! number of longitude points of the input dataset
-    real(wp), allocatable :: z_u(:,:)               ! preliminary orography at u-vector positions
-    real(wp), allocatable :: z_v(:,:)               ! preliminary orography at v-vector positions
-    real(wp), allocatable :: latitude_input(:)      ! latitudes of the input dataset
-    real(wp), allocatable :: longitude_input(:)     ! longitudes of the input dataset
-    real(wp), allocatable :: lat_distance_vector(:) ! latitudes distance vector
-    real(wp), allocatable :: lon_distance_vector(:) ! longitudes distance vector
-    integer,  allocatable :: z_input(:,:)           ! the input dataset
-    integer               :: lat_index,lon_index    ! minimum distance indices
-    integer               :: ji                     ! horizontal index
-    integer               :: jk                     ! horizontal index
-    integer               :: jm                     ! interpolation index
-    
-    n_lat_points = 10801
-    n_lon_points = 21601
-    
-    ! the filename of the grid file including the relative path
-    filename = "../../grids/phys_sfc_quantities/" // trim(oro_raw_filename)
-    
-    ! opening the netCDF file
-    call nc_check(nf90_open(trim(filename),NF90_CLOBBER,ncid))
-    
-    ! reading the variable IDs
-    call nc_check(nf90_inq_varid(ncid,"y",lat_in_id))
-    call nc_check(nf90_inq_varid(ncid,"x",lon_in_id))
-    call nc_check(nf90_inq_varid(ncid,"z",z_in_id))
-    
-    ! allocating memory for reading the grid files
-    allocate(latitude_input(n_lat_points))
-    allocate(longitude_input(n_lon_points))
-    allocate(z_input(n_lon_points,n_lat_points))
-    
-    ! reading the arrays
-    call nc_check(nf90_get_var(ncid,lat_in_id,latitude_input))
-    call nc_check(nf90_get_var(ncid,lon_in_id,longitude_input))
-    call nc_check(nf90_get_var(ncid,z_in_id,z_input))
-    
-    ! closing the netCDF file
-    call nc_check(nf90_close(ncid))
-    
-    ! allocating memory for the distance vectors
-    allocate(lat_distance_vector(n_lat_points))
-    allocate(lon_distance_vector(n_lon_points))
-
-    ! default
-    !$omp parallel workshare
-    grid%oro = 0._wp
-    !$omp end parallel workshare
-
-    ! setting the unfiltered orography
-    
-    ! preliminary orography at cell centers
-    !$omp parallel do private(ji,jk,jm,lat_distance_vector,lon_distance_vector,lat_index,lon_index)
-    do jk=1,nx
-      do ji=1,ny
-    
-        do jm=1,n_lat_points
-          lat_distance_vector(jm) = abs(2._wp*M_PI*latitude_input(jm)/360._wp - grid%lat_geo_scalar(ji,jk))
-        enddo
-    
-        do jm=1,n_lon_points
-          lon_distance_vector(jm) = abs(2._wp*M_PI*longitude_input(jm)/360._wp - grid%lon_geo_scalar(ji,jk))
-        enddo
-    
-        lat_index = find_min_index(lat_distance_vector)
-        lon_index = find_min_index(lon_distance_vector)
-        
-        grid%oro(ji,jk) = real(z_input(lon_index,lat_index),wp)/5._wp
-        
-        ! over the sea there is no orography
-        if (grid%land_fraction(ji,jk)+grid%lake_fraction(ji,jk)<0.5_wp) then
-          grid%oro(ji,jk) = 0._wp
-        endif
-        
-      enddo
-    enddo
-    !$omp end parallel do
-    
-    allocate(z_u(ny,nx+1))
-    
-    ! preliminary orography at u-vector positions
-    !$omp parallel do private(ji,jk,jm,lat_distance_vector,lon_distance_vector,lat_index,lon_index)
-    do jk=1,nx+1
-      do ji=1,ny
-    
-        do jm=1,n_lat_points
-          lat_distance_vector(jm) = abs(2._wp*M_PI*latitude_input(jm)/360._wp - grid%lat_geo_u(ji,jk))
-        enddo
-    
-        do jm=1,n_lon_points
-          lon_distance_vector(jm) = abs(2._wp*M_PI*longitude_input(jm)/360._wp - grid%lat_geo_u(ji,jk))
-        enddo
-    
-        lat_index = find_min_index(lat_distance_vector)
-        lon_index = find_min_index(lon_distance_vector)
-        
-        z_u(ji,jk) = real(z_input(lon_index,lat_index),wp)
-        
-        ! over the sea there is no orography
-        if (grid%land_fraction(ji,max(jk-1,1))+grid%land_fraction(ji,min(jk,nx)) & 
-            + grid%lake_fraction(ji,max(jk-1,1))+grid%lake_fraction(ji,min(jk,nx))<1._wp) then
-          z_u(ji,jk) = 0._wp
-        endif
-        
-      enddo
-    enddo
-    !$omp end parallel do
-    
-    allocate(z_v(ny+1,nx))
-    
-    ! preliminary orography at v-vector positions
-    !$omp parallel do private(ji,jk,jm,lat_distance_vector,lon_distance_vector,lat_index,lon_index)
-    do jk=1,nx
-      do ji=1,ny+1
-    
-        do jm=1,n_lat_points
-          lat_distance_vector(jm) = abs(2._wp*M_PI*latitude_input(jm)/360._wp - grid%lat_geo_v(ji,jk))
-        enddo
-    
-        do jm=1,n_lon_points
-          lon_distance_vector(jm) = abs(2._wp*M_PI*longitude_input(jm)/360._wp - grid%lat_geo_v(ji,jk))
-        enddo
-    
-        lat_index = find_min_index(lat_distance_vector)
-        lon_index = find_min_index(lon_distance_vector)
-        
-        z_v(ji,jk) = real(z_input(lon_index,lat_index),wp)
-        
-        ! over the sea there is no orography
-        if (grid%land_fraction(max(ji-1,1),jk)+grid%land_fraction(min(ji,ny),jk) & 
-            + grid%lake_fraction(max(ji-1,1),jk)+grid%lake_fraction(min(ji,ny),jk)<1._wp) then
-          z_v(ji,jk) = 0._wp
-        endif
-        
-      enddo
-    enddo
-    !$omp end parallel do
-    
-    ! freeing the memory
-    deallocate(lat_distance_vector)
-    deallocate(lon_distance_vector)
-    deallocate(z_input)
-    deallocate(latitude_input)
-    deallocate(longitude_input)
-    
-    ! averaging the orography to cell centers
-    !$omp parallel do private(ji,jk)
-    do jk=1,nx
-      do ji=1,ny
-        grid%oro(ji,jk) = grid%oro(ji,jk) + (z_u(ji,jk) + z_u(ji,jk+1) + z_v(ji,jk) + z_v(ji+1,jk))/0.5_wp
-      enddo
-    enddo
-    !$omp end parallel do
-
-    ! freeing the memory
-    deallocate(z_u)
-    deallocate(z_v)
-    
-  end subroutine set_orography
   
   subroutine smooth_hor_scalar(array)
     
