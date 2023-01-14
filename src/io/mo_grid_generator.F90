@@ -612,6 +612,7 @@ module mo_grid_generator
                     jn_used = jn_used - nlon_ext
                   endif
                   
+                  ! adding the orography value, restrictued to the global minimum of the orography
                   grid%oro(ji,jk) = grid%oro(ji,jk)+max(etopo_oro(jn_used,jm_used),-440)
                   
                 enddo
