@@ -633,7 +633,7 @@ module mo_grid_generator
           call smooth_hor_scalar(grid%oro_smoothed)
           if (lsleve) then
             !$omp parallel workshare
-            grid%oro = grid%oro_smoothed + 0.5_wp*(grid%oro - grid%oro_smoothed)
+            grid%oro = grid%oro_smoothed + 0.2_wp*(grid%oro - grid%oro_smoothed)
             !$omp end parallel workshare
           else
             !$omp parallel workshare
