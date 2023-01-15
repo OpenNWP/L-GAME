@@ -31,7 +31,7 @@ module mo_column_solvers
     
     ! local variables
     type(t_state), pointer :: state_new_used                        ! pointer to the state that is used as the new state in the calculation
-    integer                :: soil_switch                           ! soil switch: 0 if soil does not have to be calculated off, 1 if soil has to be calculated
+    integer                :: soil_switch                           ! soil switch: 0 if soil does not have to be calculated, 1 if soil has to be calculated
     real(wp)               :: c_vector(n_layers-2+nsoillays)        ! needed for the vertical solver
     real(wp)               :: d_vector(n_layers-1+nsoillays)        ! needed for the vertical solver
     real(wp)               :: e_vector(n_layers-2+nsoillays)        ! needed for the vertical solver
@@ -122,7 +122,7 @@ module mo_column_solvers
         
         ! determining wether soil needs to be calculated
         soil_switch = 0
-        if (lprog_soil_temp .and. grid%land_fraction(ji,jk)>=0.5_wp) then
+        if (lprog_soil_temp .and. grid%land_fraction(ji,jk)+grid%lake_fraction(ji,jk)>=0._wp) then
           soil_switch=1
         endif
         
