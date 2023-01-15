@@ -32,7 +32,7 @@ module mo_rad_nml
     dtime_rad = 60._wp*dy/1000._wp
     rrtmgp_coefficients_file_sw = "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g112-210809.nc"
     rrtmgp_coefficients_file_lw = "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g128-210809.nc"
-    cloud_coefficients_file_sw = "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-sw.nc"
+    cloud_coefficients_file_sw = "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-reordered-sw.nc"
     cloud_coefficients_file_lw = "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-lw.nc"
     
     ! Open and read namelist file.
