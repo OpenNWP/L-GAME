@@ -34,7 +34,7 @@ The following packages are additionally required if you want to make use of the 
 git clone https://github.com/OpenNWP/L-GAME.git
 cd L-GAME
 ./create_directories.sh
-./compile.sh
+./compile.sh -f
 ```
 
 ## Execution
