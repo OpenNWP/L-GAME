@@ -234,6 +234,11 @@ module mo_set_initial_state
     enddo
     !$omp end parallel do
     
+    ! setting the SST
+    !$omp parallel workshare
+    diag%sst = state%temperature_soil(:,:,1)
+    !$omp end parallel workshare
+    
     call unessential_ideal_init(state,diag,grid,pres_lowest_layer)
     
     ! setting the vertical velocity at the surface under free slip conditions

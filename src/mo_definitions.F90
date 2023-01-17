@@ -185,6 +185,7 @@ module mo_definitions
     real(wp), allocatable :: dv_dz(:,:,:)                            ! verticl gradient of v
     real(wp), allocatable :: n_squared(:,:,:)                        ! squared Brunt-Väisälä frequency
     real(wp), allocatable :: tke(:,:,:)                              ! specific turbulent kinetic energy
+    real(wp), allocatable :: sst(:,:)                                ! sea surface temperature
     real(wp), allocatable :: viscosity_molecular(:,:,:)              ! molecular diffusion coefficient
     real(wp), allocatable :: viscosity_coeff_div(:,:,:)              ! efficient viscosity acting on divergent movements (Eddies + molecular)
     real(wp), allocatable :: viscosity_coeff_curl(:,:,:)             ! efficient viscosity acting on rotational movements (Eddies + molecular)

@@ -247,6 +247,7 @@ program control
   allocate(diag%dv_dz(ny+1,nx,n_levels))
   allocate(diag%n_squared(ny,nx,n_layers))
   allocate(diag%tke(ny,nx,n_layers))
+  allocate(diag%sst(ny,nx))
   allocate(diag%viscosity_molecular(ny,nx,n_layers))
   allocate(diag%viscosity_coeff_div(ny,nx,n_layers))
   allocate(diag%viscosity_coeff_curl(ny,nx,n_layers))
@@ -416,6 +417,7 @@ program control
   diag%dv_dz = 0._wp
   diag%n_squared = 0._wp
   diag%tke = 0._wp
+  diag%sst = 0._wp
   diag%viscosity_molecular = 0._wp
   diag%viscosity_coeff_div = 0._wp
   diag%viscosity_coeff_curl = 0._wp
@@ -702,6 +704,7 @@ program control
   deallocate(diag%dv_dz)
   deallocate(diag%n_squared)
   deallocate(diag%tke)
+  deallocate(diag%sst)
   deallocate(diag%viscosity_molecular)
   deallocate(diag%viscosity_coeff_div)
   deallocate(diag%viscosity_coeff_curl)
