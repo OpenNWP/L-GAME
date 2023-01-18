@@ -52,7 +52,7 @@ module mo_run_nml
     integer :: fileunit ! file unit of the namelist file
     
     ny = 35
-    nx = 35
+    nx = 37
     n_layers = 50
     n_oro_layers = 40
     dy = 25e3_wp

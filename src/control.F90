@@ -233,8 +233,10 @@ program control
   allocate(diag%radiation_tendency(ny,nx,n_layers))
   allocate(diag%scalar_flux_resistance(ny,nx))
   allocate(diag%monin_obukhov_length(ny,nx))
-  allocate(diag%power_flux_density_sensible(ny,nx))
-  allocate(diag%power_flux_density_latent(ny,nx))
+  allocate(diag%power_flux_density_sensible_sea(ny,nx))
+  allocate(diag%power_flux_density_sensible_soil(ny,nx))
+  allocate(diag%power_flux_density_latent_sea(ny,nx))
+  allocate(diag%power_flux_density_latent_lake(ny,nx))
   allocate(diag%sfc_sw_in(ny,nx))
   allocate(diag%sfc_lw_out(ny,nx))
   allocate(diag%roughness_length(ny,nx))
@@ -403,8 +405,10 @@ program control
   diag%radiation_tendency = 0._wp
   diag%scalar_flux_resistance = 0._wp
   diag%monin_obukhov_length = 0._wp
-  diag%power_flux_density_sensible = 0._wp
-  diag%power_flux_density_latent = 0._wp
+  diag%power_flux_density_sensible_sea = 0._wp
+  diag%power_flux_density_sensible_soil = 0._wp
+  diag%power_flux_density_latent_sea = 0._wp
+  diag%power_flux_density_latent_lake = 0._wp
   diag%sfc_sw_in = 0._wp
   diag%sfc_lw_out = 0._wp
   diag%roughness_length = 0._wp
@@ -690,8 +694,10 @@ program control
   deallocate(diag%radiation_tendency)
   deallocate(diag%scalar_flux_resistance)
   deallocate(diag%monin_obukhov_length)
-  deallocate(diag%power_flux_density_sensible)
-  deallocate(diag%power_flux_density_latent)
+  deallocate(diag%power_flux_density_sensible_sea)
+  deallocate(diag%power_flux_density_sensible_soil)
+  deallocate(diag%power_flux_density_latent_sea)
+  deallocate(diag%power_flux_density_latent_lake)
   deallocate(diag%sfc_sw_in)
   deallocate(diag%sfc_lw_out)
   deallocate(diag%roughness_length)

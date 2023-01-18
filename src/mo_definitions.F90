@@ -171,8 +171,10 @@ module mo_definitions
     real(wp), allocatable :: radiation_tendency(:,:,:)               ! power density due to radiation
     real(wp), allocatable :: scalar_flux_resistance(:,:)             ! surface flux resistance acting on scalar quantities
     real(wp), allocatable :: monin_obukhov_length(:,:)               ! Monin-Obukhov length
-    real(wp), allocatable :: power_flux_density_sensible(:,:)        ! power flux density acting on the surface due to sensible heat
-    real(wp), allocatable :: power_flux_density_latent(:,:)          ! power flux density acting on the surface due to phase transitions
+    real(wp), allocatable :: power_flux_density_sensible_sea(:,:)    ! sensible power flux density at the surface above the sea
+    real(wp), allocatable :: power_flux_density_sensible_soil(:,:)   ! sensible power flux density at the surface above the soil (including lakes)
+    real(wp), allocatable :: power_flux_density_latent_sea(:,:)      ! latent power flux density at the surface above the sea
+    real(wp), allocatable :: power_flux_density_latent_lake(:,:)     ! latent power flux density at the surface above lakes
     real(wp), allocatable :: sfc_sw_in(:,:)                          ! shortwave radiation in the surface
     real(wp), allocatable :: sfc_lw_out(:,:)                         ! longwave radiation out of the surface
     real(wp), allocatable :: roughness_length(:,:)                   ! actual roughness length

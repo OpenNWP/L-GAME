@@ -98,14 +98,20 @@ module mo_column_solvers
           endif
           
           ! the sensible power flux density
-          diag%power_flux_density_sensible(ji,jk) = 0.5_wp*c_d_v*(state_new_used%rho(ji,jk,n_layers,n_condensed_constituents+1) &
+          diag%power_flux_density_sensible_soil(ji,jk) = (grid%land_fraction(ji,jk)+grid%lake_fraction(ji,jk)) &
+          *0.5_wp*c_d_v*(state_new_used%rho(ji,jk,n_layers,n_condensed_constituents+1) &
           *(t_gas_lowest_layer_old - state_old%temperature_soil(ji,jk,1)) &
           + state_old%rho(ji,jk,n_layers,n_condensed_constituents+1) &
           *(t_gas_lowest_layer_new - state_new_used%temperature_soil(ji,jk,1)))/diag%scalar_flux_resistance(ji,jk)
+          diag%power_flux_density_sensible_sea(ji,jk) = (1._wp-grid%land_fraction(ji,jk)-grid%lake_fraction(ji,jk)) &
+          *0.5_wp*c_d_v*(state_new_used%rho(ji,jk,n_layers,n_condensed_constituents+1) &
+          *(t_gas_lowest_layer_old - diag%sst(ji,jk)) &
+          + state_old%rho(ji,jk,n_layers,n_condensed_constituents+1) &
+          *(t_gas_lowest_layer_new - diag%sst(ji,jk)))/diag%scalar_flux_resistance(ji,jk)
           
           ! contribution of sensible heat to rhotheta_v
           tend%rhotheta_v(ji,jk,n_layers) = tend%rhotheta_v(ji,jk,n_layers) &
-          -grid%area_z(ji,jk,n_levels)*diag%power_flux_density_sensible(ji,jk) &
+          -grid%area_z(ji,jk,n_levels)*(diag%power_flux_density_sensible_soil(ji,jk)+diag%power_flux_density_sensible_sea(ji,jk)) &
           /((grid%exner_bg(ji,jk,n_layers)+state_new_used%exner_pert(ji,jk,n_layers))*c_d_p)/grid%volume(ji,jk,n_layers)
           
         enddo
@@ -239,9 +245,9 @@ module mo_column_solvers
           ! old temperature
           = state_old%temperature_soil(ji,jk,1) &
           ! sensible heat flux
-          + (diag%power_flux_density_sensible(ji,jk) &
+          + (diag%power_flux_density_sensible_soil(ji,jk) &
           ! latent heat flux
-          + diag%power_flux_density_latent(ji,jk) &
+          + diag%power_flux_density_latent_lake(ji,jk) &
           ! shortwave inbound radiation
           + diag%sfc_sw_in(ji,jk) &
           ! longwave outbound radiation

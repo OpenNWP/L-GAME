@@ -51,12 +51,10 @@ module mo_pbl
         u_lowest_layer = diag%v_squared(ji,jk,n_layers)**0.5_wp
         
         ! calculating the 10 m wind velocity from the logarithmic wind profile
-        u10 = u_lowest_layer*log(10._wp/grid%roughness_length(ji,jk))/log(agl/grid%roughness_length(ji,jk))
+        u10 = u_lowest_layer*log(10._wp/diag%roughness_length(ji,jk))/log(agl/diag%roughness_length(ji,jk))
 
         ! only over the sea the roughness length is time-dependant (because of the waves)
         if (grid%land_fraction(ji,jk)<1._wp) then
-          ! calculating the roughness length fom the wind velocity
-          grid%roughness_length(ji,jk) = roughness_length_from_u10_sea(u10)
           ! calculating the roughness length fom the wind velocity
           diag%roughness_length(ji,jk) = grid%land_fraction(ji,jk)*grid%roughness_length(ji,jk) &
                                       + (1._wp - grid%land_fraction(ji,jk))*roughness_length_from_u10_sea(u10)
@@ -101,8 +99,8 @@ module mo_pbl
       do jk=1,nx
         do ji=1,ny
           diag%scalar_flux_resistance(ji,jk) = scalar_flux_resistance(diag%roughness_velocity(ji,jk), &
-          grid%z_scalar(ji,jk,n_layers) - grid%z_w(ji,jk,n_levels), &
-          grid%roughness_length(ji,jk),diag%monin_obukhov_length(ji,jk))
+                                               grid%z_scalar(ji,jk,n_layers) - grid%z_w(ji,jk,n_levels), &
+                                               diag%roughness_length(ji,jk),diag%monin_obukhov_length(ji,jk))
         enddo
       enddo
       !$omp end parallel do
@@ -139,7 +137,7 @@ module mo_pbl
         z_agl = grid%z_u(ji,jk,n_layers) - 0.5_wp*(grid%z_w(ji,jk-1,n_levels) + grid%z_w(ji,jk,n_levels))
         layer_thickness = 0.5_wp*(grid%z_w(ji,jk-1,n_layers) + grid%z_w(ji,jk,n_layers)) &
         - 0.5_wp*(grid%z_w(ji,jk-1,n_levels) + grid%z_w(ji,jk,n_levels))
-        roughness_length = 0.5_wp*(grid%roughness_length(ji,jk-1) + grid%roughness_length(ji,jk))
+        roughness_length = 0.5_wp*(diag%roughness_length(ji,jk-1) + diag%roughness_length(ji,jk))
         monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji,jk-1) &
         + diag%monin_obukhov_length(ji,jk))
         
@@ -166,7 +164,7 @@ module mo_pbl
         z_agl = grid%z_u(ji,1,n_layers) - 0.5_wp*(grid%z_w(ji,nx,n_levels) + grid%z_w(ji,1,n_levels))
         layer_thickness = 0.5_wp*(grid%z_w(ji,nx,n_layers) + grid%z_w(ji,1,n_layers)) &
         - 0.5_wp*(grid%z_w(ji,nx,n_levels) + grid%z_w(ji,1,n_levels))
-        roughness_length = 0.5_wp*(grid%roughness_length(ji,nx) + grid%roughness_length(ji,1))
+        roughness_length = 0.5_wp*(diag%roughness_length(ji,nx) + diag%roughness_length(ji,1))
         monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji,nx) &
         + diag%monin_obukhov_length(ji,1))
         
@@ -199,7 +197,7 @@ module mo_pbl
           z_agl = grid%z_v(ji,jk,n_layers) - 0.5_wp*(grid%z_w(ji-1,jk,n_levels) + grid%z_w(ji,jk,n_levels))
           layer_thickness = 0.5_wp*(grid%z_w(ji-1,jk,n_layers) + grid%z_w(ji,jk,n_layers)) &
           - 0.5_wp*(grid%z_w(ji-1,jk,n_levels) + grid%z_w(ji,jk,n_levels))
-          roughness_length = 0.5_wp*(grid%roughness_length(ji-1,jk) + grid%roughness_length(ji,jk))
+          roughness_length = 0.5_wp*(diag%roughness_length(ji-1,jk) + diag%roughness_length(ji,jk))
           monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ji-1,jk) &
           + diag%monin_obukhov_length(ji,jk))
 
@@ -225,7 +223,7 @@ module mo_pbl
           z_agl = grid%z_v(1,jk,n_layers) - 0.5_wp*(grid%z_w(ny,jk,n_levels) + grid%z_w(1,jk,n_levels))
           layer_thickness = 0.5_wp*(grid%z_w(ny,jk,n_layers) + grid%z_w(1,jk,n_layers)) &
           - 0.5_wp*(grid%z_w(ny,jk,n_levels) + grid%z_w(1,jk,n_levels))
-          roughness_length = 0.5_wp*(grid%roughness_length(ny,jk) + grid%roughness_length(1,jk))
+          roughness_length = 0.5_wp*(diag%roughness_length(ny,jk) + diag%roughness_length(1,jk))
           monin_obukhov_length_value = 0.5_wp*(diag%monin_obukhov_length(ny,jk) &
           + diag%monin_obukhov_length(1,jk))
 
