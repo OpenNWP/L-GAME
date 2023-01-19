@@ -14,6 +14,8 @@ L-GAME is a numerical weather prediction (NWP) model. It is the application of t
 
 ## Installation
 
+It is recommended to run the model on Linux. These installation instructions are tested for Ubuntu, for other Linux distributions they might have to be modified.
+
 ### Dependencies
 
 Everything is easy and quick to install.
