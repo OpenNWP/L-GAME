@@ -68,14 +68,16 @@ A fully Eulerian time stepping is employed. The basic building structure is a tw
 \chapter{Installation}
 \label{chap:installation}
 
+It is recommended to run the model on Linux. These installation instructions are tested for Ubuntu, for other Linux distributions they might have to be modified.
+
 \section{Dependencies}
 \label{sec:dependencies}
 
 The following dependencies must be installed before being able to successfully build the model:
 
 \begin{itemize}
-\item \texttt{sudo apt-get install gcc gfortran make cmake wget python3 python3-pip libnetcdf-dev libnetcdff-dev}
-\item Clone our fork of the RTE+RRTMGP repository: \texttt{git clone https://github.com/OpenNWP/rte-rrtmgp}
+\item \texttt{sudo apt-get install gfortran make cmake wget python3-pip libnetcdff-dev}
+\item Clone the RTE+RRTMGP repository: \texttt{git clone https://github.com/earth-system-radiation/rte-rrtmgp}
 \end{itemize}
 
 \section{Building}
