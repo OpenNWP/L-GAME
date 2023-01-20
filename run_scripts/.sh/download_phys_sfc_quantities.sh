@@ -35,5 +35,11 @@ then
   wget "https://downloads.psl.noaa.gov/Datasets/ghcncams/Derived/air.mon.ltm.nc"
 fi
 
+# downloading the land-sea mask of the NCEP NSST data if necessary
+if [ ! -f lsmask.nc ]
+then
+  wget "ftp://ftp.cdc.noaa.gov/Datasets/noaa.oisst.v2/lsmask.nc"
+fi
+
 cd - > /dev/null
 
