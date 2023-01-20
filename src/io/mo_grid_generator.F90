@@ -11,7 +11,7 @@ module mo_grid_generator
                                    lon_center,lplane,n_flat_layers,eff_hor_res
   use mo_diff_nml,           only: klemp_begin_rel
   use mo_constants,          only: r_e,rho_h2o,t_0,M_PI,p_0,omega,gravity,p_0_standard, &
-                                   lapse_rate,surface_temp,tropo_height,inv_height,t_grad_inv, &
+                                   surface_temp,tropo_height,inv_height,t_grad_inv, &
                                    r_d,c_d_p,epsilon_security
   use mo_surface_nml,        only: nsoillays,orography_id,lsleve
   use mo_gradient_operators, only: grad_hor_cov,grad_hor,grad_vert
@@ -708,7 +708,7 @@ module mo_grid_generator
             endif
           endif
           
-          grid%t_const_soil(ji,jk) = t_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk)) - lapse_rate*grid%oro(ji,jk)
+          grid%t_const_soil(ji,jk) = t_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
               
           ! albedo of water
           grid%sfc_albedo(ji,jk) = albedo_water
