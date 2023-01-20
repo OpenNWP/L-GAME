@@ -708,8 +708,12 @@ module mo_grid_generator
             endif
           endif
           
-          grid%t_const_soil(ji,jk) = t_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
-              
+          
+          ! mean surface temperature for an Earth without real orography
+          ! if (oro_id==0) then
+            grid%t_const_soil(ji,jk) = t_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
+          ! endif
+          
           ! albedo of water
           grid%sfc_albedo(ji,jk) = albedo_water
   
