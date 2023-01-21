@@ -410,6 +410,19 @@ module mo_grid_generator
           
           deallocate(glcc)
           
+          !$omp parallel workshare
+          dq_value = minval(grid%land_fraction)
+          !$omp end parallel workshare
+          write(*,*) "minimum land fraction:",dq_value
+          !$omp parallel workshare
+          dq_value = maxval(grid%land_fraction)
+          !$omp end parallel workshare
+          write(*,*) "maximum land fraction:",dq_value
+          !$omp parallel workshare
+          dq_value = sum(grid%land_fraction)/(ny*nx)
+          !$omp end parallel workshare
+          write(*,*) "average land fraction:",dq_value
+          
           write(*,*) "Land fraction set."
           
           ! Lake fraction
