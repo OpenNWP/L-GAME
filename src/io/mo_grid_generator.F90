@@ -96,11 +96,9 @@ module mo_grid_generator
     real(wp)                      :: toa_oro                       ! top of terrain-following coordinates
     real(wp)                      :: delta_lat_ext                 ! latitude resolution of the external data grid
     real(wp)                      :: delta_lon_ext                 ! longitude resolution of the external data grid
-    real(wp)                      :: min_lake_fraction             ! minimum lake fraction
-    real(wp)                      :: max_lake_fraction             ! maximum lake fraction
     real(wp)                      :: fractions_sum                 ! sum of land fraction and lake fraction
-    real(wp)                      :: min_oro                       ! minimum of the orography
-    real(wp)                      :: max_oro                       ! maximum of the orography
+    real(wp)                      :: max_oro                       ! maximum orography value
+    real(wp)                      :: dq_value                      ! data quality value
     
     ! Horizontal grid properties
     ! --------------------------
@@ -525,11 +523,13 @@ module mo_grid_generator
           !$omp end parallel do
               
           !$omp parallel workshare
-          min_lake_fraction = minval(grid%lake_fraction)
-          max_lake_fraction = maxval(grid%lake_fraction)
+          dq_value = minval(grid%lake_fraction)
           !$omp end parallel workshare
-          write(*,*) "minimum lake fraction:",min_lake_fraction
-          write(*,*) "maximum lake fraction:",max_lake_fraction
+          write(*,*) "minimum lake fraction:",dq_value
+          !$omp parallel workshare
+          dq_value = maxval(grid%lake_fraction)
+          !$omp end parallel workshare
+          write(*,*) "maximum lake fraction:",dq_value
           
           deallocate(lake_depth_gldb)
           
@@ -673,11 +673,13 @@ module mo_grid_generator
     endselect
   
     !$omp parallel workshare
-    min_oro = minval(grid%oro)
-    max_oro = maxval(grid%oro)
+    dq_value = minval(grid%oro)
     !$omp end parallel workshare
-    write(*,*) "minimum orography:",min_oro,"m"
-    write(*,*) "maximum orography:",max_oro,"m"
+    write(*,*) "minimum orography:",dq_value,"m"
+    !$omp parallel workshare
+    dq_value = maxval(grid%oro)
+    !$omp end parallel workshare
+    write(*,*) "maximum orography:",dq_value,"m"
     
     !$omp parallel workshare
     grid%z_w(:,:,n_levels) = grid%oro
