@@ -39,8 +39,6 @@ module mo_grid_generator
     integer                       :: nlat_ext                      ! number of latitude points of the external data grid
     integer                       :: lat_index_ext                 ! latitude index of a grid point of the external data
     integer                       :: lon_index_ext                 ! longitude index of a grid point of the external data
-    integer                       :: lat_index_span_ext            ! helper variable for interpolating external data to the GAME grid
-    integer                       :: lon_index_span_ext            ! helper variable for interpolating external data to the GAME grid
     integer                       :: left_index_ext                ! helper variable for interpolating external data to the GAME grid
     integer                       :: right_index_ext               ! helper variable for interpolating external data to the GAME grid
     integer                       :: lower_index_ext               ! helper variable for interpolating external data to the GAME grid
@@ -356,9 +354,7 @@ module mo_grid_generator
           delta_lat_ext = M_PI/nlat_ext
           delta_lon_ext = 2._wp*M_PI/nlon_ext
           
-          lat_index_span_ext = int(eff_hor_res/(r_e*delta_lat_ext))
-          
-          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,lon_index_span_ext,left_index_ext,right_index_ext, &
+          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,left_index_ext,right_index_ext, &
           !$omp lower_index_ext,upper_index_ext,n_points_ext_domain,jm_used,jn_used)
           do jk=1,nx
             do ji=1,ny
@@ -367,29 +363,15 @@ module mo_grid_generator
               lat_index_ext = nlat_ext/2 - int(grid%lat_geo_scalar(ji,jk)/delta_lat_ext)
               lon_index_ext = nlon_ext/2 + int(grid%lon_geo_scalar(ji,jk)/delta_lon_ext)
               
-              ! making sure the point is actually on the GLCC grid
-              lat_index_ext = max(1,lat_index_ext)
-              lat_index_ext = min(nlat_ext,lat_index_ext)
-              lon_index_ext = max(1,lon_index_ext)
-              lon_index_ext = min(nlon_ext,lon_index_ext)
-              
-              lon_index_span_ext = int(min(eff_hor_res/(r_e*delta_lon_ext*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)), &
-                                           0._wp+nlon_ext))
-              lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
-              n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
-              
-              lower_index_ext = lat_index_ext + lat_index_span_ext/2
-              upper_index_ext = lat_index_ext - lat_index_span_ext/2
-              left_index_ext = lon_index_ext - lon_index_span_ext/2
-              right_index_ext = lon_index_ext + lon_index_span_ext/2
-              
-              ! updating n_points_ext_domain
-              n_points_ext_domain = (lower_index_ext-upper_index_ext+1)*(right_index_ext-left_index_ext+1)
+              ! computing the subset of the external data to use for the interpolation
+              call calc_ext_subset(nlat_ext,nlon_ext,grid%lat_geo_scalar(ji,jk),lat_index_ext,lon_index_ext,n_points_ext_domain, &
+                                   lower_index_ext,upper_index_ext,left_index_ext,right_index_ext)
               
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
                   
+                  ! correcting the indices for boundary cases
                   call correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
                   
                   if (glcc(jm_used,jn_used)/=16) then
@@ -452,9 +434,7 @@ module mo_grid_generator
           delta_lat_ext = M_PI/nlat_ext
           delta_lon_ext = 2._wp*M_PI/nlon_ext
           
-          lat_index_span_ext = int(eff_hor_res/(r_e*delta_lat_ext))
-          
-          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,lon_index_span_ext,left_index_ext,right_index_ext, &
+          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,left_index_ext,right_index_ext, &
           !$omp lower_index_ext,upper_index_ext,n_points_ext_domain,jm_used,jn_used)
           do jk=1,nx
             do ji=1,ny
@@ -468,29 +448,15 @@ module mo_grid_generator
               lat_index_ext = nlat_ext/2 - int(grid%lat_geo_scalar(ji,jk)/delta_lat_ext)
               lon_index_ext = nlon_ext/2 + int(grid%lon_geo_scalar(ji,jk)/delta_lon_ext)
               
-              ! making sure the point is actually on the GLDB grid
-              lat_index_ext = max(1,lat_index_ext)
-              lat_index_ext = min(nlat_ext,lat_index_ext)
-              lon_index_ext = max(1,lon_index_ext)
-              lon_index_ext = min(nlon_ext,lon_index_ext)
-              
-              lon_index_span_ext = int(min(eff_hor_res/(r_e*delta_lon_ext*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)), &
-                                           0._wp+nlon_ext))
-              lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
-              n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
-              
-              lower_index_ext = lat_index_ext + lat_index_span_ext/2
-              upper_index_ext = lat_index_ext - lat_index_span_ext/2
-              left_index_ext = lon_index_ext - lon_index_span_ext/2
-              right_index_ext = lon_index_ext + lon_index_span_ext/2
-              
-              ! updating n_points_ext_domain
-              n_points_ext_domain = (lower_index_ext-upper_index_ext+1)*(right_index_ext-left_index_ext+1)
+              ! computing the subset of the external data to use for the interpolation
+              call calc_ext_subset(nlat_ext,nlon_ext,grid%lat_geo_scalar(ji,jk),lat_index_ext,lon_index_ext,n_points_ext_domain, &
+                                   lower_index_ext,upper_index_ext,left_index_ext,right_index_ext)
               
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
                   
+                  ! correcting the indices for boundary cases
                   call correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
                   
                   if (lake_depth_gldb(jm_used,jn_used)>0._wp) then
@@ -567,9 +533,7 @@ module mo_grid_generator
           delta_lat_ext = M_PI/nlat_ext
           delta_lon_ext = 2._wp*M_PI/nlon_ext
           
-          lat_index_span_ext = int(eff_hor_res/(r_e*delta_lat_ext))
-          
-          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,lon_index_span_ext,left_index_ext,right_index_ext, &
+          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,left_index_ext,right_index_ext, &
           !$omp lower_index_ext,upper_index_ext,n_points_ext_domain,jm_used,jn_used)
           do jk=1,nx
             do ji=1,ny
@@ -583,29 +547,15 @@ module mo_grid_generator
               lat_index_ext = nlat_ext/2 + int(grid%lat_geo_scalar(ji,jk)/delta_lat_ext)
               lon_index_ext = nlon_ext/2 + int(grid%lon_geo_scalar(ji,jk)/delta_lon_ext)
               
-              ! making sure the point is actually on the GLDB grid
-              lat_index_ext = max(1,lat_index_ext)
-              lat_index_ext = min(nlat_ext,lat_index_ext)
-              lon_index_ext = max(1,lon_index_ext)
-              lon_index_ext = min(nlon_ext,lon_index_ext)
-              
-              lon_index_span_ext = int(min(eff_hor_res/(r_e*delta_lon_ext*max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)), &
-                                           0._wp+nlon_ext))
-              lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
-              n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
-              
-              lower_index_ext = lat_index_ext + lat_index_span_ext/2
-              upper_index_ext = lat_index_ext - lat_index_span_ext/2
-              left_index_ext = lon_index_ext - lon_index_span_ext/2
-              right_index_ext = lon_index_ext + lon_index_span_ext/2
-              
-              ! updating n_points_ext_domain
-              n_points_ext_domain = (lower_index_ext-upper_index_ext+1)*(right_index_ext-left_index_ext+1)
+              ! computing the subset of the external data to use for the interpolation
+              call calc_ext_subset(nlat_ext,nlon_ext,grid%lat_geo_scalar(ji,jk),lat_index_ext,lon_index_ext,n_points_ext_domain, &
+                                   lower_index_ext,upper_index_ext,left_index_ext,right_index_ext)
               
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
                   
+                  ! correcting the indices for boundary cases
                   call correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
                   
                   ! adding the orography value, restrictued to the global minimum of the orography
@@ -658,15 +608,13 @@ module mo_grid_generator
           delta_lat_ext = M_PI/nlat_ext
           delta_lon_ext = 2._wp*M_PI/nlon_ext
           
-          lat_index_span_ext = int(eff_hor_res/(r_e*delta_lat_ext))
-          
           allocate(invalid_counter(ny,nx))
           
           !$omp parallel workshare
           invalid_counter = 0
           !$omp end parallel workshare
           
-          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,lon_index_span_ext,left_index_ext,right_index_ext, &
+          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,left_index_ext,right_index_ext, &
           !$omp lower_index_ext,upper_index_ext,n_points_ext_domain,jm_used,jn_used,lon_geo_scalar_used)
           do jk=1,nx
             do ji=1,ny
@@ -679,29 +627,15 @@ module mo_grid_generator
               endif
               lon_index_ext = int(lon_geo_scalar_used/delta_lon_ext)
               
-              ! making sure the point is actually on the GLCC grid
-              lat_index_ext = max(1,lat_index_ext)
-              lat_index_ext = min(nlat_ext,lat_index_ext)
-              lon_index_ext = max(1,lon_index_ext)
-              lon_index_ext = min(nlon_ext,lon_index_ext)
-              
-              lon_index_span_ext = int(min(eff_hor_res/(r_e*delta_lon_ext &
-                                                        *max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)),0._wp+nlon_ext))
-              lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
-              n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
-              
-              lower_index_ext = lat_index_ext + lat_index_span_ext/2
-              upper_index_ext = lat_index_ext - lat_index_span_ext/2
-              left_index_ext = lon_index_ext - lon_index_span_ext/2
-              right_index_ext = lon_index_ext + lon_index_span_ext/2
-              
-              ! updating n_points_ext_domain
-              n_points_ext_domain = (lower_index_ext-upper_index_ext+1)*(right_index_ext-left_index_ext+1)
+              ! computing the subset of the external data to use for the interpolation
+              call calc_ext_subset(nlat_ext,nlon_ext,grid%lat_geo_scalar(ji,jk),lat_index_ext,lon_index_ext,n_points_ext_domain, &
+                                   lower_index_ext,upper_index_ext,left_index_ext,right_index_ext)
               
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
                   
+                  ! correcting the indices for boundary cases
                   call correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
                   
                   ! adding the temperature value at hand to the interpolated value if the temperature value is not invalid
@@ -1585,6 +1519,53 @@ module mo_grid_generator
     result_vec(3) = cos(lat)
 
   end subroutine calc_local_j
+  
+  subroutine calc_ext_subset(nlat_ext,nlon_ext,lat_c_value,lat_index_ext,lon_index_ext,n_points_ext_domain, &
+                             lower_index_ext,upper_index_ext,left_index_ext,right_index_ext)
+    
+    ! This subroutine calculates which subset of the external dataset to use to interpolate to a grid cell.
+    
+    integer,  intent(in)    :: nlat_ext            ! number of points on the latitude axis of the external data grid
+    integer,  intent(in)    :: nlon_ext            ! number of points on the longitude axis of the external data grid
+    real(wp), intent(in)    :: lat_c_value         ! latitude of the center of the cell to which to interpolate
+    integer,  intent(inout) :: lat_index_ext       ! closest latitude index of the external data
+    integer,  intent(inout) :: lon_index_ext       ! closest longitude index of the external data
+    integer,  intent(out)   :: lower_index_ext     ! index of the lower latitude boundary of the computed subset of the external data
+    integer,  intent(out)   :: upper_index_ext     ! index of the upper latitude boundary of the computed subset of the external data
+    integer,  intent(out)   :: left_index_ext      ! longitude index of the western boundary of the computed subset of the external data
+    integer,  intent(out)   :: right_index_ext     ! longitude index of the eastern boundary of the computed subset of the external data
+    integer,  intent(inout) :: n_points_ext_domain ! number of points of the computed subset of the external data
+    
+    ! local variables
+    integer  :: lat_index_span_ext ! latitude index width of the subset of the external data
+    integer  :: lon_index_span_ext ! longitude index width of the subset of the external data
+    real(wp) :: delta_lat_ext      ! latitude resolution of the external grid
+    real(wp) :: delta_lon_ext      ! longitude resolution of the external grid
+    
+    ! computing helper variables
+    delta_lat_ext = M_PI/nlat_ext
+    delta_lon_ext = 2._wp*M_PI/nlon_ext
+    lat_index_span_ext = int(eff_hor_res/(r_e*delta_lat_ext))
+    
+    lat_index_ext = max(1,lat_index_ext)
+    lat_index_ext = min(nlat_ext,lat_index_ext)
+    lon_index_ext = max(1,lon_index_ext)
+    lon_index_ext = min(nlon_ext,lon_index_ext)
+    
+    lon_index_span_ext = int(min(eff_hor_res/(r_e*delta_lon_ext*max(cos(lat_c_value),EPSILON_SECURITY)),0._wp+nlon_ext))
+    lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
+    
+    n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
+    
+    lower_index_ext = lat_index_ext + lat_index_span_ext/2
+    upper_index_ext = lat_index_ext - lat_index_span_ext/2
+    left_index_ext = lon_index_ext - lon_index_span_ext/2
+    right_index_ext = lon_index_ext + lon_index_span_ext/2
+    
+    ! updating n_points_ext_domain
+    n_points_ext_domain = (lower_index_ext-upper_index_ext+1)*(right_index_ext-left_index_ext+1)
+    
+  end subroutine calc_ext_subset
   
   subroutine correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
     
