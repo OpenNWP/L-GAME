@@ -11,7 +11,7 @@ module mo_grid_generator
                                    lon_center,lplane,n_flat_layers,eff_hor_res
   use mo_diff_nml,           only: klemp_begin_rel
   use mo_constants,          only: r_e,rho_h2o,t_0,M_PI,p_0,omega,gravity,p_0_standard, &
-                                   surface_temp,tropo_height,inv_height,t_grad_inv, &
+                                   surface_temp,tropo_height,inv_height,t_grad_inv,lapse_rate, &
                                    r_d,c_d_p,epsilon_security
   use mo_surface_nml,        only: nsoillays,orography_id,lsleve
   use mo_gradient_operators, only: grad_hor_cov,grad_hor,grad_vert
@@ -48,7 +48,8 @@ module mo_grid_generator
     integer                       :: n_points_ext_domain           ! helper variable for interpolating external data to the GAME grid
     integer                       :: jm_used                       ! helper variable for interpolating external data to the GAME grid
     integer                       :: jn_used                       ! helper variable for interpolating external data to the GAME grid
-    integer                       :: etopo_oro_id           ! variable ID of the input orography
+    integer                       :: etopo_oro_id                  ! variable ID of the input orography
+    integer                       :: ghcn_cams_id                  ! netCDF ID of the input 2-m-temperature mean (from GHCN-CAMS)
     integer(2),       allocatable :: lake_depth_gldb_raw(:,:)      ! GLDB lake depth data as read from file
     character(len=1), allocatable :: glcc_raw(:,:)                 ! GLCC raw data
     integer,          allocatable :: glcc(:,:)                     ! GLCC data
@@ -90,9 +91,12 @@ module mo_grid_generator
     real(wp)                      :: local_i(3)                    ! local i-vector
     real(wp)                      :: local_j(3)                    ! local j-vector
     real(wp)                      :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
-    real(wp)                      :: lat_local,lon_local,max_z     ! helper variables     
+    real(wp)                      :: lat_local,lon_local,max_z     ! helper variables    
+    real(wp)                      :: lon_geo_scalar_used           ! helper variable for interpolating external data to the model grid
     real(wp), allocatable         :: lake_depth_gldb(:,:)          ! GLDB lake depth data
     integer,  allocatable         :: etopo_oro(:,:)                ! ETOPO orography
+    integer,  allocatable         :: invalid_counter(:,:)          ! counts invalid values encountered in an interpolation
+    real(wp), allocatable         :: ghcn_cams(:,:,:)              ! GHCN-CAMS data (2-m-temperature mean)
     real(wp)                      :: toa_oro                       ! top of terrain-following coordinates
     real(wp)                      :: delta_lat_ext                 ! latitude resolution of the external data grid
     real(wp)                      :: delta_lon_ext                 ! longitude resolution of the external data grid
@@ -314,6 +318,8 @@ module mo_grid_generator
         
         !$omp parallel workshare
         grid%oro = 0._wp
+        ! mean surface temperature for an Earth without real orography
+        grid%t_const_soil = t_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar)
         !$omp end parallel workshare
       
       ! real orography (and other surface properties)
@@ -377,7 +383,7 @@ module mo_grid_generator
               left_index_ext = lon_index_ext - lon_index_span_ext/2
               right_index_ext = lon_index_ext + lon_index_span_ext/2
               
-              ! counting the number of lake points in the GLCC domain that is used to interpolate to the GAME grid cell
+              ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
                   jm_used = jm
@@ -487,7 +493,7 @@ module mo_grid_generator
               left_index_ext = lon_index_ext - lon_index_span_ext/2
               right_index_ext = lon_index_ext + lon_index_span_ext/2
               
-              ! counting the number of lake points in the GLDB domain that is used to interpolate to the GAME grid cell
+              ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
                   jm_used = jm
@@ -611,7 +617,7 @@ module mo_grid_generator
               left_index_ext = lon_index_ext - lon_index_span_ext/2
               right_index_ext = lon_index_ext + lon_index_span_ext/2
               
-              ! counting the number of lake points in the GLDB domain that is used to interpolate to the GAME grid cell
+              ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
                   jm_used = jm
@@ -660,6 +666,112 @@ module mo_grid_generator
           
           write(*,*) "Orography set."
           
+          ! Lower boundary soil temperature
+          ! -------------------------------
+          
+          write(*,*) "Setting the lower boundary soil temperature ..."
+          
+          nlat_ext = 360
+          nlon_ext = 720
+          
+          allocate(ghcn_cams(nlon_ext,nlat_ext,12))
+          
+          ! reading the GHCN-CAMS data
+          call nc_check(nf90_open(trim("../../grids/phys_sfc_quantities/air.mon.ltm.nc"),NF90_CLOBBER,ncid))
+          call nc_check(nf90_inq_varid(ncid,"air",ghcn_cams_id))
+          call nc_check(nf90_get_var(ncid,ghcn_cams_id,ghcn_cams))
+          call nc_check(nf90_close(ncid))
+          
+          delta_lat_ext = M_PI/nlat_ext
+          delta_lon_ext = 2._wp*M_PI/nlon_ext
+          
+          lat_index_span_ext = int(eff_hor_res/(r_e*delta_lat_ext))
+          
+          allocate(invalid_counter(ny,nx))
+          
+          !$omp parallel workshare
+          invalid_counter = 0
+          !$omp end parallel workshare
+          
+          !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,lon_index_span_ext,left_index_ext,right_index_ext, &
+          !$omp lower_index_ext,upper_index_ext,n_points_ext_domain,jm_used,jn_used,lon_geo_scalar_used)
+          do jk=1,nx
+            do ji=1,ny
+              
+              ! computing the indices of the GLCC grid point that is the closest to the center of this grid cell
+              lat_index_ext = nlat_ext/2 - int(grid%lat_geo_scalar(ji,jk)/delta_lat_ext)
+              lon_geo_scalar_used = grid%lon_geo_scalar(ji,jk)
+              if (lon_geo_scalar_used<0._wp) then
+                lon_geo_scalar_used = lon_geo_scalar_used+2._wp*M_PI
+              endif
+              lon_index_ext = int(lon_geo_scalar_used/delta_lon_ext)
+              
+              ! making sure the point is actually on the GLCC grid
+              lat_index_ext = max(1,lat_index_ext)
+              lat_index_ext = min(nlat_ext,lat_index_ext)
+              lon_index_ext = max(1,lon_index_ext)
+              lon_index_ext = min(nlon_ext,lon_index_ext)
+              
+              lon_index_span_ext = int(min(eff_hor_res/(r_e*delta_lon_ext &
+                                                        *max(cos(grid%lat_geo_scalar(ji,jk)),EPSILON_SECURITY)),0._wp+nlon_ext))
+              lon_index_span_ext = min(lon_index_span_ext,nlon_ext)
+              n_points_ext_domain = (lat_index_span_ext+1)*(lon_index_span_ext+1)
+              
+              lower_index_ext = lat_index_ext + lat_index_span_ext/2
+              upper_index_ext = lat_index_ext - lat_index_span_ext/2
+              left_index_ext = lon_index_ext - lon_index_span_ext/2
+              right_index_ext = lon_index_ext + lon_index_span_ext/2
+              
+              ! updating n_points_ext_domain
+              n_points_ext_domain = (lower_index_ext-upper_index_ext+1)*(right_index_ext-left_index_ext+1)
+              
+              ! looping over all points of the input dataset in the vicinity of the grid cell at hand
+              do jm=upper_index_ext,lower_index_ext
+                do jn=left_index_ext,right_index_ext
+                  jm_used = jm
+                  if (jm_used<1) then
+                    jm_used = 1
+                  endif
+                  if (jm_used>nlat_ext) then
+                    jm_used = nlat_ext
+                  endif
+                  jn_used = jn
+                  if (jn_used<1) then
+                    jn_used = jn_used + nlon_ext
+                  endif
+                  if (jn_used>nlon_ext) then
+                    jn_used = jn_used - nlon_ext
+                  endif
+                  
+                  ! adding the temperature value at hand to the interpolated value if the temperature value is not invalid
+                  if (ghcn_cams(jn_used,jm_used,1)/=-9.96921e36) then
+                    grid%t_const_soil(ji,jk) = grid%t_const_soil(ji,jk) &
+                                               + sum(ghcn_cams(jn_used,jm_used,:))/12._wp + lapse_rate*grid%oro(ji,jk)
+                  else
+                    invalid_counter(ji,jk) = invalid_counter(ji,jk)+1
+                  endif
+                  
+                enddo
+              enddo
+              
+              ! computing the average
+              if (invalid_counter(ji,jk)<n_points_ext_domain) then
+                grid%t_const_soil(ji,jk) = grid%t_const_soil(ji,jk)/(n_points_ext_domain-invalid_counter(ji,jk))
+              ! this is the case if all input values were invalid
+              else
+                ! adding realistic values where no real-world values were found
+                grid%t_const_soil(ji,jk) = t_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
+              endif
+              
+            enddo
+          enddo
+          !$omp end parallel do
+          
+          deallocate(ghcn_cams)
+          deallocate(invalid_counter)
+          
+          write(*,*) "Lower boundary soil temperature set."
+          
         endif
       
       ! Schaer wave test orography
@@ -702,6 +814,15 @@ module mo_grid_generator
     grid%z_w(:,:,n_levels) = grid%oro
     !$omp end parallel workshare
     
+    !$omp parallel workshare
+    dq_value = minval(grid%t_const_soil)
+    !$omp end parallel workshare
+    write(*,*) "minimum background soil temperature:",dq_value,"K"
+    !$omp parallel workshare
+    dq_value = maxval(grid%t_const_soil)
+    !$omp end parallel workshare
+    write(*,*) "maximum background soil temperature:",dq_value,"K"
+    
     ! Other physical properties of the surface
     ! ----------------------------------------
     
@@ -726,12 +847,6 @@ module mo_grid_generator
               grid%land_fraction(ji,jk) = 1._wp
             endif
           endif
-          
-          
-          ! mean surface temperature for an Earth without real orography
-          ! if (oro_id==0) then
-            grid%t_const_soil(ji,jk) = t_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar(ji,jk))
-          ! endif
           
           ! albedo of water
           grid%sfc_albedo(ji,jk) = albedo_water
@@ -771,15 +886,6 @@ module mo_grid_generator
         enddo
       enddo
       !$omp end parallel do
-      
-      !$omp parallel workshare
-      dq_value = minval(grid%t_const_soil)
-      !$omp end parallel workshare
-      write(*,*) "minimum background soil temperature:",dq_value,"K"
-      !$omp parallel workshare
-      dq_value = maxval(grid%t_const_soil)
-      !$omp end parallel workshare
-      write(*,*) "maximum background soil temperature:",dq_value,"K"
       
     endif
     
