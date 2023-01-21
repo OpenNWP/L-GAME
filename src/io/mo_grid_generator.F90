@@ -383,6 +383,9 @@ module mo_grid_generator
               left_index_ext = lon_index_ext - lon_index_span_ext/2
               right_index_ext = lon_index_ext + lon_index_span_ext/2
               
+              ! updating n_points_ext_domain
+              n_points_ext_domain = (lower_index_ext-upper_index_ext+1)*(right_index_ext-left_index_ext+1)
+              
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
@@ -492,6 +495,9 @@ module mo_grid_generator
               upper_index_ext = lat_index_ext - lat_index_span_ext/2
               left_index_ext = lon_index_ext - lon_index_span_ext/2
               right_index_ext = lon_index_ext + lon_index_span_ext/2
+              
+              ! updating n_points_ext_domain
+              n_points_ext_domain = (lower_index_ext-upper_index_ext+1)*(right_index_ext-left_index_ext+1)
               
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
@@ -616,6 +622,9 @@ module mo_grid_generator
               upper_index_ext = lat_index_ext - lat_index_span_ext/2
               left_index_ext = lon_index_ext - lon_index_span_ext/2
               right_index_ext = lon_index_ext + lon_index_span_ext/2
+              
+              ! updating n_points_ext_domain
+              n_points_ext_domain = (lower_index_ext-upper_index_ext+1)*(right_index_ext-left_index_ext+1)
               
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
