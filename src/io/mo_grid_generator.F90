@@ -389,20 +389,8 @@ module mo_grid_generator
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
-                  jm_used = jm
-                  if (jm_used<1) then
-                    jm_used = 1
-                  endif
-                  if (jm_used>nlat_ext) then
-                    jm_used = nlat_ext
-                  endif
-                  jn_used = jn
-                  if (jn_used<1) then
-                    jn_used = jn_used + nlon_ext
-                  endif
-                  if (jn_used>nlon_ext) then
-                    jn_used = jn_used - nlon_ext
-                  endif
+                  
+                  call correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
                   
                   if (glcc(jm_used,jn_used)/=16) then
                     grid%land_fraction(ji,jk) = grid%land_fraction(ji,jk)+1._wp
@@ -502,20 +490,8 @@ module mo_grid_generator
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
-                  jm_used = jm
-                  if (jm_used<1) then
-                    jm_used = 1
-                  endif
-                  if (jm_used>nlat_ext) then
-                    jm_used = nlat_ext
-                  endif
-                  jn_used = jn
-                  if (jn_used<1) then
-                    jn_used = jn_used + nlon_ext
-                  endif
-                  if (jn_used>nlon_ext) then
-                    jn_used = jn_used - nlon_ext
-                  endif
+                  
+                  call correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
                   
                   if (lake_depth_gldb(jm_used,jn_used)>0._wp) then
                     grid%lake_fraction(ji,jk) = grid%lake_fraction(ji,jk)+1._wp
@@ -629,20 +605,8 @@ module mo_grid_generator
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
-                  jm_used = jm
-                  if (jm_used<1) then
-                    jm_used = 1
-                  endif
-                  if (jm_used>nlat_ext) then
-                    jm_used = nlat_ext
-                  endif
-                  jn_used = jn
-                  if (jn_used<1) then
-                    jn_used = jn_used + nlon_ext
-                  endif
-                  if (jn_used>nlon_ext) then
-                    jn_used = jn_used - nlon_ext
-                  endif
+                  
+                  call correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
                   
                   ! adding the orography value, restrictued to the global minimum of the orography
                   grid%oro(ji,jk) = grid%oro(ji,jk)+max(etopo_oro(jn_used,jm_used),-440)
@@ -737,20 +701,8 @@ module mo_grid_generator
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
-                  jm_used = jm
-                  if (jm_used<1) then
-                    jm_used = 1
-                  endif
-                  if (jm_used>nlat_ext) then
-                    jm_used = nlat_ext
-                  endif
-                  jn_used = jn
-                  if (jn_used<1) then
-                    jn_used = jn_used + nlon_ext
-                  endif
-                  if (jn_used>nlon_ext) then
-                    jn_used = jn_used - nlon_ext
-                  endif
+                  
+                  call correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
                   
                   ! adding the temperature value at hand to the interpolated value if the temperature value is not invalid
                   if (ghcn_cams(jn_used,jm_used,1)/=-9.96921e36) then
@@ -1633,6 +1585,34 @@ module mo_grid_generator
     result_vec(3) = cos(lat)
 
   end subroutine calc_local_j
+  
+  subroutine correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
+    
+    ! This subroutine calculates which indices of an external dataset to actually use.
+    
+    integer, intent(in)  :: jm       ! latitude index
+    integer, intent(in)  :: jn       ! longitude index
+    integer, intent(in)  :: nlat_ext ! maximum latitude index
+    integer, intent(in)  :: nlon_ext ! maximum longitude index
+    integer, intent(out) :: jm_used  ! corrected latitude index
+    integer, intent(out) :: jn_used  ! corrected longitude index
+    
+    jm_used = jm
+    if (jm_used<1) then
+      jm_used = 1
+    endif
+    if (jm_used>nlat_ext) then
+      jm_used = nlat_ext
+    endif
+    jn_used = jn
+    if (jn_used<1) then
+      jn_used = jn_used + nlon_ext
+    endif
+    if (jn_used>nlon_ext) then
+      jn_used = jn_used - nlon_ext
+    endif
+            
+  end subroutine correct_ext_data_indices
 
 end module mo_grid_generator
 
