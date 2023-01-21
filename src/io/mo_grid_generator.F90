@@ -993,7 +993,7 @@ module mo_grid_generator
     !$omp parallel workshare
     dq_value = sum(grid%land_fraction*grid%area_z(:,:,n_levels))/sum(grid%area_z(:,:,n_levels))
     !$omp end parallel workshare
-    write(*,*) "average land fraction:",dq_value
+    write(*,*) "share of the surface covered by land:",dq_value
     
     ! the mean velocity area can be set now
     grid%mean_velocity_area = 2._wp*sum(grid%area_z(:,:,n_levels))/size(grid%area_z(:,:,n_levels))
