@@ -772,6 +772,15 @@ module mo_grid_generator
       enddo
       !$omp end parallel do
       
+      !$omp parallel workshare
+      dq_value = minval(grid%t_const_soil)
+      !$omp end parallel workshare
+      write(*,*) "minimum background soil temperature:",dq_value,"m"
+      !$omp parallel workshare
+      dq_value = maxval(grid%t_const_soil)
+      !$omp end parallel workshare
+      write(*,*) "maximum background soil temperature:",dq_value,"m"
+      
     endif
     
     ! Vertical grid
