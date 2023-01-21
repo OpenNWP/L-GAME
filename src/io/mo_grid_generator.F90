@@ -543,6 +543,10 @@ module mo_grid_generator
           dq_value = maxval(grid%lake_fraction)
           !$omp end parallel workshare
           write(*,*) "maximum lake fraction:",dq_value
+          !$omp parallel workshare
+          dq_value = sum(grid%lake_fraction)/(ny*nx)
+          !$omp end parallel workshare
+          write(*,*) "average lake fraction:",dq_value
           
           deallocate(lake_depth_gldb)
           
@@ -984,6 +988,12 @@ module mo_grid_generator
       grid%area_z(:,:,:) = dx*dy
       !$omp end parallel workshare
     endif
+    
+    ! some DQ
+    !$omp parallel workshare
+    dq_value = sum(grid%land_fraction*grid%area_z(:,:,n_levels))/sum(grid%area_z(:,:,n_levels))
+    !$omp end parallel workshare
+    write(*,*) "average land fraction:",dq_value
     
     ! the mean velocity area can be set now
     grid%mean_velocity_area = 2._wp*sum(grid%area_z(:,:,n_levels))/size(grid%area_z(:,:,n_levels))
