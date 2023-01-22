@@ -783,7 +783,7 @@ module mo_grid_generator
           ! albedo of water
           grid%sfc_albedo(ji,jk) = albedo_water
   
-          ! for water, the roughness_length is set to some sea-typical value, will not be used anyway
+          ! for water the roughness length is set to some sea-typical value, will not be used anyway
           grid%roughness_length(ji,jk) = 0.08_wp
           
           ! will also not be used for water
