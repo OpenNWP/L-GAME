@@ -37,6 +37,8 @@ module mo_grid_generator
     integer                       :: ncid                          ! netCDF file ID
     integer                       :: nlon_ext                      ! number of longitude points of the external data grid
     integer                       :: nlat_ext                      ! number of latitude points of the external data grid
+    integer                       :: nlon_ext_sst                  ! number of longitude points of the SST grid
+    integer                       :: nlat_ext_sst                  ! number of latitude points of the SST grid
     integer                       :: lat_index_ext                 ! latitude index of a grid point of the external data
     integer                       :: lon_index_ext                 ! longitude index of a grid point of the external data
     integer                       :: left_index_ext                ! helper variable for interpolating external data to the GAME grid
@@ -47,6 +49,7 @@ module mo_grid_generator
     integer                       :: jm_used                       ! helper variable for interpolating external data to the GAME grid
     integer                       :: jn_used                       ! helper variable for interpolating external data to the GAME grid
     integer                       :: etopo_oro_id                  ! variable ID of the input orography
+    integer                       :: lsmask_id                     ! netCDF ID of the land-sea mask of the NCEP NSST grid
     integer                       :: ghcn_cams_id                  ! netCDF ID of the input 2-m-temperature mean (from GHCN-CAMS)
     integer(2),       allocatable :: lake_depth_gldb_raw(:,:)      ! GLDB lake depth data as read from file
     character(len=1), allocatable :: glcc_raw(:,:)                 ! GLCC raw data
@@ -94,10 +97,13 @@ module mo_grid_generator
     real(wp), allocatable         :: lake_depth_gldb(:,:)          ! GLDB lake depth data
     integer,  allocatable         :: etopo_oro(:,:)                ! ETOPO orography
     integer,  allocatable         :: invalid_counter(:,:)          ! counts invalid values encountered in an interpolation
+    integer,          allocatable :: ncep_nsst_lsmask(:,:)         ! NCEP NSST land-sea mask
     real(wp), allocatable         :: ghcn_cams(:,:,:)              ! GHCN-CAMS data (2-m-temperature mean)
     real(wp)                      :: toa_oro                       ! top of terrain-following coordinates
     real(wp)                      :: delta_lat_ext                 ! latitude resolution of the external data grid
     real(wp)                      :: delta_lon_ext                 ! longitude resolution of the external data grid
+    real(wp)                      :: delta_lat_ext_sst             ! latitude resolution of the SST grid
+    real(wp)                      :: delta_lon_ext_sst             ! longitude resolution of the SST grid
     real(wp)                      :: fractions_sum                 ! sum of land fraction and lake fraction
     real(wp)                      :: max_oro                       ! maximum orography value
     real(wp)                      :: dq_value                      ! data quality value
@@ -434,8 +440,22 @@ module mo_grid_generator
           delta_lat_ext = M_PI/nlat_ext
           delta_lon_ext = 2._wp*M_PI/nlon_ext
           
+          ! reading the NCEP NSST land-sea mask
+          nlat_ext_sst = 180
+          nlon_ext_sst = 360
+          allocate(ncep_nsst_lsmask(nlon_ext_sst,nlat_ext_sst))
+          
+          call nc_check(nf90_open(trim("../../grids/phys_sfc_quantities/lsmask.nc"),NF90_CLOBBER,ncid))
+          call nc_check(nf90_inq_varid(ncid,"mask",lsmask_id))
+          call nc_check(nf90_get_var(ncid,lsmask_id,ncep_nsst_lsmask))
+          call nc_check(nf90_close(ncid))
+          
+          ! calculating the properties of the NCEP NSST land-sea mask grid
+          delta_lat_ext_sst = M_PI/nlat_ext_sst
+          delta_lon_ext_sst = 2._wp*M_PI/nlon_ext_sst
+          
           !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,left_index_ext,right_index_ext, &
-          !$omp lower_index_ext,upper_index_ext,n_points_ext_domain,jm_used,jn_used)
+          !$omp lower_index_ext,upper_index_ext,n_points_ext_domain,jm_used,jn_used,lon_geo_scalar_used)
           do jk=1,nx
             do ji=1,ny
               
@@ -455,14 +475,32 @@ module mo_grid_generator
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
-                  
+                
                   ! correcting the indices for boundary cases
                   call correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
                   
                   if (lake_depth_gldb(jm_used,jn_used)>0._wp) then
-                    grid%lake_fraction(ji,jk) = grid%lake_fraction(ji,jk)+1._wp
+                    
+                    lon_geo_scalar_used = grid%lon_geo_scalar(ji,jk)
+                    if (lon_geo_scalar_used<0._wp) then
+                      lon_geo_scalar_used = lon_geo_scalar_used+2._wp*M_PI
+                    endif
+                    lon_index_ext = int(lon_geo_scalar_used/delta_lon_ext_sst)
+                    
+                    ! a lake is only considered a lake if it is not part of the NCEP NSST grid
+                    lat_index_ext = nlat_ext_sst/2 - int(grid%lat_geo_scalar(ji,jk)/delta_lat_ext_sst)
+                    lon_index_ext = int(lon_geo_scalar_used/delta_lon_ext_sst)
+                    lat_index_ext = max(1,lat_index_ext)
+                    lat_index_ext = min(nlat_ext_sst,lat_index_ext)
+                    lon_index_ext = max(1,lon_index_ext)
+                    lon_index_ext = min(nlon_ext_sst,lon_index_ext)
+                    
+                    if (ncep_nsst_lsmask(lon_index_ext,lat_index_ext)==0) then
+                      grid%lake_fraction(ji,jk) = grid%lake_fraction(ji,jk)+1._wp
+                    endif
+                    
                   endif
-                  
+                    
                 enddo
               enddo
               
@@ -471,6 +509,9 @@ module mo_grid_generator
             enddo
           enddo
           !$omp end parallel do
+          
+          deallocate(lake_depth_gldb)
+          deallocate(ncep_nsst_lsmask)
           
           ! restricting the sum of lake fraction and land fraction to one
           !$omp parallel do private(ji,jk,fractions_sum)
@@ -499,8 +540,6 @@ module mo_grid_generator
           dq_value = sum(grid%lake_fraction)/(ny*nx)
           !$omp end parallel workshare
           write(*,*) "average lake fraction:",dq_value
-          
-          deallocate(lake_depth_gldb)
           
           write(*,*) "Lake fraction set."
           
