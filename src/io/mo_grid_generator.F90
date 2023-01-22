@@ -80,6 +80,8 @@ module mo_grid_generator
     real(wp)                      :: albedo_water                  ! albedo of water
     real(wp)                      :: albedo_soil                   ! albedo of soil
     real(wp)                      :: albedo_ice                    ! albedo of ice
+    real(wp)                      :: t_conductivity_water          ! temperature conductivity of water
+    real(wp)                      :: t_conductivity_soil           ! temperature conductivity of soil
     real(wp)                      :: lat_lower_center              ! variable for calculating the TRSK weights
     real(wp)                      :: lat_upper_center              ! variable for calculating the TRSK weights
     real(wp)                      :: rot_y(3,3)                    ! rotation matrix around the global y-axis
@@ -768,6 +770,8 @@ module mo_grid_generator
       ! Radiation in the Atmosphere, 2007, p. 444)
       albedo_soil = 0.12_wp
       albedo_ice = 0.8_wp
+      t_conductivity_water = 1.4e-7_wp
+      t_conductivity_soil = 7.5e-7_wp
       
       !$omp parallel do private(ji,jk)
       do jk=1,nx
@@ -789,14 +793,20 @@ module mo_grid_generator
           ! will also not be used for water
           grid%sfc_rho_c(ji,jk) = rho_h2o*c_p_water
           
-          grid%t_conduc_soil(ji,jk) = 1.4e-7_wp
+          grid%t_conduc_soil(ji,jk) = t_conductivity_water
           
           ! land is present in this grid cell
           if (grid%land_fraction(ji,jk)>EPSILON_SECURITY) then
-          
-            grid%t_conduc_soil(ji,jk) = 7.5e-7_wp
-          
-            grid%sfc_rho_c(ji,jk) = density_soil*c_p_soil
+            
+            ! lakes are included in the soil calculation
+            grid%t_conduc_soil(ji,jk) = (grid%land_fraction(ji,jk)*t_conductivity_soil &
+                                        + grid%lake_fraction(ji,jk)*t_conductivity_water) &
+                                        /(grid%land_fraction(ji,jk)+grid%lake_fraction(ji,jk))
+            
+            ! lakes are included in the soil calculation
+            grid%sfc_rho_c(ji,jk) = (grid%land_fraction(ji,jk)*density_soil*c_p_soil &
+                                    + grid%lake_fraction(ji,jk)*rho_h2o*c_p_water) &
+                                    /(grid%land_fraction(ji,jk)+grid%lake_fraction(ji,jk))
             
             ! setting the surface albedo of land depending on the latitude
             ! ice
