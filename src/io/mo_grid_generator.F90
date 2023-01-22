@@ -792,7 +792,7 @@ module mo_grid_generator
           grid%t_conduc_soil(ji,jk) = 1.4e-7_wp
           
           ! land is present in this grid cell
-          if (grid%land_fraction(ji,jk)>0._wp) then
+          if (grid%land_fraction(ji,jk)>EPSILON_SECURITY) then
           
             grid%t_conduc_soil(ji,jk) = 7.5e-7_wp
           
@@ -818,6 +818,23 @@ module mo_grid_generator
         enddo
       enddo
       !$omp end parallel do
+      
+      !$omp parallel workshare
+      dq_value = minval(grid%t_conduc_soil)
+      !$omp end parallel workshare
+      write(*,*) "minimum temperature conductivity of the soil:",dq_value,"m**2/s"
+      !$omp parallel workshare
+      dq_value = maxval(grid%t_conduc_soil)
+      !$omp end parallel workshare
+      write(*,*) "maximum temperature conductivity of the soil:",dq_value,"m**2/s"
+      !$omp parallel workshare
+      dq_value = minval(grid%sfc_rho_c)
+      !$omp end parallel workshare
+      write(*,*) "minimum volumetric heat capacity of the soil:",dq_value,"J/(m**3K)"
+      !$omp parallel workshare
+      dq_value = maxval(grid%sfc_rho_c)
+      !$omp end parallel workshare
+      write(*,*) "maximum volumetric heat capacity of the soil:",dq_value,"J/(m**3K)"
       
     endif
     
