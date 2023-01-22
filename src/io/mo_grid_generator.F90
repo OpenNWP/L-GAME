@@ -467,8 +467,6 @@ module mo_grid_generator
               enddo
               
               grid%lake_fraction(ji,jk) = grid%lake_fraction(ji,jk)/n_points_ext_domain
-              ! lakes belong to the land (not the sea), the lake fraction cannot be greater than the land fraction
-              grid%lake_fraction(ji,jk) = min(grid%lake_fraction(ji,jk),grid%land_fraction(ji,jk))
               
             enddo
           enddo
