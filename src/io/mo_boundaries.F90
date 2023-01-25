@@ -26,8 +26,11 @@ module mo_boundaries
     type(t_grid),  intent(in)    :: grid  ! grid properties (containing the background state)
     
     ! local variables
-    real(wp) :: old_weight,new_weight ! time interpolation weights
-    integer  :: ji,jk,jl              ! loop indicies
+    real(wp) :: old_weight ! old time step interpolation weight
+    real(wp) :: new_weight ! new time step interpolation weight
+    integer  :: ji         ! horizontal index
+    integer  :: jk         ! horizontal index
+    integer  :: jl         ! layer index
     
     ! setting the time interpolation weights
     old_weight = 1._wp - (t_now-t_latest_bc)/dtime_bc

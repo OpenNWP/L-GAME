@@ -3,7 +3,7 @@
 
 module mo_bc_nml
   
-  ! In this namelist, the boundary conditions are configured.
+  ! In this namelist the boundary conditions are configured.
   
   use mo_definitions, only: wp
   use mo_run_nml,     only: ny,nx

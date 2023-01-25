@@ -3,7 +3,7 @@
 
 module mo_manage_radiation_calls
   
-  ! This manages the calls to RTE+RRTMGP.
+  ! This module manages the calls to RTE+RRTMGP.
   
   use mo_definitions,    only: t_grid,t_state,t_diag
   use mo_run_nml,        only: nx,ny,wp

@@ -9,14 +9,14 @@ module mo_io_nml
   
   implicit none
   
-  integer           :: dt_write_min      ! output interval in minutes
-  logical           :: lread_geo         ! wether or not to read the surface properties from a file
-  logical           :: lwrite_grid       ! wether or not to write grid properties to a file
-  character(len=64) :: grid_filename     ! filename of the grid to read or write
-  real(wp)          :: dt_write          ! output interval in seconds
-  character(len=64) :: restart_filename  ! filename from which to read the inital state in case restart mode is on
-  character(len=64) :: oro_raw_filename  ! filename from which to read the raw orography
-  logical           :: lwrite_integrals  ! If set to true, fundamental integrals of the atmosphere will be written out at every time step.
+  integer           :: dt_write_min     ! output interval in minutes
+  logical           :: lread_geo        ! wether or not to read the surface properties from a file
+  logical           :: lwrite_grid      ! wether or not to write grid properties to a file
+  character(len=64) :: grid_filename    ! filename of the grid to read or write
+  real(wp)          :: dt_write         ! output interval in seconds
+  character(len=64) :: restart_filename ! filename from which to read the inital state in case restart mode is on
+  character(len=64) :: oro_raw_filename ! filename from which to read the raw orography
+  logical           :: lwrite_integrals ! If set to true, fundamental integrals of the atmosphere will be written out at every time step.
   
   namelist /io/dt_write_min,lread_geo,lwrite_grid,grid_filename,restart_filename,lwrite_integrals
   

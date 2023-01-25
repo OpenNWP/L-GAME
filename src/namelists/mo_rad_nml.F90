@@ -3,7 +3,7 @@
 
 module mo_rad_nml
   
-  ! In this namelist, the radiation is configured.
+  ! In this namelist the radiation is configured.
   
   use mo_definitions, only: wp
   use mo_run_nml,     only: dy
