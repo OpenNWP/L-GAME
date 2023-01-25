@@ -397,19 +397,6 @@ module mo_grid_generator
           
           deallocate(glcc)
           
-          !$omp parallel workshare
-          dq_value = minval(grid%land_fraction)
-          !$omp end parallel workshare
-          write(*,*) "minimum land fraction:",dq_value
-          !$omp parallel workshare
-          dq_value = maxval(grid%land_fraction)
-          !$omp end parallel workshare
-          write(*,*) "maximum land fraction:",dq_value
-          !$omp parallel workshare
-          dq_value = sum(grid%land_fraction)/(ny*nx)
-          !$omp end parallel workshare
-          write(*,*) "average land fraction:",dq_value
-          
           write(*,*) "Land fraction set."
           
           ! Lake fraction
@@ -529,19 +516,6 @@ module mo_grid_generator
             enddo
           enddo
           !$omp end parallel do
-              
-          !$omp parallel workshare
-          dq_value = minval(grid%lake_fraction)
-          !$omp end parallel workshare
-          write(*,*) "minimum lake fraction:",dq_value
-          !$omp parallel workshare
-          dq_value = maxval(grid%lake_fraction)
-          !$omp end parallel workshare
-          write(*,*) "maximum lake fraction:",dq_value
-          !$omp parallel workshare
-          dq_value = sum(grid%lake_fraction)/(ny*nx)
-          !$omp end parallel workshare
-          write(*,*) "average lake fraction:",dq_value
           
           write(*,*) "Lake fraction set."
           
@@ -734,28 +708,10 @@ module mo_grid_generator
         !$omp end parallel do
     
     endselect
-  
-    !$omp parallel workshare
-    dq_value = minval(grid%oro)
-    !$omp end parallel workshare
-    write(*,*) "minimum orography:",dq_value,"m"
-    !$omp parallel workshare
-    dq_value = maxval(grid%oro)
-    !$omp end parallel workshare
-    write(*,*) "maximum orography:",dq_value,"m"
     
     !$omp parallel workshare
     grid%z_w(:,:,n_levels) = grid%oro
     !$omp end parallel workshare
-    
-    !$omp parallel workshare
-    dq_value = minval(grid%t_const_soil)
-    !$omp end parallel workshare
-    write(*,*) "minimum background soil temperature:",dq_value,"K"
-    !$omp parallel workshare
-    dq_value = maxval(grid%t_const_soil)
-    !$omp end parallel workshare
-    write(*,*) "maximum background soil temperature:",dq_value,"K"
     
     ! Other physical properties of the surface
     ! ----------------------------------------
@@ -829,24 +785,79 @@ module mo_grid_generator
       enddo
       !$omp end parallel do
       
-      !$omp parallel workshare
-      dq_value = minval(grid%t_conduc_soil)
-      !$omp end parallel workshare
-      write(*,*) "minimum temperature conductivity of the soil:",dq_value,"m**2/s"
-      !$omp parallel workshare
-      dq_value = maxval(grid%t_conduc_soil)
-      !$omp end parallel workshare
-      write(*,*) "maximum temperature conductivity of the soil:",dq_value,"m**2/s"
-      !$omp parallel workshare
-      dq_value = minval(grid%sfc_rho_c)
-      !$omp end parallel workshare
-      write(*,*) "minimum volumetric heat capacity of the soil:",dq_value,"J/(m**3K)"
-      !$omp parallel workshare
-      dq_value = maxval(grid%sfc_rho_c)
-      !$omp end parallel workshare
-      write(*,*) "maximum volumetric heat capacity of the soil:",dq_value,"J/(m**3K)"
-      
     endif
+    
+    ! giving the user some information on the physical surface quantities
+    
+    !$omp parallel workshare
+    dq_value = minval(grid%land_fraction)
+    !$omp end parallel workshare
+    write(*,*) "minimum land fraction:",dq_value
+    
+    !$omp parallel workshare
+    dq_value = maxval(grid%land_fraction)
+    !$omp end parallel workshare
+    write(*,*) "maximum land fraction:",dq_value
+    
+    !$omp parallel workshare
+    dq_value = sum(grid%land_fraction)/(ny*nx)
+    !$omp end parallel workshare
+    write(*,*) "average land fraction:",dq_value
+        
+    !$omp parallel workshare
+    dq_value = minval(grid%lake_fraction)
+    !$omp end parallel workshare
+    write(*,*) "minimum lake fraction:",dq_value
+    
+    !$omp parallel workshare
+    dq_value = maxval(grid%lake_fraction)
+    !$omp end parallel workshare
+    write(*,*) "maximum lake fraction:",dq_value
+    
+    !$omp parallel workshare
+    dq_value = sum(grid%lake_fraction)/(ny*nx)
+    !$omp end parallel workshare
+    write(*,*) "average lake fraction:",dq_value
+    
+    !$omp parallel workshare
+    dq_value = minval(grid%oro)
+    !$omp end parallel workshare
+    write(*,*) "minimum orography:",dq_value,"m"
+    
+    !$omp parallel workshare
+    dq_value = maxval(grid%oro)
+    !$omp end parallel workshare
+    write(*,*) "maximum orography:",dq_value,"m"
+    
+    !$omp parallel workshare
+    dq_value = minval(grid%t_const_soil)
+    !$omp end parallel workshare
+    write(*,*) "minimum background soil temperature:",dq_value,"K"
+    
+    !$omp parallel workshare
+    dq_value = maxval(grid%t_const_soil)
+    !$omp end parallel workshare
+    write(*,*) "maximum background soil temperature:",dq_value,"K"
+    
+    !$omp parallel workshare
+    dq_value = minval(grid%sfc_rho_c)
+    !$omp end parallel workshare
+    write(*,*) "minimum volumetric heat capacity of the soil:",dq_value,"J/(m**3K)"
+    
+    !$omp parallel workshare
+    dq_value = maxval(grid%sfc_rho_c)
+    !$omp end parallel workshare
+    write(*,*) "maximum volumetric heat capacity of the soil:",dq_value,"J/(m**3K)"
+    
+    !$omp parallel workshare
+    dq_value = minval(grid%t_conduc_soil)
+    !$omp end parallel workshare
+    write(*,*) "minimum temperature conductivity of the soil:",dq_value,"m**2/s"
+    
+    !$omp parallel workshare
+    dq_value = maxval(grid%t_conduc_soil)
+    !$omp end parallel workshare
+    write(*,*) "maximum temperature conductivity of the soil:",dq_value,"m**2/s"
     
     ! Vertical grid
     ! -------------
