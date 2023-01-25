@@ -3,7 +3,7 @@
 
 module mo_momentum_diff_diss
 
-  ! This module computes momentum diffusion and dissipation.
+  ! In this module momentum diffusion and dissipation operators are calculated.
   
   use mo_constants,            only: M_PI
   use mo_definitions,          only: t_grid,t_diag,t_state,wp
