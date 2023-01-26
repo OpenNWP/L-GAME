@@ -1,7 +1,7 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-! This file contains the calculation of the grid properties as well as some type definitions.
+! This file contains the calculation of the grid properties.
 
 module mo_grid_generator
 
@@ -99,7 +99,7 @@ module mo_grid_generator
     real(wp), allocatable         :: lake_depth_gldb(:,:)          ! GLDB lake depth data
     integer,  allocatable         :: etopo_oro(:,:)                ! ETOPO orography
     integer,  allocatable         :: invalid_counter(:,:)          ! counts invalid values encountered in an interpolation
-    integer,          allocatable :: ncep_nsst_lsmask(:,:)         ! NCEP NSST land-sea mask
+    integer,  allocatable         :: ncep_nsst_lsmask(:,:)         ! NCEP NSST land-sea mask
     real(wp), allocatable         :: ghcn_cams(:,:,:)              ! GHCN-CAMS data (2-m-temperature mean)
     real(wp)                      :: toa_oro                       ! top of terrain-following coordinates
     real(wp)                      :: delta_lat_ext                 ! latitude resolution of the external data grid

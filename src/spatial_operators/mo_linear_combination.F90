@@ -3,7 +3,7 @@
 
 module mo_linear_combination
 
-  ! This module contains a function for linearly combining two states.
+  ! This module contains a subroutine for linearly combining two states.
 
   use mo_definitions,      only: wp,t_state,t_grid
   use mo_constituents_nml, only: n_condensed_constituents
@@ -13,6 +13,8 @@ module mo_linear_combination
   contains
 
   subroutine linear_combine_two_states(state_1,state_2,state_res,coeff_1,coeff_2,grid)
+    
+    ! This subroutine linearly combines two states.
     
     type(t_state), intent(in)    :: state_1   ! first state to linearly combine
     type(t_state), intent(in)    :: state_2   ! second state to linearly combine

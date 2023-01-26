@@ -131,7 +131,8 @@ module mo_boundaries
     
     ! local variables
     real(wp) :: dist_from_boundary ! index distance from the boundary of the domain
-    integer  :: ji,jk              ! loop indices
+    integer  :: ji                 ! horizontal index
+    integer  :: jk                 ! horizontal index
     
     ! rescale factor for scalar fields
     !$omp parallel do private(ji,jk)
