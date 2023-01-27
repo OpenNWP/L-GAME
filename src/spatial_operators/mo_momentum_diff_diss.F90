@@ -2,7 +2,7 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_momentum_diff_diss
-
+  
   ! In this module momentum diffusion and dissipation operators are calculated.
   
   use mo_constants,            only: M_PI
@@ -31,11 +31,13 @@ module mo_momentum_diff_diss
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer  :: upper_index,lower_index ! vertical interpolation indices
-    real(wp) :: slope,vertical_gradient ! vertical interpolation helper variables
-    integer  :: ji                      ! horizontal index
-    integer  :: jk                      ! horizontal index
-    integer  :: jl                      ! layer index
+    integer  :: lower_index       ! lower vertical interpolation index
+    integer  :: upper_index       ! upper vertical interpolation index
+    real(wp) :: slope             ! tangential slope at an edge
+    real(wp) :: vertical_gradient ! vertical gradient needed for computing the diffusion operator
+    integer  :: ji                ! horizontal index
+    integer  :: jk                ! horizontal index
+    integer  :: jl                ! layer index
     
     ! Preparation of kinematic properties of the wind field
     ! -----------------------------------------------------
@@ -156,7 +158,7 @@ module mo_momentum_diff_diss
     !$omp end parallel do
     
   end subroutine mom_diff_h
-
+  
   subroutine mom_diff_v(state,diag,grid)
     
     ! This subroutine handles vertical momentum diffusion.
@@ -284,7 +286,7 @@ module mo_momentum_diff_diss
     call vert_vert_mom_viscosity(state,diag,grid)
     ! taking the second derivative to compute the diffusive tendency
     call grad_vert(diag%scalar_placeholder,diag%mom_diff_tend_z,grid)
-
+    
     ! 3.) horizontal diffusion of vertical velocity
     ! ---------------------------------------------
     ! the diffusion coefficient is the same as the one for vertical diffusion of horizontal velocity
@@ -325,7 +327,7 @@ module mo_momentum_diff_diss
       enddo
     enddo
     !$omp end parallel do
-
+    
   end subroutine mom_diff_v
   
   subroutine simple_dissipation_rate(state,diag,grid)
@@ -352,9 +354,9 @@ module mo_momentum_diff_diss
     
     ! heating rate in the swamp layer
     if (lklemp) then
-    
+      
       damping_start_height = klemp_begin_rel*toa
-    
+      
       !$omp parallel do private(ji,jk,jl,z_above_damping,damping_coeff,damping_prefactor)
       do jl=2,n_damping_levels
         do jk=1,nx
@@ -385,7 +387,7 @@ module mo_momentum_diff_diss
     !$omp end parallel workshare
     
   end subroutine simple_dissipation_rate
-
+  
 end module mo_momentum_diff_diss
 
 
