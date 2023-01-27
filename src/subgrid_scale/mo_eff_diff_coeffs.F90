@@ -224,7 +224,7 @@ module mo_eff_diff_coeffs
   
   subroutine vert_hor_mom_viscosity(state,diag,grid)
     
-    ! This subroutine computes the effective viscosity (eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
+    ! This subroutine computes the effective viscosity (molecular + eddy viscosity) for the vertical diffusion of horizontal velocity.
     ! This quantity is located at the half level edges.
     ! To obey the symmetry of the stress tensor, the same coefficient must be used for the horizontal diffusion of vertical velocity.
     
@@ -482,7 +482,7 @@ module mo_eff_diff_coeffs
     enddo
     !$omp end parallel do
     
-    ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
+    ! The eddy viscosity coefficient and the TKE only have to be calculated if it has not yet been done.
     if (.not. lmom_diff_h) then
       
       call hor_viscosity(state,diag)

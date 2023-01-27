@@ -2,7 +2,7 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_rrtmgp_coupler
-
+  
   ! This module is a coupler to RTE+RRTMGP.
   
   use mo_definitions,             only: wp
@@ -727,16 +727,16 @@ module mo_rrtmgp_coupler
   end subroutine init_fluxes
   
   subroutine reset_fluxes(fluxes)
-
+    
     ! This subroutine resets all fluxes to zero.
-
+    
     type(ty_fluxes_broadband), intent(inout) :: fluxes ! the fluxe object to set to zero
-
+    
     ! reset broadband fluxes
     fluxes%flux_up = 0._wp
     fluxes%flux_dn = 0._wp
     fluxes%flux_net = 0._wp
-
+    
   end subroutine reset_fluxes
   
   subroutine free_fluxes(fluxes)
