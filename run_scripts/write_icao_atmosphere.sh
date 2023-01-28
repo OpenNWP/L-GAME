@@ -50,8 +50,14 @@ EOF
 # That's it, here we go.
 source $lgame_home_dir/run_scripts/.sh/root_script.sh
 
+# creating the nwp_init directory if it does not exist
+if [ ! -d $lgame_home_dir/nwp_init ]
+then
+  mkdir $lgame_home_dir/nwp_init
+fi
+
 # moving the output to the nwp_init directory
-mv output/$run_id/${run_id}+0min.nc nwp_init/${run_id}.nc
+mv $lgame_home_dir/output/$run_id/${run_id}+0min.nc $lgame_home_dir/nwp_init/${run_id}.nc
 
 
 
