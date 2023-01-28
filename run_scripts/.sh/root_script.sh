@@ -6,6 +6,12 @@
 # the directory of this run
 run_dir=$lgame_home_dir/output/$run_id
 
+# creating needed directories
+if [ ! -d $lgame_home_dir/output ]
+then
+  mkdir $lgame_home_dir/output
+fi
+
 if [ -d $run_dir ]
 then
   rm -r $run_dir
