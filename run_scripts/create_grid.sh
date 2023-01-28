@@ -47,7 +47,7 @@ lsleve=.true.
 
 EOF
 
-# That's it, here we go. Do not change anything below this line.
+# That's it, now the basic run script will be sourced. Do not change anything below this line.
 
 # creating needed directories
 if [ ! -d $lgame_home_dir/grids ]

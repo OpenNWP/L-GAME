@@ -51,7 +51,7 @@ lperiodic=.true.
 
 EOF
 
-# That's it, here we go.
+# that's it, now the basic run script will be sourced
 source $lgame_home_dir/run_scripts/.sh/root_script.sh
 
 
