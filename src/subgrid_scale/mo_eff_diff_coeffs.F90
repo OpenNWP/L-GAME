@@ -114,7 +114,7 @@ module mo_eff_diff_coeffs
       
     enddo
     !$omp end parallel do
-        
+    
     ! turbulent component
     !$omp parallel do private(ji,jk,jl)
     do jl=1,n_layers
@@ -205,7 +205,7 @@ module mo_eff_diff_coeffs
         diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
         
       endif
-    
+      
     enddo
     !$omp end parallel do
     
@@ -244,6 +244,7 @@ module mo_eff_diff_coeffs
     do jl=2,n_layers
       do ji=1,ny
         do jk=2,nx
+          
           diag%vert_hor_viscosity_u(ji,jk,jl) = &
           ! molecular component
           0.25_wp*( &
@@ -260,6 +261,7 @@ module mo_eff_diff_coeffs
         
         ! periodic boundary conditions
         if (lperiodic) then
+          
           diag%vert_hor_viscosity_u(ji,1,jl) = &
           ! molecular component
           0.25_wp*( &
@@ -284,6 +286,7 @@ module mo_eff_diff_coeffs
     do jl=2,n_layers
       do jk=1,nx
         do ji=2,ny
+          
           diag%vert_hor_viscosity_v(ji,jk,jl) = &
           ! molecular component
           0.25_wp*( &
@@ -300,6 +303,7 @@ module mo_eff_diff_coeffs
         
         ! periodic boundary conditions
         if (lperiodic) then
+          
           diag%vert_hor_viscosity_v(1,jk,jl) = &
           ! molecular component
           0.25_wp*( &
@@ -325,6 +329,7 @@ module mo_eff_diff_coeffs
     do jl=2,n_layers
       do ji=1,ny
         do jk=2,nx
+          
           diag%vert_hor_viscosity_u(ji,jk,jl) = diag%vert_hor_viscosity_u(ji,jk,jl) &
           ! molecular component
           *0.25_wp*( &
@@ -354,6 +359,7 @@ module mo_eff_diff_coeffs
     do jl=2,n_layers
       do jk=1,nx
         do ji=2,ny
+          
           diag%vert_hor_viscosity_v(ji,jk,jl) = diag%vert_hor_viscosity_v(ji,jk,jl) &
           ! molecular component
           *0.25_wp*( &
@@ -392,7 +398,7 @@ module mo_eff_diff_coeffs
     ! for now, we set the vertical diffusion coefficient at the surface equal to the vertical diffusion coefficient in the layer above
     diag%vert_hor_viscosity_v(:,:,n_levels) = diag%vert_hor_viscosity_v(:,:,n_layers)
     !$omp end parallel workshare
-  
+    
   end subroutine vert_hor_mom_viscosity
   
   subroutine vert_vert_mom_viscosity(state,diag,grid)
@@ -422,11 +428,12 @@ module mo_eff_diff_coeffs
 
           diag%scalar_placeholder(ji,jk,jl) = state%rho(ji,jk,jl,n_condensed_constituents+1) &
                                               *mom_diff_coeff*diag%scalar_placeholder(ji,jk,jl)
+          
         enddo
       enddo
     enddo
     !$omp end parallel do
-  
+    
   end subroutine vert_vert_mom_viscosity
   
   subroutine scalar_diffusion_coeffs(state,diag,grid)
@@ -445,7 +452,7 @@ module mo_eff_diff_coeffs
     
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
-    
+      
       call hor_viscosity(state,diag)
       call tke_update(state,diag,grid)
       
@@ -460,7 +467,7 @@ module mo_eff_diff_coeffs
         enddo
       enddo
       !$omp end parallel do
-    
+      
     endif
     
     !$omp parallel do private(ji,jk,jl)
@@ -499,7 +506,7 @@ module mo_eff_diff_coeffs
         enddo
       enddo
       !$omp end parallel do
-    
+      
     endif
     
     !$omp parallel do private(ji,jk,jl,c_g_v)
@@ -591,7 +598,7 @@ module mo_eff_diff_coeffs
     tke2hor_diff_coeff = 1._wp/6._wp*mean_free_path*mean_velocity
     
   end function tke2hor_diff_coeff
-
+  
   function tke2vert_diff_coeff(tke,n_squared,layer_thickness)
     
     ! This function returns the vertical kinematic eddy viscosity as a function of the specific TKE and the Brunt-Väisälä frequency.
