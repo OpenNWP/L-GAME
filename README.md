@@ -32,19 +32,15 @@ The following packages are additionally required if you want to make use of the 
 
 ### Download and compilation
 
-```
-git clone https://github.com/OpenNWP/L-GAME.git
-cd L-GAME
-./compile.sh -f
-```
+	git clone https://github.com/OpenNWP/L-GAME.git
+	cd L-GAME
+	./compile.sh -f
 
 ## Execution
 
 Modify the variable lgame_home_dir in the run scripts (files in the directory run_scripts). Then you can use these files to execute certain model runs, for example:
 
-```
-./run_scripts/schaer.sh
-```
+	./run_scripts/schaer.sh
 
 Output will be placed in the directory `output`.
 
