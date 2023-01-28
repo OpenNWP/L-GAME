@@ -49,6 +49,17 @@ EOF
 
 # That's it, here we go. Do not change anything below this line.
 
+# creating needed directories
+if [ ! -d $lgame_home_dir/grids ]
+then
+  mkdir $lgame_home_dir/grids
+fi
+
+if [ ! -d $lgame_home_dir/grids/phys_sfc_quantities ]
+then
+  mkdir $lgame_home_dir/grids/phys_sfc_quantities
+fi
+
 # downloading land use data if necessary
 if [ $orography_id -eq 1 ]
 then
