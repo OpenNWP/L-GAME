@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
 
-fig_save_path = "/home/max/code/L-GAME/figs"
 output_dir = "/home/max/code/L-GAME/output"
 write_out_dry_mass_integral = 1
 write_out_rhotheta_integral = 1
@@ -19,6 +18,7 @@ run_id = "schaer"
 # end of usual input section
 
 output_dir = output_dir + "/" + run_id
+fig_save_path = output_dir
 
 fig_size = 6
 if write_out_dry_mass_integral == 1:

@@ -43,4 +43,4 @@ plt.title(run_id + " + " + plot_time_since_init_min_str + " min, var: " + varnam
 plt.ylim([0, 10])
 plt.xlabel("x / km")
 plt.ylabel("z / km")
-fig.savefig(lgame_home_dir + "/figs/" + run_id + "+" + plot_time_since_init_min_str + "min_" + varname + ".png")
+fig.savefig(lgame_home_dir + "/output/" + run_id + "+" + plot_time_since_init_min_str + "min_" + varname + ".png")

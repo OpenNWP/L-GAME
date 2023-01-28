@@ -23,11 +23,6 @@ then
   mkdir real_weather
 fi
 
-if [ ! -d figs ]
-then
-  mkdir figs
-fi
-
 if [ ! -d nwp_init ]
 then
   mkdir nwp_init
