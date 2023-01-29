@@ -1,10 +1,10 @@
 ! This source file is part of the Limited-area GAME version (L-GAME), which is released under the MIT license.
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
-! This file contains the calculation of the grid properties.
-
 module mo_grid_generator
-
+  
+  ! This module contains the calculation of the grid properties.
+  
   use netcdf
   use mo_definitions,        only: wp,t_grid
   use mo_run_nml,            only: ny,nx,n_layers,n_levels,dy,dx,toa,n_oro_layers,stretching_parameter,scenario,lat_center, &
@@ -19,7 +19,7 @@ module mo_grid_generator
   use mo_read_write_grid,    only: write_grid,read_geo
   use mo_set_initial_state,  only: bg_temp,bg_pres,geopot,nc_check
   use mo_bc_nml,             only: lperiodic
-
+  
   implicit none
   
   integer  :: n_damping_levels ! number of levels in which the swamp layer is active
@@ -28,7 +28,7 @@ module mo_grid_generator
   
   subroutine grid_setup(grid)
     
-    ! This module computes the grid quantities.
+    ! This subroutine computes the grid quantities.
     
     type(t_grid), intent(inout) :: grid ! the model grid
     
@@ -318,7 +318,7 @@ module mo_grid_generator
     ! ------------------------
     
     select case (orography_id)
-    
+      
       ! no orography
       case(0)
         
@@ -327,7 +327,7 @@ module mo_grid_generator
         ! mean surface temperature for an Earth without real orography
         grid%t_const_soil = t_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar)
         !$omp end parallel workshare
-      
+        
       ! real orography (and other surface properties)
       case(1)
         
@@ -356,7 +356,7 @@ module mo_grid_generator
             glcc(ji,:) = ichar(glcc_raw(ji,:))
           end do
           !$omp end parallel do
-           
+          
           deallocate(glcc_raw)
           
           delta_lat_ext = M_PI/nlat_ext
@@ -406,7 +406,7 @@ module mo_grid_generator
           
           nlat_ext = 21600
           nlon_ext = 43200
-            
+          
           ! opening the lake depth file
           open(action="read",file="../../grids/phys_sfc_quantities/GlobalLakeDepth.dat",form="unformatted", &
           access="direct",recl=2*nlon_ext,newunit=ext_fileunit)
@@ -464,7 +464,7 @@ module mo_grid_generator
               ! looping over all points of the input dataset in the vicinity of the grid cell at hand
               do jm=upper_index_ext,lower_index_ext
                 do jn=left_index_ext,right_index_ext
-                
+                  
                   ! correcting the indices for boundary cases
                   call correct_ext_data_indices(jm,jn,nlat_ext,nlon_ext,jm_used,jn_used)
                   
@@ -489,7 +489,7 @@ module mo_grid_generator
                     endif
                     
                   endif
-                    
+                  
                 enddo
               enddo
               
@@ -512,7 +512,7 @@ module mo_grid_generator
                 grid%land_fraction(ji,jk) = grid%land_fraction(ji,jk)/fractions_sum
                 grid%lake_fraction(ji,jk) = grid%lake_fraction(ji,jk)/fractions_sum
               endif
-            
+              
             enddo
           enddo
           !$omp end parallel do
@@ -535,12 +535,12 @@ module mo_grid_generator
           ! allocating memory for reading the grid files
           allocate(etopo_oro(nlon_ext,nlat_ext))
           
-          ! reading the arrays
+          ! reading the array
           call nc_check(nf90_get_var(ncid,etopo_oro_id,etopo_oro))
           
           ! closing the netCDF file
           call nc_check(nf90_close(ncid))
-      
+          
           ! setting the unfiltered orography
           
           delta_lat_ext = M_PI/nlat_ext
@@ -681,7 +681,7 @@ module mo_grid_generator
           write(*,*) "Lower boundary soil temperature set."
           
         endif
-      
+        
       ! Schaer wave test orography
       case(2)
         height_mountain = 250._wp
@@ -692,7 +692,7 @@ module mo_grid_generator
           grid%oro_smoothed(:,jk) = 0.5_wp*height_mountain*exp(-x_coord**2/5000._wp**2)
         enddo
         !$omp end parallel do
-      
+        
       ! Schaer advection test orography
       case(3)
         height_mountain = 3000._wp
@@ -706,7 +706,7 @@ module mo_grid_generator
           endif
         enddo
         !$omp end parallel do
-    
+      
     endselect
     
     !$omp parallel workshare
@@ -742,7 +742,7 @@ module mo_grid_generator
           
           ! albedo of water
           grid%sfc_albedo(ji,jk) = albedo_water
-  
+          
           ! for water the roughness length is set to some sea-typical value, will not be used anyway
           grid%roughness_length(ji,jk) = 0.08_wp
           
@@ -780,7 +780,7 @@ module mo_grid_generator
           
           ! restricting the roughness length to a minimum
           grid%roughness_length(ji,jk) = max(0.0001_wp,grid%roughness_length(ji,jk))
-        
+          
         enddo
       enddo
       !$omp end parallel do
@@ -803,7 +803,7 @@ module mo_grid_generator
     dq_value = sum(grid%land_fraction)/(ny*nx)
     !$omp end parallel workshare
     write(*,*) "average land fraction:",dq_value
-        
+    
     !$omp parallel workshare
     dq_value = minval(grid%lake_fraction)
     !$omp end parallel workshare
@@ -893,7 +893,7 @@ module mo_grid_generator
           else
             vertical_vector_pre(jl) = A
           endif
-        
+          
           ! check
           if (jl>1) then
             if (vertical_vector_pre(jl)>=vertical_vector_pre(jl-1)) then
@@ -902,9 +902,9 @@ module mo_grid_generator
               call exit(1)
             endif
           endif
-        
-        enddo
           
+        enddo
+        
         ! check
         if (ji==1 .and. jk==1) then
           max_oro = maxval(grid%z_w(:,:,n_levels))
@@ -1150,7 +1150,7 @@ module mo_grid_generator
     do jl=1,n_layers
       do jk=1,nx+1
         do ji=1,ny+1
-        
+          
           ! setting the vertical position of the areas
           if (jk==1) then
             grid%z_area_dual_z(ji,jk,jl) = grid%z_v(ji,1,jl) + 0.5_wp*(grid%z_v(ji,1,jl)-grid%z_v(ji,2,jl))
@@ -1255,7 +1255,7 @@ module mo_grid_generator
       enddo
     enddo
     !$omp end parallel do
-
+    
     ! setting the volume of the grid boxes
     !$omp parallel do private(jl)
     do jl=1,n_layers
@@ -1334,7 +1334,7 @@ module mo_grid_generator
     
     sigma_soil = 0.352_wp
     grid%z_t_const = -10._wp
-
+    
     ! the surface is always at zero
     grid%z_soil_interface(1) = 0._wp
     do jl=2,nsoillays+1
@@ -1351,7 +1351,7 @@ module mo_grid_generator
     enddo
     
     write(*,*) "Thickness of the uppermost soil layer: ", -grid%z_soil_interface(2), "m."
-
+    
     ! writing some grid properties to a file if required by the user
     if (lwrite_grid) then
       call write_grid(grid)
@@ -1459,7 +1459,7 @@ module mo_grid_generator
       array(ji,nx) = sum(original_array(ji-1:ji+1,nx-1:nx))/6._wp
     enddo
     !$omp end parallel do
-  
+    
   end subroutine smooth_hor_scalar
   
   function find_min_index(input_vector)
@@ -1486,14 +1486,14 @@ module mo_grid_generator
   end function find_min_index
   
   function patch_area(center_lat,dx_as_angle,dy_as_angle)
-  
+    
     ! This function calculates the area of a quadrilateral grid cell.
-  
+    
     real(wp) :: center_lat  ! latitude at the center of the patch
     real(wp) :: dx_as_angle ! delta x as angle
     real(wp) :: dy_as_angle ! delta y as angle
     real(wp) :: patch_area  ! the result
-  
+    
     ! computing the result
     patch_area = r_e**2*dx_as_angle*(sin(center_lat + 0.5_wp*dy_as_angle) - sin(center_lat - 0.5_wp*dy_as_angle))
     
@@ -1501,7 +1501,7 @@ module mo_grid_generator
     if (lplane) then
       patch_area = r_e**2*dx_as_angle*dy_as_angle
     endif
-  
+    
   end function patch_area
   
   function vertical_face_area(lower_z,upper_z,lower_length)
@@ -1526,19 +1526,19 @@ module mo_grid_generator
   function vegetation_height_ideal(latitude,oro)
     
     ! This function calculates a latitude- and height-dependant idealized vegetation height.
-
+    
     real(wp) :: latitude                ! latitude of this point
     real(wp) :: oro                     ! height of the terrain at this point
     real(wp) :: vegetation_height_ideal ! result
     
     ! local variables
     real(wp) :: vegetation_height_equator ! the vegetation height at the equator
-
+    
     ! setting the vegetation height at the equator
     vegetation_height_equator = 20._wp
-
+    
     vegetation_height_ideal = vegetation_height_equator*cos(latitude)*exp(-oro/1500._wp)
-
+    
   end function vegetation_height_ideal
   
   subroutine find_global_normal(lat,lon,r)
@@ -1548,11 +1548,11 @@ module mo_grid_generator
     real(wp), intent(in)  :: lat  ! input latitude
     real(wp), intent(in)  :: lon  ! input longitude
     real(wp), intent(out) :: r(3) ! positional vector (result)
-
+    
     r(1) = cos(lat)*cos(lon)
     r(2) = cos(lat)*sin(lon)
     r(3) = sin(lat)
-
+    
   end subroutine find_global_normal
   
   subroutine find_geos(r,lat_out,lon_out)
@@ -1565,11 +1565,11 @@ module mo_grid_generator
     
     lat_out = asin(r(3)/sqrt(r(1)**2+r(2)**2+r(3)**2))
     lon_out = atan2(r(2),r(1))
-
+    
   end subroutine find_geos
-
+  
   subroutine calc_local_i(lon,result_vec)
-
+    
     ! This subroutine calculates the local eastward basis vector.
     
     real(wp), intent(in)  :: lon           ! geographical longitude
@@ -1578,11 +1578,11 @@ module mo_grid_generator
     result_vec(1) = -sin(lon)
     result_vec(2) = cos(lon)
     result_vec(3) = 0._wp
-  
+    
   end subroutine calc_local_i
-
+  
   subroutine calc_local_j(lat,lon,result_vec)
-
+    
     ! This subroutine calculates the local northward basis vector.
     
     real(wp), intent(in)  :: lat           ! geographical latitude
@@ -1592,7 +1592,7 @@ module mo_grid_generator
     result_vec(1) = -sin(lat)*cos(lon)
     result_vec(2) = -sin(lat)*sin(lon)
     result_vec(3) = cos(lat)
-
+    
   end subroutine calc_local_j
   
   subroutine calc_ext_subset(nlat_ext,nlon_ext,lat_c_value,lat_index_ext,lon_index_ext,n_points_ext_domain, &
@@ -1667,9 +1667,9 @@ module mo_grid_generator
     if (jn_used>nlon_ext) then
       jn_used = jn_used - nlon_ext
     endif
-            
+    
   end subroutine correct_ext_data_indices
-
+  
 end module mo_grid_generator
 
 
