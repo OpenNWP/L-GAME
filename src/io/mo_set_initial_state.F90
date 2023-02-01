@@ -2,9 +2,9 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_set_initial_state
-
+  
   ! This module handles everything dealing with IO.
-
+  
   use mo_definitions,      only: t_state,wp,t_diag,t_grid
   use netcdf
   use mo_run_nml,          only: ny,nx,n_layers,scenario,run_id,lplane,dx
@@ -14,13 +14,13 @@ module mo_set_initial_state
   use mo_io_nml,           only: restart_filename
   use mo_bc_nml,           only: lfreeslip
   use mo_inner_product,    only: w_free_slip
-
+  
   implicit none
   
   contains
   
   subroutine ideal_init(state,diag,grid)
-  
+    
     ! sets the initial state of the model calculation in terms of analytic functions
     
     type(t_state), intent(inout) :: state ! state to write the initial state to
@@ -46,13 +46,13 @@ module mo_set_initial_state
     real(wp) :: A_x                      ! needed for the advection test case
     real(wp) :: A_Z                      ! needed for the advection test case
     real(wp) :: x_coord                  ! needed for the advection test case
-      
-    select case (trim(scenario))
     
+    select case (trim(scenario))
+      
       case("standard","seabreeze")
-      
+        
         ! This test case is the standard atmosphere.
-      
+        
         ! There is no horizontal wind in this case
         !$omp parallel workshare
         state%wind_u = 0._wp
@@ -78,16 +78,16 @@ module mo_set_initial_state
           enddo
         enddo
         !$omp end parallel do
-    
+        
         !$omp parallel workshare
         ! humidity
         state%rho(:,:,:,n_constituents) = 0._wp
         ! condensates
         state%rho(:,:,:,1:n_condensed_constituents) = 0._wp
         !$omp end parallel workshare
-
+        
       case("advection")
-      
+        
         ! This test case is the advection test from the SLEVE paper
         ! (Schär et al. (2001): A New Terrain-Following Vertical Coordinate Formulation for Atmospheric Prediction Models).
         
@@ -149,26 +149,26 @@ module mo_set_initial_state
           enddo
         enddo
         !$omp end parallel do
-    
+        
         ! condensates
         !$omp parallel workshare
         state%rho(:,:,:,1:n_condensed_constituents) = 0._wp
         !$omp end parallel workshare
-
+        
       case("schaer")
-      
+        
         ! Schär et al. (2001): A New Terrain-Following Vertical Coordinate Formulation for Atmospheric Prediction Models
         
         !$omp parallel workshare
         state%wind_u = 10._wp
         state%wind_v = 0._wp
         !$omp end parallel workshare
-       
+        
         n_squared = (0.01_wp)**2
         T_0 = 288._wp
-       
+        
         ! background state not yet subtracted here
-       
+        
         !$omp parallel do private(ji,jk,jl,delta_z,gravity_local)
         do jk=1,nx
           do ji=1,ny
@@ -223,7 +223,7 @@ module mo_set_initial_state
         ! condensates
         state%rho(:,:,:,1:n_condensed_constituents) = 0._wp
         !$omp end parallel workshare
-      
+        
     endselect
     
     !$omp parallel do private(ji,jk)
@@ -379,7 +379,7 @@ module mo_set_initial_state
     
     real(wp), intent(in) :: height  ! geometric height above mean sea level
     real(wp)             :: bg_temp ! the result
-
+    
     ! troposphere
     if (height<tropo_height) then  
       bg_temp = surface_temp - lapse_rate*height
@@ -390,16 +390,16 @@ module mo_set_initial_state
     else
       bg_temp = surface_temp - lapse_rate*tropo_height + t_grad_inv*(height - inv_height)
     endif
-  
+    
   end function bg_temp
-
+  
   function bg_pres(height)
     
     ! This function returns the pressure of the background state (only used in the lowest layer during the initialization).
     
     real(wp), intent(in) :: height  ! geomteric height above mean sea level
     real(wp)             :: bg_pres ! the result
-
+    
     if (height<inv_height) then  
       bg_pres = p_0_standard*(1._wp-lapse_rate*height/surface_temp)**(gravity/(r_d*lapse_rate))
     elseif (height<tropo_height) then
@@ -434,14 +434,20 @@ module mo_set_initial_state
     ! This subroutine checks wether a netCDF function threw an error.
     
     integer, intent(in) :: i_status ! status ID
-
+    
     if(i_status/=nf90_noerr) then
       print *, trim(nf90_strerror(i_status))
       stop "netCDF threw an error."
     end if
+    
   end subroutine nc_check
-
+  
 end module mo_set_initial_state
+
+
+
+
+
 
 
 
