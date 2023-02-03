@@ -24,7 +24,7 @@ module mo_multiplications
     real(wp), intent(in)  :: in_vector_y(:,:,:)    ! input vector field, y-component
     real(wp), intent(out) :: result_field_x(:,:,:) ! output vector field, x-component
     real(wp), intent(out) :: result_field_y(:,:,:) ! output vector field, y-component
-  
+    
     ! local variables
     integer :: ji ! horizontal index
     integer :: jk ! horizontal index
@@ -43,7 +43,7 @@ module mo_multiplications
       result_field_y(ji,:,:) = 0.5_wp*(scalar_field(ji-1,:,:) + scalar_field(ji,:,:))*in_vector_y(ji,:,:)
     enddo
     !$omp end parallel do
-
+    
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel workshare
@@ -64,7 +64,7 @@ module mo_multiplications
     endif
     
   end subroutine scalar_times_vector_h
-
+  
   subroutine scalar_times_vector_h2(scalar_field,vector_x,vector_y)
     
     ! This subroutine multiplies a scalar with a vector field at horizontal points and writes the result to the vector field.
@@ -72,7 +72,7 @@ module mo_multiplications
     real(wp), intent(in)    :: scalar_field(:,:,:) ! input scalar field
     real(wp), intent(inout) :: vector_x(:,:,:)     ! vector field, x-component
     real(wp), intent(inout) :: vector_y(:,:,:)     ! vector field, y-component
-  
+    
     ! local variables
     integer :: ji ! horizontal index
     integer :: jk ! horizontal index
@@ -91,7 +91,7 @@ module mo_multiplications
       vector_y(ji,:,:) = 0.5_wp*(scalar_field(ji-1,:,:) + scalar_field(ji,:,:))*vector_y(ji,:,:)
     enddo
     !$omp end parallel do
-
+    
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel workshare
@@ -163,7 +163,7 @@ module mo_multiplications
       enddo
     enddo
     !$omp end parallel do
-
+    
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel do private(ji,jl)
@@ -248,7 +248,7 @@ module mo_multiplications
       enddo
     enddo
     !$omp end parallel do
-
+    
     ! periodic boundary conditions
     if (lperiodic) then
       !$omp parallel do private(ji,jl)
@@ -287,7 +287,7 @@ module mo_multiplications
   end subroutine scalar_times_vector_h_upstream
   
   subroutine scalar_times_vector_v(scalar_field,in_vector_z,result_field_z)
-  
+    
     ! This subroutine multiplies of an extended scalar with a  vector field at vertical points.
     
     real(wp), intent(in)  :: scalar_field(:,:,:)   ! input scalar field
@@ -312,7 +312,7 @@ module mo_multiplications
   end subroutine scalar_times_vector_v
   
   subroutine scalar_times_vector_v2(scalar_field,vector_z)
-  
+    
     ! This subroutine multiplies of an extended scalar with a vector field at vertical points and writes the result to the vector field.
     
     real(wp), intent(in)    :: scalar_field(:,:,:) ! input scalar field
@@ -334,8 +334,13 @@ module mo_multiplications
     !$omp end parallel do
     
   end subroutine scalar_times_vector_v2
-
+  
 end module mo_multiplications
+
+
+
+
+
 
 
 
