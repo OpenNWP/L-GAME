@@ -155,14 +155,16 @@ module mo_set_initial_state
         state%rho(:,:,:,1:n_condensed_constituents) = 0._wp
         !$omp end parallel workshare
         
-      case("schaer")
+      case("schaer","mountain_rest")
         
         ! Schär et al. (2001): A New Terrain-Following Vertical Coordinate Formulation for Atmospheric Prediction Models
         
-        !$omp parallel workshare
-        state%wind_u = 10._wp
-        state%wind_v = 0._wp
-        !$omp end parallel workshare
+        ! the Schaer test has wind, the mountain rest test not
+        if (trim(scenario)=="schaer") then
+          !$omp parallel workshare
+          state%wind_u = 10._wp
+          !$omp end parallel workshare
+        endif
         
         n_squared = (0.01_wp)**2
         T_0 = 288._wp
