@@ -120,7 +120,7 @@ module mo_set_initial_state
         !$omp parallel workshare
         state%wind_v = 0._wp
         !$omp end parallel workshare
-        
+        write(*,*) ny
         ! temperature in the whole atmosphere and pressure in the lowest layer
         !$omp parallel do private(ji,jk,jl)
         do jl=1,n_layers
@@ -128,6 +128,12 @@ module mo_set_initial_state
             do ji=1,ny
               diag%scalar_placeholder(ji,jk,jl) = bg_temp(grid%z_scalar(ji,jk,jl))
             enddo
+          enddo
+        enddo
+        !$omp end parallel do
+        !$omp parallel do private(ji,jk)
+        do jk=1,nx
+          do ji=1,ny
             pres_lowest_layer(ji,jk) = bg_pres(grid%z_scalar(ji,jk,n_layers))
           enddo
         enddo
