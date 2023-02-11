@@ -707,6 +707,16 @@ module mo_grid_generator
         enddo
         !$omp end parallel do
       
+      ! Gaussian mountain
+      case(4)
+        height_mountain = 3000._wp
+        !$omp parallel do private(jk,x_coord)
+        do jk=1,nx
+          x_coord = dx*jk - (nx/2 + 1)*dx
+          grid%oro(:,jk) = height_mountain*exp(-x_coord**2/(4._wp*5000._wp**2))**2
+        enddo
+        !$omp end parallel do
+      
     endselect
     
     !$omp parallel workshare
