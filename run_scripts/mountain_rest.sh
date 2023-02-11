@@ -23,7 +23,7 @@ scenario="standard"
 lcorio=.false.
 stretching_parameter=1.0
 lplane=.true.
-theta_adv_order=3
+theta_adv_order=2
 /
 
 &io
