@@ -5,8 +5,8 @@ module mo_pgrad
   
   ! This module manages the handling of the explicit component of the pressure gradient.
   
-  use mo_run_nml,            only: theta_adv_order
   use mo_constants,          only: c_d_p
+  use mo_run_nml,            only: theta_adv_order,luse_bg_state
   use mo_gradient_operators, only: grad_vert,grad_hor
   use mo_definitions,        only: t_state,t_diag,t_grid,wp
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_h2,scalar_times_vector_v,scalar_times_vector_v2, &
@@ -26,11 +26,19 @@ module mo_pgrad
     type(t_grid),  intent(in)    :: grid   ! model grid
     logical,       intent(in)    :: lfirst ! true for the lfirst model step
     
+    ! local variables
+    integer :: use_bg_switch ! switch set to one when using the hydrostatic background state, zero otherwise
+    
+    use_bg_switch = 0
+    if (luse_bg_state) then
+      use_bg_switch = 1
+    endif
+    
     ! saving the old pressure gradient acceleration before it is overwritten with the new one
     if (.not. lfirst) then
       !$omp parallel workshare
-      diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - diag%p_grad_acc_neg_l_u
-      diag%p_grad_acc_old_v = -diag%p_grad_acc_neg_nl_v - diag%p_grad_acc_neg_l_v
+      diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - use_bg_switch*diag%p_grad_acc_neg_l_u
+      diag%p_grad_acc_old_v = -diag%p_grad_acc_neg_nl_v - use_bg_switch*diag%p_grad_acc_neg_l_v
       !$omp end parallel workshare
     endif
     
@@ -56,21 +64,23 @@ module mo_pgrad
     call scalar_times_vector_v2(diag%scalar_placeholder,diag%p_grad_acc_neg_nl_w)
     
     ! the linear pressure gradient term
-    !$omp parallel workshare
-    diag%scalar_placeholder = state%theta_v_pert
-    !$omp end parallel workshare
-    ! multiplying the background Exner pressure gradient by the perturbed virtual potential temperature
-    if (theta_adv_order==2) then
-      call scalar_times_vector_h(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
-                                 diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
-    elseif (theta_adv_order==3) then
-      call theta_v_adv_3rd_order(state,diag,grid)
+    if (luse_bg_state) then
       !$omp parallel workshare
-      diag%p_grad_acc_neg_l_u = diag%theta_v_u*grid%exner_bg_grad_u
-      diag%p_grad_acc_neg_l_v = diag%theta_v_v*grid%exner_bg_grad_v
+      diag%scalar_placeholder = state%theta_v_pert
       !$omp end parallel workshare
+      ! multiplying the background Exner pressure gradient by the perturbed virtual potential temperature
+      if (theta_adv_order==2) then
+        call scalar_times_vector_h(diag%scalar_placeholder,grid%exner_bg_grad_u,grid%exner_bg_grad_v, &
+                                   diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
+      elseif (theta_adv_order==3) then
+        call theta_v_adv_3rd_order(state,diag,grid)
+        !$omp parallel workshare
+        diag%p_grad_acc_neg_l_u = diag%theta_v_u*grid%exner_bg_grad_u
+        diag%p_grad_acc_neg_l_v = diag%theta_v_v*grid%exner_bg_grad_v
+        !$omp end parallel workshare
+      endif
+      call scalar_times_vector_v(diag%scalar_placeholder,grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_w)
     endif
-    call scalar_times_vector_v(diag%scalar_placeholder,grid%exner_bg_grad_w,diag%p_grad_acc_neg_l_w)
     
     !$omp parallel workshare
     diag%pressure_gradient_decel_factor = c_d_p*state%rho(:,:,:,n_condensed_constituents+1)/ &
@@ -78,14 +88,16 @@ module mo_pgrad
     !$omp end parallel workshare
     call scalar_times_vector_h2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
     call scalar_times_vector_v2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_w)
-    call scalar_times_vector_h2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
-    call scalar_times_vector_v2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_w)
+    if (luse_bg_state) then
+      call scalar_times_vector_h2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
+      call scalar_times_vector_v2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_w)
+    endif
     
     ! At the very first step of the model integration, the "old" pressure gradient acceleration is saved for the first time.
     if (lfirst) then
       !$omp parallel workshare
-      diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - diag%p_grad_acc_neg_l_u
-      diag%p_grad_acc_old_v = -diag%p_grad_acc_neg_nl_v - diag%p_grad_acc_neg_l_v
+      diag%p_grad_acc_old_u = -diag%p_grad_acc_neg_nl_u - use_bg_switch*diag%p_grad_acc_neg_l_u
+      diag%p_grad_acc_old_v = -diag%p_grad_acc_neg_nl_v - use_bg_switch*diag%p_grad_acc_neg_l_v
       !$omp end parallel workshare
     endif
     

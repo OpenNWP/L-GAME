@@ -24,6 +24,7 @@ lcorio=.false.
 stretching_parameter=1.0
 lplane=.true.
 theta_adv_order=2
+luse_bg_state=.false.
 /
 
 &io

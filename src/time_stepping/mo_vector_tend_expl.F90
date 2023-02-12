@@ -18,7 +18,7 @@ module mo_vector_tend_expl
   use mo_eff_diff_coeffs,    only: update_n_squared
   use mo_tke,                only: tke_update
   use mo_pbl,                only: pbl_wind_tendency
-  use mo_run_nml,            only: ny,nx,n_layers,llinear,lcorio,n_levels
+  use mo_run_nml,            only: ny,nx,n_layers,llinear,lcorio,n_levels,luse_bg_state
   use mo_surface_nml,        only: lpbl
   use mo_bc_nml,             only: lfreeslip
   
@@ -40,12 +40,18 @@ module mo_vector_tend_expl
     ! local variables
     integer  :: ji                       ! horizontal index
     integer  :: jk                       ! horizontal index
+    integer  :: no_bg_switch             ! set to one if using no hydrostatic background state, zero otherwise
     real(wp) :: density_value            ! individual density value
     real(wp) :: old_hor_pgrad_weight     ! old time step pressure gradient weight
     real(wp) :: current_hor_pgrad_weight ! current time step horizontal pressure gradient weight
     real(wp) :: current_ver_pgrad_weight ! current time step vertical pressure gradient weight
     real(wp) :: old_weight               ! weight of the old predictor-corrector substep
     real(wp) :: new_weight               ! weight of the new predictor-corrector substep
+    
+    no_bg_switch = 0
+    if (.not. luse_bg_state) then
+      no_bg_switch = 1
+    endif
     
     ! momentum advection
     if ((rk_step==2 .or. total_step_counter==0) .and. ((.not. llinear) .or. lcorio)) then
@@ -160,7 +166,8 @@ module mo_vector_tend_expl
     tend%wind_w = old_weight*tend%wind_w &
     + new_weight*( &
     ! old time step component of the pressure gradient acceleration
-    -current_ver_pgrad_weight*(diag%p_grad_acc_neg_nl_w + diag%p_grad_acc_neg_l_w) &
+    - current_ver_pgrad_weight*(diag%p_grad_acc_neg_nl_w + diag%p_grad_acc_neg_l_w) &
+    - no_bg_switch*(1._wp-current_ver_pgrad_weight)*diag%p_grad_acc_neg_l_w &
     ! momentum advection
     - 0.5_wp*diag%v_squared_grad_z + diag%pot_vort_tend_z &
     ! effect of condensates on the pressure gradient acceleration

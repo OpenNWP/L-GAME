@@ -39,10 +39,11 @@ module mo_run_nml
   real(wp)          :: lat_center           ! latitude of the center of the model domain
   real(wp)          :: lon_center           ! longitude of the center of the model domain
   integer           :: theta_adv_order      ! theta advection order (2 or 3)
+  logical           :: luse_bg_state        ! switch for using the hydrostatic background state
   
   namelist /run/ny,nx,n_layers,dy,dx,run_span_min,stretching_parameter,theta_adv_order, &
                 toa,scenario,llinear,run_id,lcorio,n_oro_layers,lat_center,lon_center, &
-                start_year,start_month,start_day,start_hour,start_minute,lplane
+                start_year,start_month,start_day,start_hour,start_minute,lplane,luse_bg_state
   
   contains
   
@@ -76,6 +77,7 @@ module mo_run_nml
     lat_center = 0._wp
     lon_center = 0._wp
     theta_adv_order = 2
+    luse_bg_state = .true.
     
     ! open and read namelist file
     open(action="read",file="namelist.nml",newunit=fileunit)

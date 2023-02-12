@@ -6,9 +6,9 @@ module mo_grid_generator
   ! This module contains the calculation of the grid properties.
   
   use netcdf
-  use mo_definitions,        only: wp,t_grid
+  use mo_definitions,        only: wp,t_grid,t_diag
   use mo_run_nml,            only: ny,nx,n_layers,n_levels,dy,dx,toa,n_oro_layers,stretching_parameter,scenario,lat_center, &
-                                   lon_center,lplane,n_flat_layers,eff_hor_res
+                                   lon_center,lplane,n_flat_layers,eff_hor_res,luse_bg_state
   use mo_diff_nml,           only: klemp_begin_rel
   use mo_constants,          only: r_e,rho_h2o,t_0,M_PI,p_0,omega,gravity,p_0_standard, &
                                    surface_temp,tropo_height,inv_height,t_grad_inv,lapse_rate, &
@@ -1369,11 +1369,12 @@ module mo_grid_generator
     
   end subroutine grid_setup
   
-  subroutine bg_setup(grid)
+  subroutine bg_setup(grid,diag)
     
     ! This subroutine sets up the background state.
     
     type(t_grid), intent(inout) :: grid ! the model grid
+    type(t_diag), intent(inout) :: diag ! diagnostic quantities
     
     ! local variables
     real(wp) :: pressure ! pressure at the respective gridpoint
@@ -1414,8 +1415,27 @@ module mo_grid_generator
     call grad_vert(grid%exner_bg,grid%exner_bg_grad_w,grid)
     call grad_hor(grid%exner_bg,grid%exner_bg_grad_u,grid%exner_bg_grad_v,grid%exner_bg_grad_w,grid)
     
+    ! if the hydrostatic background state is switched off, the background quantities are set to zero here
+    if (.not. luse_bg_state) then
+      !$omp parallel workshare
+      grid%theta_v_bg = 0._wp
+      grid%exner_bg = 0._wp
+      !$omp end parallel workshare
+    endif
+    
     ! calculating the vertical acceleration due to gravity
     call grad_vert(grid%gravity_potential,grid%gravity_m_v,grid)
+    
+    ! if we do not use a hydrostatic background state we write the negative acceleration due to gravity into the
+    ! negative "linear" pressure gradient acceleration
+    if (.not. luse_bg_state) then
+      call grad_hor_cov(grid%gravity_potential,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v,grid)
+      !$omp parallel workshare
+      diag%p_grad_acc_neg_l_u = diag%p_grad_acc_neg_l_u
+      diag%p_grad_acc_neg_l_v = diag%p_grad_acc_neg_l_v
+      diag%p_grad_acc_neg_l_w = grid%gravity_m_v
+      !$omp end parallel workshare
+    endif
     
   end subroutine bg_setup
   

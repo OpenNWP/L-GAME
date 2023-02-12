@@ -465,7 +465,7 @@ program control
   endif
   
   ! setting up the background state
-  call bg_setup(grid)
+  call bg_setup(grid,diag)
   
   ! setting the initial state
   write(*,*) "Setting the initial state..."
