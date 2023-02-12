@@ -709,7 +709,7 @@ module mo_grid_generator
       
       ! Gaussian mountain
       case(4)
-        height_mountain = 3000._wp
+        height_mountain = 500._wp
         !$omp parallel do private(jk,x_coord)
         do jk=1,nx
           x_coord = dx*jk - (nx/2 + 1)*dx
