@@ -22,7 +22,7 @@ module mo_grid_generator
   
   implicit none
   
-  integer  :: n_damping_levels ! number of levels in which the swamp layer is active
+  integer :: n_damping_levels ! number of levels in which the swamp layer is active
   
   contains
   
@@ -69,7 +69,9 @@ module mo_grid_generator
     real(wp)                      :: z_rel                         ! variable for calculating the vertical grid (z/toa with equidistant levels)
     real(wp)                      :: vertical_vector_pre(n_levels) ! heights of the levels in a column
     real(wp)                      :: base_area                     ! variable for calculating the vertical grid
-    real(wp)                      :: lower_z,upper_z,lower_length  ! variables needed for area calculations
+    real(wp)                      :: lower_z                       ! lower height of a vertical area
+    real(wp)                      :: upper_z                       ! upper height of a vertical area
+    real(wp)                      :: lower_length                  ! lower length of a vertical area
     real(wp)                      :: height_mountain               ! height of Gaussian mountain (needed for test case)
     real(wp)                      :: x_coord                       ! help variable needed for the Schär test
     real(wp)                      :: rescale_factor                ! soil grid rescaling factor
@@ -93,8 +95,11 @@ module mo_grid_generator
     real(wp)                      :: basis_new(3)                  ! new local basis vector
     real(wp)                      :: local_i(3)                    ! local i-vector
     real(wp)                      :: local_j(3)                    ! local j-vector
-    real(wp)                      :: x_basis_local,y_basis_local   ! local Cartesian components of the local basis vector
-    real(wp)                      :: lat_local,lon_local,max_z     ! helper variables    
+    real(wp)                      :: x_basis_local                 ! eastward Cartesian component of a local basis vector
+    real(wp)                      :: y_basis_local                 ! northward Cartesian component of a local basis vector
+    real(wp)                      :: lat_local                     ! geographical latitude value
+    real(wp)                      :: lon_local                     ! geographical longitude value
+    real(wp)                      :: max_z                         ! maximum height of a level
     real(wp)                      :: lon_geo_scalar_used           ! helper variable for interpolating external data to the model grid
     real(wp), allocatable         :: lake_depth_gldb(:,:)          ! GLDB lake depth data
     integer,  allocatable         :: etopo_oro(:,:)                ! ETOPO orography
@@ -108,7 +113,7 @@ module mo_grid_generator
     real(wp)                      :: delta_lon_ext_sst             ! longitude resolution of the SST grid
     real(wp)                      :: fractions_sum                 ! sum of land fraction and lake fraction
     real(wp)                      :: max_oro                       ! maximum orography value
-    real(wp)                      :: dq_value                      ! data quality value
+    real(wp)                      :: dq_value                      ! data quality check value
     
     ! Horizontal grid properties
     ! --------------------------
@@ -340,7 +345,9 @@ module mo_grid_generator
           
           write(*,*) "Setting the land fraction ..."
           
+          ! number of points on the latitude axis of the GLCC grid
           nlat_ext = 21600
+          ! number of points on the longitude axis of the GLCC grid
           nlon_ext = 43200
           
           ! opening the GLCC file
@@ -359,7 +366,9 @@ module mo_grid_generator
           
           deallocate(glcc_raw)
           
+          ! latitude resolution of the GLCC grid
           delta_lat_ext = M_PI/nlat_ext
+          ! longitude resolution of the GLCC grid
           delta_lon_ext = 2._wp*M_PI/nlon_ext
           
           !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,left_index_ext,right_index_ext, &
@@ -523,7 +532,9 @@ module mo_grid_generator
           
           write(*,*) "Setting the orography ..."
           
+          ! number of points on the latitude axis of the ETOPO grid
           nlat_ext = 10801
+          ! number of points on the longitude axis of the ETOPO grid
           nlon_ext = 21601
           
           ! opening the netCDF file
@@ -543,7 +554,9 @@ module mo_grid_generator
           
           ! setting the unfiltered orography
           
+          ! latitude resolution of the ETOPO grid
           delta_lat_ext = M_PI/nlat_ext
+          ! longitude resolution of the ETOPO grid
           delta_lon_ext = 2._wp*M_PI/nlon_ext
           
           !$omp parallel do private(ji,jk,lat_index_ext,lon_index_ext,left_index_ext,right_index_ext, &
@@ -1443,7 +1456,7 @@ module mo_grid_generator
     
     ! This subroutine smoothes a scalar field on one layer.
     
-    real(wp), intent(inout) :: array(ny,nx) ! The field to smooth.
+    real(wp), intent(inout) :: array(ny,nx) ! the field to smooth
     
     ! local variables
     real(wp) :: original_array(ny,nx) ! the unsmoothed input array
