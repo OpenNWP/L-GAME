@@ -208,7 +208,7 @@ program control
   allocate(diag%p_grad_acc_neg_nl_w(ny,nx,n_levels))
   allocate(diag%p_grad_acc_old_u(ny,nx+1,n_layers))
   allocate(diag%p_grad_acc_old_v(ny+1,nx,n_layers))
-  allocate(diag%pressure_grad_condensates_w(ny,nx,n_levels))
+  allocate(diag%p_grad_condensates_w(ny,nx,n_levels))
   allocate(diag%pot_vort_tend_x(ny,nx+1,n_layers))
   allocate(diag%pot_vort_tend_y(ny+1,nx,n_layers))
   allocate(diag%pot_vort_tend_z(ny,nx,n_levels))
@@ -380,7 +380,7 @@ program control
   diag%p_grad_acc_neg_nl_w = 0._wp
   diag%p_grad_acc_old_u = 0._wp
   diag%p_grad_acc_old_v = 0._wp
-  diag%pressure_grad_condensates_w = 0._wp
+  diag%p_grad_condensates_w = 0._wp
   diag%pot_vort_tend_x = 0._wp
   diag%pot_vort_tend_y = 0._wp
   diag%pot_vort_tend_z = 0._wp
@@ -666,7 +666,7 @@ program control
   deallocate(diag%p_grad_acc_neg_nl_w)
   deallocate(diag%p_grad_acc_old_u)
   deallocate(diag%p_grad_acc_old_v)
-  deallocate(diag%pressure_grad_condensates_w)
+  deallocate(diag%p_grad_condensates_w)
   deallocate(diag%v_squared_grad_x)
   deallocate(diag%v_squared_grad_y)
   deallocate(diag%v_squared_grad_z)

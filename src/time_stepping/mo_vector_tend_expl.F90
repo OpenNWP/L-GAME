@@ -171,7 +171,7 @@ module mo_vector_tend_expl
     ! momentum advection
     - 0.5_wp*diag%v_squared_grad_z + diag%pot_vort_tend_z &
     ! effect of condensates on the pressure gradient acceleration
-    + diag%pressure_grad_condensates_w &
+    + diag%p_grad_condensates_w &
     ! momentum diffusion
     + diag%mom_diff_tend_z)
     !$omp end parallel workshare
