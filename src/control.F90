@@ -260,7 +260,7 @@ program control
   allocate(diag%mass_diffusion_coeff_numerical_v(ny,nx,n_layers))
   allocate(diag%temp_diffusion_coeff_numerical_h(ny,nx,n_layers))
   allocate(diag%temp_diffusion_coeff_numerical_v(ny,nx,n_layers))
-  allocate(diag%pressure_gradient_decel_factor(ny,nx,n_layers))
+  allocate(diag%p_grad_decel_factor(ny,nx,n_layers))
   allocate(diag%mom_diff_tend_x(ny,nx+1,n_layers))
   allocate(diag%mom_diff_tend_y(ny+1,nx,n_layers))
   allocate(diag%mom_diff_tend_z(ny,nx,n_levels))
@@ -432,7 +432,7 @@ program control
   diag%mass_diffusion_coeff_numerical_v = 0._wp
   diag%temp_diffusion_coeff_numerical_h = 0._wp
   diag%temp_diffusion_coeff_numerical_v = 0._wp
-  diag%pressure_gradient_decel_factor = 0._wp
+  diag%p_grad_decel_factor = 0._wp
   diag%mom_diff_tend_x = 0._wp
   diag%mom_diff_tend_y = 0._wp
   diag%mom_diff_tend_z = 0._wp
@@ -724,7 +724,7 @@ program control
   deallocate(diag%mom_diff_tend_x)
   deallocate(diag%mom_diff_tend_y)
   deallocate(diag%mom_diff_tend_z)
-  deallocate(diag%pressure_gradient_decel_factor)
+  deallocate(diag%p_grad_decel_factor)
   deallocate(diag%heating_diss)
   deallocate(diag%phase_trans_rates)
   deallocate(diag%phase_trans_heating_rate)

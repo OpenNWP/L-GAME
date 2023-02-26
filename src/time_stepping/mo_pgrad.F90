@@ -83,14 +83,14 @@ module mo_pgrad
     endif
     
     !$omp parallel workshare
-    diag%pressure_gradient_decel_factor = c_d_p*state%rho(:,:,:,n_condensed_constituents+1)/ &
+    diag%p_grad_decel_factor = c_d_p*state%rho(:,:,:,n_condensed_constituents+1)/ &
                                           sum(state%rho(:,:,:,1:n_condensed_constituents+1),4)
     !$omp end parallel workshare
-    call scalar_times_vector_h2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
-    call scalar_times_vector_v2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_nl_w)
+    call scalar_times_vector_h2(diag%p_grad_decel_factor,diag%p_grad_acc_neg_nl_u,diag%p_grad_acc_neg_nl_v)
+    call scalar_times_vector_v2(diag%p_grad_decel_factor,diag%p_grad_acc_neg_nl_w)
     if (luse_bg_state) then
-      call scalar_times_vector_h2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
-      call scalar_times_vector_v2(diag%pressure_gradient_decel_factor,diag%p_grad_acc_neg_l_w)
+      call scalar_times_vector_h2(diag%p_grad_decel_factor,diag%p_grad_acc_neg_l_u,diag%p_grad_acc_neg_l_v)
+      call scalar_times_vector_v2(diag%p_grad_decel_factor,diag%p_grad_acc_neg_l_w)
     endif
     
     ! At the very first step of the model integration, the "old" pressure gradient acceleration is saved for the first time.
@@ -112,10 +112,10 @@ module mo_pgrad
     type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     !$omp parallel workshare
-    diag%pressure_gradient_decel_factor = state%rho(:,:,:,n_condensed_constituents+1) &
+    diag%p_grad_decel_factor = state%rho(:,:,:,n_condensed_constituents+1) &
                                           /sum(state%rho(:,:,:,1:n_condensed_constituents+1),4) - 1._wp
     !$omp end parallel workshare
-    call scalar_times_vector_v(diag%pressure_gradient_decel_factor,grid%gravity_m_v,diag%p_grad_condensates_w)
+    call scalar_times_vector_v(diag%p_grad_decel_factor,grid%gravity_m_v,diag%p_grad_condensates_w)
     
   end subroutine calc_pressure_grad_condensates_v
 

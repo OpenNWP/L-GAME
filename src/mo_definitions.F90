@@ -198,7 +198,7 @@ module mo_definitions
     real(wp), allocatable :: mass_diffusion_coeff_numerical_v(:,:,:) ! efficient vertical mass diffusion coefficient
     real(wp), allocatable :: temp_diffusion_coeff_numerical_h(:,:,:) ! efficient horizontal heat diffusion coefficient
     real(wp), allocatable :: temp_diffusion_coeff_numerical_v(:,:,:) ! efficient vertical heat diffusion coefficient
-    real(wp), allocatable :: pressure_gradient_decel_factor(:,:,:)   ! pressure gradient deceleration factor due to condensates
+    real(wp), allocatable :: p_grad_decel_factor(:,:,:)              ! pressure gradient deceleration factor due to condensates
     real(wp), allocatable :: mom_diff_tend_x(:,:,:)                  ! tendency due to momentum diffusion in x-direction
     real(wp), allocatable :: mom_diff_tend_y(:,:,:)                  ! tendency due to momentum diffusion in y-direction
     real(wp), allocatable :: mom_diff_tend_z(:,:,:)                  ! tendency due to momentum diffusion in z-direction
