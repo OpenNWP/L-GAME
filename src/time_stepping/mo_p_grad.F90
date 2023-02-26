@@ -17,7 +17,7 @@ module mo_p_grad
   
   contains
   
-  subroutine manage_pressure_gradient(state,diag,grid,lfirst)
+  subroutine manage_p_grad(state,diag,grid,lfirst)
     
     ! This subroutine manages the calculation of the pressure gradient.
     
@@ -101,9 +101,9 @@ module mo_p_grad
       !$omp end parallel workshare
     endif
     
-  end subroutine manage_pressure_gradient
+  end subroutine manage_p_grad
   
-  subroutine calc_pressure_grad_condensates_v(state,diag,grid)
+  subroutine calc_p_grad_condensates_v(state,diag,grid)
     
     ! This subroutine computes the correction to the vertical pressure gradient acceleration due to condensates.
     
@@ -117,7 +117,7 @@ module mo_p_grad
     !$omp end parallel workshare
     call scalar_times_vector_v(diag%p_grad_decel_factor,grid%gravity_m_v,diag%p_grad_condensates_w)
     
-  end subroutine calc_pressure_grad_condensates_v
+  end subroutine calc_p_grad_condensates_v
 
 end module mo_p_grad
 
