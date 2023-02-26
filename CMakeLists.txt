@@ -26,7 +26,7 @@ src/time_stepping/mo_column_solvers.F90
 src/time_stepping/mo_vector_tend_expl.F90
 src/time_stepping/mo_scalar_tend_expl.F90
 src/time_stepping/mo_manage_pchevi.F90
-src/time_stepping/mo_pgrad.F90
+src/time_stepping/mo_p_grad.F90
 src/constituents/mo_derived.F90
 src/constituents/mo_dictionary.F90
 src/constituents/mo_phase_trans.F90
