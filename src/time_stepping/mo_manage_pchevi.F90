@@ -7,7 +7,7 @@ module mo_manage_pchevi
   
   use mo_definitions,            only: t_grid,t_state,t_diag,t_tend,t_bc,wp
   use mo_run_nml,                only: dtime,ny,nx
-  use mo_pgrad,                  only: manage_pressure_gradient,calc_pressure_grad_condensates_v
+  use mo_p_grad,                 only: manage_pressure_gradient,calc_pressure_grad_condensates_v
   use mo_scalar_tend_expl,       only: scalar_tend_expl
   use mo_vector_tend_expl,       only: vector_tend_expl
   use mo_column_solvers,         only: three_band_solver_ver,three_band_solver_gen_densities
