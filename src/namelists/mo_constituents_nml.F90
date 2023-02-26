@@ -38,6 +38,8 @@ module mo_constituents_nml
       n_condensed_constituents = 0
       n_gaseous_constituents = 1
     endif
+    
+    ! calculating the total number of constituents
     n_constituents = n_condensed_constituents + n_gaseous_constituents
     
   end subroutine constituents_nml_setup

@@ -333,7 +333,7 @@ module mo_grid_generator
         grid%t_const_soil = t_0 + 25._wp*cos(2._wp*grid%lat_geo_scalar)
         !$omp end parallel workshare
         
-      ! real orography (and other surface properties)
+      ! real orography
       case(1)
         
         if (lread_geo) then
@@ -413,7 +413,9 @@ module mo_grid_generator
           
           write(*,*) "Setting the lake fraction ..."
           
+          ! number of points on the latitude axis of the GLDB grid
           nlat_ext = 21600
+          ! number of points on the longitude axis of the GLDB grid
           nlon_ext = 43200
           
           ! opening the lake depth file
@@ -435,7 +437,9 @@ module mo_grid_generator
           
           deallocate(lake_depth_gldb_raw)
           
+          ! latitude resolution of the GLDB grid
           delta_lat_ext = M_PI/nlat_ext
+          ! longitude resolution of the GLDB grid
           delta_lon_ext = 2._wp*M_PI/nlon_ext
           
           ! reading the NCEP NSST land-sea mask
