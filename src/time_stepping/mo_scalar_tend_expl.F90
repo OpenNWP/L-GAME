@@ -68,13 +68,13 @@ module mo_scalar_tend_expl
       call grad_vert(diag%temperature,diag%w_placeholder,grid)
       call grad_hor(diag%temperature,diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
       ! Now the diffusive temperature flux density can be obtained.
-      call scalar_times_vector_h(diag%temp_diffusion_coeff_numerical_h,diag%u_placeholder,diag%v_placeholder, &
+      call scalar_times_vector_h(diag%temp_diff_coeff_numerical_h,diag%u_placeholder,diag%v_placeholder, &
                                  diag%flux_density_u,diag%flux_density_v)
       ! The divergence of the diffusive temperature flux density is the diffusive temperature heating.
       call div_h(diag%flux_density_u,diag%flux_density_v,diag%temp_diff_heating,grid)
       ! vertical temperature diffusion
       if (ltemp_diff_v) then
-        call scalar_times_vector_v(diag%temp_diffusion_coeff_numerical_v,diag%w_placeholder,diag%flux_density_w)
+        call scalar_times_vector_v(diag%temp_diff_coeff_numerical_v,diag%w_placeholder,diag%flux_density_w)
         call add_vertical_div(diag%flux_density_w,diag%temp_diff_heating,grid)
       endif
     endif
@@ -87,13 +87,13 @@ module mo_scalar_tend_expl
         call grad_vert(state_scalar%rho(:,:,:,jc),diag%w_placeholder,grid)
         call grad_hor(state_scalar%rho(:,:,:,jc),diag%u_placeholder,diag%v_placeholder,diag%w_placeholder,grid)
         ! Now the diffusive mass flux density can be obtained.
-        call scalar_times_vector_h(diag%mass_diffusion_coeff_numerical_h,diag%u_placeholder,diag%v_placeholder, &
+        call scalar_times_vector_h(diag%mass_diff_coeff_numerical_h,diag%u_placeholder,diag%v_placeholder, &
                                    diag%flux_density_u,diag%flux_density_v)
         ! The divergence of the diffusive mass flux density is the diffusive mass source rate.
         call div_h(diag%flux_density_u,diag%flux_density_v,diag%mass_diff_tendency(:,:,:,jc),grid)
         ! vertical mass diffusion
         if (lmass_diff_v) then
-          call scalar_times_vector_v(diag%mass_diffusion_coeff_numerical_v,diag%w_placeholder,diag%flux_density_w)
+          call scalar_times_vector_v(diag%mass_diff_coeff_numerical_v,diag%w_placeholder,diag%flux_density_w)
           call add_vertical_div(diag%flux_density_w,diag%mass_diff_tendency(:,:,:,jc),grid)
         endif
       enddo

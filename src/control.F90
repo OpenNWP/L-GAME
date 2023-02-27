@@ -256,10 +256,10 @@ program control
   allocate(diag%viscosity_coeff_curl_dual(ny+1,nx+1,n_layers))
   allocate(diag%vert_hor_viscosity_u(ny,nx+1,n_levels))
   allocate(diag%vert_hor_viscosity_v(ny+1,nx,n_levels))
-  allocate(diag%mass_diffusion_coeff_numerical_h(ny,nx,n_layers))
-  allocate(diag%mass_diffusion_coeff_numerical_v(ny,nx,n_layers))
-  allocate(diag%temp_diffusion_coeff_numerical_h(ny,nx,n_layers))
-  allocate(diag%temp_diffusion_coeff_numerical_v(ny,nx,n_layers))
+  allocate(diag%mass_diff_coeff_numerical_h(ny,nx,n_layers))
+  allocate(diag%mass_diff_coeff_numerical_v(ny,nx,n_layers))
+  allocate(diag%temp_diff_coeff_numerical_h(ny,nx,n_layers))
+  allocate(diag%temp_diff_coeff_numerical_v(ny,nx,n_layers))
   allocate(diag%p_grad_decel_factor(ny,nx,n_layers))
   allocate(diag%mom_diff_tend_x(ny,nx+1,n_layers))
   allocate(diag%mom_diff_tend_y(ny+1,nx,n_layers))
@@ -428,10 +428,10 @@ program control
   diag%viscosity_coeff_curl_dual = 0._wp
   diag%vert_hor_viscosity_u = 0._wp
   diag%vert_hor_viscosity_v = 0._wp
-  diag%mass_diffusion_coeff_numerical_h = 0._wp
-  diag%mass_diffusion_coeff_numerical_v = 0._wp
-  diag%temp_diffusion_coeff_numerical_h = 0._wp
-  diag%temp_diffusion_coeff_numerical_v = 0._wp
+  diag%mass_diff_coeff_numerical_h = 0._wp
+  diag%mass_diff_coeff_numerical_v = 0._wp
+  diag%temp_diff_coeff_numerical_h = 0._wp
+  diag%temp_diff_coeff_numerical_v = 0._wp
   diag%p_grad_decel_factor = 0._wp
   diag%mom_diff_tend_x = 0._wp
   diag%mom_diff_tend_y = 0._wp
@@ -717,10 +717,10 @@ program control
   deallocate(diag%viscosity_coeff_curl_dual)
   deallocate(diag%vert_hor_viscosity_u)
   deallocate(diag%vert_hor_viscosity_v)
-  deallocate(diag%mass_diffusion_coeff_numerical_h)
-  deallocate(diag%mass_diffusion_coeff_numerical_v)
-  deallocate(diag%temp_diffusion_coeff_numerical_h)
-  deallocate(diag%temp_diffusion_coeff_numerical_v)
+  deallocate(diag%mass_diff_coeff_numerical_h)
+  deallocate(diag%mass_diff_coeff_numerical_v)
+  deallocate(diag%temp_diff_coeff_numerical_h)
+  deallocate(diag%temp_diff_coeff_numerical_v)
   deallocate(diag%mom_diff_tend_x)
   deallocate(diag%mom_diff_tend_y)
   deallocate(diag%mom_diff_tend_z)

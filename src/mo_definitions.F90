@@ -134,81 +134,81 @@ module mo_definitions
   ! type containing diagnostic quantities
   type t_diag
     
-    real(wp), allocatable :: v_squared(:,:,:)                        ! specific kinetic energy
-    real(wp), allocatable :: p_grad_acc_neg_l_u(:,:,:)               ! x-component of linear pressure gradient acceleration
-    real(wp), allocatable :: p_grad_acc_neg_l_v(:,:,:)               ! y-component of linear pressure gradient acceleration
-    real(wp), allocatable :: p_grad_acc_neg_l_w(:,:,:)               ! z-component of linear pressure gradient accelerationpgrad_acc_old
-    real(wp), allocatable :: p_grad_acc_neg_nl_u(:,:,:)              ! x-component of nonlinear pressure gradient acceleration
-    real(wp), allocatable :: p_grad_acc_neg_nl_v(:,:,:)              ! y-component of nonlinear pressure gradient acceleration
-    real(wp), allocatable :: p_grad_acc_neg_nl_w(:,:,:)              ! z-component of nonlinear pressure gradient acceleration
-    real(wp), allocatable :: p_grad_condensates_w(:,:,:)             ! vertical pressure gradient acceleration due to the gravity of condensates
-    real(wp), allocatable :: p_grad_acc_old_u(:,:,:)                 ! x-component of pressure gradient at old time step
-    real(wp), allocatable :: p_grad_acc_old_v(:,:,:)                 ! y-component of pressure gradient at old time step
-    real(wp), allocatable :: v_squared_grad_x(:,:,:)                 ! x-gradient of specific kinetic energy
-    real(wp), allocatable :: v_squared_grad_y(:,:,:)                 ! y-gradient of specific kinetic energy
-    real(wp), allocatable :: v_squared_grad_z(:,:,:)                 ! z-gradient of specific kinetic energy
-    real(wp), allocatable :: pot_vort_tend_x(:,:,:)                  ! tendency due to the vorticity flux term in x-direction
-    real(wp), allocatable :: pot_vort_tend_y(:,:,:)                  ! tendency due to the vorticity flux term in y-direction
-    real(wp), allocatable :: pot_vort_tend_z(:,:,:)                  ! tendency due to the vorticity flux term in z-direction
-    real(wp), allocatable :: scalar_placeholder(:,:,:)               ! placeholder for scalar fields
-    real(wp), allocatable :: temperature(:,:,:)                      ! temperature
-    real(wp), allocatable :: u_placeholder(:,:,:)                    ! placeholder for vector fields in x-direction
-    real(wp), allocatable :: v_placeholder(:,:,:)                    ! placeholder for vector fields in y-direction
-    real(wp), allocatable :: w_placeholder(:,:,:)                    ! placeholder for vector fields in z-direction
-    real(wp), allocatable :: theta_v_u(:,:,:)                        ! virtual potential temperature at the edges in u-direction
-    real(wp), allocatable :: theta_v_v(:,:,:)                        ! virtual potential temperature at the edges in v-direction
-    real(wp), allocatable :: u_10(:,:)                               ! 10 m wind in x direction
-    real(wp), allocatable :: v_10(:,:)                               ! 10 m wind in y direction
-    real(wp), allocatable :: gust(:,:)                               ! gusts speed 10 m AGL
-    real(wp), allocatable :: mslp(:,:)                               ! mean sea level pressure
-    real(wp), allocatable :: t_2(:,:)                                ! 2 m temperature
-    real(wp), allocatable :: zeta_x(:,:,:)                           ! relative vorticity in x-direction
-    real(wp), allocatable :: zeta_y(:,:,:)                           ! relative vorticity in y-direction
-    real(wp), allocatable :: zeta_z(:,:,:)                           ! relative vorticity in z-direction
-    real(wp), allocatable :: eta_x(:,:,:)                            ! potential vorticity in x-direction
-    real(wp), allocatable :: eta_y(:,:,:)                            ! potential vorticity in y-direction
-    real(wp), allocatable :: eta_z(:,:,:)                            ! potential vorticity in z-direction
-    real(wp), allocatable :: radiation_tendency(:,:,:)               ! power density due to radiation
-    real(wp), allocatable :: scalar_flux_resistance(:,:)             ! surface flux resistance acting on scalar quantities
-    real(wp), allocatable :: monin_obukhov_length(:,:)               ! Monin-Obukhov length
-    real(wp), allocatable :: power_flux_density_sensible_sea(:,:)    ! sensible power flux density at the surface above the sea
-    real(wp), allocatable :: power_flux_density_sensible_soil(:,:)   ! sensible power flux density at the surface above the soil (including lakes)
-    real(wp), allocatable :: power_flux_density_latent_sea(:,:)      ! latent power flux density at the surface above the sea
-    real(wp), allocatable :: power_flux_density_latent_lake(:,:)     ! latent power flux density at the surface above lakes
-    real(wp), allocatable :: sfc_sw_in(:,:)                          ! shortwave radiation in the surface
-    real(wp), allocatable :: sfc_lw_out(:,:)                         ! longwave radiation out of the surface
-    real(wp), allocatable :: roughness_length(:,:)                   ! actual roughness length
-    real(wp), allocatable :: roughness_velocity(:,:)                 ! roughness velocity
-    real(wp), allocatable :: flux_density_u(:,:,:)                   ! placeholder for flux densities
-    real(wp), allocatable :: flux_density_v(:,:,:)                   ! placeholder for flux densities
-    real(wp), allocatable :: flux_density_w(:,:,:)                   ! placeholder for flux densities
-    real(wp), allocatable :: flux_density_div(:,:,:)                 ! placeholder for flux density divergences
-    real(wp), allocatable :: du_dz(:,:,:)                            ! verticl gradient of u
-    real(wp), allocatable :: dv_dz(:,:,:)                            ! verticl gradient of v
-    real(wp), allocatable :: n_squared(:,:,:)                        ! squared Brunt-Väisälä frequency
-    real(wp), allocatable :: tke(:,:,:)                              ! specific turbulent kinetic energy
-    real(wp), allocatable :: sst(:,:)                                ! sea surface temperature
-    real(wp), allocatable :: viscosity_molecular(:,:,:)              ! molecular diffusion coefficient
-    real(wp), allocatable :: viscosity_coeff_div(:,:,:)              ! efficient viscosity acting on divergent movements (Eddies + molecular)
-    real(wp), allocatable :: viscosity_coeff_curl(:,:,:)             ! efficient viscosity acting on rotational movements (Eddies + molecular)
-    real(wp), allocatable :: viscosity_coeff_curl_dual(:,:,:)        ! efficient viscosity acting on rotational movements at vertical vorticity points (Eddies + molecular)
-    real(wp), allocatable :: vert_hor_viscosity_u(:,:,:)             ! verticl diffusion coefficient acting on u-momentum
-    real(wp), allocatable :: vert_hor_viscosity_v(:,:,:)             ! verticl diffusion coefficient acting on v-momentum
-    real(wp), allocatable :: mass_diffusion_coeff_numerical_h(:,:,:) ! efficient horizontal mass diffusion coefficient
-    real(wp), allocatable :: mass_diffusion_coeff_numerical_v(:,:,:) ! efficient vertical mass diffusion coefficient
-    real(wp), allocatable :: temp_diffusion_coeff_numerical_h(:,:,:) ! efficient horizontal heat diffusion coefficient
-    real(wp), allocatable :: temp_diffusion_coeff_numerical_v(:,:,:) ! efficient vertical heat diffusion coefficient
-    real(wp), allocatable :: p_grad_decel_factor(:,:,:)              ! pressure gradient deceleration factor due to condensates
-    real(wp), allocatable :: mom_diff_tend_x(:,:,:)                  ! tendency due to momentum diffusion in x-direction
-    real(wp), allocatable :: mom_diff_tend_y(:,:,:)                  ! tendency due to momentum diffusion in y-direction
-    real(wp), allocatable :: mom_diff_tend_z(:,:,:)                  ! tendency due to momentum diffusion in z-direction
-    real(wp), allocatable :: heating_diss(:,:,:)                     ! dissipative heating power density
-    real(wp), allocatable :: phase_trans_rates(:,:,:,:)              ! mass source rates due to phase transitions and cloud physics
-    real(wp), allocatable :: phase_trans_heating_rate(:,:,:)         ! heat source rates due to phase transitions and cloud physics
-    real(wp), allocatable :: temp_diff_heating(:,:,:)                ! heating due to temperature diffusion
-    real(wp), allocatable :: condensates_sediment_heat(:,:,:)        ! heating rate due to falling condensates
-    real(wp), allocatable :: mass_diff_tendency(:,:,:,:)             ! mass source rate due to mass diffusion
-    real(wp), allocatable :: a_rain(:,:,:)                           ! radius of raindrops
+    real(wp), allocatable :: v_squared(:,:,:)                      ! specific kinetic energy
+    real(wp), allocatable :: p_grad_acc_neg_l_u(:,:,:)             ! x-component of linear pressure gradient acceleration
+    real(wp), allocatable :: p_grad_acc_neg_l_v(:,:,:)             ! y-component of linear pressure gradient acceleration
+    real(wp), allocatable :: p_grad_acc_neg_l_w(:,:,:)             ! z-component of linear pressure gradient accelerationpgrad_acc_old
+    real(wp), allocatable :: p_grad_acc_neg_nl_u(:,:,:)            ! x-component of nonlinear pressure gradient acceleration
+    real(wp), allocatable :: p_grad_acc_neg_nl_v(:,:,:)            ! y-component of nonlinear pressure gradient acceleration
+    real(wp), allocatable :: p_grad_acc_neg_nl_w(:,:,:)            ! z-component of nonlinear pressure gradient acceleration
+    real(wp), allocatable :: p_grad_condensates_w(:,:,:)           ! vertical pressure gradient acceleration due to the gravity of condensates
+    real(wp), allocatable :: p_grad_acc_old_u(:,:,:)               ! x-component of pressure gradient at old time step
+    real(wp), allocatable :: p_grad_acc_old_v(:,:,:)               ! y-component of pressure gradient at old time step
+    real(wp), allocatable :: v_squared_grad_x(:,:,:)               ! x-gradient of specific kinetic energy
+    real(wp), allocatable :: v_squared_grad_y(:,:,:)               ! y-gradient of specific kinetic energy
+    real(wp), allocatable :: v_squared_grad_z(:,:,:)               ! z-gradient of specific kinetic energy
+    real(wp), allocatable :: pot_vort_tend_x(:,:,:)                ! tendency due to the vorticity flux term in x-direction
+    real(wp), allocatable :: pot_vort_tend_y(:,:,:)                ! tendency due to the vorticity flux term in y-direction
+    real(wp), allocatable :: pot_vort_tend_z(:,:,:)                ! tendency due to the vorticity flux term in z-direction
+    real(wp), allocatable :: scalar_placeholder(:,:,:)             ! placeholder for scalar fields
+    real(wp), allocatable :: temperature(:,:,:)                    ! temperature
+    real(wp), allocatable :: u_placeholder(:,:,:)                  ! placeholder for vector fields in x-direction
+    real(wp), allocatable :: v_placeholder(:,:,:)                  ! placeholder for vector fields in y-direction
+    real(wp), allocatable :: w_placeholder(:,:,:)                  ! placeholder for vector fields in z-direction
+    real(wp), allocatable :: theta_v_u(:,:,:)                      ! virtual potential temperature at the edges in u-direction
+    real(wp), allocatable :: theta_v_v(:,:,:)                      ! virtual potential temperature at the edges in v-direction
+    real(wp), allocatable :: u_10(:,:)                             ! 10 m wind in x direction
+    real(wp), allocatable :: v_10(:,:)                             ! 10 m wind in y direction
+    real(wp), allocatable :: gust(:,:)                             ! gusts speed 10 m AGL
+    real(wp), allocatable :: mslp(:,:)                             ! mean sea level pressure
+    real(wp), allocatable :: t_2(:,:)                              ! 2 m temperature
+    real(wp), allocatable :: zeta_x(:,:,:)                         ! relative vorticity in x-direction
+    real(wp), allocatable :: zeta_y(:,:,:)                         ! relative vorticity in y-direction
+    real(wp), allocatable :: zeta_z(:,:,:)                         ! relative vorticity in z-direction
+    real(wp), allocatable :: eta_x(:,:,:)                          ! potential vorticity in x-direction
+    real(wp), allocatable :: eta_y(:,:,:)                          ! potential vorticity in y-direction
+    real(wp), allocatable :: eta_z(:,:,:)                          ! potential vorticity in z-direction
+    real(wp), allocatable :: radiation_tendency(:,:,:)             ! power density due to radiation
+    real(wp), allocatable :: scalar_flux_resistance(:,:)           ! surface flux resistance acting on scalar quantities
+    real(wp), allocatable :: monin_obukhov_length(:,:)             ! Monin-Obukhov length
+    real(wp), allocatable :: power_flux_density_sensible_sea(:,:)  ! sensible power flux density at the surface above the sea
+    real(wp), allocatable :: power_flux_density_sensible_soil(:,:) ! sensible power flux density at the surface above the soil (including lakes)
+    real(wp), allocatable :: power_flux_density_latent_sea(:,:)    ! latent power flux density at the surface above the sea
+    real(wp), allocatable :: power_flux_density_latent_lake(:,:)   ! latent power flux density at the surface above lakes
+    real(wp), allocatable :: sfc_sw_in(:,:)                        ! shortwave radiation in the surface
+    real(wp), allocatable :: sfc_lw_out(:,:)                       ! longwave radiation out of the surface
+    real(wp), allocatable :: roughness_length(:,:)                 ! actual roughness length
+    real(wp), allocatable :: roughness_velocity(:,:)               ! roughness velocity
+    real(wp), allocatable :: flux_density_u(:,:,:)                 ! placeholder for flux densities
+    real(wp), allocatable :: flux_density_v(:,:,:)                 ! placeholder for flux densities
+    real(wp), allocatable :: flux_density_w(:,:,:)                 ! placeholder for flux densities
+    real(wp), allocatable :: flux_density_div(:,:,:)               ! placeholder for flux density divergences
+    real(wp), allocatable :: du_dz(:,:,:)                          ! verticl gradient of u
+    real(wp), allocatable :: dv_dz(:,:,:)                          ! verticl gradient of v
+    real(wp), allocatable :: n_squared(:,:,:)                      ! squared Brunt-Väisälä frequency
+    real(wp), allocatable :: tke(:,:,:)                            ! specific turbulent kinetic energy
+    real(wp), allocatable :: sst(:,:)                              ! sea surface temperature
+    real(wp), allocatable :: viscosity_molecular(:,:,:)            ! molecular diffusion coefficient
+    real(wp), allocatable :: viscosity_coeff_div(:,:,:)            ! efficient viscosity acting on divergent movements (eddies + molecular)
+    real(wp), allocatable :: viscosity_coeff_curl(:,:,:)           ! efficient viscosity acting on rotational movements (eddies + molecular)
+    real(wp), allocatable :: viscosity_coeff_curl_dual(:,:,:)      ! efficient viscosity acting on rotational movements at vertical vorticity points (eddies + molecular)
+    real(wp), allocatable :: vert_hor_viscosity_u(:,:,:)           ! verticl diffusion coefficient acting on u-momentum
+    real(wp), allocatable :: vert_hor_viscosity_v(:,:,:)           ! verticl diffusion coefficient acting on v-momentum
+    real(wp), allocatable :: mass_diff_coeff_numerical_h(:,:,:)    ! efficient horizontal mass diffusion coefficient
+    real(wp), allocatable :: mass_diff_coeff_numerical_v(:,:,:)    ! efficient vertical mass diffusion coefficient
+    real(wp), allocatable :: temp_diff_coeff_numerical_h(:,:,:)    ! efficient horizontal heat diffusion coefficient
+    real(wp), allocatable :: temp_diff_coeff_numerical_v(:,:,:)    ! efficient vertical heat diffusion coefficient
+    real(wp), allocatable :: p_grad_decel_factor(:,:,:)            ! pressure gradient deceleration factor due to condensates
+    real(wp), allocatable :: mom_diff_tend_x(:,:,:)                ! tendency due to momentum diffusion in x-direction
+    real(wp), allocatable :: mom_diff_tend_y(:,:,:)                ! tendency due to momentum diffusion in y-direction
+    real(wp), allocatable :: mom_diff_tend_z(:,:,:)                ! tendency due to momentum diffusion in z-direction
+    real(wp), allocatable :: heating_diss(:,:,:)                   ! dissipative heating power density
+    real(wp), allocatable :: phase_trans_rates(:,:,:,:)            ! mass source rates due to phase transitions and cloud physics
+    real(wp), allocatable :: phase_trans_heating_rate(:,:,:)       ! heat source rates due to phase transitions and cloud physics
+    real(wp), allocatable :: temp_diff_heating(:,:,:)              ! heating due to temperature diffusion
+    real(wp), allocatable :: condensates_sediment_heat(:,:,:)      ! heating rate due to falling condensates
+    real(wp), allocatable :: mass_diff_tendency(:,:,:,:)           ! mass source rate due to mass diffusion
+    real(wp), allocatable :: a_rain(:,:,:)                         ! radius of raindrops
     
   end type t_diag
   
