@@ -475,11 +475,11 @@ module mo_eff_diff_coeffs
       do jk=1,nx
         do ji=1,ny
           ! horizontal diffusion coefficient
-          diag%mass_diff_coeff_numerical_h(ji,jk,jl) &
+          diag%mass_diff_coeff_eff_h(ji,jk,jl) &
           = 0.5_wp*(diag%viscosity_coeff_div(ji,jk,jl) + diag%viscosity_coeff_curl(ji,jk,jl)) &
           /state%rho(ji,jk,jl,n_condensed_constituents+1)
           ! vertical diffusion coefficient
-          diag%mass_diff_coeff_numerical_v(ji,jk,jl) &
+          diag%mass_diff_coeff_eff_v(ji,jk,jl) &
           ! molecular component
           = diag%viscosity_molecular(ji,jk,jl) &
           ! turbulent component
@@ -515,10 +515,10 @@ module mo_eff_diff_coeffs
         do ji=1,ny
           c_g_v = spec_heat_cap_diagnostics_v(state,ji,jk,jl)
           ! horizontal diffusion coefficient
-          diag%temp_diff_coeff_numerical_h(ji,jk,jl) = c_g_v &
+          diag%temp_diff_coeff_eff_h(ji,jk,jl) = c_g_v &
           *0.5_wp*(diag%viscosity_coeff_div(ji,jk,jl) + diag%viscosity_coeff_curl(ji,jk,jl))
           ! vertical diffusion coefficient
-          diag%temp_diff_coeff_numerical_v(ji,jk,jl) &
+          diag%temp_diff_coeff_eff_v(ji,jk,jl) &
           ! molecular component
           = state%rho(ji,jk,jl,n_condensed_constituents+1) &
           *c_g_v*(diag%viscosity_molecular(ji,jk,jl) &

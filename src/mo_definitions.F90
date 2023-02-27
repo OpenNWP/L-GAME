@@ -194,10 +194,10 @@ module mo_definitions
     real(wp), allocatable :: viscosity_coeff_curl_dual(:,:,:)      ! efficient viscosity acting on rotational movements at vertical vorticity points (eddies + molecular)
     real(wp), allocatable :: vert_hor_viscosity_u(:,:,:)           ! verticl diffusion coefficient acting on u-momentum
     real(wp), allocatable :: vert_hor_viscosity_v(:,:,:)           ! verticl diffusion coefficient acting on v-momentum
-    real(wp), allocatable :: mass_diff_coeff_numerical_h(:,:,:)    ! efficient horizontal mass diffusion coefficient
-    real(wp), allocatable :: mass_diff_coeff_numerical_v(:,:,:)    ! efficient vertical mass diffusion coefficient
-    real(wp), allocatable :: temp_diff_coeff_numerical_h(:,:,:)    ! efficient horizontal heat diffusion coefficient
-    real(wp), allocatable :: temp_diff_coeff_numerical_v(:,:,:)    ! efficient vertical heat diffusion coefficient
+    real(wp), allocatable :: mass_diff_coeff_eff_h(:,:,:)          ! efficient horizontal mass diffusion coefficient
+    real(wp), allocatable :: mass_diff_coeff_eff_v(:,:,:)          ! efficient vertical mass diffusion coefficient
+    real(wp), allocatable :: temp_diff_coeff_eff_h(:,:,:)          ! efficient horizontal heat diffusion coefficient
+    real(wp), allocatable :: temp_diff_coeff_eff_v(:,:,:)          ! efficient vertical heat diffusion coefficient
     real(wp), allocatable :: p_grad_decel_factor(:,:,:)            ! pressure gradient deceleration factor due to condensates
     real(wp), allocatable :: mom_diff_tend_x(:,:,:)                ! tendency due to momentum diffusion in x-direction
     real(wp), allocatable :: mom_diff_tend_y(:,:,:)                ! tendency due to momentum diffusion in y-direction
