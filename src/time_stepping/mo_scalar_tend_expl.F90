@@ -13,7 +13,7 @@ module mo_scalar_tend_expl
   use mo_divergence_operators, only: div_h,div_h_tracers,add_vertical_div
   use mo_constituents_nml,     only: n_condensed_constituents,n_constituents
   use mo_diff_nml,             only: ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v
-  use mo_eff_diff_coeffs,      only: scalar_diffusion_coeffs
+  use mo_eff_diff_coeffs,      only: scalar_diff_coeffs
   use mo_gradient_operators,   only: grad_hor,grad_vert
   use mo_derived,              only: c_v_mass_weighted_air
 
@@ -59,7 +59,7 @@ module mo_scalar_tend_expl
     
     ! updating the scalar diffusion coefficient if required
     if (rk_step==1 .and. (lmass_diff_h .or. ltemp_diff_h)) then
-      call scalar_diffusion_coeffs(state_scalar,diag,grid)
+      call scalar_diff_coeffs(state_scalar,diag,grid)
     endif
     
     ! Temperature diffusion gets updated here,but only at the first RK step and if heat conduction is switched on.

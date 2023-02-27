@@ -8,7 +8,7 @@ module mo_eff_diff_coeffs
   use mo_run_nml,              only: ny,nx,n_layers,n_levels,dtime,eff_hor_res
   use mo_definitions,          only: wp,t_state,t_diag,t_grid
   use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h
-  use mo_derived,              only: calc_diffusion_coeff
+  use mo_derived,              only: calc_diff_coeff
   use mo_constituents_nml,     only: n_constituents,n_condensed_constituents
   use mo_tke,                  only: tke_update
   use mo_divergence_operators, only: div_h
@@ -49,7 +49,7 @@ module mo_eff_diff_coeffs
     do jl=1,n_layers
       do jk=1,nx
         do ji=1,ny
-          diag%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
+          diag%viscosity_molecular(ji,jk,jl) = calc_diff_coeff(diag%temperature(ji,jk,jl), &
           state%rho(ji,jk,jl,n_condensed_constituents+1))
         enddo
       enddo
@@ -436,7 +436,7 @@ module mo_eff_diff_coeffs
     
   end subroutine vert_vert_mom_viscosity
   
-  subroutine scalar_diffusion_coeffs(state,diag,grid)
+  subroutine scalar_diff_coeffs(state,diag,grid)
     
     ! This subroutine computes the scalar diffusion coefficients (including eddies).
     
@@ -461,7 +461,7 @@ module mo_eff_diff_coeffs
       do jl=1,n_layers
         do jk=1,nx
           do ji=1,ny
-            diag%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
+            diag%viscosity_molecular(ji,jk,jl) = calc_diff_coeff(diag%temperature(ji,jk,jl), &
             state%rho(ji,jk,jl,n_condensed_constituents+1))
           enddo
         enddo
@@ -500,7 +500,7 @@ module mo_eff_diff_coeffs
       do jl=1,n_layers
         do jk=1,nx
           do ji=1,ny
-            diag%viscosity_molecular(ji,jk,jl) = calc_diffusion_coeff(diag%temperature(ji,jk,jl), &
+            diag%viscosity_molecular(ji,jk,jl) = calc_diff_coeff(diag%temperature(ji,jk,jl), &
             state%rho(ji,jk,jl,n_condensed_constituents+1))
           enddo
         enddo
@@ -529,7 +529,7 @@ module mo_eff_diff_coeffs
     enddo
     !$omp end parallel do
     
-  end subroutine scalar_diffusion_coeffs
+  end subroutine scalar_diff_coeffs
   
   subroutine update_n_squared(state,diag,grid)
     
