@@ -305,19 +305,19 @@ module mo_phase_trans
               
               ! calculating the latent heat flux density affecting the surface above lakes
               if (state%temperature_soil(ji,jk,1)>=t_0) then
-                diag%power_flux_density_latent_lake(ji,jk) = -phase_trans_heat(1,state%temperature_soil(ji,jk,1)) &
+                diag%power_flux_density_lat_lake(ji,jk) = -phase_trans_heat(1,state%temperature_soil(ji,jk,1)) &
                 *max(0._wp,diff_density_sfc_lake/diag%scalar_flux_resistance(ji,jk))
               else
-                diag%power_flux_density_latent_lake(ji,jk) = -phase_trans_heat(2,state%temperature_soil(ji,jk,1)) &
+                diag%power_flux_density_lat_lake(ji,jk) = -phase_trans_heat(2,state%temperature_soil(ji,jk,1)) &
                 *max(0._wp,diff_density_sfc_lake/diag%scalar_flux_resistance(ji,jk))
               endif
               
               ! calculating the latent heat flux density affecting the surface above the sea
               if (diag%sst(ji,jk)>=t_0) then
-                diag%power_flux_density_latent_sea(ji,jk) = -phase_trans_heat(1,diag%sst(ji,jk)) &
+                diag%power_flux_density_lat_sea(ji,jk) = -phase_trans_heat(1,diag%sst(ji,jk)) &
                 *max(0._wp,diff_density_sfc_sea/diag%scalar_flux_resistance(ji,jk))
               else
-                diag%power_flux_density_latent_sea(ji,jk) = -phase_trans_heat(2,diag%sst(ji,jk)) &
+                diag%power_flux_density_lat_sea(ji,jk) = -phase_trans_heat(2,diag%sst(ji,jk)) &
                 *max(0._wp,diff_density_sfc_sea/diag%scalar_flux_resistance(ji,jk))
               endif
               
