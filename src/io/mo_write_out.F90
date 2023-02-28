@@ -2,7 +2,7 @@
 ! Github repository: https://github.com/OpenNWP/L-GAME
 
 module mo_write_out
-
+  
   ! This module handles everything dealing with IO.
   
   use mo_constants,         only: c_d_v
@@ -13,7 +13,7 @@ module mo_write_out
   use mo_derived,           only: rel_humidity
   use mo_set_initial_state, only: bg_temp,bg_pres,geopot,nc_check
   use mo_inner_product,     only: inner_product
-
+  
   implicit none
   
   contains
@@ -83,7 +83,7 @@ module mo_write_out
     call nc_check(nf90_def_dim(ncid,"lat_model",ny,y_dimid))
     call nc_check(nf90_def_dim(ncid,"z",n_layers,z_dimid))
     call nc_check(nf90_def_dim(ncid,"jc",n_constituents,constituents_dimid))
-
+    
     ! setting the dimension ID arrays
     ! 2D
     dimids_2d(1) = y_dimid
@@ -97,7 +97,7 @@ module mo_write_out
     dimids_3d_rho(2) = x_dimid
     dimids_3d_rho(3) = z_dimid
     dimids_3d_rho(4) = constituents_dimid
-
+    
     ! Define the variable. The type of the variable in this case is
     ! NF90_INT (4-byte integer).
     call nc_check(nf90_def_var(ncid,"lat_center",NF90_REAL,single_double_dimid,varid_lat_center))
@@ -222,7 +222,7 @@ module mo_write_out
     write(*,*) "Output written."
     
   end subroutine write_output
-
+  
   subroutine write_out_integrals(state,diag,grid,time_since_init)
     
     ! This subroutine writes out fundamental integral properties of the atmosphere to a text file.
