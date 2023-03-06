@@ -7,7 +7,7 @@ module mo_eff_diff_coeffs
   
   use mo_run_nml,              only: ny,nx,n_layers,n_levels,dtime,eff_hor_res
   use mo_definitions,          only: wp,t_state,t_diag,t_grid
-  use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h
+  use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h,diff_coeff_scheme_h,diff_coeff_scheme_v
   use mo_derived,              only: calc_diff_coeff
   use mo_constituents_nml,     only: n_constituents,n_condensed_constituents
   use mo_tke,                  only: tke_update
@@ -24,6 +24,23 @@ module mo_eff_diff_coeffs
   subroutine hor_viscosity(state,diag)
     
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
+    
+    type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    
+    if (diff_coeff_scheme_h=="smag") then
+      call hor_viscosity_smag(state,diag)
+    endif
+    if (diff_coeff_scheme_h=="tke") then
+      call hor_viscosity_tke(state,diag)
+    endif
+    
+  end subroutine hor_viscosity
+  
+  subroutine hor_viscosity_smag(state,diag)
+    
+    ! This subroutine computes the effective diffusion coefficient (molecular + turbulent)
+    ! using the Smagorinsky ansatz.
     
     type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
@@ -220,7 +237,209 @@ module mo_eff_diff_coeffs
     enddo
     !$omp end parallel do
     
-  end subroutine hor_viscosity
+  end subroutine hor_viscosity_smag
+  
+  subroutine hor_viscosity_tke(state,diag)
+    
+    ! This subroutine computes the effective diffusion coefficient (molecular + turbulent)
+    ! using the TKE ansatz.
+    
+    type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
+    type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    
+    ! local variables
+    integer :: ji ! horizontal index
+    integer :: jk ! horizontal index
+    integer :: jl ! layer index
+    
+    ! computing the eddy viscosity
+    !$omp parallel do private(ji,jk,jl)
+    do jl=1,n_layers
+      do jk=1,nx
+        do ji=1,ny
+          diag%viscosity_coeff_div(ji,jk,jl) = tke2hor_diff_coeff(diag%tke(ji,jk,jl))
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
+    
+    ! calculation of the molecular diffusion coefficient
+    !$omp parallel do private(ji,jk,jl)
+    do jl=1,n_layers
+      do jk=1,nx
+        do ji=1,ny
+          diag%viscosity_molecular(ji,jk,jl) = calc_diff_coeff(diag%temperature(ji,jk,jl), &
+          state%rho(ji,jk,jl,n_condensed_constituents+1))
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
+    
+    ! adding the molecular diffusion coefficient
+    !$omp parallel workshare
+    diag%viscosity_coeff_div = diag%viscosity_molecular + diag%viscosity_coeff_div
+    !$omp end parallel workshare
+    
+    ! multiplying by the density
+    !$omp parallel do private(ji,jk,jl)
+    do jl=1,n_layers
+      do jk=1,nx
+        do ji=1,ny
+          diag%viscosity_coeff_div(ji,jk,jl) = state%rho(ji,jk,jl,n_condensed_constituents+1) &
+                                               *diag%viscosity_coeff_div(ji,jk,jl)
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
+    
+    ! initialization with zeros
+    !$omp parallel workshare
+     diag%viscosity_coeff_curl_dual = 0._wp
+    !$omp end parallel workshare
+    
+    ! molecular component
+    !$omp parallel do private(ji,jk,jl)
+    do jl=1,n_layers
+      do ji=2,ny
+        do jk=2,nx
+          diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*sum(diag%viscosity_molecular(ji-1:ji,jk-1:jk,jl))
+        enddo
+      enddo
+      
+      ! periodic boundary conditions
+      if (lperiodic) then
+        
+        do jk=2,nx
+          diag%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
+          diag%viscosity_molecular(1,jk-1,jl) + diag%viscosity_molecular(ny,jk-1,jl) &
+          + diag%viscosity_molecular(1,jk,jl) + diag%viscosity_molecular(ny,jk,jl))
+          diag%viscosity_coeff_curl_dual(ny+1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl)
+        enddo
+        do ji=2,ny
+          diag%viscosity_coeff_curl_dual(ji,1,jl) = 0.25_wp*( &
+          diag%viscosity_molecular(ji-1,nx,jl) + diag%viscosity_molecular(ji-1,1,jl) &
+          + diag%viscosity_molecular(ji,nx,jl) + diag%viscosity_molecular(ji,1,jl))
+          diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
+        enddo
+        
+        ! corners
+        diag%viscosity_coeff_curl_dual(1,1,jl) = 0.25*(diag%viscosity_molecular(1,1,jl) + diag%viscosity_molecular(ny,1,jl) &
+        + diag%viscosity_molecular(1,nx,jl) + diag%viscosity_molecular(ny,nx,jl))
+        diag%viscosity_coeff_curl_dual(1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_coeff_curl_dual(ny+1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        
+      endif
+      
+    enddo
+    !$omp end parallel do
+    
+    ! turbulent component
+    !$omp parallel do private(ji,jk,jl)
+    do jl=1,n_layers
+      do ji=2,ny
+        do jk=2,nx
+          diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*( &
+          tke2hor_diff_coeff(diag%tke(ji-1,jk-1,jl)) &
+          + tke2hor_diff_coeff(diag%tke(ji-1,jk,jl)) &
+          + tke2hor_diff_coeff(diag%tke(ji,jk-1,jl)) &
+          + tke2hor_diff_coeff(diag%tke(ji,jk,jl)))
+        enddo
+      enddo
+      
+      ! periodic boundary conditions
+      if (lperiodic) then
+        
+        do jk=2,nx
+          diag%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
+          tke2hor_diff_coeff(diag%tke(1,jk-1,jl)) + tke2hor_diff_coeff(diag%tke(ny,jk-1,jl)) &
+          + tke2hor_diff_coeff(diag%tke(1,jk,jl)) + tke2hor_diff_coeff(diag%tke(ny,jk,jl)))
+          diag%viscosity_coeff_curl_dual(ny+1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl)
+        enddo
+        do ji=2,ny
+          diag%viscosity_coeff_curl_dual(ji,1,jl) = 0.25_wp*( &
+          tke2hor_diff_coeff(diag%tke(ji-1,nx,jl)) + tke2hor_diff_coeff(diag%tke(ji-1,1,jl)) &
+          + tke2hor_diff_coeff(diag%tke(ji,nx,jl)) + tke2hor_diff_coeff(diag%tke(ji,1,jl)))
+          diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
+        enddo
+        
+        ! corners
+        diag%viscosity_coeff_curl_dual(1,1,jl) = 0.25*( &
+        tke2hor_diff_coeff(diag%tke(1,1,jl)) + tke2hor_diff_coeff(diag%tke(ny,1,jl)) &
+        + tke2hor_diff_coeff(diag%tke(1,nx,jl)) + tke2hor_diff_coeff(diag%tke(ny,nx,jl)))
+        diag%viscosity_coeff_curl_dual(1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_coeff_curl_dual(ny+1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        
+      endif
+      
+    enddo
+    !$omp end parallel do
+    
+    ! multiplication by the density
+    !$omp parallel do private(ji,jk,jl)
+    do jl=1,n_layers
+      do ji=2,ny
+        do jk=2,nx
+          diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*( &
+          state%rho(ji-1,jk-1,jl,n_condensed_constituents+1) &
+          + state%rho(ji-1,jk,jl,n_condensed_constituents+1) &
+          + state%rho(ji,jk-1,jl,n_condensed_constituents+1) &
+          + state%rho(ji,jk,jl,n_condensed_constituents+1)) &
+          *diag%viscosity_coeff_curl_dual(ji,jk,jl)
+        enddo
+      enddo
+      
+      ! periodic boundary conditions
+      if (lperiodic) then
+        
+        do jk=2,nx
+          diag%viscosity_coeff_curl_dual(1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl) &
+          *(0.25_wp*( &
+          state%rho(1,jk-1,jl,n_condensed_constituents+1) &
+          + state%rho(ny,jk-1,jl,n_condensed_constituents+1) &
+          + state%rho(1,jk,jl,n_condensed_constituents+1) &
+          + state%rho(ny,jk,jl,n_condensed_constituents+1)))
+          diag%viscosity_coeff_curl_dual(ny+1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl)
+        enddo
+        do ji=2,ny
+          diag%viscosity_coeff_curl_dual(ji,1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl) &
+          *(0.25_wp*( &
+          state%rho(ji-1,nx,jl,n_condensed_constituents+1) &
+          + state%rho(ji-1,1,jl,n_condensed_constituents+1) &
+          + state%rho(ji,nx,jl,n_condensed_constituents+1) &
+          + state%rho(ji,1,jl,n_condensed_constituents+1)))
+          diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
+        enddo
+        
+        ! corners
+        diag%viscosity_coeff_curl_dual(1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl) &
+        *(0.25_wp*( &
+        state%rho(ny,nx,jl,n_condensed_constituents+1) &
+        + state%rho(ny,1,jl,n_condensed_constituents+1) &
+        + state%rho(1,nx,jl,n_condensed_constituents+1) &
+        + state%rho(1,1,jl,n_condensed_constituents+1)))
+        diag%viscosity_coeff_curl_dual(1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_coeff_curl_dual(ny+1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        
+      endif
+      
+    enddo
+    !$omp end parallel do
+    
+    ! averaging the curl diffusion coefficient to the cell centers
+    !$omp parallel do private(ji,jk,jl)
+    do jl=1,n_layers
+      do jk=1,nx
+        do ji=1,ny
+          diag%viscosity_coeff_curl(ji,jk,jl) = 0.25_wp*sum(diag%viscosity_coeff_curl_dual(ji:ji+1,jk:jk+1,jl))
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
+    
+  end subroutine hor_viscosity_tke
   
   subroutine vert_hor_mom_viscosity(state,diag,grid)
     
