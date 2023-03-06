@@ -13,7 +13,8 @@ module mo_vector_tend_expl
   use mo_vorticities,        only: calc_pot_vort
   use mo_multiplications,    only: scalar_times_vector_h,scalar_times_vector_v
   use mo_vorticity_flux,     only: calc_vorticity_flux_term
-  use mo_diff_nml,           only: lmom_diff_h,lmom_diff_v,lmass_diff_h,ltemp_diff_h,lklemp
+  use mo_diff_nml,           only: lmom_diff_h,lmom_diff_v,lmass_diff_h,ltemp_diff_h,lklemp,diff_coeff_scheme_h, &
+                                   diff_coeff_scheme_v
   use mo_momentum_diff_diss, only: mom_diff_h,mom_diff_v,simple_dissipation_rate
   use mo_eff_diff_coeffs,    only: update_n_squared
   use mo_tke,                only: tke_update
@@ -102,7 +103,9 @@ module mo_vector_tend_expl
       ! updating the Brunt-Väisälä frequency and the TKE if any diffusion is switched on because it is required for computing the diffusion coefficients
       if (lmom_diff_h .or. lmass_diff_h .or. ltemp_diff_h) then
         call update_n_squared(state,diag,grid)
-        call tke_update(state,diag,grid)
+        if (diff_coeff_scheme_h=="tke" .or. diff_coeff_scheme_v=="tke") then
+          call tke_update(state,diag,grid)
+        endif
       endif
       ! horizontal momentum diffusion
       if (lmom_diff_h) then
