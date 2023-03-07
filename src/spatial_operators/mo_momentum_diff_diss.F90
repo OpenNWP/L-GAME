@@ -49,7 +49,7 @@ module mo_momentum_diff_diss
     ! Computing the necessary diffusion coefficients
     ! ----------------------------------------------
     ! calculating the effective horizontal kinematic viscosity
-    call hor_viscosity(state,diag)
+    call hor_viscosity(state,diag,grid)
     
     ! Computing the gradient of divergence component
     ! ----------------------------------------------

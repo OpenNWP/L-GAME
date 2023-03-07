@@ -7,7 +7,7 @@ module mo_eff_diff_coeffs
   
   use mo_run_nml,              only: ny,nx,n_layers,n_levels,dtime,eff_hor_res
   use mo_definitions,          only: wp,t_state,t_diag,t_grid
-  use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h,diff_coeff_scheme_h,diff_coeff_scheme_v
+  use mo_diff_nml,             only: lmom_diff_h,ltemp_diff_h,diff_coeff_scheme_h,diff_coeff_scheme_v,c_s,bg_shear
   use mo_derived,              only: calc_diff_coeff
   use mo_constituents_nml,     only: n_constituents,n_condensed_constituents
   use mo_tke,                  only: tke_update
@@ -21,15 +21,16 @@ module mo_eff_diff_coeffs
   
   contains
   
-  subroutine hor_viscosity(state,diag)
+  subroutine hor_viscosity(state,diag,grid)
     
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
     
     type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     if (diff_coeff_scheme_h=="smag") then
-      call hor_viscosity_smag(state,diag)
+      call hor_viscosity_smag(state,diag,grid)
     endif
     if (diff_coeff_scheme_h=="tke") then
       call hor_viscosity_tke(state,diag)
@@ -37,29 +38,20 @@ module mo_eff_diff_coeffs
     
   end subroutine hor_viscosity
   
-  subroutine hor_viscosity_smag(state,diag)
+  subroutine hor_viscosity_smag(state,diag,grid)
     
     ! This subroutine computes the effective diffusion coefficient (molecular + turbulent)
     ! using the Smagorinsky ansatz.
     
     type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
+    type(t_grid),  intent(in)    :: grid  ! grid quantities
     
     ! local variables
-    integer :: ji ! horizontal index
-    integer :: jk ! horizontal index
-    integer :: jl ! layer index
-    
-    ! computing the eddy viscosity
-    !$omp parallel do private(ji,jk,jl)
-    do jl=1,n_layers
-      do jk=1,nx
-        do ji=1,ny
-          diag%viscosity(ji,jk,jl) = tke2hor_diff_coeff(diag%tke(ji,jk,jl))
-        enddo
-      enddo
-    enddo
-    !$omp end parallel do
+    integer  :: ji                ! horizontal index
+    integer  :: jk                ! horizontal index
+    integer  :: jl                ! layer index
+    real(wp) :: vorticity_at_cell ! vorticity value in a cell center
     
     ! calculation of the molecular diffusion coefficient
     !$omp parallel do private(ji,jk,jl)
@@ -67,7 +59,22 @@ module mo_eff_diff_coeffs
       do jk=1,nx
         do ji=1,ny
           diag%viscosity_molecular(ji,jk,jl) = calc_diff_coeff(diag%temperature(ji,jk,jl), &
-          state%rho(ji,jk,jl,n_condensed_constituents+1))
+                                               state%rho(ji,jk,jl,n_condensed_constituents+1))
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
+    
+    ! computing the eddy viscosity
+    !$omp parallel do private(ji,jk,jl,vorticity_at_cell)
+    do jl=1,n_layers
+      do jk=1,nx
+        do ji=1,ny
+          vorticity_at_cell = 0.25_wp*(diag%zeta_z(ji,jk,jl) + diag%zeta_z(ji,jk+1,jl) &
+                              + diag%zeta_z(ji+1,jk,jl) + diag%zeta_z(ji+1,jk+1,jl))
+          diag%viscosity(ji,jk,jl) = c_s*grid%mean_velocity_area &
+                                     ! scalar_placeholder contains the divergence of the horizontal wind field
+                                     *sqrt(max(vorticity_at_cell**2 + diag%scalar_placeholder(ji,jk,jl)**2,bg_shear**2))
         enddo
       enddo
     enddo
@@ -84,7 +91,7 @@ module mo_eff_diff_coeffs
       do jk=1,nx
         do ji=1,ny
           diag%viscosity(ji,jk,jl) = state%rho(ji,jk,jl,n_condensed_constituents+1) &
-                                               *diag%viscosity(ji,jk,jl)
+                                     *diag%viscosity(ji,jk,jl)
         enddo
       enddo
     enddo
@@ -107,24 +114,24 @@ module mo_eff_diff_coeffs
     integer :: jk ! horizontal index
     integer :: jl ! layer index
     
-    ! computing the eddy viscosity
-    !$omp parallel do private(ji,jk,jl)
-    do jl=1,n_layers
-      do jk=1,nx
-        do ji=1,ny
-          diag%viscosity(ji,jk,jl) = tke2hor_diff_coeff(diag%tke(ji,jk,jl))
-        enddo
-      enddo
-    enddo
-    !$omp end parallel do
-    
     ! calculation of the molecular diffusion coefficient
     !$omp parallel do private(ji,jk,jl)
     do jl=1,n_layers
       do jk=1,nx
         do ji=1,ny
           diag%viscosity_molecular(ji,jk,jl) = calc_diff_coeff(diag%temperature(ji,jk,jl), &
-          state%rho(ji,jk,jl,n_condensed_constituents+1))
+                                               state%rho(ji,jk,jl,n_condensed_constituents+1))
+        enddo
+      enddo
+    enddo
+    !$omp end parallel do
+    
+    ! computing the eddy viscosity
+    !$omp parallel do private(ji,jk,jl)
+    do jl=1,n_layers
+      do jk=1,nx
+        do ji=1,ny
+          diag%viscosity(ji,jk,jl) = tke2hor_diff_coeff(diag%tke(ji,jk,jl))
         enddo
       enddo
     enddo
@@ -533,7 +540,7 @@ module mo_eff_diff_coeffs
     ! The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
     if (.not. lmom_diff_h .and. .not. ltemp_diff_h) then
       
-      call hor_viscosity(state,diag)
+      call hor_viscosity(state,diag,grid)
       call tke_update(state,diag,grid)
       
       ! molecular viscosity
@@ -571,7 +578,7 @@ module mo_eff_diff_coeffs
     ! The eddy viscosity coefficient and the TKE only have to be calculated if it has not yet been done.
     if (.not. lmom_diff_h) then
       
-      call hor_viscosity(state,diag)
+      call hor_viscosity(state,diag,grid)
       call tke_update(state,diag,grid)
       
       ! molecular viscosity
