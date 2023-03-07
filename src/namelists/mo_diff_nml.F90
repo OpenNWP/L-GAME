@@ -23,9 +23,10 @@ module mo_diff_nml
   character(len=8) :: diff_coeff_scheme_h ! scheme for computing the horizontal diffusion coefficient
   character(len=8) :: diff_coeff_scheme_v ! scheme for computing the vertical diffusion coefficient
   real(wp)         :: bg_shear            ! minimum background shear
+  real(wp)         :: c_s                 ! Smagorinsky parameter
   
   namelist /diff/lmom_diff_h,lmom_diff_v,ltemp_diff_h,ltemp_diff_v,lmass_diff_h,lmass_diff_v,h_prandtl,karman, &
-                 lklemp,klemp_damp_max,klemp_begin_rel,diff_coeff_scheme_h,diff_coeff_scheme_v,bg_shear
+                 lklemp,klemp_damp_max,klemp_begin_rel,diff_coeff_scheme_h,diff_coeff_scheme_v,bg_shear,c_s
   
   contains
   
@@ -49,6 +50,7 @@ module mo_diff_nml
     diff_coeff_scheme_h = "smag"
     diff_coeff_scheme_v = "tke"
     bg_shear = 1.5e-5_wp
+    c_s = 0.2_wp
     
     ! Open and read namelist file.
     open(action="read",file="namelist.nml",newunit=fileunit)
