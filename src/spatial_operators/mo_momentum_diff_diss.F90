@@ -55,7 +55,7 @@ module mo_momentum_diff_diss
     ! ----------------------------------------------
     ! multiplying the divergence by the diffusion coefficient acting on divergent movements
     !$omp parallel workshare
-    diag%scalar_placeholder = diag%viscosity_coeff_div*diag%scalar_placeholder
+    diag%scalar_placeholder = diag%viscosity*diag%scalar_placeholder
     !$omp end parallel workshare
     ! calculating the horizontal gradient of the divergence
     call grad_hor(diag%scalar_placeholder,diag%mom_diff_tend_x,diag%mom_diff_tend_y,diag%mom_diff_tend_z,grid)

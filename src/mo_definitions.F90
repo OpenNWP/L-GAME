@@ -189,15 +189,15 @@ module mo_definitions
     real(wp), allocatable :: tke(:,:,:)                        ! specific turbulent kinetic energy
     real(wp), allocatable :: sst(:,:)                          ! sea surface temperature
     real(wp), allocatable :: viscosity_molecular(:,:,:)        ! molecular diffusion coefficient
-    real(wp), allocatable :: viscosity_coeff_div(:,:,:)        ! efficient viscosity acting on divergent movements (eddies + molecular)
-    real(wp), allocatable :: viscosity_coeff_curl(:,:,:)       ! efficient viscosity acting on rotational movements (eddies + molecular)
-    real(wp), allocatable :: viscosity_coeff_curl_dual(:,:,:)  ! efficient viscosity acting on rotational movements at vertical vorticity points (eddies + molecular)
+    real(wp), allocatable :: viscosity(:,:,:)                  ! effective viscosity (at cell centers)
+    real(wp), allocatable :: viscosity_coeff_curl(:,:,:)       ! effective viscosity acting on rotational movements
+    real(wp), allocatable :: viscosity_coeff_curl_dual(:,:,:)  ! effective viscosity acting on rotational movements at vertical vorticity points
     real(wp), allocatable :: vert_hor_viscosity_u(:,:,:)       ! verticl diffusion coefficient acting on u-momentum
     real(wp), allocatable :: vert_hor_viscosity_v(:,:,:)       ! verticl diffusion coefficient acting on v-momentum
-    real(wp), allocatable :: mass_diff_coeff_eff_h(:,:,:)      ! efficient horizontal mass diffusion coefficient
-    real(wp), allocatable :: mass_diff_coeff_eff_v(:,:,:)      ! efficient vertical mass diffusion coefficient
-    real(wp), allocatable :: temp_diff_coeff_eff_h(:,:,:)      ! efficient horizontal heat diffusion coefficient
-    real(wp), allocatable :: temp_diff_coeff_eff_v(:,:,:)      ! efficient vertical heat diffusion coefficient
+    real(wp), allocatable :: mass_diff_coeff_eff_h(:,:,:)      ! effective horizontal mass diffusion coefficient
+    real(wp), allocatable :: mass_diff_coeff_eff_v(:,:,:)      ! effective vertical mass diffusion coefficient
+    real(wp), allocatable :: temp_diff_coeff_eff_h(:,:,:)      ! effective horizontal heat diffusion coefficient
+    real(wp), allocatable :: temp_diff_coeff_eff_v(:,:,:)      ! effective vertical heat diffusion coefficient
     real(wp), allocatable :: p_grad_decel_factor(:,:,:)        ! pressure gradient deceleration factor due to condensates
     real(wp), allocatable :: mom_diff_tend_x(:,:,:)            ! tendency due to momentum diffusion in x-direction
     real(wp), allocatable :: mom_diff_tend_y(:,:,:)            ! tendency due to momentum diffusion in y-direction
