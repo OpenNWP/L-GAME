@@ -190,8 +190,7 @@ module mo_definitions
     real(wp), allocatable :: sst(:,:)                          ! sea surface temperature
     real(wp), allocatable :: viscosity_molecular(:,:,:)        ! molecular diffusion coefficient
     real(wp), allocatable :: viscosity(:,:,:)                  ! effective viscosity (at cell centers)
-    real(wp), allocatable :: viscosity_coeff_curl(:,:,:)       ! effective viscosity acting on rotational movements
-    real(wp), allocatable :: viscosity_coeff_curl_dual(:,:,:)  ! effective viscosity acting on rotational movements at vertical vorticity points
+    real(wp), allocatable :: viscosity_dual(:,:,:)             ! effective viscosity at the dual cell centers
     real(wp), allocatable :: vert_hor_viscosity_u(:,:,:)       ! verticl diffusion coefficient acting on u-momentum
     real(wp), allocatable :: vert_hor_viscosity_v(:,:,:)       ! verticl diffusion coefficient acting on v-momentum
     real(wp), allocatable :: mass_diff_coeff_eff_h(:,:,:)      ! effective horizontal mass diffusion coefficient

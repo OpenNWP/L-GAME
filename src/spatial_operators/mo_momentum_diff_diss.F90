@@ -66,8 +66,8 @@ module mo_momentum_diff_diss
     do jl=1,n_layers
       do jk=1,nx+1
         do ji=1,ny
-          diag%u_placeholder(ji,jk,jl) = (diag%viscosity_coeff_curl_dual(ji+1,jk,jl)*diag%zeta_z(ji+1,jk,jl) - &
-          diag%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
+          diag%u_placeholder(ji,jk,jl) = (diag%viscosity_dual(ji+1,jk,jl)*diag%zeta_z(ji+1,jk,jl) - &
+          diag%viscosity_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
           
           ! terrain-following correction
           slope = (grid%z_area_dual_z(ji+1,jk,jl) - grid%z_area_dual_z(ji,jk,jl))/grid%dy_dual(ji,jk,jl)
@@ -75,11 +75,11 @@ module mo_momentum_diff_diss
           lower_index = min(n_layers,jl+1)
           ! computing the vertical gradient of the vertical vorticity (times the respective diffusion coefficient)
           ! and averaging it to the vector point
-          vertical_gradient = 0.5_wp*(diag%viscosity_coeff_curl_dual(ji+1,jk,upper_index)*diag%zeta_z(ji+1,jk,upper_index) &
-          - diag%viscosity_coeff_curl_dual(ji+1,jk,lower_index)*diag%zeta_z(ji+1,jk,lower_index)) &
+          vertical_gradient = 0.5_wp*(diag%viscosity_dual(ji+1,jk,upper_index)*diag%zeta_z(ji+1,jk,upper_index) &
+          - diag%viscosity_dual(ji+1,jk,lower_index)*diag%zeta_z(ji+1,jk,lower_index)) &
           /(grid%z_area_dual_z(ji+1,jk,upper_index) - grid%z_area_dual_z(ji+1,jk,lower_index)) &
-          + 0.5_wp*(diag%viscosity_coeff_curl_dual(ji,jk,upper_index)*diag%zeta_z(ji,jk,upper_index) &
-          - diag%viscosity_coeff_curl_dual(ji,jk,lower_index)*diag%zeta_z(ji,jk,lower_index)) &
+          + 0.5_wp*(diag%viscosity_dual(ji,jk,upper_index)*diag%zeta_z(ji,jk,upper_index) &
+          - diag%viscosity_dual(ji,jk,lower_index)*diag%zeta_z(ji,jk,lower_index)) &
           /(grid%z_area_dual_z(ji,jk,upper_index) - grid%z_area_dual_z(ji,jk,lower_index))
           ! adding the terrain-following correction
           diag%u_placeholder(ji,jk,jl) = diag%u_placeholder(ji,jk,jl) - slope*vertical_gradient
@@ -92,8 +92,8 @@ module mo_momentum_diff_diss
     do jl=1,n_layers
       do jk=1,nx
         do ji=1,ny+1
-          diag%v_placeholder(ji,jk,jl) = (diag%viscosity_coeff_curl_dual(ji,jk+1,jl)*diag%zeta_z(ji,jk+1,jl) - &
-          diag%viscosity_coeff_curl_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
+          diag%v_placeholder(ji,jk,jl) = (diag%viscosity_dual(ji,jk+1,jl)*diag%zeta_z(ji,jk+1,jl) - &
+          diag%viscosity_dual(ji,jk,jl)*diag%zeta_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
           
           ! terrain-following correction
           slope = (grid%z_area_dual_z(ji,jk+1,jl) - grid%z_area_dual_z(ji,jk,jl))/grid%dx_dual(ji,jk,jl)
@@ -101,11 +101,11 @@ module mo_momentum_diff_diss
           lower_index = min(n_layers,jl+1)
           ! computing the vertical gradient of the vertical vorticity (times the respective diffusion coefficient)
           ! and averaging it to the vector point
-          vertical_gradient = 0.5_wp*(diag%viscosity_coeff_curl_dual(ji,jk+1,upper_index)*diag%zeta_z(ji,jk+1,upper_index) &
-          - diag%viscosity_coeff_curl_dual(ji,jk+1,lower_index)*diag%zeta_z(ji,jk+1,lower_index)) &
+          vertical_gradient = 0.5_wp*(diag%viscosity_dual(ji,jk+1,upper_index)*diag%zeta_z(ji,jk+1,upper_index) &
+          - diag%viscosity_dual(ji,jk+1,lower_index)*diag%zeta_z(ji,jk+1,lower_index)) &
           /(grid%z_area_dual_z(ji,jk+1,upper_index) - grid%z_area_dual_z(ji,jk+1,lower_index)) &
-          + 0.5_wp*(diag%viscosity_coeff_curl_dual(ji,jk,upper_index)*diag%zeta_z(ji,jk,upper_index) &
-          - diag%viscosity_coeff_curl_dual(ji,jk,lower_index)*diag%zeta_z(ji,jk,lower_index)) &
+          + 0.5_wp*(diag%viscosity_dual(ji,jk,upper_index)*diag%zeta_z(ji,jk,upper_index) &
+          - diag%viscosity_dual(ji,jk,lower_index)*diag%zeta_z(ji,jk,lower_index)) &
           /(grid%z_area_dual_z(ji,jk,upper_index) - grid%z_area_dual_z(ji,jk,lower_index))
           ! adding the terrain-following correction
           diag%v_placeholder(ji,jk,jl) = diag%v_placeholder(ji,jk,jl) - slope*vertical_gradient

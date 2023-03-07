@@ -252,8 +252,7 @@ program control
   allocate(diag%sst(ny,nx))
   allocate(diag%viscosity_molecular(ny,nx,n_layers))
   allocate(diag%viscosity(ny,nx,n_layers))
-  allocate(diag%viscosity_coeff_curl(ny,nx,n_layers))
-  allocate(diag%viscosity_coeff_curl_dual(ny+1,nx+1,n_layers))
+  allocate(diag%viscosity_dual(ny+1,nx+1,n_layers))
   allocate(diag%vert_hor_viscosity_u(ny,nx+1,n_levels))
   allocate(diag%vert_hor_viscosity_v(ny+1,nx,n_levels))
   allocate(diag%mass_diff_coeff_eff_h(ny,nx,n_layers))
@@ -424,8 +423,7 @@ program control
   diag%sst = 0._wp
   diag%viscosity_molecular = 0._wp
   diag%viscosity = 0._wp
-  diag%viscosity_coeff_curl = 0._wp
-  diag%viscosity_coeff_curl_dual = 0._wp
+  diag%viscosity_dual = 0._wp
   diag%vert_hor_viscosity_u = 0._wp
   diag%vert_hor_viscosity_v = 0._wp
   diag%mass_diff_coeff_eff_h = 0._wp
@@ -713,8 +711,7 @@ program control
   deallocate(diag%sst)
   deallocate(diag%viscosity_molecular)
   deallocate(diag%viscosity)
-  deallocate(diag%viscosity_coeff_curl)
-  deallocate(diag%viscosity_coeff_curl_dual)
+  deallocate(diag%viscosity_dual)
   deallocate(diag%vert_hor_viscosity_u)
   deallocate(diag%vert_hor_viscosity_v)
   deallocate(diag%mass_diff_coeff_eff_h)

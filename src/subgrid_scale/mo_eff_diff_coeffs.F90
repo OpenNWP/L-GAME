@@ -166,7 +166,7 @@ module mo_eff_diff_coeffs
     
     ! initialization with zeros
     !$omp parallel workshare
-     diag%viscosity_coeff_curl_dual = 0._wp
+     diag%viscosity_dual = 0._wp
     !$omp end parallel workshare
     
     ! molecular component
@@ -174,7 +174,7 @@ module mo_eff_diff_coeffs
     do jl=1,n_layers
       do ji=2,ny
         do jk=2,nx
-          diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*sum(diag%viscosity_molecular(ji-1:ji,jk-1:jk,jl))
+          diag%viscosity_dual(ji,jk,jl) = 0.25_wp*sum(diag%viscosity_molecular(ji-1:ji,jk-1:jk,jl))
         enddo
       enddo
       
@@ -182,24 +182,24 @@ module mo_eff_diff_coeffs
       if (lperiodic) then
         
         do jk=2,nx
-          diag%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
+          diag%viscosity_dual(1,jk,jl) = 0.25_wp*( &
           diag%viscosity_molecular(1,jk-1,jl) + diag%viscosity_molecular(ny,jk-1,jl) &
           + diag%viscosity_molecular(1,jk,jl) + diag%viscosity_molecular(ny,jk,jl))
-          diag%viscosity_coeff_curl_dual(ny+1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl)
+          diag%viscosity_dual(ny+1,jk,jl) = diag%viscosity_dual(1,jk,jl)
         enddo
         do ji=2,ny
-          diag%viscosity_coeff_curl_dual(ji,1,jl) = 0.25_wp*( &
+          diag%viscosity_dual(ji,1,jl) = 0.25_wp*( &
           diag%viscosity_molecular(ji-1,nx,jl) + diag%viscosity_molecular(ji-1,1,jl) &
           + diag%viscosity_molecular(ji,nx,jl) + diag%viscosity_molecular(ji,1,jl))
-          diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
+          diag%viscosity_dual(ji,nx+1,jl) = diag%viscosity_dual(ji,1,jl)
         enddo
         
         ! corners
-        diag%viscosity_coeff_curl_dual(1,1,jl) = 0.25*(diag%viscosity_molecular(1,1,jl) + diag%viscosity_molecular(ny,1,jl) &
+        diag%viscosity_dual(1,1,jl) = 0.25*(diag%viscosity_molecular(1,1,jl) + diag%viscosity_molecular(ny,1,jl) &
         + diag%viscosity_molecular(1,nx,jl) + diag%viscosity_molecular(ny,nx,jl))
-        diag%viscosity_coeff_curl_dual(1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
-        diag%viscosity_coeff_curl_dual(ny+1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
-        diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_dual(1,nx+1,jl) = diag%viscosity_dual(1,1,jl)
+        diag%viscosity_dual(ny+1,1,jl) = diag%viscosity_dual(1,1,jl)
+        diag%viscosity_dual(ny+1,nx+1,jl) = diag%viscosity_dual(1,1,jl)
         
       endif
       
@@ -211,7 +211,7 @@ module mo_eff_diff_coeffs
     do jl=1,n_layers
       do ji=2,ny
         do jk=2,nx
-          diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*( &
+          diag%viscosity_dual(ji,jk,jl) = 0.25_wp*( &
           diag%viscosity(ji-1,jk-1,jl) &
           + diag%viscosity(ji-1,jk,jl) &
           + diag%viscosity(ji,jk-1,jl) &
@@ -223,25 +223,25 @@ module mo_eff_diff_coeffs
       if (lperiodic) then
         
         do jk=2,nx
-          diag%viscosity_coeff_curl_dual(1,jk,jl) = 0.25_wp*( &
+          diag%viscosity_dual(1,jk,jl) = 0.25_wp*( &
           diag%viscosity(1,jk-1,jl) + diag%viscosity(ny,jk-1,jl) &
           + diag%viscosity(1,jk,jl) + diag%viscosity(ny,jk,jl))
-          diag%viscosity_coeff_curl_dual(ny+1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl)
+          diag%viscosity_dual(ny+1,jk,jl) = diag%viscosity_dual(1,jk,jl)
         enddo
         do ji=2,ny
-          diag%viscosity_coeff_curl_dual(ji,1,jl) = 0.25_wp*( &
+          diag%viscosity_dual(ji,1,jl) = 0.25_wp*( &
           diag%viscosity(ji-1,nx,jl) + diag%viscosity(ji-1,1,jl) &
           + diag%viscosity(ji,nx,jl) + diag%viscosity(ji,1,jl))
-          diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
+          diag%viscosity_dual(ji,nx+1,jl) = diag%viscosity_dual(ji,1,jl)
         enddo
         
         ! corners
-        diag%viscosity_coeff_curl_dual(1,1,jl) = 0.25*( &
+        diag%viscosity_dual(1,1,jl) = 0.25*( &
         diag%viscosity(1,1,jl) + diag%viscosity(ny,1,jl) &
         + diag%viscosity(1,nx,jl) + diag%viscosity(ny,nx,jl))
-        diag%viscosity_coeff_curl_dual(1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
-        diag%viscosity_coeff_curl_dual(ny+1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
-        diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_dual(1,nx+1,jl) = diag%viscosity_dual(1,1,jl)
+        diag%viscosity_dual(ny+1,1,jl) = diag%viscosity_dual(1,1,jl)
+        diag%viscosity_dual(ny+1,nx+1,jl) = diag%viscosity_dual(1,1,jl)
         
       endif
       
@@ -253,12 +253,12 @@ module mo_eff_diff_coeffs
     do jl=1,n_layers
       do ji=2,ny
         do jk=2,nx
-          diag%viscosity_coeff_curl_dual(ji,jk,jl) = 0.25_wp*( &
+          diag%viscosity_dual(ji,jk,jl) = 0.25_wp*( &
           state%rho(ji-1,jk-1,jl,n_condensed_constituents+1) &
           + state%rho(ji-1,jk,jl,n_condensed_constituents+1) &
           + state%rho(ji,jk-1,jl,n_condensed_constituents+1) &
           + state%rho(ji,jk,jl,n_condensed_constituents+1)) &
-          *diag%viscosity_coeff_curl_dual(ji,jk,jl)
+          *diag%viscosity_dual(ji,jk,jl)
         enddo
       enddo
       
@@ -266,48 +266,37 @@ module mo_eff_diff_coeffs
       if (lperiodic) then
         
         do jk=2,nx
-          diag%viscosity_coeff_curl_dual(1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl) &
+          diag%viscosity_dual(1,jk,jl) = diag%viscosity_dual(1,jk,jl) &
           *(0.25_wp*( &
           state%rho(1,jk-1,jl,n_condensed_constituents+1) &
           + state%rho(ny,jk-1,jl,n_condensed_constituents+1) &
           + state%rho(1,jk,jl,n_condensed_constituents+1) &
           + state%rho(ny,jk,jl,n_condensed_constituents+1)))
-          diag%viscosity_coeff_curl_dual(ny+1,jk,jl) = diag%viscosity_coeff_curl_dual(1,jk,jl)
+          diag%viscosity_dual(ny+1,jk,jl) = diag%viscosity_dual(1,jk,jl)
         enddo
         do ji=2,ny
-          diag%viscosity_coeff_curl_dual(ji,1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl) &
+          diag%viscosity_dual(ji,1,jl) = diag%viscosity_dual(ji,1,jl) &
           *(0.25_wp*( &
           state%rho(ji-1,nx,jl,n_condensed_constituents+1) &
           + state%rho(ji-1,1,jl,n_condensed_constituents+1) &
           + state%rho(ji,nx,jl,n_condensed_constituents+1) &
           + state%rho(ji,1,jl,n_condensed_constituents+1)))
-          diag%viscosity_coeff_curl_dual(ji,nx+1,jl) = diag%viscosity_coeff_curl_dual(ji,1,jl)
+          diag%viscosity_dual(ji,nx+1,jl) = diag%viscosity_dual(ji,1,jl)
         enddo
         
         ! corners
-        diag%viscosity_coeff_curl_dual(1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl) &
+        diag%viscosity_dual(1,1,jl) = diag%viscosity_dual(1,1,jl) &
         *(0.25_wp*( &
         state%rho(ny,nx,jl,n_condensed_constituents+1) &
         + state%rho(ny,1,jl,n_condensed_constituents+1) &
         + state%rho(1,nx,jl,n_condensed_constituents+1) &
         + state%rho(1,1,jl,n_condensed_constituents+1)))
-        diag%viscosity_coeff_curl_dual(1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
-        diag%viscosity_coeff_curl_dual(ny+1,1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
-        diag%viscosity_coeff_curl_dual(ny+1,nx+1,jl) = diag%viscosity_coeff_curl_dual(1,1,jl)
+        diag%viscosity_dual(1,nx+1,jl) = diag%viscosity_dual(1,1,jl)
+        diag%viscosity_dual(ny+1,1,jl) = diag%viscosity_dual(1,1,jl)
+        diag%viscosity_dual(ny+1,nx+1,jl) = diag%viscosity_dual(1,1,jl)
         
       endif
       
-    enddo
-    !$omp end parallel do
-    
-    ! averaging the curl diffusion coefficient to the cell centers
-    !$omp parallel do private(ji,jk,jl)
-    do jl=1,n_layers
-      do jk=1,nx
-        do ji=1,ny
-          diag%viscosity_coeff_curl(ji,jk,jl) = 0.25_wp*sum(diag%viscosity_coeff_curl_dual(ji:ji+1,jk:jk+1,jl))
-        enddo
-      enddo
     enddo
     !$omp end parallel do
   
@@ -567,8 +556,7 @@ module mo_eff_diff_coeffs
         do ji=1,ny
           ! horizontal diffusion coefficient
           diag%mass_diff_coeff_eff_h(ji,jk,jl) &
-          = 0.5_wp*(diag%viscosity(ji,jk,jl) + diag%viscosity_coeff_curl(ji,jk,jl)) &
-          /state%rho(ji,jk,jl,n_condensed_constituents+1)
+          = diag%viscosity(ji,jk,jl)/state%rho(ji,jk,jl,n_condensed_constituents+1)
           ! vertical diffusion coefficient
           diag%mass_diff_coeff_eff_v(ji,jk,jl) &
           ! molecular component
@@ -607,7 +595,7 @@ module mo_eff_diff_coeffs
           c_g_v = spec_heat_cap_diagnostics_v(state,ji,jk,jl)
           ! horizontal diffusion coefficient
           diag%temp_diff_coeff_eff_h(ji,jk,jl) = c_g_v &
-          *0.5_wp*(diag%viscosity(ji,jk,jl) + diag%viscosity_coeff_curl(ji,jk,jl))
+          *diag%viscosity(ji,jk,jl)
           ! vertical diffusion coefficient
           diag%temp_diff_coeff_eff_v(ji,jk,jl) &
           ! molecular component
