@@ -160,7 +160,7 @@ module mo_eff_diff_coeffs
   
   subroutine hor_diff_coeff_postprocessing(state,diag)
     
-    ! This subroutine averages the diffusion coefficient at cells to edges and triangles.
+    ! This subroutine averages the diffusion coefficient (originally located at cell centers) to dual cell centers.
     
     type(t_state), intent(in)    :: state ! the state variables of the model atmosphere
     type(t_diag),  intent(inout) :: diag  ! diagnostic quantities
