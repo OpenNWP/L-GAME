@@ -606,10 +606,10 @@ module mo_grid_generator
           !$omp parallel workshare
           grid%oro_smoothed = grid%oro
           !$omp end parallel workshare
-          call smooth_hor_scalar(grid%oro_smoothed)
+          call smooth_hor_scalar2(grid%oro_smoothed,grid)
           if (lsleve) then
             !$omp parallel workshare
-            grid%oro = grid%oro_smoothed + 0.2_wp*(grid%oro - grid%oro_smoothed)
+            grid%oro = grid%oro_smoothed + 0.1_wp*(grid%oro - grid%oro_smoothed)
             !$omp end parallel workshare
           else
             !$omp parallel workshare
@@ -1470,7 +1470,7 @@ module mo_grid_generator
     ! copying the original array
     original_array = array
     
-    ! inner domin
+    ! inner domain
     !$omp parallel do private(ji,jk)
     do jk=2,nx-1
       do ji=2,ny-1
@@ -1509,6 +1509,53 @@ module mo_grid_generator
     
   end subroutine smooth_hor_scalar
   
+  subroutine smooth_hor_scalar2(array,grid)
+    
+    ! This subroutine smoothes a scalar field on one layer according to a 1/d**x-interpolation.
+    
+    real(wp),     intent(inout) :: array(ny,nx) ! the field to smooth
+    type(t_grid), intent(in)    :: grid         ! grid properties
+    
+    ! local variables
+    real(wp) :: original_array(ny,nx) ! the unsmoothed input array
+    integer  :: ji                    ! horizontal index
+    integer  :: jk                    ! horizontal index
+    integer  :: jm                    ! interpolation index
+    integer  :: jn                    ! interpolation index
+    real(wp) :: weight                ! individual interpolation weight
+    real(wp) :: sum_of_weights        ! sum of interpolation weights
+    real(wp) :: power                 ! power of the distance in the interpolation weights
+    
+    power = 1.5_wp
+    
+    ! copying the original array
+    !$omp parallel workshare
+    original_array = array
+    !$omp end parallel workshare
+    
+    ! inner domain
+    !$omp parallel do private(ji,jk,jm,jn,weight,sum_of_weights)
+    do jk=1,nx
+      do ji=1,ny
+        array(ji,jk) = 0._wp
+        sum_of_weights = 0._wp
+        do jm=1,nx
+          do jn=1,ny
+            if (jm/=jk .or. jn/=ji) then
+              weight = 1._wp/(calculate_distance_h(grid%lat_scalar(ji),grid%lon_scalar(jk), &
+                                                   grid%lat_scalar(jn),grid%lon_scalar(jm),1._wp)+EPSILON_SECURITY)**power
+              array(ji,jk) = array(ji,jk) + weight*original_array(jn,jm)
+              sum_of_weights = sum_of_weights + weight
+            endif
+          enddo
+        enddo
+        array(ji,jk) = array(ji,jk)/sum_of_weights
+      enddo
+    enddo
+    !$omp end parallel do
+    
+  end subroutine smooth_hor_scalar2
+  
   function find_min_index(input_vector)
     
     ! This function finds the index where a vector assumes its minimum.
@@ -1531,6 +1578,22 @@ module mo_grid_generator
     enddo
     
   end function find_min_index
+  
+  function calculate_distance_h(latitude_a,longitude_a,latitude_b,longitude_b,radius)
+    
+    ! This function returns the geodetic distance of two points given their geographical coordinates.
+    
+    real(wp), intent(in) :: latitude_a           ! geographic latitude of the first point
+    real(wp), intent(in) :: longitude_a          ! geographic longitude of the first point
+    real(wp), intent(in) :: latitude_b           ! geographic latitude of the second point
+    real(wp), intent(in) :: longitude_b          ! geographic longitude of the second point
+    real(wp), intent(in) :: radius               ! radius of the two points
+    real(wp)             :: calculate_distance_h ! the result
+    
+    calculate_distance_h = 2._wp*radius*asin(sqrt(0.5_wp-0.5_wp*(cos(latitude_a)*cos(latitude_b) &
+    *cos(longitude_b-longitude_a)+sin(latitude_a)*sin(latitude_b))))
+    
+  end function calculate_distance_h
   
   function patch_area(center_lat,dx_as_angle,dy_as_angle)
     

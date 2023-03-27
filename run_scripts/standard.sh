@@ -39,6 +39,8 @@ lrad=.true.
 &surface
 orography_id=1
 lsleve=.true.
+lsfc_sensible_heat_flux=.true.
+lsfc_phase_trans=.true.
 /
 
 &bc
